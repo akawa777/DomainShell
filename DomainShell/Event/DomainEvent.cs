@@ -35,23 +35,8 @@ namespace DomainShell.Event
         void Handle(TDomainEvent domainEvent);
     }
 
-    internal abstract class EventCallbackBase
-    {
-        public abstract dynamic GetCallback();
-    }
-
-    internal class EventCallback<TResult> : EventCallbackBase
-    {
-        public Action<TResult> Callback { get; set; }
-
-        public override dynamic GetCallback()
-        {
-            return Callback;
-        }
-    }
-
     internal interface IDomainEventCallbackCache
     {
-        Dictionary<IDomainEvent, EventCallbackBase> GetCallbackCache();
+        Dictionary<IDomainEvent, dynamic> GetCallbackCache();
     }
 }

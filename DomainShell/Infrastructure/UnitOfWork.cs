@@ -54,7 +54,7 @@ namespace DomainShell.Infrastructure
 
                 foreach (var keyValue in (eventList as IDomainEventCallbackCache).GetCallbackCache())
                 {
-                    _domainEventPublisher.Callback(keyValue.Key as dynamic, keyValue.Value.GetCallback());
+                    _domainEventPublisher.Callback(keyValue.Key as dynamic, keyValue.Value);
                 }
 
                 aggregateRoot.EventList.Clear();

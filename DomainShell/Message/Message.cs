@@ -24,8 +24,9 @@ namespace DomainShell.Message
     public interface IMessageResult
     {
         void Set<TMessage, TResult>(TMessage message, TResult result) where TMessage : IMessage<TResult>;
-        void Clear<TResult>(IMessage<TResult> message);
+        void Clear<TMessage>(TMessage message) where TMessage : IMessage;
         TResult Get<TResult>(IMessage<TResult> message);
+        dynamic Get<TMessage>(TMessage message) where TMessage : IMessage;
     }
 
     public class MessageResult : IMessageResult
@@ -37,7 +38,7 @@ namespace DomainShell.Message
             _resultCache[message] = result;
         }
 
-        void IMessageResult.Clear<TResult>(IMessage<TResult> message)
+        void IMessageResult.Clear<TMessage>(TMessage message)
         {
             _resultCache.Remove(message);
         }
@@ -54,6 +55,21 @@ namespace DomainShell.Message
             else
             {
                 return default(TResult);
+            }
+        }
+
+        dynamic IMessageResult.Get<TMessage>(TMessage message)
+        {
+            object result;
+
+            if (_resultCache.TryGetValue(message, out result))
+            {
+                _resultCache.Remove(message);
+                return result;
+            }
+            else
+            {                
+                return null;
             }
         }
     }
@@ -81,6 +97,16 @@ namespace DomainShell.Message
             }
 
             _handlerMap[typeof(TMessage)].Add(handler);
+        }
+
+        public void Register(Type messageType,  Func<IMessageHandler> handler) 
+        {            
+            if (!_handlerMap.ContainsKey(messageType))
+            {
+                _handlerMap[messageType] = new List<Func<object>>();
+            }
+
+            _handlerMap[messageType].Add(handler);
         }
 
         public void Callback<TResult>(IMessage<TResult> message, Action<TResult> action)
@@ -111,7 +137,8 @@ namespace DomainShell.Message
                         _callbackCache.Remove(message);
 
                         _endHandle(message, handler, e);
-                        
+
+                        throw e;                        
                     }
                 }
 
@@ -134,7 +161,7 @@ namespace DomainShell.Message
                 dynamic callback;
 
                 if (_callbackCache.TryGetValue(message, out callback))
-                {                    
+                {
                     callback(result.Get(message as dynamic));
                 }
 

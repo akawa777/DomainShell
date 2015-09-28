@@ -28,7 +28,17 @@ namespace DomainDesigner.Tests.DomainShell
         }
     }
 
-    public class PersonEventHandler : IDomainEventHandler<PersonAddedEvent>, IDomainEventHandler<PersonUpdatedEvent>
+    public class PersonRemovedEvent : IDomainEvent<bool>
+    {
+        public Person Person { get; set; }
+
+        public bool InTransaction()
+        {
+            return true;
+        }
+    }
+
+    public class PersonEventHandler : IDomainEventHandler<PersonAddedEvent>, IDomainEventHandler<PersonUpdatedEvent>, IDomainEventHandler<PersonRemovedEvent>
     {
         public PersonEventHandler(PersonWriteRepository repository)
         {
@@ -52,6 +62,12 @@ namespace DomainDesigner.Tests.DomainShell
         public void Handle(PersonUpdatedEvent domainEvent)
         {
             _repository.Update(domainEvent.Person);            
+        }
+
+        public void Handle(PersonRemovedEvent domainEvent)
+        {
+            _repository.Delete(domainEvent.Person);
+            _result.Set(domainEvent, true);
         }
     }
 }

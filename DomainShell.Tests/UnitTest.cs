@@ -17,20 +17,24 @@ namespace DomainDesigner.Tests
         [TestInitialize]
         public void Init()
         {
+            _validator = new PersonValidator();
             _repository = new PersonReadRepository();
             PersonWriteRepository writeRepository = new PersonWriteRepository();
 
             DomainEventPublisher publisher = new DomainEventPublisher();
             publisher.Register<PersonAddedEvent>(() => new PersonEventHandler(writeRepository));
             publisher.Register<PersonUpdatedEvent>(() => new PersonEventHandler(writeRepository));
+            publisher.Register<PersonRemovedEvent>(() => new PersonEventHandler(writeRepository));
 
             _unitOfWork = new UnitOfWork(publisher);
 
             _bus = new CommandBus();
-            _bus.Register<AddPersonCommand>(() => new PersonCommandHandler(_repository, _unitOfWork));
-            _bus.Register<UpdatePersonCommand>(() => new PersonCommandHandler(_repository, _unitOfWork));
+            _bus.Register<AddPersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
+            _bus.Register<UpdatePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
+            _bus.Register<RemovePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
         }
 
+        private PersonValidator _validator;
         private PersonReadRepository _repository;
         private UnitOfWork _unitOfWork;
         private CommandBus _bus;
@@ -40,30 +44,53 @@ namespace DomainDesigner.Tests
         {
             Person person = new Person();
 
-            person.Add();
+            person.Id = _repository.GetNewId();
+            person.Name = "add";
 
-            _unitOfWork.Save(person);
+            if (_validator.Validate(person))
+            {
+                person.Add();
+                _unitOfWork.Save(person);
+            }
 
-            person = _repository.Load(1);
+            person = _repository.Load(person.Id);
 
-            person.Update();
+            person.Name = "update";
 
-            _unitOfWork.Save(person);
+            if (_validator.Validate(person))
+            {
+                person.Update();
+                _unitOfWork.Save(person);
+            }
+
+            person = _repository.Load(person.Id);
+
+            if (_validator.Validate(person))
+            {
+                person.Remove();
+                _unitOfWork.Save(person);
+            }
         }
 
         [TestMethod]
         public void Cqrs()
         {
-            AddPersonCommand command = new AddPersonCommand();
+            AddPersonCommand addCommand = new AddPersonCommand();
 
-            _bus.Callback(command, success =>
+            addCommand.Id = _repository.GetNewId();
+            addCommand.Name = "add";
+
+            _bus.Callback(addCommand, success =>
             {
                 Assert.AreEqual(true, success);
             });
 
-            _bus.Send(command);
+            _bus.Send(addCommand);
 
             UpdatePersonCommand updateCommand = new UpdatePersonCommand();
+
+            updateCommand.Id = addCommand.Id;
+            updateCommand.Name = "update";
 
             _bus.Callback(updateCommand, success =>
             {
@@ -71,6 +98,17 @@ namespace DomainDesigner.Tests
             });
 
             _bus.Send(updateCommand);
+
+            RemovePersonCommand removeCommand = new RemovePersonCommand();
+
+            removeCommand.Id = updateCommand.Id;
+
+            _bus.Callback<bool>(removeCommand, success =>
+            {
+                Assert.AreEqual(true, success);
+            });
+
+            _bus.Send(removeCommand);
         }
 
     }

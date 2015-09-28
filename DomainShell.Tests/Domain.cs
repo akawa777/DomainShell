@@ -18,7 +18,7 @@ namespace DomainDesigner.Tests.DomainShell
         }
 
         public int Id { get; set; }
-        public int Name { get; set; }
+        public string Name { get; set; }
 
         public void Add()
         {
@@ -36,6 +36,33 @@ namespace DomainDesigner.Tests.DomainShell
             @event.Person = this;
 
             _eventList.Add(@event);
+        }
+
+        public void Remove()
+        {
+            PersonRemovedEvent @event = new PersonRemovedEvent();
+
+            @event.Person = this;
+
+            _eventList.Callback(@event, x => 
+            {
+                if (!x) throw new Exception();
+            });
+
+            _eventList.Add(@event);
+        }
+    }
+
+    public class PersonValidator
+    {
+        public bool Validate(Person person)
+        {
+            if (person != null && person.Id > 0 && person.Name != string.Empty)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

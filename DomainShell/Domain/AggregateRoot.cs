@@ -9,13 +9,13 @@ namespace DomainShell.Domain
 {
     public class EventList : List<IDomainEvent>, IDomainEventCallbackCache
     {
-        private Dictionary<IDomainEvent, EventCallbackBase> _callbackCache = new Dictionary<IDomainEvent, EventCallbackBase>();
+        private Dictionary<IDomainEvent, dynamic> _callbackCache = new Dictionary<IDomainEvent, dynamic>();
         public void Callback<TResult>(IDomainEvent<TResult> message, Action<TResult> action)
         {
-            _callbackCache[message] = new EventCallback<TResult> { Callback = action };
+            _callbackCache[message] = action as dynamic;
         }
 
-        Dictionary<IDomainEvent, EventCallbackBase> IDomainEventCallbackCache.GetCallbackCache()
+        Dictionary<IDomainEvent, dynamic> IDomainEventCallbackCache.GetCallbackCache()
         {
             return _callbackCache;
         }
