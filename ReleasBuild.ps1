@@ -1,6 +1,6 @@
 ﻿$msBuildDirectory = "C:\Windows\Microsoft.NET\Framework\v4.0.30319"
 
-$projects ="DomainShell","DomainShell.Tests"
+$projects ="DomainShell","DomainShell.CQRS","DomainShell.Tests"
 
 $netVersions = "v3.5", "v4.0", "v4.5"
 

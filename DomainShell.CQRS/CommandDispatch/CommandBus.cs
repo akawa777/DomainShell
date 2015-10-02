@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Message;
-using DomainShell.Command;
+using DomainShell.CQRS.Command;
 
-namespace DomainShell.CommandDispatch
+namespace DomainShell.CQRS.CommandDispatch
 {   
     public interface ICommandBus
     {

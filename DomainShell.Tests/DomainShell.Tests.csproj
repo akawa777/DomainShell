@@ -58,6 +58,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DomainShell.CQRS\DomainShell.CQRS.csproj">
+      <Project>{261564fe-dc9a-47bd-8f58-ebd6b29839e6}</Project>
+      <Name>DomainShell.CQRS</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DomainShell\DomainShell.csproj">
       <Project>{63af8772-ea46-4dda-8424-bc4d9aeebc14}</Project>
       <Name>DomainShell</Name>

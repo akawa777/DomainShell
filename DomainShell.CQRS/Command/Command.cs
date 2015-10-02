@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Message;
 
-namespace DomainShell.Command
+namespace DomainShell.CQRS.Command
 {
     public class CommandResult : MessageResult
     {

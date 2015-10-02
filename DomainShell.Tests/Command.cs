@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Infrastructure;
-using DomainShell.Command;
+using DomainShell.CQRS.Command;
 
-namespace DomainDesigner.Tests.DomainShell
+namespace DomainShell.Tests
 {
     public class AddPersonCommand : ICommand<bool>
     {
@@ -56,7 +56,7 @@ namespace DomainDesigner.Tests.DomainShell
             if (_validator.Validate(person))
             {
                 person.Add();
-                _unitOfWork.Save(person);
+                _unitOfWork.AsyncSave(person).Wait();
 
                 _result.Set(command, true);
             }

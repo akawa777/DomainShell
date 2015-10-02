@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Infrastructure;
 using DomainShell.EventDispatch;
-using DomainShell.CommandDispatch;
-using DomainDesigner.Tests.DomainShell;
+using DomainShell.CQRS.CommandDispatch;
 
-namespace DomainDesigner.Tests
+namespace DomainShell.Tests
 {    
     [TestClass]
     public class UnitTest

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Domain;
 
-namespace DomainDesigner.Tests.DomainShell
+namespace DomainShell.Tests
 {
     public class Person : IAggregateRoot
     {
