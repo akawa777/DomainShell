@@ -23,6 +23,11 @@ namespace DomainShell.EventDispatch
             _messagePublisher.Register(handler);
         }
 
+        public void Register(Type domainEventType, Func<IDomainEventHandler> handler)
+        {
+            _messagePublisher.Register(domainEventType, handler);
+        }
+
         public void Callback<TResult>(IDomainEvent<TResult> domainEvent, Action<TResult> action)
         {
             _messagePublisher.Callback(domainEvent, action);

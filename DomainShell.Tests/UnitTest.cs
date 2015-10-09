@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Infrastructure;
 using DomainShell.EventDispatch;
 using DomainShell.CQRS.CommandDispatch;
+using DomainShell.CQRS.QueryDispatch;
 
 namespace DomainShell.Tests
 {    
@@ -25,18 +26,25 @@ namespace DomainShell.Tests
             publisher.Register<PersonUpdatedEvent>(() => new PersonEventHandler(writeRepository));
             publisher.Register<PersonRemovedEvent>(() => new PersonEventHandler(writeRepository));
 
-            _unitOfWork = new UnitOfWork(publisher);
+            TransactionProcessor transaction = new TransactionProcessor();
+
+            _unitOfWork = new UnitOfWork(publisher, transaction);
 
             _bus = new CommandBus();
             _bus.Register<AddPersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
             _bus.Register<UpdatePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
             _bus.Register<RemovePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
+
+            _facade = new QueryFacade();
+
+            _facade.Register<PersonListQuery, List<PersonData>>(() => new PersonListQueryHandler());
         }
 
         private PersonValidator _validator;
         private PersonReadRepository _repository;
         private UnitOfWork _unitOfWork;
         private CommandBus _bus;
+        private QueryFacade _facade;
 
         [TestMethod]
         public void Main()
@@ -74,21 +82,27 @@ namespace DomainShell.Tests
         [TestMethod]
         public void Cqrs()
         {
-            AddPersonCommand addCommand = new AddPersonCommand();
+            PersonListQuery query = new PersonListQuery();
 
-            addCommand.Id = _repository.GetNewId();
+            List<PersonData> persons = _facade.Get(query);
+
+            AddPersonCommand addCommand = new AddPersonCommand();
+            
             addCommand.Name = "add";
 
-            _bus.Callback(addCommand, success =>
+            int newId = 0;
+
+            _bus.Callback(addCommand, result =>
             {
-                Assert.AreEqual(true, success);
+                newId = result.NewId;
+                Assert.AreEqual(true, result.Success);
             });
 
             _bus.Send(addCommand);
 
-            UpdatePersonCommand updateCommand = new UpdatePersonCommand();
+            UpdatePersonCommand updateCommand = new UpdatePersonCommand();            
 
-            updateCommand.Id = addCommand.Id;
+            updateCommand.Id = newId;
             updateCommand.Name = "update";
 
             _bus.Callback(updateCommand, success =>

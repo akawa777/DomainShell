@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Infrastructure;
 
-namespace DomainShell.CQRS.Command
+namespace DomainShell.CQRS.Infrastructure
 {
     public static class UnitOfWorkExtension
     {

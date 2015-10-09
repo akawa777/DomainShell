@@ -2,79 +2,59 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests
 { 
-    public class PersonData
+    public static class DataStore 
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
-    public static class Persons
-    {
-        static Persons()
+        static DataStore()
         {
-            Persons.persons.Add(new PersonData { Id = 1, Name = "1" });
-            Persons.persons.Add(new PersonData { Id = 2, Name = "2" });
-            Persons.persons.Add(new PersonData { Id = 3, Name = "3" });
+            _personTable.Columns.Add("id", typeof(int));
+            _personTable.Columns.Add("name", typeof(string));
+
+            _personTable.Rows.Add(new object[] { 1, "1" });
+            _personTable.Rows.Add(new object[] { 2, "2" });
+            _personTable.Rows.Add(new object[] { 3, "3" });
         }
 
-        private static List<PersonData> persons = new List<PersonData>();
+        private static DataTable _personTable = new DataTable();
 
-        public static List<PersonData> GetAll()
-        {
-            return persons;
-        }
-
-        public static int Insert(PersonData person)
-        {
-            if (persons.Any(x => x.Id == person.Id))
-            {
-                return 0;
-            }
-
-            persons.Add(person);
-
-            return 1;
-        }
-
-        public static int Delete(PersonData person)
-        {
-            return persons.Remove(person) ? 1 : 0;
-        }        
+        public static DataTable PersonTable { get { return _personTable; } }
     }
 
     public class PersonReadRepository
     {
         public Person Load(int id)
         {
-            PersonData personData = Persons.GetAll().FirstOrDefault(x => x.Id == id);
+            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", id));
 
-            if (personData == null)
+            if (rows.Length == 0)
             {
                 return null;
             }
 
             Person person = new Person();
 
-            person.Id = personData.Id;
-            person.Name = personData.Name;
+            person.Id = rows[0].Field<int>("id");
+            person.Name = rows[0].Field<string>("name");
 
             return person;
         }
 
         public int GetNewId()
         {
-            if (Persons.GetAll().Count == 0)
+            if (DataStore.PersonTable.Rows.Count == 0)
             {
                 return 1;
             }
 
-            return Persons.GetAll().Max(x => x.Id) + 1;
+            DataRow[] rows = DataStore.PersonTable.Select("id = max(id)");
+
+            return rows[0].Field<int>("id") + 1;
         }
     }
 
@@ -82,45 +62,60 @@ namespace DomainShell.Tests
     {
         public void Add(Person person)
         {
-            PersonData personData = new PersonData();
+            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
 
-            personData.Id = person.Id;
-            personData.Name = person.Name;
-
-            int rtn = Persons.Insert(personData);
-
-            if (rtn == 0)
+            if (rows.Length > 0)
             {
-                throw new Exception("concurrency exception");
+                throw new Exception("not exist person");
             }
+
+            DataRow row = DataStore.PersonTable.NewRow();
+            row["id"] = person.Id;
+            row["name"] = person.Name;
+
+            DataStore.PersonTable.Rows.Add(row);
+
+            DataStore.PersonTable.AcceptChanges();
         }
 
         public void Update(Person person)
         {
-            PersonData personData = Persons.GetAll().FirstOrDefault(x => x.Id == person.Id);
+            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
 
-            if (personData == null)
+            if (rows.Length == 0)
             {
                 throw new Exception("not exist person");
             }
 
-            personData.Name = person.Name;
+            rows[0]["name"] = person.Name;
+
+            DataStore.PersonTable.AcceptChanges();
         }
 
         public void Delete(Person person)
         {
-            PersonData personData = Persons.GetAll().FirstOrDefault(x => x.Id == person.Id);
+            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
 
-            if (personData == null)
+            if (rows.Length == 0)
             {
                 throw new Exception("not exist person");
             }
 
-            int rtn = Persons.Delete(personData);
+            DataStore.PersonTable.Rows.Remove(rows[0]);
 
-            if (rtn == 0)
+            DataStore.PersonTable.AcceptChanges();
+        }
+    }
+
+    public class TransactionProcessor : ITransactionProcessor
+    {
+        private static object o = new object();
+
+        public void Execute(Action saveAction)
+        {
+            lock(o)
             {
-                throw new Exception("concurrency exception");
+                saveAction();
             }
         }
     }

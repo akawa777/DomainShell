@@ -17,6 +17,11 @@ namespace DomainShell.Event
 
     public interface IDomainEvent : IMessage
     {
+        
+    }
+
+    public interface ITransaction
+    {
         bool InTransaction();
     }
 

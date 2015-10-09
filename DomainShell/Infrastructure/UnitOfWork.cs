@@ -64,7 +64,9 @@ namespace DomainShell.Infrastructure
             {
                 foreach (IDomainEvent @event in events)
                 {
-                    if (@event.InTransaction())
+                    ITransaction tran = @event as ITransaction;
+
+                    if (tran == null || tran.InTransaction())
                     {
                         _domainEventPublisher.Publish(@event as dynamic);
                     }

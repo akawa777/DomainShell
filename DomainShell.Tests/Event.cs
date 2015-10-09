@@ -11,31 +11,16 @@ namespace DomainShell.Tests
     public class PersonAddedEvent : IDomainEvent
     {
         public Person Person { get; set; }
-
-        public bool InTransaction()
-        {
-            return true;
-        }
     }
 
     public class PersonUpdatedEvent : IDomainEvent
     {
         public Person Person { get; set; }
-
-        public bool InTransaction()
-        {
-            return true;
-        }
     }
 
     public class PersonRemovedEvent : IDomainEvent<bool>
     {
         public Person Person { get; set; }
-
-        public bool InTransaction()
-        {
-            return true;
-        }
     }
 
     public class PersonEventHandler : IDomainEventHandler<PersonAddedEvent>, IDomainEventHandler<PersonUpdatedEvent>, IDomainEventHandler<PersonRemovedEvent>

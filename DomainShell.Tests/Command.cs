@@ -6,13 +6,19 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Infrastructure;
 using DomainShell.CQRS.Command;
+using DomainShell.CQRS.Infrastructure;
 
 namespace DomainShell.Tests
 {
-    public class AddPersonCommand : ICommand<bool>
-    {
-        public int Id { get; set; }
+    public class AddPersonCommand : ICommand<AddPersonCommandResult>
+    {        
         public string Name { get; set; }
+    }
+
+    public class AddPersonCommandResult
+    {
+        public int NewId { get; set; }
+        public bool Success { get; set; }
     }
 
     public class UpdatePersonCommand : ICommand<bool>
@@ -21,7 +27,7 @@ namespace DomainShell.Tests
         public string Name { get; set; }
     }
 
-    public class RemovePersonCommand : ICommand<bool>, ICommand<int>
+    public class RemovePersonCommand : ICommand<bool>
     {
         public int Id { get; set; }
     }
@@ -50,19 +56,20 @@ namespace DomainShell.Tests
         {
             Person person = new Person();
 
-            person.Id = command.Id;
+            person.Id = _repository.GetNewId();
             person.Name = command.Name;
 
             if (_validator.Validate(person))
             {
                 person.Add();
-                _unitOfWork.AsyncSave(person).Wait();
 
-                _result.Set(command, true);
+                _unitOfWork.AsyncSave(person);
+
+                _result.Set(command, new AddPersonCommandResult { NewId = person.Id, Success = true });
             }
             else
             {
-                _result.Set(command, false);
+                _result.Set(command, new AddPersonCommandResult());
             }
         }
 
@@ -76,7 +83,7 @@ namespace DomainShell.Tests
             if (_validator.Validate(person))
             {
                 person.Update();
-                _unitOfWork.Save(person);
+                _unitOfWork.AsyncSave(person);
 
                 _result.Set(command, true);
             }
@@ -93,7 +100,7 @@ namespace DomainShell.Tests
             if (_validator.Validate(person))
             {
                 person.Remove();
-                _unitOfWork.Save(person);
+                _unitOfWork.AsyncSave(person);
 
                 _result.Set(command, true);
             }

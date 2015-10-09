@@ -23,6 +23,11 @@ namespace DomainShell.CQRS.CommandDispatch
             _messagePublisher.Register(handler);
         }
 
+        public void Register(Type commandType, Func<ICommandHandler> handler)
+        {
+            _messagePublisher.Register(commandType, handler);
+        }
+
         public void Callback<TResult>(ICommand<TResult> command, Action<TResult> action)
         {
             _messagePublisher.Callback(command, action);
