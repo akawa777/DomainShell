@@ -26,25 +26,30 @@ namespace DomainShell.Tests
             publisher.Register<PersonUpdatedEvent>(() => new PersonEventHandler(writeRepository));
             publisher.Register<PersonRemovedEvent>(() => new PersonEventHandler(writeRepository));
 
-            TransactionProcessor transaction = new TransactionProcessor();
+            _unitOfWork = new UnitOfWork(publisher);
 
-            _unitOfWork = new UnitOfWork(publisher, transaction);
+            CommandBus bus = new CommandBus();
+            bus.Register<AddPersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
+            bus.Register<UpdatePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
+            bus.Register<RemovePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
 
-            _bus = new CommandBus();
-            _bus.Register<AddPersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
-            _bus.Register<UpdatePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
-            _bus.Register<RemovePersonCommand>(() => new PersonCommandHandler(_unitOfWork, _repository, _validator));
+            _bus = bus;
 
-            _facade = new QueryFacade();
+            QueryFacade facade = new QueryFacade();
 
-            _facade.Register<PersonListQuery, List<PersonData>>(() => new PersonListQueryHandler());
+            PersonDataReadRepository _readRepository = new PersonDataReadRepository();
+
+            facade.Register<PersonListQuery, PersonData[]>(() => new PersonQueryHandler(_readRepository));
+            facade.Register<PersonQuery, PersonData>(() => new PersonQueryHandler(_readRepository));
+
+            _facade = facade;
         }
 
         private PersonValidator _validator;
         private PersonReadRepository _repository;
         private UnitOfWork _unitOfWork;
-        private CommandBus _bus;
-        private QueryFacade _facade;
+        private ICommandBus _bus;
+        private IQueryFacade _facade;
 
         [TestMethod]
         public void Main()
@@ -82,27 +87,32 @@ namespace DomainShell.Tests
         [TestMethod]
         public void Cqrs()
         {
-            PersonListQuery query = new PersonListQuery();
+            PersonListQuery listQuery = new PersonListQuery();
 
-            List<PersonData> persons = _facade.Get(query);
+            PersonData[] persons = _facade.Get(listQuery);
+
+            Assert.AreEqual(true, persons.Length > 0);
 
             AddPersonCommand addCommand = new AddPersonCommand();
             
             addCommand.Name = "add";
 
-            int newId = 0;
-
             _bus.Callback(addCommand, result =>
-            {
-                newId = result.NewId;
+            {                
                 Assert.AreEqual(true, result.Success);
+                Assert.AreEqual(persons.Max(x => x.Id + 1), result.NewId);
             });
 
             _bus.Send(addCommand);
 
-            UpdatePersonCommand updateCommand = new UpdatePersonCommand();            
+            PersonQuery query = new PersonQuery();
+            query.Id = persons[0].Id;
 
-            updateCommand.Id = newId;
+            PersonData person = _facade.Get(query);
+
+            UpdatePersonCommand updateCommand = new UpdatePersonCommand();
+
+            updateCommand.Id = person.Id;
             updateCommand.Name = "update";
 
             _bus.Callback(updateCommand, success =>
@@ -112,9 +122,14 @@ namespace DomainShell.Tests
 
             _bus.Send(updateCommand);
 
+            query = new PersonQuery();
+            query.Id = persons[1].Id;
+
+            person = _facade.Get(query);
+
             RemovePersonCommand removeCommand = new RemovePersonCommand();
 
-            removeCommand.Id = updateCommand.Id;
+            removeCommand.Id = person.Id;
 
             _bus.Callback<bool>(removeCommand, success =>
             {

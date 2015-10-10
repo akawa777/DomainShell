@@ -7,22 +7,34 @@ using DomainShell.CQRS.Query;
 
 namespace DomainShell.Tests
 {
-    public class PersonListQuery : IQuery<List<PersonData>>
+    public class PersonListQuery : IQuery<PersonData[]>
     {
     }
 
-    public class PersonListQueryHandler : IQueryHandler<PersonListQuery, List<PersonData>>
+    public class PersonQuery : IQuery<PersonData>
     {
-        public List<PersonData> Handle(PersonListQuery query)
+        public int Id { get; set; }
+    }
+
+    public class PersonQueryHandler : 
+        IQueryHandler<PersonListQuery, PersonData[]>,
+        IQueryHandler<PersonQuery, PersonData>
+    {
+        public PersonQueryHandler(PersonDataReadRepository repository)
         {
-            List<PersonData> persons = new List<PersonData>();
+            _repository = repository;
+        }
 
-            foreach (DataRow row in DataStore.PersonTable.Rows)
-            {
-                persons.Add(new PersonData { Id = row.Field<int>("id"), Name = row.Field<string>("name") });
-            }
+        private PersonDataReadRepository _repository;
 
-            return persons;
+        public PersonData[] Handle(PersonListQuery query)
+        {
+            return _repository.GetAll();
+        }
+
+        public PersonData Handle(PersonQuery query)
+        {
+            return _repository.Load(query.Id);
         }
     }
 }

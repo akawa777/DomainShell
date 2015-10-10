@@ -19,6 +19,8 @@ namespace DomainShell.Tests
             _personTable.Rows.Add(new object[] { 1, "1" });
             _personTable.Rows.Add(new object[] { 2, "2" });
             _personTable.Rows.Add(new object[] { 3, "3" });
+
+            _personTable.AcceptChanges();
         }
 
         private static DataTable _personTable = new DataTable();
@@ -107,16 +109,35 @@ namespace DomainShell.Tests
         }
     }
 
-    public class TransactionProcessor : ITransactionProcessor
+    public class PersonDataReadRepository
     {
-        private static object o = new object();
-
-        public void Execute(Action saveAction)
+        public PersonData Load(int id)
         {
-            lock(o)
+            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", id));
+
+            if (rows.Length == 0)
             {
-                saveAction();
+                return null;
             }
+
+            PersonData person = new PersonData();
+
+            person.Id = rows[0].Field<int>("id");
+            person.Name = rows[0].Field<string>("name");
+
+            return person;
+        }
+
+        public PersonData[] GetAll()
+        {
+            List<PersonData> persons = new List<PersonData>();
+
+            foreach (DataRow row in DataStore.PersonTable.Rows)
+            {
+                persons.Add(new PersonData { Id = row.Field<int>("id"), Name = row.Field<string>("name") });
+            }
+
+            return persons.OrderBy(x => x.Id).ToArray();
         }
     }
 }
