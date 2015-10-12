@@ -1,0 +1,23 @@
+﻿
+@{
+    ViewBag.Title = "Detail";
+}
+
+<h2>Detail</h2>
+
+<div class="row">
+    <div class="col-md-12">
+        <form action="/home/update" method="post">
+            <label>id</label> <span>@Model.Id</span><input type="hidden" name="id" value="@Model.Id" /><br />
+            <label>name</label> <input type="text" name="Name" value="@Model.Name" />
+            <br />
+            <br />
+            <button type="submit">update</button>            
+        </form>
+        <form action="/home/delete" method="post">            
+            <input type="hidden" name="id" value="@Model.Id" /><br />
+            <button type="submit">delete</button>
+        </form>
+    </div>
+</div>
+

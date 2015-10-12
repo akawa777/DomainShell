@@ -7,7 +7,7 @@ using DomainShell.EventDispatch;
 using DomainShell.Infrastructure;
 using DomainShell.CQRS.CommandDispatch;
 using DomainShell.CQRS.QueryDispatch;
-using DomainShell.Tests.Web.BizLogic;
+using DomainShell.Tests.Web.BizLogic.Person;
 
 namespace DomainShell.Tests.Web.ServiceLocators
 {

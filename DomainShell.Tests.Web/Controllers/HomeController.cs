@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using DomainShell.Tests.Web.ServiceLocators;
-using DomainShell.Tests.Web.BizLogic;
+using DomainShell.Tests.Web.BizLogic.Person;
 
 namespace DomainShell.Tests.Web.Controllers
 {
@@ -26,13 +26,9 @@ namespace DomainShell.Tests.Web.Controllers
             return View(persons);
         }
 
-        public ActionResult Detail(int id)
+        public ActionResult New()
         {
-            PersonQuery query = new PersonQuery();
-
-            PersonData person = _locator.QueryFacade.Get(query);
-
-            return View(person);
+            return View();
         }
 
         public ActionResult Create(AddPersonCommand command)
@@ -43,7 +39,36 @@ namespace DomainShell.Tests.Web.Controllers
 
             _locator.CommandBus.Send(command);
 
-            return View(success);
+            return RedirectToAction("index");
+        }
+
+        public ActionResult Detail(PersonQuery query)
+        {
+            PersonData person = _locator.QueryFacade.Get(query);
+
+            return View(person);
+        }
+
+        public ActionResult Update(UpdatePersonCommand command)
+        {
+            bool success = false;
+
+            _locator.CommandBus.Callback(command, result => success = result);
+
+            _locator.CommandBus.Send(command);
+
+            return RedirectToAction("index");
+        }
+
+        public ActionResult Delete(RemovePersonCommand command)
+        {
+            bool success = false;
+
+            _locator.CommandBus.Callback(command, result => success = result);
+
+            _locator.CommandBus.Send(command);
+
+            return RedirectToAction("index");
         }
 
         public ActionResult About()
