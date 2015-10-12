@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DomainShell.Tests
+namespace DomainShell.Tests.Web
 {
     public class PersonData
     {

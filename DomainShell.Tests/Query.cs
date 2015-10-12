@@ -5,7 +5,7 @@ using System.Text;
 using System.Data;
 using DomainShell.CQRS.Query;
 
-namespace DomainShell.Tests
+namespace DomainShell.Tests.Web
 {
     public class PersonListQuery : IQuery<PersonData[]>
     {

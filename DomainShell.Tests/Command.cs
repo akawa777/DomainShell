@@ -8,7 +8,7 @@ using DomainShell.Infrastructure;
 using DomainShell.CQRS.Command;
 using DomainShell.CQRS.Infrastructure;
 
-namespace DomainShell.Tests
+namespace DomainShell.Tests.Web
 {
     public class AddPersonCommand : ICommand<AddPersonCommandResult>
     {        

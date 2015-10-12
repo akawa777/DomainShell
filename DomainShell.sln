@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests", "Domain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.CQRS", "DomainShell.CQRS\DomainShell.CQRS.csproj", "{261564FE-DC9A-47BD-8F58-EBD6B29839E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests.DbProvider", "DomainShell.Tests.DbProvider\DomainShell.Tests.DbProvider.csproj", "{9CC8738E-8A30-4975-B5C4-64898D78DE76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests.Web", "DomainShell.Tests.Web\DomainShell.Tests.Web.csproj", "{BFA472EF-0852-4822-94F4-C60CEE76A394}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{261564FE-DC9A-47BD-8F58-EBD6B29839E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{261564FE-DC9A-47BD-8F58-EBD6B29839E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{261564FE-DC9A-47BD-8F58-EBD6B29839E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CC8738E-8A30-4975-B5C4-64898D78DE76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CC8738E-8A30-4975-B5C4-64898D78DE76}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CC8738E-8A30-4975-B5C4-64898D78DE76}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CC8738E-8A30-4975-B5C4-64898D78DE76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

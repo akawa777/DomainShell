@@ -9,7 +9,7 @@ using DomainShell.EventDispatch;
 using DomainShell.CQRS.CommandDispatch;
 using DomainShell.CQRS.QueryDispatch;
 
-namespace DomainShell.Tests
+namespace DomainShell.Tests.Web
 {    
     [TestClass]
     public class UnitTest
