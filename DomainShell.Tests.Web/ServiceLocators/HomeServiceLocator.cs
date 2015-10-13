@@ -7,7 +7,7 @@ using DomainShell.EventDispatch;
 using DomainShell.Infrastructure;
 using DomainShell.CQRS.CommandDispatch;
 using DomainShell.CQRS.QueryDispatch;
-using DomainShell.Tests.Web.BizLogic.Person;
+using DomainShell.Tests.Web.Models.Person;
 
 namespace DomainShell.Tests.Web.ServiceLocators
 {
@@ -15,7 +15,6 @@ namespace DomainShell.Tests.Web.ServiceLocators
     {
         public HomeServiceLocator()
         {
-
             PersonReadRepository readRepository = new PersonReadRepository();
             PersonWriteRepository writeRepository = new PersonWriteRepository();
 

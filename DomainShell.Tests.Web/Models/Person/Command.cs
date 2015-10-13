@@ -7,7 +7,7 @@ using DomainShell.Infrastructure;
 using DomainShell.CQRS.Command;
 using DomainShell.CQRS.Infrastructure;
 
-namespace DomainShell.Tests.Web.BizLogic.Person
+namespace DomainShell.Tests.Web.Models.Person
 {
     public class AddPersonCommand : ICommand<AddPersonCommandResult>
     {        

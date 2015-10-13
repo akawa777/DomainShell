@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Event;
 
-namespace DomainShell.Tests.Web.BizLogic.Person
+namespace DomainShell.Tests.Web.Models.Person
 {
     public class PersonAddedEvent : IDomainEvent
     {

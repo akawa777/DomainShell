@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
 
-namespace DomainShell.Tests.Web.BizLogic.Person
+namespace DomainShell.Tests.Web.Models.Person
 {
     public class Person : IAggregateRoot
     {
@@ -56,7 +56,7 @@ namespace DomainShell.Tests.Web.BizLogic.Person
     {
         public bool Validate(Person person)
         {
-            if (person != null && person.Id > 0 && person.Name != string.Empty)
+            if (person != null && person.Id > 0 && !string.IsNullOrEmpty(person.Name))
             {
                 return true;
             }

@@ -6,7 +6,7 @@ using System.Data;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
 
-namespace DomainShell.Tests.Web.BizLogic.Person
+namespace DomainShell.Tests.Web.Models.Person
 { 
     public static class DataStore 
     {

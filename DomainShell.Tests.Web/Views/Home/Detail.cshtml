@@ -1,23 +1,74 @@
 ﻿
 @{
     ViewBag.Title = "Detail";
+    string scriptId = Guid.NewGuid().ToString();
+    string updateFormId = Guid.NewGuid().ToString();    
+}
+
+@section scripts{
+    <script id="@scriptId" type="text/javascript">
+        var personDetailModel = {
+            el: $("#@updateFormId"),
+            id: function () {
+                return $(this.el).find("[name=id]").val();
+            },
+            name: function () {
+                return $(this.el).find("[name=name]").val();
+            },
+            update: function () {
+                var updateCommand = { id: this.id(), name: this.name() };
+
+                $.ajax({
+                    url: "/home/update",
+                    method: "post",
+                    data: updateCommand,
+                }).done(function (data) { //ajaxの通信に成功した場合
+                    if (data) {
+                        location.href = "/home";
+                    } else {
+                        alert("error!");
+                    }
+
+                }).fail(function (data) { //ajaxの通信に失敗した場合
+                    alert("error!");
+                });
+            },
+            remove: function () {
+                var removeCommand = { id: this.id() };
+
+                $.ajax({
+                    url: "/home/remove",
+                    method: "post",
+                    data: removeCommand,
+                }).done(function (data) { //ajaxの通信に成功した場合
+                    if (data) {
+                        location.href = "/home";
+                    } else {
+                        alert("error!");
+                    }
+
+                }).fail(function (data) { //ajaxの通信に失敗した場合
+                    alert("error!");
+                });
+            }
+        };
+    </script>
 }
 
 <h2>Detail</h2>
 
 <div class="row">
     <div class="col-md-12">
-        <form action="/home/update" method="post">
+        <form id="@updateFormId">
             <label>id</label> <span>@Model.Id</span><input type="hidden" name="id" value="@Model.Id" /><br />
-            <label>name</label> <input type="text" name="Name" value="@Model.Name" />
+            <label>name</label> <input type="text" name="name" value="@Model.Name" />
             <br />
             <br />
-            <button type="submit">update</button>            
-        </form>
-        <form action="/home/delete" method="post">            
-            <input type="hidden" name="id" value="@Model.Id" /><br />
-            <button type="submit">delete</button>
+            <button type="button" onclick="personDetailModel.update()">update</button>            
+            <button type="button" onclick="personDetailModel.remove()">remove</button>    
         </form>
     </div>
 </div>
+
+
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using DomainShell.Tests.Web.ServiceLocators;
-using DomainShell.Tests.Web.BizLogic.Person;
+using DomainShell.Tests.Web.Models.Person;
 
 namespace DomainShell.Tests.Web.Controllers
 {
@@ -31,6 +31,7 @@ namespace DomainShell.Tests.Web.Controllers
             return View();
         }
 
+        [HttpPost]
         public ActionResult Create(AddPersonCommand command)
         {
             bool success = false;
@@ -39,7 +40,7 @@ namespace DomainShell.Tests.Web.Controllers
 
             _locator.CommandBus.Send(command);
 
-            return RedirectToAction("index");
+            return Json(success);
         }
 
         public ActionResult Detail(PersonQuery query)
@@ -49,6 +50,7 @@ namespace DomainShell.Tests.Web.Controllers
             return View(person);
         }
 
+        [HttpPost]
         public ActionResult Update(UpdatePersonCommand command)
         {
             bool success = false;
@@ -57,10 +59,11 @@ namespace DomainShell.Tests.Web.Controllers
 
             _locator.CommandBus.Send(command);
 
-            return RedirectToAction("index");
+            return Json(success);
         }
 
-        public ActionResult Delete(RemovePersonCommand command)
+        [HttpPost]
+        public ActionResult Remove(RemovePersonCommand command)
         {
             bool success = false;
 
@@ -68,7 +71,7 @@ namespace DomainShell.Tests.Web.Controllers
 
             _locator.CommandBus.Send(command);
 
-            return RedirectToAction("index");
+            return Json(success);
         }
 
         public ActionResult About()
