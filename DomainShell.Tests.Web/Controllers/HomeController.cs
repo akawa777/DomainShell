@@ -18,12 +18,18 @@ namespace DomainShell.Tests.Web.Controllers
         private HomeServiceLocator _locator;
 
         public ActionResult Index()
+        {   
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult List()
         {
             PersonListQuery query = new PersonListQuery();
 
             PersonData[] persons = _locator.QueryFacade.Get(query);
 
-            return View(persons);
+            return Json(persons);
         }
 
         public ActionResult New()
@@ -43,11 +49,17 @@ namespace DomainShell.Tests.Web.Controllers
             return Json(success);
         }
 
-        public ActionResult Detail(PersonQuery query)
+        public ActionResult Detail(int id)
+        {
+            return View(id);
+        }
+
+        [HttpPost]
+        public ActionResult Load(PersonQuery query)
         {
             PersonData person = _locator.QueryFacade.Get(query);
 
-            return View(person);
+            return Json(person);
         }
 
         [HttpPost]

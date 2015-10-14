@@ -1,57 +1,113 @@
 ﻿
 @{
     ViewBag.Title = "Detail";
+    int id = Model;
     string scriptId = Guid.NewGuid().ToString();
     string updateFormId = Guid.NewGuid().ToString();    
 }
 
 @section scripts{
     <script id="@scriptId" type="text/javascript">
-        var personDetailModel = {
+        var personDetailModel = {            
             el: $("#@updateFormId"),
-            id: function () {
-                return $(this.el).find("[name=id]").val();
+            data: { id: 0, name: "" },
+            getId: function () {
+                return this.data.id;
             },
-            name: function () {
-                return $(this.el).find("[name=name]").val();
+            getName: function () {
+                return this.data.name;
+            },
+            setId: function (val) {
+                this.el.find("[data-text=id]").each(function () {
+                    $(this).text(val);
+                });
+                this.el.find("[data-value=id]").each(function () {
+                    $(this).val(val);
+                });
+
+                this.data.id = val;
+            },
+            setName: function (val) {
+                this.el.find("[data-text=name]").each(function () {
+                    $(this).text(val);
+                });
+                this.el.find("[data-value=name]").each(function () {
+                    $(this).val(val);
+                });
+
+                this.data.name = val;
+            },
+            render: function () {
+                var self = this;
+
+                this.el.find("[data-value=id]").on("change", function () {
+                    self.setId($(this).val());
+                });
+                this.el.find("[data-value=name]").on("change", function () {
+                    self.setName($(this).val());
+                });
+
+                this.el.find("[data-event-click]").each(function(){
+                    var method = $(this).attr("data-event-click");
+
+                    $(this).on("click", function () {
+                        self[method]();
+                    });
+                });
+
+                var personQuery = { id: "@id" };
+
+                $.ajax({
+                    url: "/home/load",
+                    method: "post",
+                    data: personQuery,
+                }).done(function (data) {
+                    self.setId(data.Id);
+                    self.setName(data.Name);
+
+                }).fail(function (data) {
+                    alert("error!");
+                });
             },
             update: function () {
-                var updateCommand = { id: this.id(), name: this.name() };
+                var updateCommand = { id: this.getId(), name: this.getName() };
 
                 $.ajax({
                     url: "/home/update",
                     method: "post",
                     data: updateCommand,
-                }).done(function (data) { //ajaxの通信に成功した場合
+                }).done(function (data) {
                     if (data) {
                         location.href = "/home";
                     } else {
                         alert("error!");
                     }
 
-                }).fail(function (data) { //ajaxの通信に失敗した場合
+                }).fail(function (data) {
                     alert("error!");
                 });
             },
             remove: function () {
-                var removeCommand = { id: this.id() };
+                var removeCommand = { id: this.getId() };
 
                 $.ajax({
                     url: "/home/remove",
                     method: "post",
                     data: removeCommand,
-                }).done(function (data) { //ajaxの通信に成功した場合
+                }).done(function (data) {
                     if (data) {
                         location.href = "/home";
                     } else {
                         alert("error!");
                     }
 
-                }).fail(function (data) { //ajaxの通信に失敗した場合
+                }).fail(function (data) {
                     alert("error!");
                 });
             }
         };
+
+        personDetailModel.render();
     </script>
 }
 
@@ -60,12 +116,12 @@
 <div class="row">
     <div class="col-md-12">
         <form id="@updateFormId">
-            <label>id</label> <span>@Model.Id</span><input type="hidden" name="id" value="@Model.Id" /><br />
-            <label>name</label> <input type="text" name="name" value="@Model.Name" />
+            <label>id</label> <span data-text="id"></span><input type="hidden" data-value="id" /><br />
+            <label>name</label> <input type="text" data-value="name" />
             <br />
             <br />
-            <button type="button" onclick="personDetailModel.update()">update</button>            
-            <button type="button" onclick="personDetailModel.remove()">remove</button>    
+            <button type="button" data-event-click="update">update</button>            
+            <button type="button" data-event-click="remove">remove</button>    
         </form>
     </div>
 </div>

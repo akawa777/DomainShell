@@ -1,5 +1,137 @@
 ﻿@{
     ViewBag.Title = "Home Page";
+    string scriptId = Guid.NewGuid().ToString();
+    string listId = Guid.NewGuid().ToString();  
+}
+
+@section scripts{
+    <script id="@scriptId" type="text/javascript">
+        var viewModel = {
+            el: $("#@listId")[0],
+            render: function () {
+                var self = this;
+
+                $.ajax({
+                    url: "/home/list",
+                    method: "post"                    
+                }).done(function (data) {
+                    var parent = $(self.el).find("[data-loop=row]");
+
+                    var template = parent.html();
+
+                    parent.empty();
+
+                    for (var i in data) {
+                        var clone = $(template).clone();
+
+                        clone.find("a").attr("href", "/home/detail/" + data[i].Id);
+                        clone.find("a").text(data[i].Id);                        
+                        $(clone.children("td")[0]).find("a").attr("href", "/home/detail/" + data[i].Id);
+                        $(clone.children("td")[1]).text(data[i].Name);
+
+                        parent.append(clone);
+                    }
+
+                }).fail(function (data) {
+                    alert("error!");
+                });
+            }
+        };
+
+        viewModel.render();
+
+        var trees = [
+            {
+                tag: "input",
+                attributes: { text: "input", value: "id" },                
+            },
+            {
+                tag: "br"            
+            },
+            {
+                tag: "br"
+            },
+            {
+                tag: "div",
+                name: "list",
+                children: [
+                    {
+                        tag: "input",
+                        attributes: { text: "input", value: "name" }
+                    },
+                    {
+                        tag: "br"
+                    },
+                    {
+                        tag: "span",                        
+                        text: "name"
+                    },
+                    {
+                        tag: "br"
+                    }
+                ]
+            }
+        ];
+
+        var engine = {
+            render: function (el, trees, data) {
+                var self = this;
+
+                var parent = $(el);
+
+                for (var i in trees) {
+                    var tree = trees[i];
+
+                    var node;
+
+                    if (tree == "input" || tree == "br") {
+                        node = $("<" + tree.tag + " />").clone();
+                    } else {
+                        node = $("<" + tree.tag + "></" + tree.tag).clone();
+                    }
+
+                    if (tree.text) {
+                        if (data.hasOwnProperty(tree.text)) {
+                            node.text(data[tree.text]);
+                        } else {
+                            node.text(tree.text);
+                        }
+                    }
+
+                    if (tree.attributes) {
+                        var attrs = tree.attributes;
+                        for (var key in attrs) {
+                            if (attrs.hasOwnProperty(key)) {
+                                if (data.hasOwnProperty(attrs[key])) {
+                                    node.attr(key, data[attrs[key]]);
+                                } else {
+                                    node.attr(key, attrs[key]);
+                                }
+                            }
+                        }
+                    }
+
+                    if (tree.children) {
+                        if (tree.name && data.hasOwnProperty(tree.name)) {
+                            if (data[tree.name] instanceof Array) {
+                                for (var itemIndex in data[tree.name]) {
+                                    self.render(node[0], tree.children, data[tree.name][itemIndex]);
+                                }
+                            } else {
+                                self.render(node[0], tree.children, data[tree.name]);
+                            }
+                        } else {
+                            self.render(node[0], tree.children, data);
+                        }
+                    }
+
+                    parent.append(node);
+                }
+            }
+        };
+
+        engine.render($("#sample")[0], trees, { id: "111", name: "name_111", list: [{ id: "222", name: "name_222" }, { id: "333", name: "name_333" }] });
+    </script>
 }
 
 <h2>Index</h2>
@@ -7,16 +139,16 @@
 <div class="row">
     <div class="col-md-12">  
         <a href="/home/new">new</a>      
-        <table>
+        <table id="@listId">
             <thead>
                 <tr><th>id</th><th>name</th></tr>
             </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr><td><a href="/home/detail/@item.Id">@item.Id</a></td><td>@item.Name</td></tr>
-                }
+            <tbody data-loop="row">
+                <tr><td><a href="/home/detail/" data-text="id"></a></td><td data-text="name"></td></tr>
             </tbody>
         </table>
-    </div>    
+    </div>  
+    <br />  
+    <br />  
+    <div id="sample"></div>
 </div>

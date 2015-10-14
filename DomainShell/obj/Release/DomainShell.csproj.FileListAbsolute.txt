@@ -1,5 +1,5 @@
-C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\bin\Release\DomainShell.dll
-C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\bin\Release\DomainShell.pdb
-C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Release\DomainShell.csprojResolveAssemblyReference.cache
-C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Release\DomainShell.dll
-C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Release\DomainShell.pdb
+E:\Documents\GitHub\DomainShell\DomainShell\bin\Release\DomainShell.dll
+E:\Documents\GitHub\DomainShell\DomainShell\bin\Release\DomainShell.pdb
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Release\DomainShell.csprojResolveAssemblyReference.cache
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Release\DomainShell.dll
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Release\DomainShell.pdb
