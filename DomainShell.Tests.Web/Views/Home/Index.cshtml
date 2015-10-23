@@ -5,150 +5,82 @@
 }
 
 @section scripts{
-    <script id="@scriptId" type="text/javascript">
-        var viewModel = {
-            el: $("#@listId")[0],
-            render: function () {
-                var self = this;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.0.0/jquery.serialize-object.compiled.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.js"></script>
+    <script id="template" type="text/html">
+        <form id="{{formId}}">
+            <table>
+                <thead>
+                    <tr><th>id</th><th>name</th></tr>
+                </thead>
+                <tbody>
+                    {{#list}}
+                    <tr>
+                        <td>{{id}}<input type="hidden" name="list[][id]" value="{{id}}" /></td>
+                        <td><input id="{{refId}}" type="text" name="list[][name]" value="{{name}}" onkeyup="{{action}}" /></td>
+                        <td>{{name}}</td>
+                    </tr>
+                    {{/list}}
+                </tbody>
+            </table>
+        </form>
+    </script>
+    <script type="text/javascript">
+        require.config({
+            baseUrl: "/scripts",
+            paths: {
+                Mustache: "https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.0/mustache"
+            }
+        });
 
-                $.ajax({
-                    url: "/home/list",
-                    method: "post"                    
-                }).done(function (data) {
-                    var parent = $(self.el).find("[data-loop=row]");
+        require(['lib/vmustache'], function (Vmustache) {
+            var vmustache = new Vmustache();
 
-                    var template = parent.html();
+            var data = {
+                formId: vmustache.getRefKey(),
+                list: []
+            }
 
-                    parent.empty();
+            for (var i = 0; i < 100; i++) {
+                data.list.push({
+                    id: i,
+                    name: "name_" + i.toString(),
+                    refId: vmustache.getRefKey(),
+                    action: vmustache.setEvent(function (event, item) {
+                        alert(event.target.value);
+                        vmustache.rerender();
+                        var formData = vmustache.getFromData(rootNode.querySelector("#" + data.formId));
 
-                    for (var i in data) {
-                        var clone = $(template).clone();
 
-                        clone.find("a").attr("href", "/home/detail/" + data[i].Id);
-                        clone.find("a").text(data[i].Id);                        
-                        $(clone.children("td")[0]).find("a").attr("href", "/home/detail/" + data[i].Id);
-                        $(clone.children("td")[1]).text(data[i].Name);
-
-                        parent.append(clone);
-                    }
-
-                }).fail(function (data) {
-                    alert("error!");
+                    })
                 });
             }
-        };
 
-        viewModel.render();
+            var html = vmustache.render(document.getElementById("template").innerHTML, data);
 
-        var trees = [
-            {
-                tag: "input",
-                attributes: { text: "input", value: "id" },                
-            },
-            {
-                tag: "br"            
-            },
-            {
-                tag: "br"
-            },
-            {
-                tag: "div",
-                name: "list",
-                children: [
-                    {
-                        tag: "input",
-                        attributes: { text: "input", value: "name" }
-                    },
-                    {
-                        tag: "br"
-                    },
-                    {
-                        tag: "span",                        
-                        text: "name"
-                    },
-                    {
-                        tag: "br"
-                    }
-                ]
-            }
-        ];
+            var rootNode = document.getElementById("@listId");
 
-        var engine = {
-            render: function (el, trees, data) {
-                var self = this;
+            $(rootNode).html(html);
 
-                var parent = $(el);
+            data.list.forEach(function (item) {
+                var val = rootNode.querySelector("#" + item.refId).value;
+                item.name = val + "_update";
+            });
 
-                for (var i in trees) {
-                    var tree = trees[i];
+            html = vmustache.rerender();
 
-                    var node;
+            $(rootNode).html(html);
 
-                    if (tree == "input" || tree == "br") {
-                        node = $("<" + tree.tag + " />").clone();
-                    } else {
-                        node = $("<" + tree.tag + "></" + tree.tag).clone();
-                    }
-
-                    if (tree.text) {
-                        if (data.hasOwnProperty(tree.text)) {
-                            node.text(data[tree.text]);
-                        } else {
-                            node.text(tree.text);
-                        }
-                    }
-
-                    if (tree.attributes) {
-                        var attrs = tree.attributes;
-                        for (var key in attrs) {
-                            if (attrs.hasOwnProperty(key)) {
-                                if (data.hasOwnProperty(attrs[key])) {
-                                    node.attr(key, data[attrs[key]]);
-                                } else {
-                                    node.attr(key, attrs[key]);
-                                }
-                            }
-                        }
-                    }
-
-                    if (tree.children) {
-                        if (tree.name && data.hasOwnProperty(tree.name)) {
-                            if (data[tree.name] instanceof Array) {
-                                for (var itemIndex in data[tree.name]) {
-                                    self.render(node[0], tree.children, data[tree.name][itemIndex]);
-                                }
-                            } else {
-                                self.render(node[0], tree.children, data[tree.name]);
-                            }
-                        } else {
-                            self.render(node[0], tree.children, data);
-                        }
-                    }
-
-                    parent.append(node);
-                }
-            }
-        };
-
-        engine.render($("#sample")[0], trees, { id: "111", name: "name_111", list: [{ id: "222", name: "name_222" }, { id: "333", name: "name_333" }] });
-    </script>
+            var updateObj = $("#" + data.formId).serializeObject();
+        });
+</script>
 }
 
 <h2>Index</h2>
 
 <div class="row">
-    <div class="col-md-12">  
-        <a href="/home/new">new</a>      
-        <table id="@listId">
-            <thead>
-                <tr><th>id</th><th>name</th></tr>
-            </thead>
-            <tbody data-loop="row">
-                <tr><td><a href="/home/detail/" data-text="id"></a></td><td data-text="name"></td></tr>
-            </tbody>
-        </table>
-    </div>  
-    <br />  
-    <br />  
-    <div id="sample"></div>
+    <div class="col-md-12">
+        <a href="/home/new">new</a>
+        <div id="@listId"></div>
+    </div>
 </div>
