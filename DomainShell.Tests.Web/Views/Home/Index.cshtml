@@ -33,8 +33,59 @@
             }
         });
 
-        require(['lib/vmustache'], function (Vmustache) {
-            var vmustache = new Vmustache();
+        require(['lib/vmustache'], function (vmustache) {
+            var app = vmustache.createApp({
+                init: function (options) {
+                    var self = this;
+
+                    self.render({
+                        template: "<input type='text' value='{{data.name}]' /><span>{{data.name}}</span>",
+                        data: { name: "" },
+                        events: {
+                            action: function (el, item) {
+                                item.data.name = el.target.value;
+                                self.render();
+                            }
+                        }
+                    });
+                }
+            });
+
+            var el = document.getElementById("sample");
+            var options = {};
+
+            vmustache.render(app, el, options);
+
+            var app2 = vmustache.createApp({
+                init: function (options) {
+                    var self = this;
+
+                    var config = {
+                        template: "<div>{{compentens.app}}</div>",
+                        components: {
+                            app: function (el, item) {
+                                var app = options.app;
+                                var vmustache = options.vmustache;
+
+                                vmustache.render(app, el, {});
+                            }
+                        }
+                    };
+
+                    self.render(config);
+                }
+            });
+
+            var el = document.getElementById("sample2");
+            var options = {
+                app: app,
+                vmustache: vmustache
+            };            
+
+            vmustache.render(app2, el, options);
+
+            /*
+            var vmustache = new Vmustache();            
 
             var data = {
                 formId: vmustache.getRefKey(),
@@ -48,10 +99,7 @@
                     refId: vmustache.getRefKey(),
                     action: vmustache.setEvent(function (event, item) {
                         alert(event.target.value);
-                        vmustache.rerender();
-                        var formData = vmustache.getFromData(rootNode.querySelector("#" + data.formId));
-
-
+                        item.name = event.target.value;
                     })
                 });
             }
@@ -72,6 +120,7 @@
             $(rootNode).html(html);
 
             var updateObj = $("#" + data.formId).serializeObject();
+            */
         });
 </script>
 }
