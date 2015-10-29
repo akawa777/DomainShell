@@ -34,55 +34,44 @@
         });
 
         require(['lib/vmustache'], function (vmustache) {
-            var app = vmustache.createApp({
-                init: function (options) {
-                    var self = this;
+            var app = function (view, options) {
+                view.template = "<input type='text' value='{{data.name}]' /><span>{{data.name}}</span>";
 
-                    self.render({
-                        template: "<input type='text' value='{{data.name}]' /><span>{{data.name}}</span>",
-                        data: { name: "" },
-                        events: {
-                            action: function (el, item) {
-                                item.data.name = el.target.value;
-                                self.render();
-                            }
-                        }
-                    });
-                }
-            });
+                view.data = options.data;
+
+                view.events = {
+                    action: function (el, item) {
+                        item.data.name = el.target.value;
+                        view.render();
+                    }
+                };
+
+                view.render();
+            };
 
             var el = document.getElementById("sample");
             var options = {};
 
-            vmustache.render(app, el, options);
+            vmustache.react(app, el, options);
 
-            var app2 = vmustache.createApp({
-                init: function (options) {
-                    var self = this;
+            var app2 = function (view, options) {
+                view.template = "{{components.app}}";
 
-                    var config = {
-                        template: "<div>{{compentens.app}}</div>",
-                        components: {
-                            app: function (el, item) {
-                                var app = options.app;
-                                var vmustache = options.vmustache;
-
-                                vmustache.render(app, el, {});
-                            }
-                        }
-                    };
-
-                    self.render(config);
+                view.components = {
+                    app: function (el, item) {
+                        view.component(options.app, el, { data: self.data });
+                    }
                 }
-            });
+
+                view.render();
+            }
 
             var el = document.getElementById("sample2");
-            var options = {
-                app: app,
-                vmustache: vmustache
+            var options = {                
+                app: app
             };            
 
-            vmustache.render(app2, el, options);
+            vmustache.react(app2, el, options);
 
             /*
             var vmustache = new Vmustache();            
