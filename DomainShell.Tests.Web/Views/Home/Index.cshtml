@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Home Page";
     string scriptId = Guid.NewGuid().ToString();
     string listId = Guid.NewGuid().ToString();  
@@ -7,6 +7,7 @@
 @section scripts{
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.0.0/jquery.serialize-object.compiled.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.js"></script>
+    <script src="~/Scripts/bundle.js"></script>
     <script id="template" type="text/html">
         <form id="{{formId}}">
             <table>
@@ -26,90 +27,78 @@
         </form>
     </script>
     <script type="text/javascript">
-        require.config({
-            baseUrl: "/scripts",
-            paths: {
-                Mustache: "https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.0/mustache"
-            }
-        });
+        
+        var el = document.getElementById("comp");
 
-        require(['lib/vmustache'], function (vmustache) {
-            var app = function (view, options) {
-                view.template = "<input type='text' value='{{data.name}]' /><span>{{data.name}}</span>";
+        var data = {
+            item: "aaa"
+        }
 
-                view.data = options.data;
+        var rootVnode = new VNode("div", { id: "comp" }, []);
 
-                view.events = {
-                    action: function (el, item) {
-                        item.data.name = el.target.value;
-                        view.render();
-                    }
-                };
+        var rootDnode = createElement(rootVnode);
 
-                view.render();
-            };
+        el.appendChild(rootDnode);
 
-            var el = document.getElementById("sample");
-            var options = {};
+        var vnodes = [];
+        var dnodes = [];
 
-            vmustache.react(app, el, options);
+        var action = function (e) {
 
-            var app2 = function (view, options) {
-                view.template = "{{components.app}}";
+        }
 
-                view.components = {
-                    app: function (el, item) {
-                        view.component(options.app, el, { data: self.data });
-                    }
+        var createAction = function (data, name) {
+            var action = function (e) {
+                data[name] = e.target.value;
+
+                var newVnodes = [];
+
+                for (var i = 0; i < vnodes.length; i++) {
+                    newVnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
                 }
 
-                view.render();
+                newVnodes.push(new VNode("div", { }, [ new VText(data.item) ]));                
+
+                for (var i = 0; i < newVnodes.length; i++) {
+                    if (i < vnodes.length){
+                        var material = diff(vnodes[i], newVnodes[i]);
+                        dnodes[i] = patch(dnodes[i], material);
+                    } else {                        
+                        var lastDnode = dnodes[i - 1];
+
+                        dnode = createElement(newVnodes[i]);
+                        dnodes.push(dnode);
+
+                        lastDnode.parentElement.insertBefore(dnode, lastDnode.nextSibling);
+                    }                    
+                }
+
+                vnodes = newVnodes;
             }
 
-            var el = document.getElementById("sample2");
-            var options = {                
-                app: app
-            };            
+            return action;            
+        }
 
-            vmustache.react(app2, el, options);
+        action = createAction(data, "item");        
+        
+        vnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
+        vnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
+        vnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
 
-            /*
-            var vmustache = new Vmustache();            
+        var prevDnode = null;
 
-            var data = {
-                formId: vmustache.getRefKey(),
-                list: []
+        vnodes.forEach(function (vnode) {
+            dnode = createElement(vnode);
+
+            dnodes.push(dnode);
+
+            if (prevDnode == null) {
+                el.parentElement.replaceChild(dnode, el);
+                prevDnode = dnode;
+            } else {
+                prevDnode.parentElement.insertBefore(dnode, prevDnode.nextSibling);
+                prevDnode = dnode;
             }
-
-            for (var i = 0; i < 100; i++) {
-                data.list.push({
-                    id: i,
-                    name: "name_" + i.toString(),
-                    refId: vmustache.getRefKey(),
-                    action: vmustache.setEvent(function (event, item) {
-                        alert(event.target.value);
-                        item.name = event.target.value;
-                    })
-                });
-            }
-
-            var html = vmustache.render(document.getElementById("template").innerHTML, data);
-
-            var rootNode = document.getElementById("@listId");
-
-            $(rootNode).html(html);
-
-            data.list.forEach(function (item) {
-                var val = rootNode.querySelector("#" + item.refId).value;
-                item.name = val + "_update";
-            });
-
-            html = vmustache.rerender();
-
-            $(rootNode).html(html);
-
-            var updateObj = $("#" + data.formId).serializeObject();
-            */
         });
 </script>
 }
@@ -120,5 +109,10 @@
     <div class="col-md-12">
         <a href="/home/new">new</a>
         <div id="@listId"></div>
+        <div id="sample"> 
+            bbb
+            <div id="comp"></div> 
+            aaa          
+        </div>
     </div>
 </div>
