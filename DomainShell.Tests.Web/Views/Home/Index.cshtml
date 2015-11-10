@@ -27,154 +27,117 @@
         </form>
     </script>
     <script type="text/javascript">
-        
-        var el = document.getElementById("comp");
+        var react = function (app, rootView) {
+            var view = {};
 
-        var data = {
-            item: "aaa"
-        }
-
-        var rootVnode = new VNode("div", { id: "comp" }, []);
-
-        var rootDnode = createElement(rootVnode);
-
-        el.appendChild(rootDnode);
-
-        var vnodes = [];
-        var dnodes = [];
-
-        var action = function (e) {
-
-        }
-
-        var createAction = function (data, name) {
-            var action = function (e) {
-                data[name] = e.target.value;
-
-                var newVnodes = [];
-
-                for (var i = 0; i < vnodes.length; i++) {
-                    newVnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
-                }
-
-                newVnodes.push(new VNode("div", { }, [ new VText(data.item) ]));                
-
-                for (var i = 0; i < newVnodes.length; i++) {
-                    if (i < vnodes.length){
-                        var material = diff(vnodes[i], newVnodes[i]);
-                        dnodes[i] = patch(dnodes[i], material);
-                    } else {                        
-                        var lastDnode = dnodes[i - 1];
-
-                        dnode = createElement(newVnodes[i]);
-                        dnodes.push(dnode);
-
-                        lastDnode.parentElement.insertBefore(dnode, lastDnode.nextSibling);
-                    }                    
-                }
-
-                vnodes = newVnodes;
-            }
-
-            return action;            
-        }
-
-        action = createAction(data, "item");        
-        
-        vnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
-        vnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
-        vnodes.push(new VNode("input", { type: "text", value: data.item, onkeyup: action }, []));
-
-        var prevDnode = null;
-
-        vnodes.forEach(function (vnode) {
-            dnode = createElement(vnode);
-
-            dnodes.push(dnode);
-
-            if (prevDnode == null) {
-                el.parentElement.replaceChild(dnode, el);
-                prevDnode = dnode;
+            if (typeof rootView === "undefined") {
+                view.renders = [];
+                view.deffereds = [];
+                
             } else {
-                prevDnode.parentElement.insertBefore(dnode, prevDnode.nextSibling);
-                prevDnode = dnode;
-            }
-        });
-    </script>
-    <script type="text/javascript" src="~/Scripts/lib/q.js"></script>
-    <script type="text/javascript">
-        var initAction = function () {
-            var d = Q.defer();
-            setTimeout(function () {
-                var resolveObj
-                d.resolve(resolveObj);
-            });
-            return d.promise;
-        }
-
-        var asyncActions = [];
-
-        var actionSet = function () {
-            var self = this;
-            self.d = Q.defer();
-        }
-
-        actionSet.prototype.action = function (value) {
-            var self = this;
-            var d = self.d;
-            alert(value);
-            var resolveObj = {};
-            d.resolve(resolveObj);
-        }
-
-        actionSet.prototype.createWrapAction = function (action) {
-            var self = this;
-            var d = self.d;
-
-            var createAction = function () {
-                action();
-                return d.promise;
+                view.renders = rootView.renders;
+                view.deffereds = rootView.deffereds;
             }
 
-            return createAction;
+            view.render = function(callback){
+                if (app.defferd) {
+                    alert(view.data);
+                    app.defferd.resolve()
+                } else {
+                    view.renders.push(function () {
+                        var defferd = Q.defer();
+                        alert(view.data);
+                        defferd.resolve();
+                        return defferd.promise;
+                    });
+                }
+
+                for (var key in view.components) {
+                    if (view.components.hasOwnProperty(key)) {
+                        var action = view.components[key];
+
+                        var setRenders = function (action) {
+                            view.renders.push(function () {
+                                var defferd = Q.defer();
+
+                                view.deffereds.push(defferd);
+
+                                var el = {}
+                                el.attributes = {};
+                                el.attributes["defferd"] = view.deffereds.length - 1;
+
+                                action(el);
+
+                                return defferd.promise;
+                            });
+                        }
+
+                        setRenders(action);
+                    }
+                }
+
+                if (typeof rootApp === "undefined") {
+                    view.renders.push(function () {
+                        var defferd = Q.defer();
+
+                        view.renders = [];
+                        view.deffereds = [];
+
+                        defferd.resolve();
+                        return defferd.promise;
+                    });
+
+                    view.renders.push(function () {
+                        if (callback) {
+                            callback();
+                        }
+                    });
+
+                    var defferd = Q.defer();
+                    defferd.resolve();
+                    var promise = defferd.promise;
+
+                    view.renders.forEach(function (render) {
+                        promise = promise.then(render);
+                    });
+                }
+            }
+
+            view.component = function (el, data)
+            {
+                var childApp = function (view) {
+                    view.data = data;
+                    view.render();
+                }
+
+                childApp.defferd = view.deffereds[el.attributes["defferd"]];
+
+                react(childApp, rootView);
+            }
+
+            app(view);
         }
 
-        var set1 = new actionSet();
-
-        var action1 = function () {
+        var app = function (view) {
             setTimeout(function () {
-                set1.action(1);
+                view.data = "parent";
+
+                view.components = {
+                    compApp1: function (el) {
+                        setTimeout(function () {
+                            view.component(el, "child1");
+                        }, 1000);                        
+                    },
+                    compApp2: function (el) {
+                        view.component(el, "child2");
+                    }
+                }
+
+                view.render();
             }, 1000);
         }
-        
-        var async1 = set1.createWrapAction(action1);
 
-        var set2 = new actionSet();
-
-        var action2 = function () {            
-            setTimeout(function () {
-                set2.action(2);
-            });
-        }
-        
-        var async2 = set2.createWrapAction(action2);
-
-        var set3 = new actionSet();
-
-        var action3 = function () {
-            set3.action(3);
-        }
-        
-        var async3 = set3.createWrapAction(action3);
-
-        asyncActions.push(async1);
-        asyncActions.push(async2);
-        asyncActions.push(async3);        
-
-        var promies = initAction();
-        asyncActions.forEach(function (action) {
-            promies = promies.then(action);
-        });
+        react(app);
     </script>
 }
 
