@@ -1,156 +1,25 @@
-@{
+﻿@{
     ViewBag.Title = "Home Page";
-    string scriptId = Guid.NewGuid().ToString();
-    string listId = Guid.NewGuid().ToString();  
 }
 
-@section scripts{
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.0.0/jquery.serialize-object.compiled.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.20/require.js"></script>
-    <script src="~/Scripts/bundle.js"></script>
-    <script id="template" type="text/html">
-        <form id="{{formId}}">
-            <table>
-                <thead>
-                    <tr><th>id</th><th>name</th></tr>
-                </thead>
-                <tbody>
-                    {{#list}}
-                    <tr>
-                        <td>{{id}}<input type="hidden" name="list[][id]" value="{{id}}" /></td>
-                        <td><input id="{{refId}}" type="text" name="list[][name]" value="{{name}}" onkeyup="{{action}}" /></td>
-                        <td>{{name}}</td>
-                    </tr>
-                    {{/list}}
-                </tbody>
-            </table>
-        </form>
-    </script>
+@section scripts{            
+    <script src="~/scripts/require.js"></script> 
     <script type="text/javascript">
-        var react = function (app, rootView) {
-            var view = {};
+        require.config({            
+            baseUrl: "/scripts",
+        });
 
-            if (typeof rootView === "undefined") {
-                view.renders = [];
-                view.deffereds = [];
-                
-            } else {
-                view.renders = rootView.renders;
-                view.deffereds = rootView.deffereds;
-            }
-
-            view.render = function(callback){
-                if (app.defferd) {
-                    alert(view.data);
-                    app.defferd.resolve()
-                } else {
-                    view.renders.push(function () {
-                        var defferd = Q.defer();
-                        alert(view.data);
-                        defferd.resolve();
-                        return defferd.promise;
-                    });
-                }
-
-                for (var key in view.components) {
-                    if (view.components.hasOwnProperty(key)) {
-                        var action = view.components[key];
-
-                        var setRenders = function (action) {
-                            view.renders.push(function () {
-                                var defferd = Q.defer();
-
-                                view.deffereds.push(defferd);
-
-                                var el = {}
-                                el.attributes = {};
-                                el.attributes["defferd"] = view.deffereds.length - 1;
-
-                                action(el);
-
-                                return defferd.promise;
-                            });
-                        }
-
-                        setRenders(action);
-                    }
-                }
-
-                if (typeof rootApp === "undefined") {
-                    view.renders.push(function () {
-                        var defferd = Q.defer();
-
-                        view.renders = [];
-                        view.deffereds = [];
-
-                        defferd.resolve();
-                        return defferd.promise;
-                    });
-
-                    view.renders.push(function () {
-                        if (callback) {
-                            callback();
-                        }
-                    });
-
-                    var defferd = Q.defer();
-                    defferd.resolve();
-                    var promise = defferd.promise;
-
-                    view.renders.forEach(function (render) {
-                        promise = promise.then(render);
-                    });
-                }
-            }
-
-            view.component = function (el, data)
-            {
-                var childApp = function (view) {
-                    view.data = data;
-                    view.render();
-                }
-
-                childApp.defferd = view.deffereds[el.attributes["defferd"]];
-
-                react(childApp, rootView);
-            }
-
-            app(view);
-        }
-
-        var app = function (view) {
-            setTimeout(function () {
-                view.data = "parent";
-
-                view.components = {
-                    compApp1: function (el) {
-                        setTimeout(function () {
-                            view.component(el, "child1");
-                        }, 1000);                        
-                    },
-                    compApp2: function (el) {
-                        view.component(el, "child2");
-                    }
-                }
-
-                view.render();
-            }, 1000);
-        }
-
-        react(app);
-    </script>
+        require(["viact", "home/listApp"], function (viact, app) {
+            var el = document.getElementById("sample");            
+            viact.mold(el, app);
+        });
+</script>
 }
 
 <h2>Index</h2>
 
 <div class="row">
-    <div class="col-md-12">
-        <a href="/home/new">new</a>
-        <div id="@listId"></div>
-        <div id="sample"> 
-            bbb
-            <div id="comp"></div> 
-            aaa          
-        </div>
-    </div>
+    <div class="col-md-12">                                
+        <div id="sample"></div>        
+    </div>    
 </div>

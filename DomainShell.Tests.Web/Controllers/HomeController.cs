@@ -32,11 +32,6 @@ namespace DomainShell.Tests.Web.Controllers
             return Json(persons);
         }
 
-        public ActionResult New()
-        {
-            return View();
-        }
-
         [HttpPost]
         public ActionResult Create(AddPersonCommand command)
         {
@@ -47,11 +42,6 @@ namespace DomainShell.Tests.Web.Controllers
             _locator.CommandBus.Send(command);
 
             return Json(success);
-        }
-
-        public ActionResult Detail(int id)
-        {
-            return View(id);
         }
 
         [HttpPost]
