@@ -29,8 +29,12 @@
                 method: "post",
                 data: createCommand,
             }).done(function (data) {
-                self.modal('hide');
-                self.list(render);
+                if (data) {
+                    self.modal('hide');
+                    self.list(render);
+                } else {
+                    alert("error!");
+                }
             }).fail(function (data) {
                 alert("error!");
             });
@@ -46,8 +50,12 @@
                 method: "post",
                 data: updateCommand,
             }).done(function (data) {
-                self.modal('hide');
-                self.list(render);
+                if (data) {
+                    self.modal('hide');
+                    self.list(render);
+                } else {
+                    alert("error!");
+                }
             }).fail(function (data) {
                 alert("error!");
             });
@@ -61,8 +69,12 @@
                 method: "post",
                 data: removeCommand,
             }).done(function (data) {
-                self.modal('hide');
-                self.list(render);
+                if (data) {
+                    self.modal('hide');
+                    self.list(render);
+                } else {
+                    alert("error!");
+                }
             }).fail(function (data) {
                 alert("error!");
             });
