@@ -4,7 +4,9 @@
         data: {
             id: "",
             name: "",            
-            visible: false
+            visible: false,
+            displayForAdd: "",
+            displayForUpdate: ""
         },
         detailHook: function (el) {
             this.modal = function (args) {
