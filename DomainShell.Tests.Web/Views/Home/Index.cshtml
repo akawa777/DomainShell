@@ -5,13 +5,14 @@
 @section scripts{            
     <script src="~/scripts/require.js"></script> 
     <script type="text/javascript">
-        require.config({            
+        require.config({
+            urlArgs: "bust=v2",
             baseUrl: "/scripts",
         });
 
-        require(["viact", "home/listApp"], function (viact, app) {
+        require(["figuram", "home/listApp"], function (figuram, app) {
             var el = document.getElementById("sample");            
-            viact.mold(el, app);
+            figuram.render(el, app);
         });
 </script>
 }

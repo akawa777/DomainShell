@@ -4,7 +4,7 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" data-event-onclick="close">&times;</button>
                 <h4 class="modal-title">detail</h4>
             </div>
             <div class="modal-body">
@@ -27,7 +27,7 @@
                 <button style="display: {{displayForAdd}};" type="button" class="btn btn-primary" data-event-onclick="add">add</button>
                 <button style="display: {{displayForUpdate}};" type="button" class="btn btn-primary" data-event-onclick="update">update</button>
                 <button style="display: {{displayForUpdate}};" type="button" class="btn btn-primary" data-event-onclick="remove">remove</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">close</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" data-event-onclick="close">close</button>
             </div>
         </div>
     </div>

@@ -17116,7 +17116,7 @@ var convertHTML = require('html-to-vdom')({
         }
     }
 
-    View.prototype.render = function (callback) {
+    View.prototype.adapt = function (callback) {
         var self = this;
 
         try {
@@ -17124,13 +17124,13 @@ var convertHTML = require('html-to-vdom')({
                 self.status.beginRenderRootView = true;
 
                 if (self.status.rootView.app.rerender) {
-                    var render = function () {
-                        self.status.rootView.render();
+                    var adapt = function () {
+                        self.status.rootView.adapt();
                     }
 
-                    self.status.rootView.app.rerender(render, self.status.rootView.options);
+                    self.status.rootView.app.rerender(adapt, self.status.rootView.options);
                 } else {
-                    self.status.rootView.render();
+                    self.status.rootView.adapt();
                 }
                 
                 return;
@@ -17154,19 +17154,19 @@ var convertHTML = require('html-to-vdom')({
                 el.removeAttribute("data-component");
             }
 
-            var render = function () {
-                self.render();
+            var adapt = function () {
+                self.adapt();
             }
 
-            var createMold = function (el, app, options, status, node) {
+            var createRender = function (el, app, options, status, node) {
                 var componentView = new View(el, app, options, status, node);
 
                 return function (app, options) {
-                    componentView.mold(app, options);
+                    componentView.render(app, options);
                 }
             }
 
-            var node = getNode(el, self.app, self.app.data, self.options, self.status, render, createMold);
+            var node = getNode(el, self.app, self.app.data, self.options, self.status, adapt, createRender);
 
             var Hook = function (app, options, status, callback) {
                 this.app = app;               
@@ -17230,7 +17230,7 @@ var convertHTML = require('html-to-vdom')({
         }
     }
 
-    View.prototype.mold = function (app, options) {
+    View.prototype.render = function (app, options) {        
         var self = this;
 
         var view = null;
@@ -17241,11 +17241,11 @@ var convertHTML = require('html-to-vdom')({
             view = new View(self.el, app, options, self.status);
         }   
 
-        var render = function (callback) {
-            view.render(callback);
+        var adapt = function (callback) {
+            view.adapt(callback);
         }
 
-        app.init(render, options);
+        app.init(adapt, options);
     }
 
     var createVnode = function (node) {
@@ -17265,7 +17265,7 @@ var convertHTML = require('html-to-vdom')({
         return new VNode(node.tagName, node.props, vchildren);
     }
 
-    var getNode = function (el, app, data, options, status, render, createMold) {
+    var getNode = function (el, app, data, options, status, adapt, createRender) {
         var node = {
             tagName: "",
             nodeType: "",
@@ -17301,26 +17301,27 @@ var convertHTML = require('html-to-vdom')({
                     } else if (name.length > eventName.length && name.substr(0, eventName.length) == eventName) {
                         var event = name.replace(eventName, "");
 
-                        var createEvent = function (app, eventName, data, options, render) {
+                        var createEvent = function (app, eventName, data, options, adapt) {
                             return function (event) {
-                                app[eventName](render, event, data, options);
+                                app[eventName](adapt, event, data, options);
                             }
                         }
 
-                        node.props[event] = createEvent(app, value, data, options, render);
+                        node.props[event] = createEvent(app, value, data, options, adapt);
                     } else if (name == "data-hook") {
-                        var Hook = function (app, data, hookName, options) {
+                        var Hook = function (app, adapt, data, hookName, options) {
                             this.app = app;
+                            this.adapt = adapt;
                             this.data = data;
                             this.hookName = hookName;
                             this.options = options;
                         }
 
                         Hook.prototype.hook = function (el, propertyName, previousValue) {
-                            this.app[this.hookName](el, this.data, this.options)
+                            this.app[this.hookName](el, this.adapt, this.data, this.options)
                         }
 
-                        node.props[value] = new Hook(app, data, value, options);
+                        node.props[value] = new Hook(app, adapt, data, value, options);
                     } else {
                         node.props[name] = value;
                         attributes.push({ name: name, value: value });                        
@@ -17352,7 +17353,7 @@ var convertHTML = require('html-to-vdom')({
                 list.forEach(function (item) {
                     var cloneEl = el.cloneNode(true);
                     cloneEl.removeAttribute("data-each");
-                    var child = getNode(cloneEl, app, item, options, status, render, createMold);
+                    var child = getNode(cloneEl, app, item, options, status, adapt, createRender);
                     children.push(child);
                 });
 
@@ -17363,13 +17364,13 @@ var convertHTML = require('html-to-vdom')({
                 if (component) {
                     status.componentCount++;
 
-                    var mold = createMold(el, app, options, status, node);
+                    var render = createRender(el, app, options, status, node);
 
-                    app[component](components, mold, data, options);
+                    app[component](components, render, data, options);
 
                 } else {
                     for (var i = 0; i < el.childNodes.length; i++) {
-                        var child = getNode(el.childNodes[i], app, data, options, status, render, createMold);
+                        var child = getNode(el.childNodes[i], app, data, options, status, adapt, createRender);
 
                         if (child instanceof Array) {
                             child.forEach(function (item) {
@@ -17386,10 +17387,10 @@ var convertHTML = require('html-to-vdom')({
         return node;
     }
 
-    var viact = {
-        mold: function (el, app, options) {
+    var figuram = {
+        render: function (el, app, options) {
             var view = new View(el, app, options);
-            view.mold(app, options);
+            view.render(app, options);
         },
         components: components
     }
@@ -17398,11 +17399,11 @@ var convertHTML = require('html-to-vdom')({
     if ( typeof define === 'function' && define.amd ) {
         // AMD
         define( function() {
-            return viact;
+            return figuram;
         });
     } else {
         // browser global
-        window.viact = viact;
+        window.figuram = figuram;
     }
 })( window );
 },{"html-to-vdom":29,"mustache":73,"q":74,"virtual-dom/create-element":75,"virtual-dom/diff":76,"virtual-dom/h":77,"virtual-dom/patch":85,"virtual-dom/vnode/vnode":103,"virtual-dom/vnode/vtext":105}]},{},[108]);

@@ -15,9 +15,10 @@ namespace DomainShell.Tests.Web.Models.Person
             _personTable.Columns.Add("id", typeof(int));
             _personTable.Columns.Add("name", typeof(string));
 
-            _personTable.Rows.Add(new object[] { 1, "name_1" });
-            _personTable.Rows.Add(new object[] { 2, "name_2" });
-            _personTable.Rows.Add(new object[] { 3, "name_3" });
+            for (int i = 1; i < 100; i++)
+            {
+                _personTable.Rows.Add(new object[] { i.ToString(), "name_" + i.ToString() });
+            }   
 
             _personTable.AcceptChanges();
         }

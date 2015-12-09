@@ -1,4 +1,4 @@
-﻿define([], function (vmustache) {
+﻿define([], function () {
     var detailApp = {
         template: "",
         data: {
@@ -8,8 +8,10 @@
             displayForAdd: "",
             displayForUpdate: ""
         },
-        detailHook: function (el) {
-            this.modal = function (args) {
+        detailHook: function (el, adapt) {
+            var self = this;
+
+            self.modal = function (args) {                
                 if (args) {
                     $(el).modal(args);
                 } else {
@@ -17,10 +19,10 @@
                 }
             }
         },        
-        change: function (render, event, item) {
-            item.name = event.target.value;
+        change: function (adapt, event, item) {           
+            item.name = event.target.value;            
         },
-        add: function (render, event, item) {
+        add: function (adapt, event, item) {
             var self = this;
             var createCommand = item;
 
@@ -31,7 +33,7 @@
             }).done(function (data) {
                 if (data) {
                     self.modal('hide');
-                    self.list(render);
+                    self.list(adapt);
                 } else {
                     alert("error!");
                 }
@@ -39,7 +41,7 @@
                 alert("error!");
             });
         },
-        update: function (render, event, item) {
+        update: function (adapt, event, item) {
             var self = this;
             var personQuery = { id: item.id };
 
@@ -52,7 +54,7 @@
             }).done(function (data) {
                 if (data) {
                     self.modal('hide');
-                    self.list(render);
+                    self.list(adapt);
                 } else {
                     alert("error!");
                 }
@@ -60,7 +62,7 @@
                 alert("error!");
             });
         },
-        remove: function (render, event, item) {
+        remove: function (adapt, event, item) {
             var self = this;
             var removeCommand = item;
 
@@ -71,7 +73,7 @@
             }).done(function (data) {
                 if (data) {
                     self.modal('hide');
-                    self.list(render);
+                    self.list(adapt);
                 } else {
                     alert("error!");
                 }
@@ -79,14 +81,18 @@
                 alert("error!");
             });
         },
-        init: function (render, options) {
+        close: function (adapt) {
             var self = this;
-            self.data.id = options.data.id;
-            self.data.visible = options.data.visible;
-            self.list = options.list;
+            self.data.visible = false;
+            adapt();
+        },
+        init: function (adapt, options) {
+            var self = this;
+            self.data = options.data;
+            self.list = options.list;            
 
             if (self.data.visible) {
-                $.get("/scripts/home/detail.html").done(function (template) {
+                $.get("/scripts/home/detail.html?bust=v3").done(function (template) {
                     self.template = template;
 
                     if (self.data.id == "") {
@@ -96,7 +102,7 @@
                         self.data.displayForAdd = "inline";
                         self.data.displayForUpdate = "none";
 
-                        render(function () {
+                        adapt(function (el) {                            
                             self.modal();
                         });
                     } else {
@@ -113,7 +119,7 @@
                             self.data.displayForAdd = "none";
                             self.data.displayForUpdate = "inline";
 
-                            render(function () {
+                            adapt(function () {
                                 self.modal();
                             });
 
@@ -123,7 +129,7 @@
                     }
                 });
             } else {
-                render();
+                adapt();
             }
         }
     }

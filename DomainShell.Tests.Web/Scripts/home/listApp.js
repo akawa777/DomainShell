@@ -6,20 +6,20 @@
             list: [],
             visible: false
         },
-        create: function (render, event, item) {
+        create: function (adapt, event, item) {
             item.id = "";            
             item.visible = true;
 
-            render();
+            adapt();
         },
-        detail: function (render, event, item) {
+        detail: function (adapt, event, item) {
             var self = this;
             self.data.id = item.id;
             self.data.visible = true;
 
-            render();
+            adapt();
         },
-        list: function (render) {
+        list: function (adapt) {
             var self = this;
 
             $.ajax({
@@ -40,26 +40,26 @@
                 self.data.id = "";
                 self.data.visible = false;
 
-                render();
+                adapt();
             }).fail(function (data) {
                 alert("error!");
             });
         },
-        detailApp: function(components, mold, item, options) {            
+        detailApp: function(components, render, item, options) {            
             var self = this;
 
-            var list = function (render) {
-                self.list(render);
+            var list = function (adapt) {
+                self.list(adapt);
             }
 
-            mold(detailApp, { data: { id: self.data.id, visible: self.data.visible }, list: list });
+            render(detailApp, { data: self.data, list: list });
         },
-        init: function (render) {
+        init: function (adapt) {
             var self = this;
 
-            $.get("/scripts/home/list.html").done(function (template) {
+            $.get("/scripts/home/list.html?bust=v2").done(function (template) {
                 self.template = template;
-                self.list(render);
+                self.list(adapt);
             });            
         }
     }    
