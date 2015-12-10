@@ -173,7 +173,8 @@
     <Compile Include="Models\Person\Event.cs" />
     <Compile Include="Models\Person\Query.cs" />
     <Compile Include="Models\Person\Repository.cs" />
-    <Compile Include="ServiceLocators\ServiceLocator.cs" />
+    <Compile Include="ServiceLocators\ServiceLocatorProvider.cs" />
+    <Compile Include="ServiceLocators\IServiceLocator.cs" />
     <Compile Include="ServiceLocators\HomeServiceLocator.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">

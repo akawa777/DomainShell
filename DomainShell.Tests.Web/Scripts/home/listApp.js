@@ -1,43 +1,61 @@
 ﻿define(["home/detailApp"], function (detailApp) {
-    var listApp = {
+    var listApp = {        
         template: "",
         data: {
             id: "",            
-            list: [],
-            visible: false
+            list: []
+        },
+        componetns: {
+            detailApp: detailApp
+        },
+        modal: function(args) {
+
+        },
+        detailHook: function (el, adapt) {
+            var self = this;
+
+            self.modal = function (args) {
+                if (args) {
+                    $(el).modal(args);
+                } else {
+                    $(el).modal(args);
+                }
+            }
         },
         create: function (adapt, event, item) {
-            item.id = "";            
-            item.visible = true;
-            item.isChange = true;
+            item.id = "";
 
-            adapt();
+            var self = this;
+            adapt(function () {
+                self.modal();
+            });
         },
         detail: function (adapt, event, item) {
             var self = this;
-            self.data.id = item.id;
-            self.data.visible = true;
-            self.data.isChange = true;
+            self.data.id = item.id;            
 
-            adapt();
+            var self = this;
+            adapt(function () {
+                self.modal();
+            });
         },
         list: function (adapt) {
             var self = this;
+
+            self.modal("hide");
 
             $.ajax({
                 url: "/home/list",
                 method: "post"
             }).done(function (rtnData) {
-                var list = [];
+                self.data.list = [];
 
                 rtnData.forEach(function (item) {
-                    list.push({
+                    self.data.list.push({
                         id: item.Id,
                         name: item.Name
                     });
                 });
-
-                self.data.list = list;
 
                 self.data.id = "";
                 self.data.visible = false;                
@@ -47,14 +65,14 @@
                 alert("error!");
             });
         },
-        detailApp: function(components, render, item, options) {            
+        detailApp: function(render, item, options) {            
             var self = this;
 
             var list = function (adapt) {
                 self.list(adapt);
             }
 
-            render(detailApp, { data: self.data, list: list });
+            render(self.componetns.detailApp, { data: self.data, list: list });
         },
         init: function (adapt) {
             var self = this;

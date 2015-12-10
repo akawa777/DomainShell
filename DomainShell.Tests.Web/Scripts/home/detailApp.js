@@ -3,8 +3,7 @@
         template: "",
         data: {
             id: "",
-            name: "",            
-            visible: false,
+            name: "",
             displayForAdd: "",
             displayForUpdate: ""
         },
@@ -19,62 +18,29 @@
                 }
             }
         },        
-        keyup: function (adapt, event, item) {           
-            item.name = event.target.value;
-            item.isChange = false;
-            adapt();
+        change: function (adapt, event, item) {           
+            item.name = event.target.value;                        
         },
         add: function (adapt, event, item) {
-            var self = this;
-            var createCommand = item;
-
-            $.ajax({
-                url: "/home/create",
-                method: "post",
-                data: createCommand,
-            }).done(function (data) {
-                if (data) {
-                    self.modal('hide');
-                    self.list(adapt);
-                } else {
-                    alert("error!");
-                }
-            }).fail(function (data) {
-                alert("error!");
-            });
+            this.save(adapt, item, "create");
         },
         update: function (adapt, event, item) {
-            var self = this;
-            var personQuery = { id: item.id };
-
-            var updateCommand = item;
-
-            $.ajax({
-                url: "/home/update",
-                method: "post",
-                data: updateCommand,
-            }).done(function (data) {
-                if (data) {
-                    self.modal('hide');
-                    self.list(adapt);
-                } else {
-                    alert("error!");
-                }
-            }).fail(function (data) {
-                alert("error!");
-            });
+            this.save(adapt, item, "update");
         },
         remove: function (adapt, event, item) {
+            this.save(adapt, item, "remove");
+        },
+        save: function (adapt, item, action) {
             var self = this;
-            var removeCommand = item;
+
+            var command = item;
 
             $.ajax({
-                url: "/home/remove",
+                url: "/home/" + action,
                 method: "post",
-                data: removeCommand,
+                data: command,
             }).done(function (data) {
-                if (data) {
-                    self.modal('hide');
+                if (data) {                    
                     self.list(adapt);
                 } else {
                     alert("error!");
@@ -86,61 +52,50 @@
         show: function (adapt) {
             var self = this;
 
-            if (self.data.isChange) {
-                if (self.data.id == "") {
-                    self.data.id = "";
-                    self.data.name = "";
+            if (self.data.id == "") {
+                self.data.id = "";
+                self.data.name = "";
 
-                    self.data.displayForAdd = "inline";
-                    self.data.displayForUpdate = "none";
+                self.data.displayForAdd = "inline";
+                self.data.displayForUpdate = "none";
 
-                    adapt(function (el) {
-                        self.modal();
-                    });
-                } else {
-                    var personQuery = { id: self.data.id };
-
-                    $.ajax({
-                        url: "/home/load",
-                        method: "post",
-                        data: personQuery,
-                    }).done(function (data) {
-                        self.data.id = data.Id;
-                        self.data.name = data.Name;
-
-                        self.data.displayForAdd = "none";
-                        self.data.displayForUpdate = "inline";
-
-                        adapt(function () {
-                            self.modal();
-                        });
-
-                    }).fail(function (data) {
-                        alert("error!");
-                    });
-                }
-            } else {
                 adapt();
+            } else {
+                var personQuery = { id: self.data.id };
 
+                $.ajax({
+                    url: "/home/load",
+                    method: "post",
+                    data: personQuery,
+                }).done(function (data) {
+                    self.data.id = data.Id;
+                    self.data.name = data.Name;
+
+                    self.data.displayForAdd = "none";
+                    self.data.displayForUpdate = "inline";
+
+                    adapt();
+
+                }).fail(function (data) {
+                    alert("error!");
+                });
             }
+        },
+        list: function(adapt) {
+
         },
         init: function (adapt, options) {
             var self = this;
             self.data = options.data;
-            self.list = options.list;            
+            self.list = options.list;
 
-            if (self.data.visible) {
-                if (self.template == "") {
-                    $.get("/scripts/home/detail.html?bust=v3").done(function (template) {
-                        self.template = template;
-                        self.show(adapt);
-                    });
-                } else {
+            if (self.template == "") {
+                $.get("/scripts/home/detail.html?bust=v2").done(function (template) {
+                    self.template = template;
                     self.show(adapt);
-                }
-                
+                });
             } else {
-                adapt();
+                self.show(adapt);
             }
         }
     }

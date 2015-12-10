@@ -8,11 +8,6 @@ using System.Reflection;
 
 namespace DomainShell.Tests.Web.ServiceLocators
 {
-    public interface IServiceLocator
-    {
-        
-    }
-
     public class ServiceLocatorProvider
     {
         public void TargetAssemblies(params Assembly[] assemblies)

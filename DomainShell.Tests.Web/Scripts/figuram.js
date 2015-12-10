@@ -17125,12 +17125,12 @@ var convertHTML = require('html-to-vdom')({
 
                 if (self.status.rootView.app.rerender) {
                     var adapt = function () {
-                        self.status.rootView.adapt();
+                        self.status.rootView.adapt(callback);
                     }
 
                     self.status.rootView.app.rerender(adapt, self.status.rootView.options);
                 } else {
-                    self.status.rootView.adapt();
+                    self.status.rootView.adapt(callback);
                 }
                 
                 return;
@@ -17154,8 +17154,8 @@ var convertHTML = require('html-to-vdom')({
                 el.removeAttribute("data-component");
             }
 
-            var adapt = function () {
-                self.adapt();
+            var adapt = function (callback) {
+                self.adapt(callback);
             }
 
             var createRender = function (el, app, options, status, node) {
@@ -17359,7 +17359,7 @@ var convertHTML = require('html-to-vdom')({
 
                     var render = createRender(el, app, options, status, node);
 
-                    app[component](components, render, data, options);
+                    app[component](render, data, options);
 
                 } else {
                     for (var i = 0; i < el.childNodes.length; i++) {
@@ -17384,8 +17384,7 @@ var convertHTML = require('html-to-vdom')({
         render: function (el, app, options) {
             var view = new View(el, app, options);
             view.render(app, options);
-        },
-        components: components
+        }
     }
 
     // transport
