@@ -5,6 +5,7 @@ using System.Text;
 using System.Data;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
+using System.Linq.Expressions;
 
 namespace DomainShell.Tests.Web.Models.Person
 { 
@@ -12,27 +13,54 @@ namespace DomainShell.Tests.Web.Models.Person
     {
         static DataStore()
         {
-            _personTable.Columns.Add("id", typeof(int));
-            _personTable.Columns.Add("name", typeof(string));
-
-            for (int i = 1; i < 100; i++)
-            {
-                _personTable.Rows.Add(new object[] { i.ToString(), "name_" + i.ToString() });
-            }   
-
-            _personTable.AcceptChanges();
+            PersonTable = new PersonTable();
         }
 
-        private static DataTable _personTable = new DataTable();
+        public static PersonTable PersonTable { get; set; }
+    }
 
-        public static DataTable PersonTable { get { return _personTable; } }
+    public abstract class Table
+    {        
+        public abstract DataTable Data { get;set;}
+        public abstract int GetNewId();
+    }
+
+    public class PersonTable : Table
+    {
+        public PersonTable()
+        {
+            Data = new DataTable();
+
+            Data.Columns.Add("id", typeof(int));
+            Data.Columns.Add("name", typeof(string));
+
+            for (int i = 1; i < 3; i++)
+            {
+                Data.Rows.Add(new object[] { i.ToString(), "name_" + i.ToString() });
+            }
+
+            Data.AcceptChanges();
+
+            _maxId = Data.Rows.Count;
+        }
+
+        public override DataTable Data { get; set; }
+
+        private static int _maxId;
+
+        public override int GetNewId()
+        {
+            var newId = _maxId++ + 1;
+
+            return newId;
+        }
     }
 
     public class PersonReadRepository
     {
         public Person Load(int id)
         {
-            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", id));
+            DataRow[] rows = DataStore.PersonTable.Data.Select(string.Format("id = {0}", id));
 
             if (rows.Length == 0)
             {
@@ -49,14 +77,7 @@ namespace DomainShell.Tests.Web.Models.Person
 
         public int GetNewId()
         {
-            if (DataStore.PersonTable.Rows.Count == 0)
-            {
-                return 1;
-            }
-
-            DataRow[] rows = DataStore.PersonTable.Select("id = max(id)");
-
-            return rows[0].Field<int>("id") + 1;
+            return DataStore.PersonTable.GetNewId();
         }
     }
 
@@ -64,25 +85,25 @@ namespace DomainShell.Tests.Web.Models.Person
     {
         public void Add(Person person)
         {
-            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+            DataRow[] rows = DataStore.PersonTable.Data.Select(string.Format("id = {0}", person.Id));
 
             if (rows.Length > 0)
             {
                 throw new Exception("not exist person");
             }
 
-            DataRow row = DataStore.PersonTable.NewRow();
+            DataRow row = DataStore.PersonTable.Data.NewRow();
             row["id"] = person.Id;
             row["name"] = person.Name;
 
-            DataStore.PersonTable.Rows.Add(row);
+            DataStore.PersonTable.Data.Rows.Add(row);
 
-            DataStore.PersonTable.AcceptChanges();
+            DataStore.PersonTable.Data.AcceptChanges();
         }
 
         public void Update(Person person)
         {
-            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+            DataRow[] rows = DataStore.PersonTable.Data.Select(string.Format("id = {0}", person.Id));
 
             if (rows.Length == 0)
             {
@@ -91,21 +112,21 @@ namespace DomainShell.Tests.Web.Models.Person
 
             rows[0]["name"] = person.Name;
 
-            DataStore.PersonTable.AcceptChanges();
+            DataStore.PersonTable.Data.AcceptChanges();
         }
 
         public void Delete(Person person)
         {
-            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+            DataRow[] rows = DataStore.PersonTable.Data.Select(string.Format("id = {0}", person.Id));
 
             if (rows.Length == 0)
             {
                 throw new Exception("not exist person");
             }
 
-            DataStore.PersonTable.Rows.Remove(rows[0]);
+            DataStore.PersonTable.Data.Rows.Remove(rows[0]);
 
-            DataStore.PersonTable.AcceptChanges();
+            DataStore.PersonTable.Data.AcceptChanges();
         }
     }
 
@@ -113,7 +134,7 @@ namespace DomainShell.Tests.Web.Models.Person
     {
         public PersonData Load(int id)
         {
-            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", id));
+            DataRow[] rows = DataStore.PersonTable.Data.Select(string.Format("id = {0}", id));
 
             if (rows.Length == 0)
             {
@@ -132,7 +153,7 @@ namespace DomainShell.Tests.Web.Models.Person
         {
             List<PersonData> persons = new List<PersonData>();
 
-            foreach (DataRow row in DataStore.PersonTable.Rows)
+            foreach (DataRow row in DataStore.PersonTable.Data.Rows)
             {
                 persons.Add(new PersonData { Id = row.Field<int>("id"), Name = row.Field<string>("name") });
             }

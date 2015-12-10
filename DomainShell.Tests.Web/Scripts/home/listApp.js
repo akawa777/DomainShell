@@ -9,6 +9,7 @@
         create: function (adapt, event, item) {
             item.id = "";            
             item.visible = true;
+            item.isChange = true;
 
             adapt();
         },
@@ -16,6 +17,7 @@
             var self = this;
             self.data.id = item.id;
             self.data.visible = true;
+            self.data.isChange = true;
 
             adapt();
         },
@@ -38,7 +40,7 @@
                 self.data.list = list;
 
                 self.data.id = "";
-                self.data.visible = false;
+                self.data.visible = false;                
 
                 adapt();
             }).fail(function (data) {

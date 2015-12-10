@@ -19,8 +19,10 @@
                 }
             }
         },        
-        change: function (adapt, event, item) {           
-            item.name = event.target.value;            
+        keyup: function (adapt, event, item) {           
+            item.name = event.target.value;
+            item.isChange = false;
+            adapt();
         },
         add: function (adapt, event, item) {
             var self = this;
@@ -81,10 +83,46 @@
                 alert("error!");
             });
         },
-        close: function (adapt) {
+        show: function (adapt) {
             var self = this;
-            self.data.visible = false;
-            adapt();
+
+            if (self.data.isChange) {
+                if (self.data.id == "") {
+                    self.data.id = "";
+                    self.data.name = "";
+
+                    self.data.displayForAdd = "inline";
+                    self.data.displayForUpdate = "none";
+
+                    adapt(function (el) {
+                        self.modal();
+                    });
+                } else {
+                    var personQuery = { id: self.data.id };
+
+                    $.ajax({
+                        url: "/home/load",
+                        method: "post",
+                        data: personQuery,
+                    }).done(function (data) {
+                        self.data.id = data.Id;
+                        self.data.name = data.Name;
+
+                        self.data.displayForAdd = "none";
+                        self.data.displayForUpdate = "inline";
+
+                        adapt(function () {
+                            self.modal();
+                        });
+
+                    }).fail(function (data) {
+                        alert("error!");
+                    });
+                }
+            } else {
+                adapt();
+
+            }
         },
         init: function (adapt, options) {
             var self = this;
@@ -92,42 +130,15 @@
             self.list = options.list;            
 
             if (self.data.visible) {
-                $.get("/scripts/home/detail.html?bust=v3").done(function (template) {
-                    self.template = template;
-
-                    if (self.data.id == "") {
-                        self.data.id = "";
-                        self.data.name = "";
-
-                        self.data.displayForAdd = "inline";
-                        self.data.displayForUpdate = "none";
-
-                        adapt(function (el) {                            
-                            self.modal();
-                        });
-                    } else {
-                        var personQuery = { id: self.data.id };
-
-                        $.ajax({
-                            url: "/home/load",
-                            method: "post",
-                            data: personQuery,
-                        }).done(function (data) {
-                            self.data.id = data.Id;
-                            self.data.name = data.Name;
-
-                            self.data.displayForAdd = "none";
-                            self.data.displayForUpdate = "inline";
-
-                            adapt(function () {
-                                self.modal();
-                            });
-
-                        }).fail(function (data) {
-                            alert("error!");
-                        });
-                    }
-                });
+                if (self.template == "") {
+                    $.get("/scripts/home/detail.html?bust=v3").done(function (template) {
+                        self.template = template;
+                        self.show(adapt);
+                    });
+                } else {
+                    self.show(adapt);
+                }
+                
             } else {
                 adapt();
             }

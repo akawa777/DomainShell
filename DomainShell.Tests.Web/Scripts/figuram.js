@@ -17250,7 +17250,8 @@ var convertHTML = require('html-to-vdom')({
 
     var createVnode = function (node) {
         if (node.nodeType == Node.TEXT_NODE) {
-            return new VText(node.text);
+            //return new VText(node.text);
+            return node.text;
         }
 
         var vchildren = [];
@@ -17262,7 +17263,8 @@ var convertHTML = require('html-to-vdom')({
             });
         }
 
-        return new VNode(node.tagName, node.props, vchildren);
+        //return new VNode(node.tagName, node.props, vchildren);
+        return h(node.tagName, node.props, vchildren);
     }
 
     var getNode = function (el, app, data, options, status, adapt, createRender) {
@@ -17273,6 +17275,8 @@ var convertHTML = require('html-to-vdom')({
             children: [],
             props: {}
         }
+
+        node.props.attributes = {};
 
         if (el.nodeType == Node.TEXT_NODE) {
             node.nodeType = Node.TEXT_NODE;
@@ -17292,12 +17296,16 @@ var convertHTML = require('html-to-vdom')({
 
                     var eventName = "data-event-";
 
-                    if (name == "class") {
+                    if (name == "id") {
+                        node.props[name] = value;
+                    } else if (name == "class") {
                         name = "className";
                         node.props[name] = value;
                     } else if (name == "style") {
                         var styleObj = CSSJSON.toJSON(value);
                         node.props[name] = styleObj.attributes;
+                    } else if (name == "value") {
+                        node.props[name] = value;
                     } else if (name.length > eventName.length && name.substr(0, eventName.length) == eventName) {
                         var event = name.replace(eventName, "");
 
@@ -17323,24 +17331,9 @@ var convertHTML = require('html-to-vdom')({
 
                         node.props[value] = new Hook(app, adapt, data, value, options);
                     } else {
-                        node.props[name] = value;
-                        attributes.push({ name: name, value: value });                        
+                        node.props.attributes[name] = value;
                     }
                 }
-
-                var Hook = function (attributes) {                    
-                    this.attributes = attributes;                    
-                }
-
-                Hook.prototype.hook = function (el, propertyName, previousValue) {
-                    this.attributes.forEach(function (item) {
-                        if (!el.getAttribute(item.name)) {
-                            el.setAttribute(item.name, item.value);
-                        }
-                    }); 
-                }
-
-                node.props["setAttribute"] = new Hook(attributes);
             }
 
             var each = el.attributes ? el.getAttribute("data-each") : "";
