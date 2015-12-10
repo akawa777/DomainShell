@@ -172,6 +172,7 @@
     <Compile Include="Models\Person\Domain.cs" />
     <Compile Include="Models\Person\Event.cs" />
     <Compile Include="Models\Person\Query.cs" />
+    <Compile Include="Models\Person\DataStore.cs" />
     <Compile Include="Models\Person\Repository.cs" />
     <Compile Include="ServiceLocators\ServiceLocatorProvider.cs" />
     <Compile Include="ServiceLocators\IServiceLocator.cs" />
