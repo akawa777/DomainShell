@@ -17266,6 +17266,16 @@ var convertHTML = require('html-to-vdom')({
         return h(node.tagName, node.props, vchildren);
     }
 
+    var mustacheRender = function (template, data) {
+        var textTemplate = template.replace(/{{\s*[\w\.]+\s*}}/g, function (x) {
+            return "{{&" + x.match(/[\w\.]+/)[0] + "}}";
+        });
+
+        var text = Mustache.render(textTemplate, data);
+
+        return text;
+    }
+
     var getNode = function (el, component, data, options, status, adapt, createRender) {
         var node = {
             tagName: "",
@@ -17279,7 +17289,7 @@ var convertHTML = require('html-to-vdom')({
 
         if (el.nodeType == Node.TEXT_NODE) {
             node.nodeType = Node.TEXT_NODE;
-            var text = Mustache.render(el.textContent, data)
+            var text = mustacheRender(el.textContent, data);
             node.text = text;
         } else if (el.nodeType == Node.COMMENT_NODE) {
             node.nodeType = Node.TEXT_NODE;            
@@ -17290,8 +17300,8 @@ var convertHTML = require('html-to-vdom')({
             if (el.attributes) {
                 var attributes = [];
                 for (var i = 0; i < el.attributes.length; i++) {
-                    var name = Mustache.render(el.attributes[i].nodeName, data);
-                    var value = Mustache.render(el.attributes[i].nodeValue, data);
+                    var name = mustacheRender(el.attributes[i].nodeName, data);
+                    var value = mustacheRender(el.attributes[i].nodeValue, data);
 
                     var eventName = "data-event-";
 
