@@ -196,10 +196,10 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
-    <Content Include="Scripts\home\detailApp.js" />
-    <Content Include="Scripts\home\listApp.js" />
-    <Content Include="Scripts\home\list.html" />
-    <Content Include="Scripts\home\detail.html" />
+    <Content Include="Scripts\home\components\detail.js" />
+    <Content Include="Scripts\home\components\list.js" />
+    <Content Include="Scripts\home\templates\list.html" />
+    <Content Include="Scripts\home\templates\detail.html" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />

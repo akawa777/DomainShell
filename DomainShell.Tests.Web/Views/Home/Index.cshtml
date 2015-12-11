@@ -10,9 +10,9 @@
             baseUrl: "/scripts",
         });
 
-        require(["figuram", "home/listApp"], function (figuram, app) {
-            var el = document.getElementById("sample");            
-            figuram.render(el, app);
+        require(["figuram", "home/components/list"], function (figuram, list) {
+            var el = document.getElementById("app");
+            figuram.render(el, list);
         });
 </script>
 }
@@ -24,6 +24,6 @@
 </div>
 <div class="row">
     <div class="col-md-12">                                
-        <div id="sample"></div>        
+        <div id="app"></div>        
     </div>    
 </div>

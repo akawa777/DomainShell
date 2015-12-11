@@ -1,12 +1,15 @@
-﻿define(["home/detailApp"], function (detailApp) {
+﻿define(["home/components/detail"], function (detail) {
     var listApp = {        
         template: "",
         data: {
-            id: "",            
-            list: []
+            list: [],
+            detail: {
+                id: "",
+                name: ""
+            }
         },
         componetns: {
-            detailApp: detailApp
+            detail: detail
         },
         modal: function(args) {
 
@@ -22,24 +25,24 @@
                 }
             }
         },
-        create: function (adapt, event, item) {
-            item.id = "";
+        clickCreate: function (adapt, event, item) {
+            var self = this;
+            self.data.detail.id = "";
+
+            adapt(function () {
+                self.modal();
+            });
+        },
+        clickDetail: function (adapt, event, item) {
+            var self = this;
+            self.data.detail.id = item.id;
 
             var self = this;
             adapt(function () {
                 self.modal();
             });
         },
-        detail: function (adapt, event, item) {
-            var self = this;
-            self.data.id = item.id;            
-
-            var self = this;
-            adapt(function () {
-                self.modal();
-            });
-        },
-        list: function (adapt) {
+        loadList: function (adapt) {
             var self = this;
 
             self.modal("hide");
@@ -57,29 +60,28 @@
                     });
                 });
 
-                self.data.id = "";
-                self.data.visible = false;                
+                self.data.detail.id = "";                
 
                 adapt();
             }).fail(function (data) {
                 alert("error!");
             });
         },
-        detailApp: function(render, item, options) {            
+        detailComponent: function(render, item, options) {            
             var self = this;
 
-            var list = function (adapt) {
-                self.list(adapt);
+            var loadList = function (adapt) {
+                self.loadList(adapt);
             }
 
-            render(self.componetns.detailApp, { data: self.data, list: list });
+            render(self.componetns.detail, { data: self.data.detail, loadList: loadList });
         },
         init: function (adapt) {
             var self = this;
 
-            $.get("/scripts/home/list.html?bust=v2").done(function (template) {
+            $.get("/scripts/home/templates/list.html?bust=v2").done(function (template) {
                 self.template = template;
-                self.list(adapt);
+                self.loadList(adapt);
             });            
         }
     }    

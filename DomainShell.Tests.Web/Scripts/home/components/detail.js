@@ -7,30 +7,19 @@
             displayForAdd: "",
             displayForUpdate: ""
         },
-        detailHook: function (el, adapt) {
-            var self = this;
-
-            self.modal = function (args) {                
-                if (args) {
-                    $(el).modal(args);
-                } else {
-                    $(el).modal(args);
-                }
-            }
-        },        
-        change: function (adapt, event, item) {           
+        change: function (adapt, event, item) {
             item.name = event.target.value;                        
         },
-        add: function (adapt, event, item) {
-            this.save(adapt, item, "create");
+        add: function (adapt, event, item, options) {
+            this.save(adapt, item, "create", options);
         },
-        update: function (adapt, event, item) {
-            this.save(adapt, item, "update");
+        update: function (adapt, event, item, options) {
+            this.save(adapt, item, "update", options);
         },
-        remove: function (adapt, event, item) {
-            this.save(adapt, item, "remove");
+        remove: function (adapt, event, item, options) {
+            this.save(adapt, item, "remove", options);
         },
-        save: function (adapt, item, action) {
+        save: function (adapt, item, action, options) {
             var self = this;
 
             var command = item;
@@ -41,7 +30,7 @@
                 data: command,
             }).done(function (data) {
                 if (data) {                    
-                    self.list(adapt);
+                    options.loadList(adapt);
                 } else {
                     alert("error!");
                 }
@@ -81,16 +70,12 @@
                 });
             }
         },
-        list: function(adapt) {
-
-        },
         init: function (adapt, options) {
             var self = this;
-            self.data = options.data;
-            self.list = options.list;
+            self.data = options.data;            
 
             if (self.template == "") {
-                $.get("/scripts/home/detail.html?bust=v2").done(function (template) {
+                $.get("/scripts/home/templates/detail.html?bust=v2").done(function (template) {
                     self.template = template;
                     self.show(adapt);
                 });
