@@ -26,8 +26,13 @@ namespace DomainShell.Tests.Web
             var container = new Container();
             container.Options.DefaultScopedLifestyle = new WebRequestLifestyle();
 
-            ServiceLocatorProvider serviceLocatorProvider = new ServiceLocatorProvider();            
-            serviceLocatorProvider.EachServiceLocatorTypes(type => container.Register(type));            
+            ServiceLocatorProvider serviceLocatorProvider = new ServiceLocatorProvider();
+            Type[] serviceLocatorTypes = serviceLocatorProvider.GetServiceLocatorTypes();
+
+            foreach (Type type in serviceLocatorTypes)
+            {
+                container.Register(type);
+            }
             
             container.RegisterMvcControllers(Assembly.GetExecutingAssembly());            
             container.RegisterMvcIntegratedFilterProvider();

@@ -10,24 +10,18 @@ namespace DomainShell.Tests.Web.ServiceLocators
 {
     public class ServiceLocatorProvider
     {
-        public void TargetAssemblies(params Assembly[] assemblies)
+        public ServiceLocatorProvider()
         {
-            _assemblies = assemblies.ToList();
+            Assemblies = new List<Assembly>();
+            Assemblies.Add(Assembly.GetExecutingAssembly());
         }
 
-        private List<Assembly> _assemblies = new List<Assembly>();
+        public List<Assembly> Assemblies { get; set; }
 
-        public void EachServiceLocatorTypes(Action<Type> action)
+        public Type[] GetServiceLocatorTypes()
         {
-            List<Assembly> assemblies = _assemblies.ToList();
-
-            Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            if (!assemblies.Any(x => x.FullName == executingAssembly.FullName))
-            {
-                assemblies.Add(executingAssembly);
-            }
-
-            foreach (Assembly assembly in assemblies)
+            List<Type> types = new List<Type>();
+            foreach (Assembly assembly in Assemblies)
             {
                 foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
                 {
@@ -36,10 +30,11 @@ namespace DomainShell.Tests.Web.ServiceLocators
                         continue;
                     }
 
-                    action(type);
+                    types.Add(type);
                 }
             }
-        }
 
+            return types.ToArray();
+        }
     }
 }

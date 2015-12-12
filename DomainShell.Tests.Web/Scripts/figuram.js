@@ -17252,6 +17252,8 @@ var convertHTML = require('html-to-vdom')({
     var createVnode = function (node) {
         if (node.nodeType == Node.TEXT_NODE) {            
             return node.text;
+        } else if (node.nodeType == Node.COMMENT_NODE) {
+            return "";
         }
 
         var vchildren = [];
@@ -17268,7 +17270,7 @@ var convertHTML = require('html-to-vdom')({
 
     var mustacheRender = function (template, data) {
         var textTemplate = template.replace(/{{\s*[\w\.]+\s*}}/g, function (x) {
-            return "{{&" + x.match(/[\w\.]+/)[0] + "}}";
+            return "{{{" + x.match(/[\w\.]+/)[0] + "}}}";
         });
 
         var text = Mustache.render(textTemplate, data);
@@ -17285,15 +17287,15 @@ var convertHTML = require('html-to-vdom')({
             props: {}
         }
 
+        node.nodeType = el.nodeType;
         node.props.attributes = {};
 
-        if (el.nodeType == Node.TEXT_NODE) {
+        if (node.nodeType == Node.TEXT_NODE) {
             node.nodeType = Node.TEXT_NODE;
             var text = mustacheRender(el.textContent, data);
             node.text = text;
-        } else if (el.nodeType == Node.COMMENT_NODE) {
-            node.nodeType = Node.TEXT_NODE;            
-            node.text = "";            
+        } else if (node.nodeType == Node.COMMENT_NODE) {
+            node.nodeType = Node.COMMENT_NODE;
         } else {
             node.tagName = el.tagName;            
 
@@ -17335,7 +17337,7 @@ var convertHTML = require('html-to-vdom')({
                         }
 
                         Hook.prototype.hook = function (el, propertyName, previousValue) {
-                            this.component[this.hookName](el, this.adapt, this.data, this.options)
+                            this.component[this.hookName](el, this.data, this.options)
                         }
 
                         node.props[value] = new Hook(component, adapt, data, value, options);

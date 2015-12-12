@@ -33,6 +33,7 @@ namespace DomainShell.Tests.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateInput(false)]
         public ActionResult Create(AddPersonCommand command)
         {
             bool success = false;
@@ -53,6 +54,7 @@ namespace DomainShell.Tests.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateInput(false)]
         public ActionResult Update(UpdatePersonCommand command)
         {
             bool success = false;

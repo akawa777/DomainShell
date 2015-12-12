@@ -1,11 +1,10 @@
-﻿define(["home/components/detail"], function (detail) {
+﻿define(["home/components/detail", "text!home/templates/list.html"], function (detail, template) {
     var listApp = {        
-        template: "",
+        template: template,
         data: {
             list: [],
             detail: {
-                id: "",
-                name: ""
+                id: ""
             }
         },
         componetns: {
@@ -14,7 +13,7 @@
         modal: function(args) {
 
         },
-        detailHook: function (el, adapt) {
+        detailHook: function (el) {
             var self = this;
 
             self.modal = function (args) {
@@ -28,6 +27,7 @@
         clickCreate: function (adapt, event, item) {
             var self = this;
             self.data.detail.id = "";
+            self.doRerenderDetail = true;
 
             adapt(function () {
                 self.modal();
@@ -36,12 +36,14 @@
         clickDetail: function (adapt, event, item) {
             var self = this;
             self.data.detail.id = item.id;
+            self.doRerenderDetail = true;
 
             var self = this;
             adapt(function () {
                 self.modal();
             });
         },
+        doRerenderDetail: true,
         loadList: function (adapt) {
             var self = this;
 
@@ -64,7 +66,7 @@
 
                 adapt();
             }).fail(function (data) {
-                alert("error!");
+                alert(err.responseText);
             });
         },
         detailComponent: function(render, item, options) {            
@@ -74,15 +76,17 @@
                 self.loadList(adapt);
             }
 
-            render(self.componetns.detail, { data: self.data.detail, loadList: loadList });
+            render(self.componetns.detail, { 
+                data: self.data.detail, 
+                loadList: loadList,
+                doRerender: self.doRerenderDetail
+            });
+
+            self.doRerenderDetail = false;
         },
         init: function (adapt) {
             var self = this;
-
-            $.get("/scripts/home/templates/list.html?bust=v2").done(function (template) {
-                self.template = template;
-                self.loadList(adapt);
-            });            
+            self.loadList(adapt);
         }
     }    
 
