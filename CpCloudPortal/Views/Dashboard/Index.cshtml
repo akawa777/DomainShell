@@ -1,0 +1,92 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+@section scripts{
+    <script src="~/scripts/require.js"></script>    
+    <script type="text/javascript">
+        require.config({
+            urlArgs: "bust=v3",
+            baseUrl: "/scripts",
+        });
+
+        require([
+            "figuram",
+            "dashboard/components/vmuschine",
+            "dashboard/components/health",
+            "dashboard/components/user",
+            "dashboard/components/system"
+        ], function (figuram, vmuschine, health, user, system) {
+            var maschineEl = document.getElementById("vmaschine");
+            figuram.render(maschineEl, vmuschine);
+
+            var healthEl = document.getElementById("health");
+            figuram.render(healthEl, health);
+
+            var userEl = document.getElementById("user");
+            figuram.render(userEl, user);
+
+            var systemEl = document.getElementById("system");
+            figuram.render(systemEl, system);            
+        });
+
+        
+    </script>
+}
+
+<div class="row">    
+    <div class="col-md-12">
+        <ol class="breadcrumb">
+            <li><a href="#">管理</a></li>
+            <li class="active">Dashboard</li>            
+        </ol>
+
+        <h1 class="page-header">Dashboard</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">仮想マシン利用状況</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="vmaschine"></div>                        
+                    </div>
+                </div>
+            </div>  
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">仮想マシン状態</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="health"></div>
+                    </div>
+                </div>
+            </div>           
+        </div>
+        <div class="row">            
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">稼動システム割合</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="system"></div>                                                
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">利用ユーザー推移</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="user"></div>
+                    </div>
+                </div>
+            </div>                                             
+         </div>        
+    </div>
+</div>

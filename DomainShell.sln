@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.CQRS", "DomainS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests.Web", "DomainShell.Tests.Web\DomainShell.Tests.Web.csproj", "{BFA472EF-0852-4822-94F4-C60CEE76A394}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CpCloudPortal", "CpCloudPortal\CpCloudPortal.csproj", "{5D97BA0F-5AA4-4211-A528-F63341A4C7FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFA472EF-0852-4822-94F4-C60CEE76A394}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D97BA0F-5AA4-4211-A528-F63341A4C7FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D97BA0F-5AA4-4211-A528-F63341A4C7FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D97BA0F-5AA4-4211-A528-F63341A4C7FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D97BA0F-5AA4-4211-A528-F63341A4C7FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3,17 +3,17 @@
 }
 
 @section scripts{            
-    <script src="~/scripts/require.js"></script> 
-    <script type="text/javascript">
-        require.config({
-            urlArgs: "bust=v3",
-            baseUrl: "/scripts",
-        });
+<script src="~/scripts/require.js"></script> 
+<script type="text/javascript">
+    require.config({
+        urlArgs: "bust=v3",
+        baseUrl: "/scripts",
+    });
 
-        require(["figuram", "home/components/list"], function (figuram, list) {
-            var el = document.getElementById("list");
-            figuram.render(el, list);
-        });
+    require(["figuram", "home/components/list"], function (figuram, list) {
+        var el = document.getElementById("list");
+        figuram.render(el, list);
+    });
 </script>
 }
 
