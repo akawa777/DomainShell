@@ -1,0 +1,24 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@section scripts{
+    <script src="~/scripts/require.js"></script>
+    <script type="text/javascript">
+        require.config({
+            urlArgs: "bust=v3",
+            baseUrl: "/scripts",
+        });
+
+        require(["figuram", "shared/components/notice"], function (figuram, notice) {
+            var el = document.getElementById("notice");
+            figuram.render(el, notice);
+        });
+    </script>
+}
+
+<div class="jumbotron">
+    <h2>キャンパスプラン クラウドサービス</h2>    
+</div>
+<div class="page-header"><h3>お知らせ</h3></div>
+<div id="notice" class="row"></div>
