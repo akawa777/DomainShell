@@ -4,26 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DomainShell.Event;
+using DomainShell;
 
-namespace DomainShell.Tests.Web
+namespace DomainShell.Tests
 {
-    public class PersonAddedEvent : IDomainEvent
+    public class PersonAddedEvent : DomainEvent
     {
-        public Person Person { get; set; }
+        
     }
 
-    public class PersonUpdatedEvent : IDomainEvent
+    public class PersonUpdatedEvent : DomainEvent
     {
-        public Person Person { get; set; }
+        
     }
 
-    public class PersonRemovedEvent : IDomainEvent<bool>
+    public class PersonRemovedEvent : DomainEvent<bool>
     {
-        public Person Person { get; set; }
+        
     }
 
-    public class PersonEventHandler : IDomainEventHandler<PersonAddedEvent>, IDomainEventHandler<PersonUpdatedEvent>, IDomainEventHandler<PersonRemovedEvent>
+    public class PersonEventHandler : IDomainEventHandler<PersonAddedEvent>, IDomainEventHandler<PersonUpdatedEvent>, IDomainEventHandler<PersonRemovedEvent, bool>
     {
         public PersonEventHandler(PersonWriteRepository repository)
         {
@@ -32,27 +32,21 @@ namespace DomainShell.Tests.Web
 
         private PersonWriteRepository _repository;
 
-        private EventResult _result = new EventResult();
-
-        public EventResult EventResult
+        public void Handle(PersonAddedEvent @event)
         {
-            get { return _result; }
+            _repository.Add(@event.AggregateRoot as Person);
         }
 
-        public void Handle(PersonAddedEvent domainEvent)
+        public void Handle(PersonUpdatedEvent @event)
         {
-            _repository.Add(domainEvent.Person);            
+            _repository.Update(@event.AggregateRoot as Person);
         }
 
-        public void Handle(PersonUpdatedEvent domainEvent)
+        public bool Handle(PersonRemovedEvent @event)
         {
-            _repository.Update(domainEvent.Person);            
-        }
+            _repository.Delete(@event.AggregateRoot as Person);
 
-        public void Handle(PersonRemovedEvent domainEvent)
-        {
-            _repository.Delete(domainEvent.Person);
-            _result.Set(domainEvent, true);
+            return true;
         }
     }
 }
