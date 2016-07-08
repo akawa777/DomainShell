@@ -29,12 +29,7 @@ namespace DomainShell.Tests.Web.Events
         IDomainEventHandler<PersonUpdatedEvent, bool>, 
         IDomainEventHandler<PersonRemovedEvent, bool>
     {
-        public PersonEventHandler(PersonWriteRepository repository)
-        {
-            _repository = repository;
-        }
-
-        private PersonWriteRepository _repository;
+        private PersonWriteRepository _repository = new PersonWriteRepository();
 
         public bool Handle(PersonAddedEvent @event)
         {

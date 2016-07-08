@@ -14,11 +14,9 @@ namespace DomainShell.Tests.Web.Infrastructure
     {
         public void Bundle(IDomainEventRegister register)
         {
-            PersonWriteRepository writeRepository = new PersonWriteRepository();
-
-            register.Set<PersonAddedEvent>(() => new PersonEventHandler(writeRepository));
-            register.Set<PersonUpdatedEvent>(() => new PersonEventHandler(writeRepository));
-            register.Set<PersonRemovedEvent>(() => new PersonEventHandler(writeRepository));
+            register.Set<PersonAddedEvent>(() => new PersonEventHandler());
+            register.Set<PersonUpdatedEvent>(() => new PersonEventHandler());
+            register.Set<PersonRemovedEvent>(() => new PersonEventHandler());
         }
     }
 
