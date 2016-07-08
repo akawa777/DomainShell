@@ -27,19 +27,19 @@ namespace DomainShell.Tests.Web.Controllers
             return View("Detail", person);
         }
 
-        public ActionResult Detail (string id)
-        {
-            Person person = _personReader.Get(id);
-
-            return View(person);
-        }
-
         public ActionResult Add(Person person)
         {
             bool result = person.Add();
 
             return Json(result);
         }
+
+        public ActionResult Detail (string id)
+        {
+            Person person = _personReader.Get(id);
+
+            return View(person);
+        }        
 
         public ActionResult Update(Person person)
         {
