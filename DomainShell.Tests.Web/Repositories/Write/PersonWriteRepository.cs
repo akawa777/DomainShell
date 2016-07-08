@@ -50,6 +50,21 @@ namespace DomainShell.Tests.Web.Repositories.Write
             }
         }
 
+        public void Update(Person person, Tran tran)
+        {
+            lock (o)
+            {
+                DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+
+                if (rows.Length == 0)
+                {
+                    throw new Exception("not exist person");
+                }
+
+                rows[0]["name"] = person.Name;
+            }
+        }
+
         public void Delete(Person person)
         {
             lock (o)

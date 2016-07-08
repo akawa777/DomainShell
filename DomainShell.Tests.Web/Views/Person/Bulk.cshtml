@@ -1,0 +1,69 @@
+﻿@using DomainShell.Tests.Web.Models
+@model Person[]
+@{
+    ViewBag.Title = "Index";
+}
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $("#save").on("click", function () {
+                var ids = [];
+
+                $('.target:checked').map(function () {
+                    ids.push($(this).val());
+                });
+
+                var name = $("input[name=name]").val();
+
+                $.post("/person/bulkupdate", { ids: ids, name: name }).success(function (result) {
+                    if (result.Success) {
+                        location.href = "/person";
+                    } else {
+                        $("#message").text("fail");
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<h2>Bulk</h2>
+
+<div id="message"></div>
+
+<a href="/person">list</a><br />
+
+<table id="list">
+    <thead>
+        <tr>
+            <th>target</th>
+            <th>Id</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Person person in Model)
+        {
+            <tr>
+                <td>
+                    <input class="target" type="checkbox" value="@person.Id" />
+                </td>
+                <td>
+                    @person.Id
+                </td>
+                <td>
+                    @person.Name
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<form>
+    <label for="name">name</label>
+    <input type="text" name="name" /><br />
+
+    <button id="save" type="button">save</button>    
+</form>
+

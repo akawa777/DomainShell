@@ -11,6 +11,7 @@ namespace DomainShell.Tests.Web.Controllers
     public class PersonController : Controller
     {
         private PersonReader _personReader = new PersonReader();
+        private PersonBulkService _bulkService = new PersonBulkService();
 
         // GET: Person
         public ActionResult Index()
@@ -25,6 +26,20 @@ namespace DomainShell.Tests.Web.Controllers
             Person person = new Person();
 
             return View("Detail", person);
+        }        
+
+        public ActionResult Detail(string id)
+        {
+            Person person = _personReader.Get(id);
+
+            return View(person);
+        }
+
+        public ActionResult Bulk()
+        {
+            Person[] persons = _personReader.GetAll();
+
+            return View(persons);
         }
 
         public ActionResult Add(Person person)
@@ -33,13 +48,6 @@ namespace DomainShell.Tests.Web.Controllers
 
             return Json(result);
         }
-
-        public ActionResult Detail (string id)
-        {
-            Person person = _personReader.Get(id);
-
-            return View(person);
-        }        
 
         public ActionResult Update(Person person)
         {
@@ -51,6 +59,13 @@ namespace DomainShell.Tests.Web.Controllers
         public ActionResult Remove(Person person)
         {
             bool result = person.Remove();
+
+            return Json(result);
+        }
+
+        public ActionResult BulkUpdate(string[] ids, string name)
+        {
+            PersonBulkService.Result result = _bulkService.BulkUpdate(ids, name);
 
             return Json(result);
         }

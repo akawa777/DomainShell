@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DomainShell;
 using DomainShell.Tests.Web.Models;
 using DomainShell.Tests.Web.Repositories.Write;
+using DomainShell.Tests.Web.Services;
 
 namespace DomainShell.Tests.Web.Events
 {
@@ -30,12 +31,13 @@ namespace DomainShell.Tests.Web.Events
         IDomainEventHandler<PersonRemovedEvent, bool>
     {
         private PersonWriteRepository _repository = new PersonWriteRepository();
+        private PersonValidator _validator = new PersonValidator();
 
         public bool Handle(PersonAddedEvent @event)
         {
             Person person = @event.AggregateRoot as Person;
 
-            if (string.IsNullOrEmpty(person.Name))
+            if (!_validator.Validate(person))
             {
                 return false;
             }
@@ -49,12 +51,7 @@ namespace DomainShell.Tests.Web.Events
         {
             Person person = @event.AggregateRoot as Person;
 
-            if (string.IsNullOrEmpty(person.Id))
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(person.Name))
+            if (!_validator.Validate(person))
             {
                 return false;
             }
@@ -67,11 +64,6 @@ namespace DomainShell.Tests.Web.Events
         public bool Handle(PersonRemovedEvent @event)
         {
             Person person = @event.AggregateRoot as Person;
-
-            if (string.IsNullOrEmpty(person.Id))
-            {
-                return false;
-            }
 
             _repository.Delete(person);
 

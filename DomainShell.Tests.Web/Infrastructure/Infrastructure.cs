@@ -20,6 +20,24 @@ namespace DomainShell.Tests.Web.Infrastructure
         }
     }
 
+    public class Tran : IDisposable
+    {
+        public Tran()
+        {
+            
+        }
+
+        public void Complete()
+        {
+            DataStore.PersonTable.AcceptChanges();
+        }
+
+        public void Dispose()
+        {
+            DataStore.PersonTable.RejectChanges();
+        }
+    }
+
     public static class DataStore
     {
         static DataStore()
