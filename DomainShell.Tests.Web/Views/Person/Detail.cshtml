@@ -1,0 +1,64 @@
+﻿@using DomainShell.Tests.Web.Models
+@model Person
+@{
+    ViewBag.Title = "Person";
+
+    string isNew = string.IsNullOrEmpty(Model.Id) ? "true" : "false";
+}
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            var isNew = @isNew;
+
+            if (isNew) {
+                $("#id").prev().hide();
+                $("#id").hide();
+                $("#remove").hide();
+            }
+
+            $("#save").on("click", function () {
+                var id = $("#id").val();
+                var name = $("#name").val();
+
+                $.post(isNew ? "/person/add" : "/person/update", { id: id, name: name }).success(function (result) {
+                    if (result) {
+                        $("#message").text("success");
+                    } else {
+                        $("#message").text("fail");
+                    }
+                });
+            });
+
+            $("#remove").on("click", function () {
+                var id = $("#id").val();
+                var name = $("#name").val();
+
+                $.post("/person/remove", { id: id, name: name }).success(function (result) {
+                    if (result) {
+                        location.href = "/person";
+                    } else {
+                        $("#message").text("fail");
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+
+<h2>Person</h2>
+
+<div id="message"></div>
+
+<a href="/person">list</a><br />
+   
+<label>id</label>
+<input id="id" type="text" value="@Model.Id" /><br />
+<label>name</label>
+<input id="name" type="text" value="@Model.Name" /><br />
+
+
+<button id="save" type="button">save</button>
+<button id="remove" type="button">remove</button>
+

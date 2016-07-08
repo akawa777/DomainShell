@@ -1,0 +1,32 @@
+﻿@using DomainShell.Tests.Web.Models
+@model Person[]
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<a href="/person/new">new</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Person person in Model)
+        {
+            <tr>
+                <td>
+                    <a href="/person/detail/@person.Id">@person.Id</a> 
+                </td>
+                <td>
+                    @person.Name
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
