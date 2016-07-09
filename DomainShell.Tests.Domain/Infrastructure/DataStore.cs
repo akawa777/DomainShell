@@ -27,12 +27,25 @@ namespace DomainShell.Tests.Domain.Infrastructure
                 _inited = true;
             }
 
-            DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SQLite");
+            DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SQLite");            
 
             DbConnection connection = factory.CreateConnection();
             connection.ConnectionString = _connectionString;
 
             return connection;
+        }
+
+        public static DbDataAdapter CreateDataAdapter(DbCommand selectCommand)
+        {
+            DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SQLite");
+
+            DbDataAdapter adapter = factory.CreateDataAdapter();
+            adapter.SelectCommand = selectCommand;            
+
+            DbCommandBuilder builder = factory.CreateCommandBuilder();            
+            builder.DataAdapter = adapter;
+
+            return adapter;
         }
 
         private static void Init()

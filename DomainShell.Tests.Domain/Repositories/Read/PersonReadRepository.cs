@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 using DomainShell.Tests.Domain.Infrastructure;
 using DomainShell.Tests.Domain.Models;
 using System.Data.Common;
-using System.IO;
 
 namespace DomainShell.Tests.Domain.Repositories.Read
 { 
     public class PersonReadRepository
     {
-        public Person Load(string id)
+        public Person Get(string id)
         {
             Person person = null;
 
@@ -21,13 +20,13 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             {
                 connection.Open();
 
-                person = Load(id, connection);
+                person = Get(id, connection);
             }            
 
             return person;
         }
 
-        public Person Load(string id, DbConnection connection)
+        public Person Get(string id, DbConnection connection)
         {
             Person person = null;            
 
@@ -85,52 +84,19 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             return persons.ToArray();
         }
 
-        public void OutputTsv(MemoryStream stream)
+        public void LoadAll(DataTable table)
         {
             using (DbConnection connection = DataStore.CreateConnection())
             {
                 connection.Open();
 
-                DbCommand command = connection.CreateCommand();
+                DbCommand command = connection.CreateCommand();                
 
-                command.CommandText = "select * from Person order by Id";   
+                command.CommandText = "select * from Person order by Id";
 
-                using (StreamWriter writer = new StreamWriter(stream))
-                {
-                    using (DbDataReader reader = command.ExecuteReader())
-                    {
-                        StringBuilder line = new StringBuilder();
+                DbDataAdapter adapter = DataStore.CreateDataAdapter(command);                
 
-                        for (int i = 0; i < reader.FieldCount; i++)
-                        {
-                            if (!string.IsNullOrEmpty(line.ToString()))
-                            {
-                                line.Append("\t");
-                            }
-
-                            line.Append(reader.GetName(i));
-                        }
-
-                        writer.WriteLine(line);
-
-                        while (reader.Read())
-                        {
-                            line = new StringBuilder();
-
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                if (!string.IsNullOrEmpty(line.ToString()))
-                                {
-                                    line.Append("\t");
-                                }
-
-                                line.Append(reader.GetValue(i));
-                            }
-
-                            writer.WriteLine(line);
-                        }
-                    }
-                }
+                adapter.Fill(table);
             }
         }
     }
