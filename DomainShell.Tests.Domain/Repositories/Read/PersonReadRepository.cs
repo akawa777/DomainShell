@@ -20,28 +20,37 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             {
                 connection.Open();
 
-                DbCommand command = connection.CreateCommand();
-
-                command.CommandText = "select * from Person where Id = @id";
-
-                DbParameter parameter = command.CreateParameter();
-
-                parameter.ParameterName = "@id";
-                parameter.Value = id;
-
-                command.Parameters.Add(parameter);
-
-                using (DbDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        person = new Person();
-
-                        person.Id = id;
-                        person.Name = reader["Name"].ToString();
-                    }
-                }
+                person = Load(id, connection);
             }            
+
+            return person;
+        }
+
+        public Person Load(string id, DbConnection connection)
+        {
+            Person person = null;            
+
+            DbCommand command = connection.CreateCommand();
+
+            command.CommandText = "select * from Person where Id = @id";
+
+            DbParameter parameter = command.CreateParameter();
+
+            parameter.ParameterName = "@id";
+            parameter.Value = id;
+
+            command.Parameters.Add(parameter);
+
+            using (DbDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    person = new Person();
+
+                    person.Id = id;
+                    person.Name = reader["Name"].ToString();
+                }
+            }
 
             return person;
         }

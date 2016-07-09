@@ -40,7 +40,7 @@ namespace DomainShell.Tests.Domain.Service
                 {
                     foreach (string id in ids)
                     {
-                        Person person = _repository.Load(id);
+                        Person person = _repository.Load(id, connection);
                         person.Name = name;
 
                         if (!person.Update(connection))
