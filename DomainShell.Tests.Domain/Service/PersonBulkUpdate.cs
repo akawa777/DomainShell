@@ -7,7 +7,7 @@ using DomainShell.Tests.Domain.Repositories.Read;
 using System.Data.Common;
 using DomainShell.Tests.Domain.Infrastructure;
 
-namespace DomainShell.Tests.Domain.Services
+namespace DomainShell.Tests.Domain.Service
 {
     public class PersonBulkUpdate
     {

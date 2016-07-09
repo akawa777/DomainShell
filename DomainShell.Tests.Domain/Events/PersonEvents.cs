@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DomainShell;
 using DomainShell.Tests.Domain.Models;
 using DomainShell.Tests.Domain.Repositories.Write;
-using DomainShell.Tests.Domain.Services;
+using DomainShell.Tests.Domain.Service;
 using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events

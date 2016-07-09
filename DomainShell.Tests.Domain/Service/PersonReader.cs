@@ -5,7 +5,7 @@ using System.Web;
 using DomainShell.Tests.Domain.Models;
 using DomainShell.Tests.Domain.Repositories.Read;
 
-namespace DomainShell.Tests.Domain.Services
+namespace DomainShell.Tests.Domain.Service
 {
     public class PersonReader
     {

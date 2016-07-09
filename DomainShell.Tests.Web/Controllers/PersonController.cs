@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using DomainShell.Tests.Domain.Models;
-using DomainShell.Tests.Domain.Services;
+using DomainShell.Tests.Domain.Service;
 
 namespace DomainShell.Tests.Web.Controllers
 {

@@ -62,9 +62,9 @@
     <Compile Include="Models\Person.cs" />
     <Compile Include="Repositories\Read\PersonReadRepository.cs" />
     <Compile Include="Repositories\Write\PersonWriteRepository.cs" />
-    <Compile Include="Services\PersonBulkUpdate.cs" />
-    <Compile Include="Services\PersonReader.cs" />
-    <Compile Include="Services\PersonValidator.cs" />
+    <Compile Include="Service\PersonBulkUpdate.cs" />
+    <Compile Include="Service\PersonReader.cs" />
+    <Compile Include="Service\PersonValidator.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
