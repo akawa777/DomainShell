@@ -38,10 +38,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregateRoot.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DomainEventHandler.cs" />
     <Compile Include="Base\Base.cs" />
     <Compile Include="DomainEvents.cs" />
-    <Compile Include="AggregateRoot.cs" />
     <Compile Include="Infrastructure\Infrastructure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
