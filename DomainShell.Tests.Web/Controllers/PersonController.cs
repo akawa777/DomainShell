@@ -82,8 +82,6 @@ namespace DomainShell.Tests.Web.Controllers
                 _personReader.OutputTsv(stream);    
                 return File(stream.GetBuffer(), System.Net.Mime.MediaTypeNames.Application.Octet, "person.txt");
             }
-
-            
         }
     }
 }
