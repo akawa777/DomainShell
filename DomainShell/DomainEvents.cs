@@ -8,31 +8,7 @@ using DomainShell.Base;
 using DomainShell.Infrastructure;
 
 namespace DomainShell
-{
-    public interface IAggregateRoot
-    {
-    }
-
-    public abstract class DomainEvent : IDomainEvent
-    {
-        public IAggregateRoot AggregateRoot { get; set; }
-    }
-
-    public abstract class DomainEvent<TResult> : IDomainEvent
-    {
-        public IAggregateRoot AggregateRoot { get; set; }
-    }
-
-    public interface IDomainEventHandler<TEvent> : IDomainEventHandler where TEvent : DomainEvent
-    {        
-        void Handle(TEvent @event);
-    }
-
-    public interface IDomainEventHandler<TEvent, TResult> : IDomainEventHandler where TEvent : DomainEvent<TResult>
-    {        
-        TResult Handle(TEvent @event);
-    }    
-
+{   
     public class DomainEvents
     {
         private static DomainEventContainer _container = new DomainEventContainer();
@@ -62,40 +38,15 @@ namespace DomainShell
 
         public static void Raise(DomainEvent @event)
         {
-            Bundle(@event);
-
-            IDomainEventHandler handler = _container.Load(@event);
-
-            bool canAspect = handler is IDomainEventAspect;
-            IDomainEventAspect aspect = handler as IDomainEventAspect;
-
-            if (canAspect)
-            {
-                aspect.BeginEvent(@event, handler);
-            }
-
-            try
-            {
-                dynamic dynamicHandler = handler as dynamic;
-                dynamicHandler.Handle(@event as dynamic);
-
-                if (canAspect)
-                {
-                    aspect.SuccessEvent(@event, handler, null);
-                }
-            }
-            catch(Exception e)
-            {
-                if (canAspect)
-                {
-                    aspect.FailEvent(@event, handler, e);
-                }
-
-                throw e;
-            }            
-        }
+            Raise(@event, true);    
+        }        
 
         public static TResult Raise<TResult>(DomainEvent<TResult> @event)
+        {
+            return (TResult)Raise(@event, false);           
+        }
+
+        private static dynamic Raise(IDomainEvent @event, bool isVoid)
         {
             Bundle(@event);
 
@@ -114,7 +65,16 @@ namespace DomainShell
             try
             {
                 dynamic dynamicHandler = handler as dynamic;
-                result = dynamicHandler.Handle(@event as dynamic);
+
+                if (isVoid)
+                {
+                    dynamicHandler.Handle(@event as dynamic);
+                    result = null;
+                }
+                else
+                {
+                    result = dynamicHandler.Handle(@event as dynamic);
+                }
 
                 if (canAspect)
                 {
@@ -131,7 +91,8 @@ namespace DomainShell
                 throw e;
             }
 
-            return (TResult)result;
+            return result;
+
         }
     }    
 }
