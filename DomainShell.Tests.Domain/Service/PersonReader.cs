@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using DomainShell.Tests.Domain.Models;
 using DomainShell.Tests.Domain.Repositories.Read;
+using System.IO;
 
 namespace DomainShell.Tests.Domain.Service
 {
@@ -19,6 +20,11 @@ namespace DomainShell.Tests.Domain.Service
         public Person[] GetAll()
         {
             return _repository.GetAll();
+        }
+
+        public void OutputTsv(MemoryStream stream)
+        {
+            _repository.OutputTsv(stream);
         }
     }
 }

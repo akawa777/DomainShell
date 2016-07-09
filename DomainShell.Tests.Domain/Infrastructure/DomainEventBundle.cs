@@ -15,9 +15,9 @@ namespace DomainShell.Tests.Domain.Infrastructure
         public void Bundle(IDomainEventRegister register)
         {
             register.Set<PersonAddedEvent>(() => new PersonEventHandler());
-            register.Set<PersonUpdatedEvent>(() => new PersonEventHandler());
-            register.Set<PersonTranUpdatedEvent>(() => new PersonEventHandler());
+            register.Set<PersonUpdatedEvent>(() => new PersonEventHandler());            
             register.Set<PersonRemovedEvent>(() => new PersonEventHandler());
+            register.Set<PersonTranUpdatedEvent>(() => new PersonTranUpdatedEventHandler());
         }
     }
 }

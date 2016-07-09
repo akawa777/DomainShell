@@ -3,31 +3,57 @@
 @{
     ViewBag.Title = "Index";
 }
+@section scripts{
+    <script type="text/javascript" src="/scripts/view.js"></script>
+    <script type="text/javascript">
+        var List = function (context, options) {
+            var self = this;
 
+            context("[name=output]").on("click", function () {               
+                location.href = "/person/output";
+            });
+        }
+
+        view({
+            el: "#app",
+            app: List,
+            parameters: {
+
+            }
+        });
+    </script>
+}
 <h2>list</h2>
 
-<a href="/person/new">new</a>
-<a href="/person/bulk">bulk</a>
-
-<table>
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (Person person in Model)
-        {
+<div id="app">
+    <a href="/person/new">new</a>
+    <a href="/person/bulk">bulk</a>
+    <br />
+    <br />
+    <table>
+        <thead>
             <tr>
-                <td>
-                    <a href="/person/detail/@person.Id">@person.Id</a> 
-                </td>
-                <td>
-                    @person.Name
-                </td>
+                <th>Id</th>
+                <th>Name</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (Person person in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="/person/detail/@person.Id">@person.Id</a>
+                    </td>
+                    <td>
+                        @person.Name
+                    </td>
+                </tr>
+            }
+        </tbody>        
+    </table>
+    <br />
+    <form>
+        <button name="output" type="button">output</button>
+    </form>
+</div>
 

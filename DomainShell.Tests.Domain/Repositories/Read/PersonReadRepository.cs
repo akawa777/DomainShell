@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DomainShell.Tests.Domain.Infrastructure;
 using DomainShell.Tests.Domain.Models;
 using System.Data.Common;
+using System.IO;
 
 namespace DomainShell.Tests.Domain.Repositories.Read
 { 
@@ -82,6 +83,55 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             }
 
             return persons.ToArray();
+        }
+
+        public void OutputTsv(MemoryStream stream)
+        {
+            using (DbConnection connection = DataStore.CreateConnection())
+            {
+                connection.Open();
+
+                DbCommand command = connection.CreateCommand();
+
+                command.CommandText = "select * from Person order by Id";   
+
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    using (DbDataReader reader = command.ExecuteReader())
+                    {
+                        StringBuilder line = new StringBuilder();
+
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            if (!string.IsNullOrEmpty(line.ToString()))
+                            {
+                                line.Append("\t");
+                            }
+
+                            line.Append(reader.GetName(i));
+                        }
+
+                        writer.WriteLine(line);
+
+                        while (reader.Read())
+                        {
+                            line = new StringBuilder();
+
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                if (!string.IsNullOrEmpty(line.ToString()))
+                                {
+                                    line.Append("\t");
+                                }
+
+                                line.Append(reader.GetValue(i));
+                            }
+
+                            writer.WriteLine(line);
+                        }
+                    }
+                }
+            }
         }
     }
 }

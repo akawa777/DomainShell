@@ -35,7 +35,7 @@ namespace DomainShell.Tests.Domain.Infrastructure
             return connection;
         }
 
-        private static void Init()        
+        private static void Init()
         {            
             if (File.Exists(_db))
             {

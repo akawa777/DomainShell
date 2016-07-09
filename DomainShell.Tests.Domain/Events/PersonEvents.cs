@@ -21,11 +21,6 @@ namespace DomainShell.Tests.Domain.Events
         
     }
 
-    public class PersonTranUpdatedEvent : DomainEvent<bool>
-    {
-        public DbConnection Connection { get; set; }
-    }
-
     public class PersonRemovedEvent : DomainEvent<bool>
     {
         
@@ -33,18 +28,26 @@ namespace DomainShell.Tests.Domain.Events
 
     public class PersonEventHandler : 
         IDomainEventHandler<PersonAddedEvent, bool>,
-        IDomainEventHandler<PersonUpdatedEvent, bool>,
-        IDomainEventHandler<PersonTranUpdatedEvent, bool>, 
+        IDomainEventHandler<PersonUpdatedEvent, bool>,        
         IDomainEventHandler<PersonRemovedEvent, bool>
     {
-        private PersonWriteRepository _repository = new PersonWriteRepository();
-        private PersonValidator _validator = new PersonValidator();
+        protected PersonWriteRepository _repository = new PersonWriteRepository();        
+
+        protected bool Validate(Person person)
+        {
+            if (string.IsNullOrEmpty(person.Name))
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         public bool Handle(PersonAddedEvent @event)
         {
             Person person = @event.AggregateRoot as Person;
 
-            if (!_validator.Validate(person))
+            if (!Validate(person))
             {
                 return false;
             }
@@ -58,26 +61,12 @@ namespace DomainShell.Tests.Domain.Events
         {
             Person person = @event.AggregateRoot as Person;
 
-            if (!_validator.Validate(person))
+            if (!Validate(person))
             {
                 return false;
             }
 
             _repository.Update(person);
-
-            return true;
-        }
-
-        public bool Handle(PersonTranUpdatedEvent @event)
-        {
-            Person person = @event.AggregateRoot as Person;
-
-            if (!_validator.Validate(person))
-            {
-                return false;
-            }
-
-            _repository.Update(person, @event.Connection);
 
             return true;
         }

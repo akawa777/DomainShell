@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using DomainShell.Tests.Domain.Models;
 using DomainShell.Tests.Domain.Service;
+using System.IO;
 
 namespace DomainShell.Tests.Web.Controllers
 {
@@ -72,6 +73,17 @@ namespace DomainShell.Tests.Web.Controllers
             PersonBulkUpdate.Result result = _bulkUpdate.BulkUpdate(ids, name);
 
             return Json(result);
+        }
+
+        public ActionResult Output()
+        {            
+            using (MemoryStream stream = new MemoryStream())
+            {                
+                _personReader.OutputTsv(stream);    
+                return File(stream.GetBuffer(), System.Net.Mime.MediaTypeNames.Application.Octet, "person.txt");
+            }
+
+            
         }
     }
 }

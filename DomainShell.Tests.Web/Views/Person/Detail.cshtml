@@ -16,7 +16,7 @@
             var id = 0;
 
             if (isNew) {
-                context("[name=id]").parent().hide();
+                context(".id").hide();
                 context("[name=remove]").hide();
             } else {
                 var sections = location.href.split("/");
@@ -72,8 +72,10 @@
     <br />
     <br />
 
-    <form>
-        id: <span>@Model.Id</span>
+    <form>        
+        <div class="id">
+            id: @Model.Id
+        </div>
         <br />
         name: <input type="text" name="name" value="@Model.Name" />
         <br />

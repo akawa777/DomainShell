@@ -57,6 +57,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Events\PersonEvents.cs" />
+    <Compile Include="Events\PersonTrunUpdateEvent.cs" />
     <Compile Include="Infrastructure\DataStore.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -66,7 +67,6 @@
     <Compile Include="Repositories\Write\PersonWriteRepository.cs" />
     <Compile Include="Service\PersonBulkUpdate.cs" />
     <Compile Include="Service\PersonReader.cs" />
-    <Compile Include="Service\PersonValidator.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
