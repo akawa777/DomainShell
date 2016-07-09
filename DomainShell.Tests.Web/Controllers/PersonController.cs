@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.Http;
 using DomainShell.Tests.Web.Models;
 using DomainShell.Tests.Web.Services;
 
@@ -13,13 +12,17 @@ namespace DomainShell.Tests.Web.Controllers
     {
         private PersonReader _personReader = new PersonReader();
         private PersonBulkService _bulkService = new PersonBulkService();
-
-        // GET: Person
+        
         public ActionResult Index()
+        {
+            return List();
+        }
+        
+        public ActionResult List()
         {
             Person[] persons = _personReader.GetAll();
 
-            return View(persons);
+            return View("List", persons);
         }
 
         public ActionResult New()
