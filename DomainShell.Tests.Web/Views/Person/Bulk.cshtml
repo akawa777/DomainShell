@@ -27,6 +27,18 @@
                     }
                 });
             });
+
+            context(".allTarget").on("click", function () {
+                if ($(this).is(':checked')) {
+                    context('.target').map(function () {
+                        $(this).prop("checked", true);
+                    });
+                } else {
+                    context('.target').map(function () {
+                        $(this).prop("checked", false);
+                    });
+                }                
+            });
         }
 
         view({
@@ -50,7 +62,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>target</th>
+                    <th><input class="allTarget" type="checkbox" /></th>
                     <th>Id</th>
                     <th>Name</th>
                 </tr>
