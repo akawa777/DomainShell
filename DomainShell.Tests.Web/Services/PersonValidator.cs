@@ -9,8 +9,6 @@ namespace DomainShell.Tests.Web.Services
 {
     public class PersonValidator
     {
-        private PersonReadRepository _reposiory = new PersonReadRepository();
-
         public bool Validate(Person person)
         {
             if (string.IsNullOrEmpty(person.Name))
