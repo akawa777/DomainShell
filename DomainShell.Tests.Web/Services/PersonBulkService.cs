@@ -49,7 +49,7 @@ namespace DomainShell.Tests.Web.Services
 
             return new Result 
             {
-                Success = true,
+                Success = errors.Count == 0,
                 ErrorPersons = errors 
             };
         }

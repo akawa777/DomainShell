@@ -7,63 +7,83 @@
 }
 
 @section scripts{
+    <script type="text/javascript" src="/scripts/view.js"></script>
     <script type="text/javascript">
-        $(function () {
-            var isNew = @isNew;
+        var Detail = function(context, options) {
+            var self = this;
+
+            var isNew = options.isNew;
+            var id = 0;
 
             if (isNew) {
-                $("label[for=id]").hide();
-                $("input[name=id]").hide();
-                $("#remove").hide();
+                context("[name=id]").parent().hide();
+                context("[name=remove]").hide();
+            } else {
+                var sections = location.href.split("/");
+                id = sections[sections.length - 1];
             }
 
-            $("#save").on("click", function () {
-                var id = $("input[name=id]").val();
-                var name = $("input[name=name]").val();
+            context("[name=save]").on("click", function () {                
+                var name = context("[name=name]").val();
 
                 $.post(isNew ? "/person/add" : "/person/update", { id: id, name: name }).success(function (result) {
                     if (result) {
-                        $("#message").text("success");
+                        if (isNew) {
+                            location.href = "/person";
+                        } else {
+                            context(".message").text("success");
+                        }
                     } else {
-                        $("#message").text("fail");
+                        context(".message").text("fail");
                     }
                 });
             });
 
-            $("#remove").on("click", function () {
-                var id = $("input[name=id]").val();
-                var name = $("input[name=name]").val();
+            context("[name=remove]").on("click", function () {                
+                var name = context("[name=name]").val();
 
                 $.post("/person/remove", { id: id, name: name }).success(function (result) {
                     if (result) {
                         location.href = "/person";
                     } else {
-                        $("#message").text("fail");
+                        context(".message").text("fail");
                     }
                 });
             });
+        }
+
+        view({
+            el: "#app",
+            app: Detail,
+            parameters: {
+                isNew: location.href.toLocaleString().indexOf("/person/new") != -1
+            }
         });
     </script>
 }
 
 
-<h2>Detail</h2>
+<h2>detail</h2>
 
-<div id="message"></div>
+<div id="app">
+    <div class="message"></div>
 
-<a href="/person">list</a>
-<br />
-   
-<form>
-    <label for="id">id</label>
-    <input type="text" name="id" value="@Model.Id" /><br />
+    <a href="/person">list</a>
+    <br />
+    <br />
 
-    <label for="name">name</label>
-    <input type="text" name="name" value="@Model.Name" /><br />
+    <form>
+        id: <span>@Model.Id</span>
+        <br />
+        name: <input type="text" name="name" value="@Model.Name" />
+        <br />
+        <br />
+        <button name="save" type="button">save</button>
+        <button name="remove" type="button">remove</button>
+    </form>
+</div>
 
-    <button id="save" type="button">save</button>
-    <button id="remove" type="button">remove</button>
-</form>
+
 
 
 
