@@ -9,7 +9,7 @@ using DomainShell.Tests.Web.Services;
 namespace DomainShell.Tests.Web.Controllers
 {
     public class PersonController : Controller
-    {
+    {       
         private PersonReader _personReader = new PersonReader();
         private PersonBulkUpdate _bulkUpdate = new PersonBulkUpdate();
         

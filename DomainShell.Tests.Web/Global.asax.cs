@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using DomainShell.Tests.Web.Infrastructure;
+using DomainShell.Tests.Web.Services;
 
 namespace DomainShell.Tests.Web
 {
