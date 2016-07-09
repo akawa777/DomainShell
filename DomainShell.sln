@@ -5,7 +5,7 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell", "DomainShell\DomainShell.csproj", "{63AF8772-EA46-4DDA-8424-BC4D9AEEBC14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests", "DomainShell.Tests\DomainShell.Tests.csproj", "{0C5BDF26-32C2-404C-9293-32F92160A444}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests.Domain", "DomainShell.Tests.Domain\DomainShell.Tests.Domain.csproj", "{0C5BDF26-32C2-404C-9293-32F92160A444}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainShell.Tests.Web", "DomainShell.Tests.Web\DomainShell.Tests.Web.csproj", "{D57A9CBC-05F1-4C0E-80EC-7DADE3B8B240}"
 EndProject

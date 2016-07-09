@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell;
-using DomainShell.Tests.Web.Models;
-using DomainShell.Tests.Web.Repositories.Write;
-using DomainShell.Tests.Web.Services;
+using DomainShell.Tests.Domain.Models;
+using DomainShell.Tests.Domain.Repositories.Write;
+using DomainShell.Tests.Domain.Services;
 using System.Data.Common;
 
-namespace DomainShell.Tests.Web.Events
+namespace DomainShell.Tests.Domain.Events
 {
     public class PersonAddedEvent : DomainEvent<bool>
     {

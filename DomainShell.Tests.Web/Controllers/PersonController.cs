@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using DomainShell.Tests.Web.Models;
-using DomainShell.Tests.Web.Services;
+using DomainShell.Tests.Domain.Models;
+using DomainShell.Tests.Domain.Services;
 
 namespace DomainShell.Tests.Web.Controllers
 {

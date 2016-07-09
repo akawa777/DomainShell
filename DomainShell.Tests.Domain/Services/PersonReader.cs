@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using DomainShell.Tests.Web.Models;
-using DomainShell.Tests.Web.Repositories.Read;
+using DomainShell.Tests.Domain.Models;
+using DomainShell.Tests.Domain.Repositories.Read;
 
-namespace DomainShell.Tests.Web.Services
+namespace DomainShell.Tests.Domain.Services
 {
     public class PersonReader
     {

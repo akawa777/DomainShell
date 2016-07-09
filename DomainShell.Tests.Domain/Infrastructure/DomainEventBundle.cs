@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using DomainShell.Infrastructure;
+using DomainShell.Tests.Domain.Repositories.Write;
+using DomainShell.Tests.Domain.Events;
 
-namespace DomainShell.Tests
+namespace DomainShell.Tests.Domain.Infrastructure
 {
     public class DomainEventBundle : IDomainEventBundle
     {
@@ -14,6 +16,7 @@ namespace DomainShell.Tests
         {
             register.Set<PersonAddedEvent>(() => new PersonEventHandler());
             register.Set<PersonUpdatedEvent>(() => new PersonEventHandler());
+            register.Set<PersonTranUpdatedEvent>(() => new PersonEventHandler());
             register.Set<PersonRemovedEvent>(() => new PersonEventHandler());
         }
     }

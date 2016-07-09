@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using DomainShell.Tests.Web.Models;
-using DomainShell.Tests.Web.Repositories.Read;
+using DomainShell.Tests.Domain.Models;
+using DomainShell.Tests.Domain.Repositories.Read;
 using System.Data.Common;
-using DomainShell.Tests.Web.Infrastructure;
+using DomainShell.Tests.Domain.Infrastructure;
 
-namespace DomainShell.Tests.Web.Services
+namespace DomainShell.Tests.Domain.Services
 {
     public class PersonBulkUpdate
     {
@@ -32,7 +32,7 @@ namespace DomainShell.Tests.Web.Services
 
             List<Person> errors = new List<Person>();            
 
-            using (DbConnection connection = DataStore.GetConnection())
+            using (DbConnection connection = DataStore.CreateConnection())
             {
                 connection.Open();
 

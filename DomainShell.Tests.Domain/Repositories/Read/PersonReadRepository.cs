@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Data;
 using System.Threading.Tasks;
-using DomainShell.Tests.Web.Infrastructure;
-using DomainShell.Tests.Web.Models;
+using DomainShell.Tests.Domain.Infrastructure;
+using DomainShell.Tests.Domain.Models;
 using System.Data.Common;
 
-namespace DomainShell.Tests.Web.Repositories.Read
+namespace DomainShell.Tests.Domain.Repositories.Read
 { 
     public class PersonReadRepository
     {
@@ -16,7 +16,7 @@ namespace DomainShell.Tests.Web.Repositories.Read
         {
             Person person = null;
 
-            using (DbConnection connection = DataStore.GetConnection())
+            using (DbConnection connection = DataStore.CreateConnection())
             {
                 connection.Open();
 
@@ -50,7 +50,7 @@ namespace DomainShell.Tests.Web.Repositories.Read
         {
             List<Person> persons = new List<Person>();
 
-            using (DbConnection connection = DataStore.GetConnection())
+            using (DbConnection connection = DataStore.CreateConnection())
             {
                 connection.Open();
 

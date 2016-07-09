@@ -4,30 +4,42 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell;
+using System.Data.Common;
+using DomainShell.Tests.Domain.Events;
 
-namespace DomainShell.Tests
+namespace DomainShell.Tests.Domain.Models
 {
     public class Person : IAggregateRoot
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
 
-        public void Add()
+        public bool Add()
         {
             PersonAddedEvent @event = new PersonAddedEvent();
 
             @event.AggregateRoot = this;
 
-            DomainEvents.Raise(@event);
+            return DomainEvents.Raise(@event);
         }
 
-        public void Update()
+        public bool Update()
         {
             PersonUpdatedEvent @event = new PersonUpdatedEvent();
 
             @event.AggregateRoot = this;
 
-            DomainEvents.Raise(@event);
+            return DomainEvents.Raise(@event);
+        }
+
+        public bool Update(DbConnection connection)
+        {
+            PersonTranUpdatedEvent @event = new PersonTranUpdatedEvent();
+
+            @event.AggregateRoot = this;
+            @event.Connection = connection;
+
+            return DomainEvents.Raise(@event);
         }
 
         public bool Remove()
