@@ -9,7 +9,7 @@ using DomainShell.Tests.Web.Infrastructure;
 
 namespace DomainShell.Tests.Web.Services
 {
-    public class PersonBulkService
+    public class PersonBulkUpdate
     {
         private PersonReadRepository _repository = new PersonReadRepository();
 

@@ -11,7 +11,7 @@ namespace DomainShell.Tests.Web.Controllers
     public class PersonController : Controller
     {
         private PersonReader _personReader = new PersonReader();
-        private PersonBulkService _bulkService = new PersonBulkService();
+        private PersonBulkUpdate _bulkService = new PersonBulkUpdate();
         
         public ActionResult Index()
         {
@@ -69,7 +69,7 @@ namespace DomainShell.Tests.Web.Controllers
 
         public ActionResult BulkUpdate(string[] ids, string name)
         {
-            PersonBulkService.Result result = _bulkService.BulkUpdate(ids, name);
+            PersonBulkUpdate.Result result = _bulkService.BulkUpdate(ids, name);
 
             return Json(result);
         }
