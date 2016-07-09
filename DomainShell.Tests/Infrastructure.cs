@@ -12,30 +12,9 @@ namespace DomainShell.Tests
     {
         public void Bundle(IDomainEventRegister register)
         {
-            PersonWriteRepository writeRepository = new PersonWriteRepository();
-
-            register.Set<PersonAddedEvent>(() => new PersonEventHandler(writeRepository));
-            register.Set<PersonUpdatedEvent>(() => new PersonEventHandler(writeRepository));
-            register.Set<PersonRemovedEvent>(() => new PersonEventHandler(writeRepository));
+            register.Set<PersonAddedEvent>(() => new PersonEventHandler());
+            register.Set<PersonUpdatedEvent>(() => new PersonEventHandler());
+            register.Set<PersonRemovedEvent>(() => new PersonEventHandler());
         }
-    }
-
-    public static class DataStore
-    {
-        static DataStore()
-        {
-            _personTable.Columns.Add("id", typeof(int));
-            _personTable.Columns.Add("name", typeof(string));
-
-            _personTable.Rows.Add(new object[] { 1, "1" });
-            _personTable.Rows.Add(new object[] { 2, "2" });
-            _personTable.Rows.Add(new object[] { 3, "3" });
-
-            _personTable.AcceptChanges();
-        }
-
-        private static DataTable _personTable = new DataTable();
-
-        public static DataTable PersonTable { get { return _personTable; } }
     }
 }

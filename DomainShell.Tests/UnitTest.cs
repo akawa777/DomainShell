@@ -9,34 +9,19 @@ namespace DomainShell.Tests
 {
     [TestClass]
     public class UnitTest
-    {
-        [TestInitialize]
-        public void Init()
-        {            
-            _repository = new PersonReadRepository();            
-        }
-
-        private PersonReadRepository _repository;
-        
-
+    {        
         [TestMethod]
         public void Main()
         {
             Person person = new Person();
             
-            person.Name = "add";
+            person.Add();            
 
-            person.Add();
+            person.Update();            
 
-            person = _repository.Load(person.Id);
+            bool success = person.Remove();
 
-            person.Name = "update";
-
-            person.Update();
-
-            person = _repository.Load(person.Id);
-
-            person.Remove();
+            Assert.AreEqual(true, success);
         }
     }
 }

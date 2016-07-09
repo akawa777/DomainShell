@@ -7,6 +7,7 @@ using DomainShell;
 using DomainShell.Tests.Web.Models;
 using DomainShell.Tests.Web.Repositories.Write;
 using DomainShell.Tests.Web.Services;
+using System.Data.SQLite;
 
 namespace DomainShell.Tests.Web.Events
 {
@@ -20,6 +21,11 @@ namespace DomainShell.Tests.Web.Events
         
     }
 
+    public class PersonTranUpdatedEvent : DomainEvent<bool>
+    {
+        public SQLiteConnection Connection { get; set; }
+    }
+
     public class PersonRemovedEvent : DomainEvent<bool>
     {
         
@@ -27,7 +33,8 @@ namespace DomainShell.Tests.Web.Events
 
     public class PersonEventHandler : 
         IDomainEventHandler<PersonAddedEvent, bool>,
-        IDomainEventHandler<PersonUpdatedEvent, bool>, 
+        IDomainEventHandler<PersonUpdatedEvent, bool>,
+        IDomainEventHandler<PersonTranUpdatedEvent, bool>, 
         IDomainEventHandler<PersonRemovedEvent, bool>
     {
         private PersonWriteRepository _repository = new PersonWriteRepository();
@@ -57,6 +64,20 @@ namespace DomainShell.Tests.Web.Events
             }
 
             _repository.Update(person);
+
+            return true;
+        }
+
+        public bool Handle(PersonTranUpdatedEvent @event)
+        {
+            Person person = @event.AggregateRoot as Person;
+
+            if (!_validator.Validate(person))
+            {
+                return false;
+            }
+
+            _repository.Update(person, @event.Connection);
 
             return true;
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell;
 using DomainShell.Tests.Web.Events;
+using System.Data.SQLite;
 
 namespace DomainShell.Tests.Web.Models
 {
@@ -27,6 +28,16 @@ namespace DomainShell.Tests.Web.Models
             PersonUpdatedEvent @event = new PersonUpdatedEvent();
 
             @event.AggregateRoot = this;
+
+            return DomainEvents.Raise(@event);
+        }
+
+        public bool Update(SQLiteConnection connection)
+        {
+            PersonTranUpdatedEvent @event = new PersonTranUpdatedEvent();
+
+            @event.AggregateRoot = this;
+            @event.Connection = connection;
 
             return DomainEvents.Raise(@event);
         }

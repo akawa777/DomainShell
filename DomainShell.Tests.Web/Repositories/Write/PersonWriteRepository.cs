@@ -6,6 +6,7 @@ using System.Data;
 using System.Threading.Tasks;
 using DomainShell.Tests.Web.Infrastructure;
 using DomainShell.Tests.Web.Models;
+using System.Data.Common;
 
 namespace DomainShell.Tests.Web.Repositories.Write
 { 
@@ -15,70 +16,76 @@ namespace DomainShell.Tests.Web.Repositories.Write
 
         public void Add(Person person)
         {
-            lock (o)
+            using (DbConnection connection = DataStore.GetConnection())
             {
-                DataRow[] rows = DataStore.PersonTable.Select("id = max(id)");
+                connection.Open();
 
-                int id = rows.Length == 0 ? 1 : int.Parse(rows[0]["id"].ToString()) + 1;
+                DbCommand command = connection.CreateCommand();
 
-                person.Id = id.ToString();
+                command.CommandText = "insert into Person(Name) values (@name)";
 
-                DataRow row = DataStore.PersonTable.NewRow();
-                row["id"] = person.Id;
-                row["name"] = person.Name;
+                DbParameter parameter = command.CreateParameter();
 
-                DataStore.PersonTable.Rows.Add(row);
+                parameter.ParameterName = "@name";
+                parameter.Value = person.Name;
 
-                DataStore.PersonTable.AcceptChanges();
+                command.Parameters.Add(parameter);
+
+                command.ExecuteNonQuery();
             }
         }
 
         public void Update(Person person)
         {
-            lock (o)
+            using (DbConnection connection = DataStore.GetConnection())
             {
-                DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+                connection.Open();
 
-                if (rows.Length == 0)
-                {
-                    throw new Exception("not exist person");
-                }
-
-                rows[0]["name"] = person.Name;
-
-                DataStore.PersonTable.AcceptChanges();
+                Update(person, connection);
             }
         }
 
-        public void Update(Person person, Tran tran)
+        public void Update(Person person, DbConnection connection)
         {
-            lock (o)
-            {
-                DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+            DbCommand command = connection.CreateCommand();
 
-                if (rows.Length == 0)
-                {
-                    throw new Exception("not exist person");
-                }
+            command.CommandText = "update Person set Name = @name where Id = @id";
 
-                rows[0]["name"] = person.Name;
-            }
+            DbParameter parameter = command.CreateParameter();
+
+            parameter.ParameterName = "@id";
+            parameter.Value = person.Id;
+
+            command.Parameters.Add(parameter);
+
+            parameter = command.CreateParameter();
+
+            parameter.ParameterName = "@name";
+            parameter.Value = person.Name;
+
+            command.Parameters.Add(parameter);
+
+            command.ExecuteNonQuery();
         }
 
         public void Delete(Person person)
         {
-            lock (o)
+            using (DbConnection connection = DataStore.GetConnection())
             {
-                DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", person.Id));
+                connection.Open();
 
-                if (rows.Length == 0)
-                {
-                    throw new Exception("not exist person");
-                }
+                DbCommand command = connection.CreateCommand();
 
-                DataStore.PersonTable.Rows.Remove(rows[0]);
+                command.CommandText = "delete from Person where Id = @id";
 
-                DataStore.PersonTable.AcceptChanges();
+                DbParameter parameter = command.CreateParameter();
+
+                parameter.ParameterName = "@id";
+                parameter.Value = person.Id;
+
+                command.Parameters.Add(parameter);
+
+                command.ExecuteNonQuery();
             }
         }
     }

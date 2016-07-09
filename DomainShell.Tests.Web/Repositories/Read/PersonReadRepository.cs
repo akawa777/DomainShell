@@ -6,6 +6,7 @@ using System.Data;
 using System.Threading.Tasks;
 using DomainShell.Tests.Web.Infrastructure;
 using DomainShell.Tests.Web.Models;
+using System.Data.Common;
 
 namespace DomainShell.Tests.Web.Repositories.Read
 { 
@@ -13,17 +14,34 @@ namespace DomainShell.Tests.Web.Repositories.Read
     {
         public Person Load(string id)
         {
-            DataRow[] rows = DataStore.PersonTable.Select(string.Format("id = {0}", id));
+            Person person = null;
 
-            if (rows.Length == 0)
+            using (DbConnection connection = DataStore.GetConnection())
             {
-                return null;
-            }
+                connection.Open();
 
-            Person person = new Person();
+                DbCommand command = connection.CreateCommand();
 
-            person.Id = rows[0].Field<string>("id");
-            person.Name = rows[0].Field<string>("name");
+                command.CommandText = "select * from Person where Id = @id";
+
+                DbParameter parameter = command.CreateParameter();
+
+                parameter.ParameterName = "@id";
+                parameter.Value = id;
+
+                command.Parameters.Add(parameter);
+
+                using (DbDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        person = new Person();
+
+                        person.Id = id;
+                        person.Name = reader["Name"].ToString();
+                    }
+                }
+            }            
 
             return person;
         }
@@ -32,12 +50,29 @@ namespace DomainShell.Tests.Web.Repositories.Read
         {
             List<Person> persons = new List<Person>();
 
-            foreach (DataRow row in DataStore.PersonTable.Rows)
+            using (DbConnection connection = DataStore.GetConnection())
             {
-                persons.Add(new Person { Id = row.Field<string>("id"), Name = row.Field<string>("name") });
+                connection.Open();
+
+                DbCommand command = connection.CreateCommand();
+                
+                command.CommandText = "select * from Person order by Id";
+
+                using (DbDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Person person = new Person();
+
+                        person.Id = reader["Id"].ToString();
+                        person.Name = reader["Name"].ToString();
+
+                        persons.Add(person);
+                    }
+                }
             }
 
-            return persons.OrderBy(x => x.Id).ToArray();
+            return persons.ToArray();
         }
     }
 }

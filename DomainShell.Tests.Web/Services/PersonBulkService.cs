@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using DomainShell.Tests.Web.Models;
 using DomainShell.Tests.Web.Repositories.Read;
+using System.Data.SQLite;
 using DomainShell.Tests.Web.Infrastructure;
 
 namespace DomainShell.Tests.Web.Services
@@ -29,22 +30,30 @@ namespace DomainShell.Tests.Web.Services
                 };
             }
 
-            List<Person> errors = new List<Person>();
+            List<Person> errors = new List<Person>();            
 
-            using (Tran tran = new Tran())
+            using (SQLiteConnection connection = new SQLiteConnection(DataStore.ConnectionString))
             {
-                foreach (string id in ids)
-                {
-                    Person person = _repository.Load(id);
-                    person.Name = name;
+                connection.Open();
 
-                    if (!person.Update())
+                using (SQLiteTransaction tran = connection.BeginTransaction())
+                {
+                    foreach (string id in ids)
                     {
-                        errors.Add(person);
+                        Person person = _repository.Load(id);
+                        person.Name = name;
+
+                        if (!person.Update(connection))
+                        {
+                            errors.Add(person);
+                        }
+                    }
+
+                    if (errors.Count == 0)
+                    {
+                        tran.Commit();
                     }
                 }
-
-                tran.Complete();
             }
 
             return new Result 

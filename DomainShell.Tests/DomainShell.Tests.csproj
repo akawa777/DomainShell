@@ -56,8 +56,7 @@
     <Compile Include="Infrastructure.cs" />
     <Compile Include="AggreateRoot.cs" />
     <Compile Include="UnitTest.cs" />
-    <Compile Include="Event.cs" />
-    <Compile Include="Repository.cs" />
+    <Compile Include="Events.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
