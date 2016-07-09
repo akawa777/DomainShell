@@ -7,7 +7,7 @@ using DomainShell;
 using DomainShell.Tests.Web.Models;
 using DomainShell.Tests.Web.Repositories.Write;
 using DomainShell.Tests.Web.Services;
-using System.Data.SQLite;
+using System.Data.Common;
 
 namespace DomainShell.Tests.Web.Events
 {
@@ -23,7 +23,7 @@ namespace DomainShell.Tests.Web.Events
 
     public class PersonTranUpdatedEvent : DomainEvent<bool>
     {
-        public SQLiteConnection Connection { get; set; }
+        public DbConnection Connection { get; set; }
     }
 
     public class PersonRemovedEvent : DomainEvent<bool>

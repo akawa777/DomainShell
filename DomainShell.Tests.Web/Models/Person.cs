@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell;
 using DomainShell.Tests.Web.Events;
-using System.Data.SQLite;
+using System.Data.Common;
 
 namespace DomainShell.Tests.Web.Models
 {
@@ -32,7 +32,7 @@ namespace DomainShell.Tests.Web.Models
             return DomainEvents.Raise(@event);
         }
 
-        public bool Update(SQLiteConnection connection)
+        public bool Update(DbConnection connection)
         {
             PersonTranUpdatedEvent @event = new PersonTranUpdatedEvent();
 

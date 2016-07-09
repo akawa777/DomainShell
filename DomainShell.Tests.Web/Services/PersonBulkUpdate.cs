@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using DomainShell.Tests.Web.Models;
 using DomainShell.Tests.Web.Repositories.Read;
-using System.Data.SQLite;
+using System.Data.Common;
 using DomainShell.Tests.Web.Infrastructure;
 
 namespace DomainShell.Tests.Web.Services
@@ -32,11 +32,11 @@ namespace DomainShell.Tests.Web.Services
 
             List<Person> errors = new List<Person>();            
 
-            using (SQLiteConnection connection = new SQLiteConnection(DataStore.ConnectionString))
+            using (DbConnection connection = DataStore.GetConnection())
             {
                 connection.Open();
 
-                using (SQLiteTransaction tran = connection.BeginTransaction())
+                using (DbTransaction tran = connection.BeginTransaction())
                 {
                     foreach (string id in ids)
                     {
