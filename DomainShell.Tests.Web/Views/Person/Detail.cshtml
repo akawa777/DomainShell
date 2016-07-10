@@ -36,6 +36,8 @@
                     } else {
                         context(".message").text("fail");
                     }
+                }).fail(function (result) {
+                    context(".message").html(result.responseText);
                 });
             });
 
@@ -48,6 +50,8 @@
                     } else {
                         context(".message").text("fail");
                     }
+                }).fail(function (result) {
+                    context(".message").html(result.responseText);
                 });
             });
         }

@@ -43,7 +43,7 @@ namespace DomainShell.Tests.Domain.Service
                         Person person = _repository.Get(id, connection);
                         person.Name = name;
 
-                        if (!person.Update(connection))
+                        if (!person.UpdateInTran(connection))
                         {
                             errors.Add(person);
                         }

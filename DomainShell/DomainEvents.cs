@@ -34,23 +34,30 @@ namespace DomainShell
             }
 
             _assemblyMap[assembly.FullName] = true;
-        }        
+        }                
 
-        public static void Raise(DomainEvent @event)
+        private static void Validate(IDomainEvent @event, Type returnType, IDomainEventHandler handler)
         {
-            Raise(@event, true);    
-        }        
+            if (handler == null)
+            {
+                throw new Exception(string.Format("not registered {0} Handler class.", @event.GetType().ToString()));
+            }
 
-        public static TResult Raise<TResult>(DomainEvent<TResult> @event)
-        {
-            return (TResult)Raise(@event, false);           
+            MethodInfo method = handler.GetType().GetMethod("Handle", new Type[] { @event.GetType() });
+
+            if (method == null || method.ReturnType != returnType)
+            {
+                throw new Exception(string.Format("not define Handle method for {0}. return type of Handle method must be {1}.", @event.GetType().ToString(), returnType.ToString()));
+            }
         }
 
-        private static dynamic Raise(IDomainEvent @event, bool isVoid)
+        private static dynamic Raise(IDomainEvent @event, Type returnType)
         {
             Bundle(@event);
 
             IDomainEventHandler handler = _container.Load(@event);
+
+            Validate(@event, returnType, handler);
 
             bool canAspect = handler is IDomainEventAspect;
             IDomainEventAspect aspect = handler as IDomainEventAspect;
@@ -66,7 +73,7 @@ namespace DomainShell
             {
                 dynamic dynamicHandler = handler as dynamic;
 
-                if (isVoid)
+                if (returnType == typeof(void))
                 {
                     dynamicHandler.Handle(@event as dynamic);
                     result = null;
@@ -93,6 +100,16 @@ namespace DomainShell
 
             return result;
 
+        }
+
+        public static void Raise(DomainEvent @event)
+        {
+            Raise(@event, typeof(void));
+        }
+
+        public static TResult Raise<TResult>(DomainEvent<TResult> @event)
+        {
+            return (TResult)Raise(@event, typeof(TResult));
         }
     }    
 }

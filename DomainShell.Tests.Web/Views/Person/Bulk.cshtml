@@ -25,6 +25,8 @@
                     } else {
                         context(".message").text("fail");
                     }
+                }).fail(function (result) {
+                    context(".message").html(result.responseText);
                 });
             });
 

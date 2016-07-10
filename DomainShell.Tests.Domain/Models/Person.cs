@@ -32,9 +32,9 @@ namespace DomainShell.Tests.Domain.Models
             return DomainEvents.Raise(@event);
         }
 
-        public bool Update(DbConnection connection)
+        public bool UpdateInTran(DbConnection connection)
         {
-            PersonUpdatedEvent @event = new PersonUpdatedEvent();
+            PersonUpdatedInTranEvent @event = new PersonUpdatedInTranEvent();
 
             @event.AggregateRoot = this;
             @event.Connection = connection;

@@ -40,8 +40,13 @@ namespace DomainShell.Infrastructure
 
         public IDomainEventHandler Load(IDomainEvent @event)
         {
-            Func<IDomainEventHandler> hander = _handlerMap[@event.GetType()];
-            return hander();
+            if (!_handlerMap.ContainsKey(@event.GetType()))
+            {
+                return null;
+            }
+
+            Func<IDomainEventHandler> handler = _handlerMap[@event.GetType()];
+            return handler();
         }
     }
 
