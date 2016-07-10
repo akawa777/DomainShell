@@ -34,7 +34,7 @@ namespace DomainShell.Tests.Domain.Models
 
         public bool Update(DbConnection connection)
         {
-            PersonTranUpdatedEvent @event = new PersonTranUpdatedEvent();
+            PersonUpdatedEvent @event = new PersonUpdatedEvent();
 
             @event.AggregateRoot = this;
             @event.Connection = connection;

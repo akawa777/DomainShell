@@ -57,7 +57,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Events\PersonEvents.cs" />
-    <Compile Include="Events\PersonTrunUpdateEvent.cs" />
     <Compile Include="Infrastructure\DataStore.cs">
       <SubType>Code</SubType>
     </Compile>

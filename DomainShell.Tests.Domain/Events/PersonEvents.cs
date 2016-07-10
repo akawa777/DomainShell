@@ -18,7 +18,7 @@ namespace DomainShell.Tests.Domain.Events
 
     public class PersonUpdatedEvent : DomainEvent<bool>
     {
-        
+        public DbConnection Connection { get; set; }
     }
 
     public class PersonRemovedEvent : DomainEvent<bool>
@@ -66,7 +66,14 @@ namespace DomainShell.Tests.Domain.Events
                 return false;
             }
 
-            _repository.Update(person);
+            if (@event.Connection == null)
+            {
+                _repository.Update(person);
+            }
+            else
+            {
+                _repository.Update(person, @event.Connection);
+            }
 
             return true;
         }
