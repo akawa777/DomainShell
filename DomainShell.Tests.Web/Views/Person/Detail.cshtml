@@ -1,71 +1,73 @@
-﻿@using DomainShell.Tests.Domain.Models
-@model Person
-@{
-    ViewBag.Title = "Person";
-
-    string isNew = string.IsNullOrEmpty(Model.Id) ? "true" : "false";
+﻿@{
+    ViewBag.Title = "detail";
 }
 
 @section scripts{
-    <script type="text/javascript" src="/scripts/view.js"></script>
+    <script type="text/javascript" src="/scripts/figuram.js"></script>
     <script type="text/javascript">
-        var Detail = function(context, options) {
-            var self = this;
+        var detail = {
+            ready: function (context, parameters) {
+                var isNew = parameters.isNew;
+                var id = 0;
 
-            var isNew = options.isNew;
-            var id = 0;
+                if (isNew) {
+                    context(".id").hide();
+                    context("[name=remove]").hide();
+                } else {
+                    var sections = location.href.split("/");
+                    id = sections[sections.length - 1];
 
-            if (isNew) {
-                context(".id").hide();
-                context("[name=remove]").hide();
-            } else {
-                var sections = location.href.split("/");
-                id = sections[sections.length - 1];
-            }
+                    $.get("/person/get", { id: id }).success(function (person) {
+                        context(".id").text(person.Id)
+                        context("[name=name]").val(person.Name);
+                    }).fail(function (result) {
+                        context(".message").html(result.responseText);
+                    });
+                }
 
-            context("[name=save]").on("click", function () {                
-                var name = context("[name=name]").val();
+                context("[name=save]").on("click", function () {
+                    var name = context("[name=name]").val();
 
-                $.post(isNew ? "/person/add" : "/person/update", { id: id, name: name }).success(function (result) {
-                    if (result) {
-                        if (isNew) {
+                    $.post(isNew ? "/person/add" : "/person/update", { id: id, name: name }).success(function (result) {
+                        if (result) {
+                            if (isNew) {
+                                location.href = "/person";
+                            } else {
+                                context(".message").text("success");
+                            }
+                        } else {
+                            context(".message").text("fail");
+                        }
+                    }).fail(function (result) {
+                        context(".message").html(result.responseText);
+                    });
+                });
+
+                context("[name=remove]").on("click", function () {
+                    var name = context("[name=name]").val();
+
+                    $.post("/person/remove", { id: id, name: name }).success(function (result) {
+                        if (result) {
                             location.href = "/person";
                         } else {
-                            context(".message").text("success");
+                            context(".message").text("fail");
                         }
-                    } else {
-                        context(".message").text("fail");
-                    }
-                }).fail(function (result) {
-                    context(".message").html(result.responseText);
+                    }).fail(function (result) {
+                        context(".message").html(result.responseText);
+                    });
                 });
-            });
-
-            context("[name=remove]").on("click", function () {                
-                var name = context("[name=name]").val();
-
-                $.post("/person/remove", { id: id, name: name }).success(function (result) {
-                    if (result) {
-                        location.href = "/person";
-                    } else {
-                        context(".message").text("fail");
-                    }
-                }).fail(function (result) {
-                    context(".message").html(result.responseText);
-                });
-            });
+            }
         }
 
-        view({
+        figuram({
             el: "#app",
-            app: Detail,
+            app: detail,
             parameters: {
                 isNew: location.href.toLocaleString().indexOf("/person/new") != -1
             }
         });
     </script>
 }
-
 
 <h2>detail</h2>
 
@@ -77,11 +79,11 @@
     <br />
 
     <form>        
-        <div class="id">
-            id: @Model.Id
+        <div>
+            id: <span class="id"></span>
         </div>
         <br />
-        name: <input type="text" name="name" value="@Model.Name" />
+        name: <input type="text" name="name" />
         <br />
         <br />
         <button name="save" type="button">save</button>

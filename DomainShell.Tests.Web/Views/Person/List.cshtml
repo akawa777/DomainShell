@@ -1,28 +1,62 @@
-﻿@using DomainShell.Tests.Domain.Models
-@model Person[]
-@{
-    ViewBag.Title = "Index";
+﻿@{
+    ViewBag.Title = "list";
 }
-@section scripts{
-    <script type="text/javascript" src="/scripts/view.js"></script>
-    <script type="text/javascript">
-        var List = function (context, options) {
-            var self = this;
-
-            context("[name=output]").on("click", function () {               
-                location.href = "/person/output";
-            });
+@section scripts{       
+    <script type="text/javascript" src="/scripts/figuram.js"></script>   
+    <script id="tr-template" type="text/html">
+        <td class="id">
+            <a href="/person/detail/"></a>
+        </td>
+        <td class="name">
+            
+        </td>
+    </script>
+    <script type="text/javascript">   
+        var tr = {
+            template: $("#tr-template").html(),
+            ready: function (context, parameters) {
+                context(".id a").attr("href", "/person/detail/" + parameters.id);
+                context(".id a").text(parameters.id);
+                context(".name").text(parameters.name);
+            }
         }
 
-        view({
+        var list = {
+            ready: function (context, parameters, figuram) {
+                $.get("/person/getall").success(function (persons) {
+                    for (var id in persons) {
+                        var person = persons[id];
+
+                        var trEl = $("<tr>");
+                        context("table tbody").append(trEl);
+
+                        figuram({
+                            el: trEl,
+                            app: tr,
+                            parameters: { id: person.Id, name: person.Name }
+                        });
+                    }                    
+                }).fail(function (result) {
+                    context(".message").html(result.responseText);
+                });
+
+                context("[name=output]").on("click", function () {
+                    location.href = "/person/output";
+                });
+            }
+        }
+
+        figuram({
             el: "#app",
-            app: List
+            app: list
         });
     </script>
 }
 <h2>list</h2>
 
 <div id="app">
+    <div class="message"></div>
+
     <a href="/person/new">new</a>
     <a href="/person/bulk">bulk</a>
     <br />
@@ -34,18 +68,7 @@
                 <th>Name</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach (Person person in Model)
-            {
-                <tr>
-                    <td>
-                        <a href="/person/detail/@person.Id">@person.Id</a>
-                    </td>
-                    <td>
-                        @person.Name
-                    </td>
-                </tr>
-            }
+        <tbody>            
         </tbody>        
     </table>
     <br />

@@ -21,61 +21,67 @@ namespace DomainShell.Tests.Web.Controllers
         
         public ActionResult List()
         {
-            Person[] persons = _personReader.GetAll();
-
-            return View("List", persons);
-        }
+            return View("List");
+        }        
 
         public ActionResult New()
         {
-            Person person = new Person();
-
-            return View("Detail", person);
+            return View("Detail");
         }        
 
-        public ActionResult Detail(string id)
+        public ActionResult Detail()
         {
-            Person person = _personReader.Get(id);
-
-            return View(person);
+            return View();
         }
 
         public ActionResult Bulk()
         {
-            Person[] persons = _personReader.GetAll();
-
-            return View(persons);
+            return View();
         }
 
-        public ActionResult Add(Person person)
+        public JsonResult GetAll()
+        {
+            Person[] persons = _personReader.GetAll();
+
+            return Json(persons, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult Get(string id)
+        {
+            Person person = _personReader.Get(id);
+
+            return Json(person, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult Add(Person person)
         {
             bool result = person.Add();
 
             return Json(result);
         }
 
-        public ActionResult Update(Person person)
+        public JsonResult Update(Person person)
         {
             bool result = person.Update();
 
             return Json(result);
         }
 
-        public ActionResult Remove(Person person)
+        public JsonResult Remove(Person person)
         {
             bool result = person.Remove();
 
             return Json(result);
         }
 
-        public ActionResult BulkUpdate(string[] ids, string name)
+        public JsonResult BulkUpdate(string[] ids, string name)
         {
             PersonBulkUpdate.Result result = _bulkUpdate.BulkUpdate(ids, name);
 
             return Json(result);
         }
 
-        public ActionResult Output()
+        public FileResult Output()
         {            
             using (MemoryStream stream = new MemoryStream())
             {                

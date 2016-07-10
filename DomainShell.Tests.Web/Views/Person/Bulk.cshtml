@@ -1,51 +1,94 @@
 ﻿@using DomainShell.Tests.Domain.Models
 @model Person[]
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "bulk";
 }
 
 @section scripts{
-    <script type="text/javascript" src="/scripts/view.js"></script>
-    <script type="text/javascript">        
-        var Bulk = function(context, options) {
-            var self = this;
+    <script type="text/javascript" src="/scripts/figuram.js"></script>
+    <script id="tr-template" type="text/html">
+        <td>
+            <input class="target" type="checkbox" />
+        </td>
+        <td class="id"></td>
+        <td class="name"></td>
+    </script>
+    <script type="text/javascript">  
+        var tr = {
+            template: $("#tr-template").html(),
+            ready: function (context, parameters) {
+                context(".target").val(parameters.id);
+                context(".id a").text(parameters.id);
+                context(".name").text(parameters.name);
+            }            
+        }
 
-            context("[name=save]").on("click", function () {
-                var ids = [];
+        var bulk = {
+            ready: function (context) {
+                $.get("/person/getall").success(function (persons) {
+                    for (var id in persons) {
+                        var person = persons[id];
 
-                context('.target:checked').map(function () {
-                    ids.push($(this).val());
-                });
+                        var trEl = $("<tr>");
+                        context("table tbody").append(trEl);
 
-                var name = context("input[name=name]").val();
-
-                $.post("/person/bulkupdate", { ids: ids, name: name }).success(function (result) {
-                    if (result.Success) {
-                        location.href = "/person";
-                    } else {
-                        context(".message").text("fail");
+                        figuram({
+                            el: trEl,
+                            app: tr,
+                            parameters: { id: person.Id, name: person.Name }
+                        });
                     }
                 }).fail(function (result) {
                     context(".message").html(result.responseText);
                 });
-            });
 
-            context(".allTarget").on("click", function () {
-                if ($(this).is(':checked')) {
-                    context('.target').map(function () {
-                        $(this).prop("checked", true);
+                context("[name=save]").on("click", function () {
+                    var ids = [];
+
+                    context('.target:checked').map(function () {
+                        ids.push($(this).val());
                     });
-                } else {
-                    context('.target').map(function () {
-                        $(this).prop("checked", false);
+
+                    if (ids.length == 0) {
+                        context(".message").text("no select target.");
+                        return;
+                    }
+
+                    var name = context("input[name=name]").val();
+
+                    if (name == "") {
+                        context(".message").text("no set name.");
+                        return;
+                    }
+
+                    $.post("/person/bulkupdate", { ids: ids, name: name }).success(function (result) {
+                        if (result.Success) {
+                            location.href = "/person";
+                        } else {
+                            context(".message").text("fail");
+                        }
+                    }).fail(function (result) {
+                        context(".message").html(result.responseText);
                     });
-                }                
-            });
+                });
+
+                context(".allTarget").on("click", function () {
+                    if ($(this).is(':checked')) {
+                        context('.target').map(function () {
+                            $(this).prop("checked", true);
+                        });
+                    } else {
+                        context('.target').map(function () {
+                            $(this).prop("checked", false);
+                        });
+                    }
+                });
+            }
         }
 
-        view({
+        figuram({
             el: "#app",
-            app: Bulk
+            app: bulk
         });
     </script>
 }
@@ -66,21 +109,7 @@
                     <th>Name</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (Person person in Model)
-                {
-                    <tr>
-                        <td>
-                            <input class="target" type="checkbox" value="@person.Id" />
-                        </td>
-                        <td>
-                            @person.Id
-                        </td>
-                        <td>
-                            @person.Name
-                        </td>
-                    </tr>
-                }
+            <tbody>                
             </tbody>
         </table>
         <br />
