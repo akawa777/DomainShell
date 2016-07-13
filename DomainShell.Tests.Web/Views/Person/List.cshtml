@@ -2,39 +2,36 @@
     ViewBag.Title = "list";
 }
 @section scripts{       
-    <script type="text/javascript" src="/scripts/figuram.js"></script>   
-    <script id="tr-template" type="text/html">
-        <td class="id">
-            <a href="/person/detail/"></a>
-        </td>
-        <td class="name">
-            
-        </td>
-    </script>
+    <script type="text/javascript" src="/scripts/coco.js"></script>    
     <script type="text/javascript">   
         var tr = {
-            template: $("#tr-template").html(),
-            ready: function (context, parameters) {
-                context(".id a").attr("href", "/person/detail/" + parameters.id);
-                context(".id a").text(parameters.id);
-                context(".name").text(parameters.name);
+            template: " \
+                <tr> \
+                    <td coco-pin='id'> \
+                        <a href='/person/detail/'></a> \
+                    </td> \
+                    <td coco-pin='name'></td> \
+                </tr> ",
+            ready: function (context, params, coco) {
+                context.pin("id", "a").attr("href", "/person/detail/" + params.Id);
+                context.pin("id", "a").text(params.Id);
+                context.pin("name").text(params.Name);
             }
         }
 
+        coco.container.tr = tr;
+
         var list = {
-            ready: function (context, parameters, figuram) {
+            template: "#app",
+            ready: function (context, params, coco) {
                 $.get("/person/getall").success(function (persons) {
                     for (var id in persons) {
-                        var person = persons[id];
-
-                        var trEl = $("<tr>");
-                        context("table tbody").append(trEl);
-
-                        figuram({
-                            el: trEl,
-                            app: tr,
-                            parameters: { id: person.Id, name: person.Name }
+                        view = coco({
+                            model: "tr",
+                            params: persons[id]
                         });
+
+                        context("table tbody").append(view.el);
                     }                    
                 }).fail(function (result) {
                     context(".message").html(result.responseText);
@@ -46,10 +43,11 @@
             }
         }
 
-        figuram({
-            el: "#app",
-            app: list
+        var view = coco({            
+            model: list
         });
+
+        $("#app").replaceWith(view.el);
     </script>
 }
 <h2>list</h2>
@@ -68,8 +66,8 @@
                 <th>Name</th>
             </tr>
         </thead>
-        <tbody>            
-        </tbody>        
+        <tbody>
+        </tbody>
     </table>
     <br />
     <form>
