@@ -31,7 +31,17 @@
     </div>
 
     @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/require")
+    <script type="text/javascript">
+        require.config({
+            baseUrl: "/Scripts",
+            paths: {
+                text: "/Scripts/text",
+                templates: "/Templates"
+            }
+        });
+    </script>
+    @Scripts.Render("~/bundles/bootstrap")    
     @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -1,95 +1,95 @@
-﻿@using DomainShell.Tests.Domain.Models
-@model Person[]
-@{
+﻿@{
     ViewBag.Title = "bulk";
 }
 
-@section scripts{
-    <script type="text/javascript" src="/scripts/figuram.js"></script>
-    <script id="tr-template" type="text/html">
-        <td>
-            <input class="target" type="checkbox" />
-        </td>
-        <td class="id"></td>
-        <td class="name"></td>
-    </script>
-    <script type="text/javascript">  
-        var tr = {
-            template: $("#tr-template").html(),
-            ready: function (context, parameters) {
-                context(".target").val(parameters.id);
-                context(".id a").text(parameters.id);
-                context(".name").text(parameters.name);
-            }            
-        }
+@section scripts{        
+    <script type="text/javascript"> 
+        require(["coco", "Person/tr", "text!templates/person/tr.check.html"], function (coco, tr, template) {
+            var checkTr = coco.extend(tr, {
+                node: template,
+                checked: function () {
+                    var self = this;
+                    return self.$context('.target:checked').length > 0
+                },
+                check: function (checked) {
+                    var self = this;                    
+                    self.$context('.target').prop("checked", checked);
+                }
+            });
 
-        var bulk = {
-            ready: function (context) {
-                $.get("/person/getall").success(function (persons) {
-                    for (var id in persons) {
-                        var person = persons[id];
+            coco.container.set("checkTr", checkTr);
 
-                        var trEl = $("<tr>");
-                        context("table tbody").append(trEl);
+            var bulk = {
+                node: "#app",
+                ready: function () {
+                    var self = this;
 
-                        figuram({
-                            el: trEl,
-                            app: tr,
-                            parameters: { id: person.Id, name: person.Name }
-                        });
-                    }
-                }).fail(function (result) {
-                    context(".message").html(result.responseText);
-                });
+                    var trViews = [];
 
-                context("[name=save]").on("click", function () {
-                    var ids = [];
+                    $.get("/person/getall").success(function (persons) {
+                        for (var id in persons) {
+                            view = self.$coco({
+                                model: "checkTr",
+                                params: persons[id]
+                            });
 
-                    context('.target:checked').map(function () {
-                        ids.push($(this).val());
-                    });
+                            self.$context("table tbody").append(view.el);
 
-                    if (ids.length == 0) {
-                        context(".message").text("no select target.");
-                        return;
-                    }
-
-                    var name = context("input[name=name]").val();
-
-                    if (name == "") {
-                        context(".message").text("no set name.");
-                        return;
-                    }
-
-                    $.post("/person/bulkupdate", { ids: ids, name: name }).success(function (result) {
-                        if (result.Success) {
-                            location.href = "/person";
-                        } else {
-                            context(".message").text("fail");
+                            trViews.push(view);
                         }
                     }).fail(function (result) {
-                        context(".message").html(result.responseText);
+                        self.$context(".message").html(result.responseText);
                     });
-                });
 
-                context(".allTarget").on("click", function () {
-                    if ($(this).is(':checked')) {
-                        context('.target').map(function () {
-                            $(this).prop("checked", true);
+                    self.$context("[name=save]").on("click", function () {
+                        var ids = [];
+
+                        trViews.forEach(function (trView) {
+                            if (trView.checked()) {
+                                ids.push(this.Id);
+                            }
                         });
-                    } else {
-                        context('.target').map(function () {
-                            $(this).prop("checked", false);
+
+                        if (ids.length == 0) {
+                            self.$context(".message").text("no select target.");
+                            return;
+                        }
+
+                        var name = context("input[name=name]").val();
+
+                        if (name == "") {
+                            self.$context(".message").text("no set name.");
+                            return;
+                        }
+
+                        $.post("/person/bulkupdate", { ids: ids, name: name }).success(function (result) {
+                            if (result.Success) {
+                                location.href = "/person";
+                            } else {
+                                self.$context(".message").text("fail");
+                            }
+                        }).fail(function (result) {
+                            self.$context(".message").html(result.responseText);
                         });
-                    }
-                });
+                    });
+
+                    self.$context(".allTarget").on("click", function () {
+                        var checked = $(this).is(':checked');
+
+                        trViews.forEach(function (trView) {
+                            trView.check(checked);
+                        });
+                    });
+                }
             }
-        }
 
-        figuram({
-            el: "#app",
-            app: bulk
+            var view = coco({
+                model: bulk
+            });
+
+            $("#app").replaceWith(view.el);
         });
+        
     </script>
 }
 

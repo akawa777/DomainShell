@@ -1,53 +1,39 @@
 ﻿@{
     ViewBag.Title = "list";
 }
-@section scripts{       
-    <script type="text/javascript" src="/scripts/coco.js"></script>    
+@section scripts{           
     <script type="text/javascript">   
-        var tr = {
-            template: " \
-                <tr> \
-                    <td coco-pin='id'> \
-                        <a href='/person/detail/'></a> \
-                    </td> \
-                    <td coco-pin='name'></td> \
-                </tr> ",
-            ready: function (context, params, coco) {
-                context.pin("id", "a").attr("href", "/person/detail/" + params.Id);
-                context.pin("id", "a").text(params.Id);
-                context.pin("name").text(params.Name);
+        require(["coco", "Person/tr"], function (coco, tr) {
+            var list = {
+                node: "#app",
+                ready: function () {
+                    var self = this;
+
+                    $.get("/person/getall").success(function (persons) {
+                        for (var id in persons) {
+                            view = self.$coco({
+                                model: tr,
+                                params: persons[id]
+                            });
+
+                            self.$context("table tbody").append(view.el);
+                        }
+                    }).fail(function (result) {
+                        self.$context(".message").html(result.responseText);
+                    });
+
+                    self.$context("[name=output]").on("click", function () {
+                        location.href = "/person/output";
+                    });
+                }
             }
-        }
 
-        coco.container.tr = tr;
+            var view = coco({
+                model: list
+            });
 
-        var list = {
-            template: "#app",
-            ready: function (context, params, coco) {
-                $.get("/person/getall").success(function (persons) {
-                    for (var id in persons) {
-                        view = coco({
-                            model: "tr",
-                            params: persons[id]
-                        });
-
-                        context("table tbody").append(view.el);
-                    }                    
-                }).fail(function (result) {
-                    context(".message").html(result.responseText);
-                });
-
-                context("[name=output]").on("click", function () {
-                    location.href = "/person/output";
-                });
-            }
-        }
-
-        var view = coco({            
-            model: list
-        });
-
-        $("#app").replaceWith(view.el);
+            $("#app").replaceWith(view.el);
+        });        
     </script>
 }
 <h2>list</h2>
