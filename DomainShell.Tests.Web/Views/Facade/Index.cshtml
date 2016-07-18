@@ -1,9 +1,10 @@
-﻿
-@{
+﻿@{
     string guid = Guid.NewGuid().ToString();
 
     string app = Request.RequestContext.RouteData.Values["app"].ToString();
     string main = Request.RequestContext.RouteData.Values["main"].ToString();
+
+    string appStateId = DomainShell.Tests.Web.MvcApplication.AppStateId;
     
 }
 
@@ -11,6 +12,7 @@
     <script type="text/javascript">   
         require.config({
             baseUrl: "/Scripts",
+            urlArgs: "bust=@appStateId",
             paths: {
                 text: "/Scripts/text",
                 apps: "/Apps"
