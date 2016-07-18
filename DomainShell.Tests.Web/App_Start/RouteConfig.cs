@@ -14,12 +14,29 @@ namespace DomainShell.Tests.Web
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
+                name: "Api",
+                url: "api/{controller}/{action}/{id}",
+                defaults: new { controller = "Person", action = "Index", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "App",
+                url: "{app}/{behavior}/{id}",
+                defaults: new 
+                    { 
+                        controller = "Facade", 
+                        action = "Index", 
+                        app = "Person", 
+                        behavior = "List", 
+                        id = UrlParameter.Optional 
+                    }
+            );
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Person", action = "Index", id = UrlParameter.Optional }
             );
-
-           
         }
     }
 }

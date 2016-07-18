@@ -14,30 +14,30 @@ namespace DomainShell.Tests.Web.Controllers
         private PersonReader _personReader = new PersonReader();
         private PersonBulkUpdate _bulkUpdate = new PersonBulkUpdate();
         
-        public ActionResult Index()
-        {
-            return List();
-        }
+        //public ActionResult Index()
+        //{
+        //    return List();
+        //}
         
-        public ActionResult List()
-        {
-            return View("List");
-        }        
+        //public ActionResult List()
+        //{
+        //    return View("List");
+        //}        
 
-        public ActionResult New()
-        {
-            return View("Detail");
-        }        
+        //public ActionResult New()
+        //{
+        //    return View("Detail");
+        //}        
 
-        public ActionResult Detail()
-        {
-            return View();
-        }
+        //public ActionResult Detail()
+        //{
+        //    return View();
+        //}
 
-        public ActionResult Bulk()
-        {
-            return View();
-        }
+        //public ActionResult Bulk()
+        //{
+        //    return View();
+        //}
 
         public JsonResult GetAll()
         {

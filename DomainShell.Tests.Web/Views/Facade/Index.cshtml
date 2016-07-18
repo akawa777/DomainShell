@@ -1,0 +1,20 @@
+﻿
+@{
+    string guid = Guid.NewGuid().ToString();
+
+    string app = Request.RequestContext.RouteData.Values["app"].ToString();
+    string behavior = Request.RequestContext.RouteData.Values["behavior"].ToString();
+    
+}
+
+@section scripts {
+    <script type="text/javascript">        
+        define("el", [], function(){
+            return document.getElementById("@guid");
+        });
+
+        require(["@app/@behavior"]);
+    </script>
+}
+
+<div id="@guid"></div>
