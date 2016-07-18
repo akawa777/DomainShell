@@ -21,13 +21,13 @@ namespace DomainShell.Tests.Web
 
             routes.MapRoute(
                 name: "App",
-                url: "{app}/{behavior}/{id}",
+                url: "{app}/{main}/{id}",
                 defaults: new 
                     { 
                         controller = "Facade", 
                         action = "Index", 
-                        app = "Person", 
-                        behavior = "List", 
+                        app = "Person",
+                        main = "List", 
                         id = UrlParameter.Optional 
                     }
             );

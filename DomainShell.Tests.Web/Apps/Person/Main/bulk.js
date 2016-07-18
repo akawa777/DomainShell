@@ -1,30 +1,6 @@
 ﻿require(
-    ["el", "coco", "text!apps/person/main/bulk.html", "apps/person/parts/tr", "text!apps/person/parts/tr.check.html"],
-    function (el, coco, template, tr, checkTemplate) {
-        var checkTr = coco.extend(tr, {
-            node: checkTemplate,
-            ready: function () {
-                var self = this;
-
-                self.base().ready();
-
-                self.Id = self.$params.Id;
-                self.Name = self.$params.Name;
-            },
-            checked: function () {
-                var self = this;
-                return self.$context('.target:checked').length > 0
-            },
-            check: function (checked) {
-                var self = this;
-                self.$context('.target').prop("checked", checked);
-            },
-            Id: "",
-            Name: ""
-        });
-
-        coco.container.set("checkTr", checkTr);
-
+    ["el", "coco", "text!apps/person/main/bulk.html", "apps/person/parts/tr.check"],
+    function (el, coco, template, trCheck) {
         var bulk = {
             node: template,
             ready: function () {
@@ -35,7 +11,7 @@
                 $.get("/api/person/getall").success(function (persons) {
                     for (var id in persons) {
                         view = self.$coco({
-                            model: "checkTr",
+                            model: "trCheck",
                             params: persons[id]
                         });
 
