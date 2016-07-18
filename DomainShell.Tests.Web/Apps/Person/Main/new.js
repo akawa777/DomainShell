@@ -1,0 +1,1 @@
+﻿require(["apps/person/main/detail"]);

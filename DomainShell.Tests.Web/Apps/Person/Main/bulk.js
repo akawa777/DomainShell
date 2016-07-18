@@ -1,5 +1,5 @@
 ﻿require(
-    ["el", "coco", "text!templates/person/bulk.html", "person/tr", "text!templates/person/tr.check.html"],
+    ["el", "coco", "text!apps/person/main/bulk.html", "apps/person/parts/tr", "text!apps/person/parts/tr.check.html"],
     function (el, coco, template, tr, checkTemplate) {
         var checkTr = coco.extend(tr, {
             node: checkTemplate,

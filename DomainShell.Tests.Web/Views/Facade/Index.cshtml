@@ -8,12 +8,20 @@
 }
 
 @section scripts {
-    <script type="text/javascript">        
+    <script type="text/javascript">   
+        require.config({
+            baseUrl: "/Scripts",
+            paths: {
+                text: "/Scripts/text",
+                apps: "/Apps"
+            }
+        });
+
         define("el", [], function(){
             return document.getElementById("@guid");
         });
 
-        require(["@app/@behavior"]);
+        require(["apps/@app/main/@behavior"]);
     </script>
 }
 

@@ -1,4 +1,4 @@
-﻿require(["el", "coco", "text!templates/person/list.html", "person/tr"], function (el, coco, template, tr) {
+﻿require(["el", "coco", "text!apps/person/main/list.html", "apps/person/parts/tr"], function (el, coco, template, tr) {
     var list = {
         node: template,
         ready: function () {

@@ -179,6 +179,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Apps\Person\Main\bulk.html" />
+    <Content Include="Apps\Person\Main\bulk.js" />
+    <Content Include="Apps\Person\Main\detail.html" />
+    <Content Include="Apps\Person\Main\detail.js" />
+    <Content Include="Apps\Person\Main\list.html" />
+    <Content Include="Apps\Person\Main\list.js" />
+    <Content Include="Apps\Person\Main\new.js" />
+    <Content Include="Apps\Person\Parts\tr.check.html" />
+    <Content Include="Apps\Person\Parts\tr.html" />
+    <Content Include="Apps\Person\Parts\tr.js" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="favicon.ico" />
@@ -197,19 +207,12 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\Person\bulk.js" />
-    <Content Include="Scripts\Person\new.js" />
-    <Content Include="Scripts\Person\tr.js" />
     <Content Include="Scripts\r.js" />
     <Content Include="Scripts\require.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\text.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Templates\Person\detail.html" />
-    <Content Include="Templates\Person\list.html" />
-    <Content Include="Templates\Person\tr.check.html" />
-    <Content Include="Templates\Person\tr.html" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -224,9 +227,6 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Facade\Index.cshtml" />
-    <Content Include="Scripts\Person\list.js" />
-    <Content Include="Scripts\Person\detail.js" />
-    <Content Include="Templates\Person\bulk.html" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,4 +1,4 @@
-﻿require(["el", "coco", "text!templates/person/detail.html"], function (el, coco, template) {
+﻿require(["el", "coco", "text!apps/person/main/detail.html"], function (el, coco, template) {
     var detail = {
         node: template,
         ready: function () {
