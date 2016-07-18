@@ -1,9 +1,8 @@
 ﻿<div>
-    <div class="message"></div>
-
     <a href="/person">list</a><br />
     <br />
     <form>
+        <coco-error-table></coco-error-table>
         <table>
             <thead>
                 <tr>
@@ -13,11 +12,13 @@
                 </tr>
             </thead>
             <tbody></tbody>
-        </table>
-        <br />
-        <label for="name">name</label>
-        <br />
-        <input type="text" name="name" />
+        </table>                
+        <br />        
+        <label>
+            name            
+            <input type="text" name="name" />            
+        </label>
+        <coco-error-name></coco-error-name>
         <br />
         <br />
         <button name="save" type="button">save</button>

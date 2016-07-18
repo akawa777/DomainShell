@@ -1,16 +1,19 @@
 ﻿<div>
-    <div class="message"></div>
-
     <a href="/person">list</a>
     <br />
     <br />
 
     <form>        
         <div>
-            id: <span class="id"></span>
+            <label>
+                id: <span class="id"></span>
+            </label>
         </div>
         <br />
-        name: <input type="text" name="name" />
+        <label>
+            name: <input type="text" name="name" />
+        </label>
+        <coco-error-name></coco-error-name>
         <br />
         <br />
         <button name="save" type="button">save</button>

@@ -186,6 +186,7 @@
     <Content Include="Apps\Person\Main\list.html" />
     <Content Include="Apps\Person\Main\list.js" />
     <Content Include="Apps\Person\Main\new.js" />
+    <Content Include="Apps\Person\Parts\error.js" />
     <Content Include="Apps\Person\Parts\tr.check.js" />
     <Content Include="Apps\Person\Parts\tr.check.html" />
     <Content Include="Apps\Person\Parts\tr.html" />

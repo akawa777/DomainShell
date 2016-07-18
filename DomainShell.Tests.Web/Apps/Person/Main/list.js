@@ -14,7 +14,7 @@
                     self.$context("table tbody").append(view.el);
                 }
             }).fail(function (result) {                
-                self.$context(".message").html(result.responseText);
+                $("body").html(result.responseText);
             });
 
             self.$context("[name=output]").on("click", function () {

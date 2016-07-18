@@ -1,8 +1,16 @@
 ﻿require(
-    ["el", "coco", "text!apps/person/main/bulk.html", "apps/person/parts/tr.check"],
-    function (el, coco, template, trCheck) {
+    ["el", "coco", "text!apps/person/main/bulk.html", "apps/person/parts/tr.check", "apps/person/parts/error"],
+    function (el, coco, template, trCheck, error) {
         var bulk = {
             node: template,
+            components: {
+                errorTable: {
+                    model: error
+                },
+                errorName: {
+                    model: error
+                }
+            },
             ready: function () {
                 var self = this;
 
@@ -20,10 +28,13 @@
                         trViews.push(view);
                     }
                 }).fail(function (result) {
-                    self.$context(".message").html(result.responseText);
+                    $("body").html(result.responseText);
                 });
 
                 self.$context("[name=save]").on("click", function () {
+                    self.components.errorTable.view.clear();
+                    self.components.errorName.view.clear();
+
                     var ids = [];
 
                     trViews.forEach(function (trView) {
@@ -32,15 +43,22 @@
                         }
                     });
 
+                    var valid = true;
+
                     if (ids.length == 0) {
-                        self.$context(".message").text("no select target.");
-                        return;
+                        self.components.errorTable.view.message("no select target.");
+                        valid = false;
                     }
 
                     var name = self.$context("input[name=name]").val();
 
-                    if (name == "") {
-                        self.$context(".message").text("no set name.");
+                    if (name == "") {                        
+                        self.components.errorName.view.message("no set name.");
+                        valid = false;
+                    }
+
+                    if (!valid) {
+                        alert("exist error.");
                         return;
                     }
 
@@ -48,10 +66,10 @@
                         if (result.Success) {
                             location.href = "/person";
                         } else {
-                            self.$context(".message").text("fail");
+                            alert("failed.");
                         }
                     }).fail(function (result) {
-                        self.$context(".message").html(result.responseText);
+                        $("body").html(result.responseText);
                     });
                 });
 

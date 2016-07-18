@@ -144,7 +144,9 @@
                     continue;
                 }
 
-                var componentEl = context(componentTag + key);
+                var componentEl = context(componentTag + key.replace(/[A-Z]/g, function(ch){
+                    return "-" + ch;
+                }));
 
                 if (componentEl.length == 0) {
                     continue;
