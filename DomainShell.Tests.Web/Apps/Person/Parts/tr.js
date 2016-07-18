@@ -10,7 +10,5 @@
         }
     }
 
-    coco.container.set("tr", tr);
-
     return tr;
 });

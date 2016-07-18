@@ -11,7 +11,7 @@
                 $.get("/api/person/getall").success(function (persons) {
                     for (var id in persons) {
                         view = self.$coco({
-                            model: "trCheck",
+                            model: trCheck,
                             params: persons[id]
                         });
 

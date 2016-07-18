@@ -21,7 +21,5 @@
             Name: ""
         });
 
-        coco.container.set("trCheck", trCheck);
-
         return trCheck
 });
