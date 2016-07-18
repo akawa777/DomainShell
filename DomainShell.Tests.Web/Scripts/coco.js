@@ -152,11 +152,18 @@
                     continue;
                 }
 
+                var attrs = {};
+
+                $.each(componentEl.get(0).attributes, function (i, attr) {
+                    attrs[attr.name] = attr.value;
+                });
+
                 var component = components[key];
 
                 var componentView = coco({
                     model: component.model,
-                    params: component.params
+                    params: component.params,
+                    attrs: attrs
                 });
 
                 componentEl.replaceWith(componentView.el);
@@ -166,6 +173,11 @@
 
         model.$context = context;
         model.$params = params;
+
+        if (options.attrs) {
+            model.$attrs = options.attrs;
+        }
+
         model.$coco = coco;
 
         model.ready();
