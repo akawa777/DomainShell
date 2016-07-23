@@ -56,9 +56,9 @@ namespace DomainShell.Tests.Domain.Repositories.Write
             }
         }
 
-        public void Update(Person person, DbConnection connection)
+        public void Update(Person person, object connection)
         {
-            DbCommand command = connection.CreateCommand();
+            DbCommand command = (connection as DbConnection).CreateCommand();
 
             command.CommandText = "update Person set Name = @name where Id = @id";
 

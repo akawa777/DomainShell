@@ -32,7 +32,7 @@ namespace DomainShell.Tests.Domain.Models
             return DomainEvents.Raise(@event);
         }
 
-        public bool UpdateInTran(DbConnection connection)
+        public bool UpdateInTran(object connection)
         {
             PersonUpdatedInTranEvent @event = new PersonUpdatedInTranEvent();
 
@@ -50,5 +50,5 @@ namespace DomainShell.Tests.Domain.Models
 
             return DomainEvents.Raise(@event);
         }
-    }
+    }   
 }

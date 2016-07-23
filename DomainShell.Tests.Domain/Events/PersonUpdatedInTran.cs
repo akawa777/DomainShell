@@ -13,7 +13,7 @@ namespace DomainShell.Tests.Domain.Events
 {
     public class PersonUpdatedInTranEvent : DomainEvent<bool>
     {
-        public DbConnection Connection { get; set; }
+        public object Connection { get; set; }
     }
 
     public class PersonUpdatedInTranEventHandler :

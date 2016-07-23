@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using DomainShell.Extension;
 using DomainShell.Tests.Domain.Models;
 using DomainShell.Tests.Domain.Repositories.Read;
-using System.Data.Common;
 using DomainShell.Tests.Domain.Infrastructure;
 
 namespace DomainShell.Tests.Domain.Service
@@ -30,29 +30,24 @@ namespace DomainShell.Tests.Domain.Service
                 };
             }
 
-            List<Person> errors = new List<Person>();            
+            List<Person> errors = new List<Person>();     
 
-            using (DbConnection connection = DataStore.CreateConnection())
+            using (ITransaction tran = TransactionProvider.BeginTran<Person>())
             {
-                connection.Open();
-
-                using (DbTransaction tran = connection.BeginTransaction())
+                foreach (string id in ids)
                 {
-                    foreach (string id in ids)
-                    {
-                        Person person = _repository.Get(id, connection);
-                        person.Name = name;
+                    Person person = _repository.Get(id, tran.Connection);
+                    person.Name = name;
 
-                        if (!person.UpdateInTran(connection))
-                        {
-                            errors.Add(person);
-                        }
-                    }
-
-                    if (errors.Count == 0)
+                    if (!person.UpdateInTran(tran.Connection))
                     {
-                        tran.Commit();
+                        errors.Add(person);
                     }
+                }
+
+                if (errors.Count == 0)
+                {
+                    tran.Complete();
                 }
             }
 

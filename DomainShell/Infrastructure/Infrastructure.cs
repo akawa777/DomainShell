@@ -13,7 +13,7 @@ namespace DomainShell.Infrastructure
         void Set<TEvent>(Func<IDomainEventHandler> handler) where TEvent : IDomainEvent;
     }
 
-    public interface IDomainEventLoader
+    internal interface IDomainEventLoader
     {
         IDomainEventHandler Load(IDomainEvent @event);
     }
