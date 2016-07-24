@@ -36,10 +36,10 @@ namespace DomainShell.Tests.Domain.Service
             {
                 foreach (string id in ids)
                 {
-                    Person person = _repository.Get(id, tran.Connection);
+                    Person person = _repository.Get(id, tran.TranContext);
                     person.Name = name;
 
-                    if (!person.UpdateInTran(tran.Connection))
+                    if (!person.UpdateInTran(tran.TranContext))
                     {
                         errors.Add(person);
                     }

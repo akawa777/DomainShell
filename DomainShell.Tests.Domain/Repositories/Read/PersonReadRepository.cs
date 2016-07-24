@@ -26,11 +26,11 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             return person;
         }
 
-        public Person Get(string id, object connection)
+        public Person Get(string id, object tranContext)
         {
             Person person = null;
 
-            DbCommand command = (connection as DbConnection).CreateCommand();
+            DbCommand command = (tranContext as DbConnection).CreateCommand();
 
             command.CommandText = "select * from Person where Id = @id";
 

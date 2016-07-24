@@ -9,7 +9,7 @@ namespace DomainShell.Extension
 {
     public interface ITransaction : IDisposable
     {
-        object Connection { get; }
+        object TranContext { get; }
         void Complete();
     }
 

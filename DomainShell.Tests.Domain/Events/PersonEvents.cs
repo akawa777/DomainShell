@@ -11,19 +11,19 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events
 {
-    public class PersonAddedEvent : DomainEvent<bool>
+    public class PersonAddedEvent : IDomainEvent<bool>
     {
-        
+        public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    public class PersonUpdatedEvent : DomainEvent<bool>
+    public class PersonUpdatedEvent : IDomainEvent<bool>
     {
-        
+        public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    public class PersonRemovedEvent : DomainEvent<bool>
+    public class PersonRemovedEvent : IDomainEvent<bool>
     {
-        
+        public IAggregateRoot AggregateRoot { get; set; }
     }
 
     public class PersonEventHandler : 

@@ -32,12 +32,12 @@ namespace DomainShell.Tests.Domain.Models
             return DomainEvents.Raise(@event);
         }
 
-        public bool UpdateInTran(object connection)
+        public bool UpdateInTran(object tranContext)
         {
             PersonUpdatedInTranEvent @event = new PersonUpdatedInTranEvent();
 
             @event.AggregateRoot = this;
-            @event.Connection = connection;
+            @event.TranContext = tranContext;
 
             return DomainEvents.Raise(@event);
         }

@@ -102,12 +102,12 @@ namespace DomainShell
 
         }
 
-        public static void Raise(DomainEvent @event)
+        public static void Raise(IDomainEvent @event)
         {
             Raise(@event, typeof(void));
         }
 
-        public static TResult Raise<TResult>(DomainEvent<TResult> @event)
+        public static TResult Raise<TResult>(IDomainEvent<TResult> @event)
         {
             return (TResult)Raise(@event, typeof(TResult));
         }

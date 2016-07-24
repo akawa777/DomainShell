@@ -8,23 +8,38 @@ using DomainShell.Base;
 using DomainShell.Infrastructure;
 
 namespace DomainShell
-{  
-    public abstract class DomainEvent : IDomainEvent
+{
+    public interface IDomainEvent
     {
-        public IAggregateRoot AggregateRoot { get; set; }
+        IAggregateRoot AggregateRoot { get; set; }
     }
 
-    public abstract class DomainEvent<TResult> : IDomainEvent
+    public interface IDomainEvent<TResult> : IDomainEvent
     {
-        public IAggregateRoot AggregateRoot { get; set; }
+        
     }
 
-    public interface IDomainEventHandler<TEvent> : IDomainEventHandler where TEvent : DomainEvent
+    public interface IDomainEventHandler
+    {
+        
+    }
+
+    //public abstract class DomainEvent : IDomainEvent
+    //{
+    //    public IAggregateRoot AggregateRoot { get; set; }
+    //}
+
+    //public abstract class DomainEvent<TResult> : IDomainEvent
+    //{
+    //    public IAggregateRoot AggregateRoot { get; set; }
+    //}
+
+    public interface IDomainEventHandler<TEvent> : IDomainEventHandler where TEvent : IDomainEvent
     {        
         void Handle(TEvent @event);
     }
 
-    public interface IDomainEventHandler<TEvent, TResult> : IDomainEventHandler where TEvent : DomainEvent<TResult>
+    public interface IDomainEventHandler<TEvent, TResult> : IDomainEventHandler where TEvent : IDomainEvent<TResult>
     {        
         TResult Handle(TEvent @event);
     }    

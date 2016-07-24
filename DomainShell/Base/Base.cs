@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Base
 {
-    public interface IDomainEvent
-    {
+    //public interface IDomainEvent
+    //{
 
-    }
+    //}
 
-    public interface IDomainEventHandler
-    {
+    //public interface IDomainEventHandler
+    //{
 
-    }
+    //}
 
     public interface IDomainEventAspect
     {

@@ -21,7 +21,7 @@ namespace DomainShell.Tests.Domain.Infrastructure
         private System.Data.Common.DbTransaction _transaction;
         private bool _complete = false;
 
-        public object Connection
+        public object TranContext
         {
             get { return _connection; }
         }

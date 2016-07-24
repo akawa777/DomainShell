@@ -11,9 +11,10 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events
 {
-    public class PersonUpdatedInTranEvent : DomainEvent<bool>
+    public class PersonUpdatedInTranEvent : IDomainEvent<bool>
     {
-        public object Connection { get; set; }
+        public IAggregateRoot AggregateRoot { get; set; }
+        public object TranContext { get; set; }
     }
 
     public class PersonUpdatedInTranEventHandler :
@@ -24,7 +25,7 @@ namespace DomainShell.Tests.Domain.Events
         {
             Person person = @event.AggregateRoot as Person;
 
-            _repository.Update(person, @event.Connection);
+            _repository.Update(person, @event.TranContext);
 
             return true;
         }
