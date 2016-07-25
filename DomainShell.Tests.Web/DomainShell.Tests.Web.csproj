@@ -180,6 +180,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\Infrastructure\startup.js" />
+    <Content Include="Scripts\Person\list.js">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="Scripts\Person\new.js" />
     <Content Include="Scripts\Shared\error.js" />
     <Content Include="Scripts\Person\tr.check.js" />
@@ -209,7 +212,6 @@
     <Content Include="Scripts\Infrastructure\text.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Views\Facade\Index.cshtml" />
-    <Content Include="Scripts\Person\list.js" />
     <Content Include="Scripts\Person\bulk.js" />
     <Content Include="Scripts\Person\detail.js" />
     <None Include="Views\Person\Tr.cshtml" />
