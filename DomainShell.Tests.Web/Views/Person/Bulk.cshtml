@@ -1,16 +1,8 @@
-﻿
-@{
-    ViewBag.Title = "Bulk";
-    string guid = Guid.NewGuid().ToString();
-}
-
-@section scripts {
+﻿@section scripts {
     <script type="text/javascript">
-        require(["coco", "person/tr.check", "shared/error"], function (coco, trCheck, error) {
-            var appId = "#@guid";
-
+        require(["el", "coco", "person/tr.check", "shared/error"], function (el, coco, trCheck, error) {
             var bulk = {
-                node: appId,
+                node: el,
                 components: {
                     errorTable: {
                         model: error
@@ -95,12 +87,12 @@
                 model: bulk
             });
 
-            $(appId).replaceWith(view.el);
+            $(el).replaceWith(view.el);
         });
     </script>
 }
 
-<div id="@guid">
+<div>
     <a href="/person">list</a><br />
     <br />
     <form>

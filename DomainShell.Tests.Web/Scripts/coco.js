@@ -15,7 +15,7 @@
 })(function () {// 実際の定義を行う関数
     'use strict';
 
-    var createModel = function (model) {
+    var createModel = function (model) {        
         if (typeof model == "function") {
             return $.extend({}, new model());
         } else {
@@ -90,7 +90,7 @@
         }
 
         var node;
-        if (model.node.indexOf("#") == 0) {
+        if (model.node.nodeType || model.node.indexOf("#") == 0) {
             node = $(model.node).prop("outerHTML");
         } else {
             node = model.node;

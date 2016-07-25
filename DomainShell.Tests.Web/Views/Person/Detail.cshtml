@@ -1,16 +1,8 @@
-﻿
-@{
-    ViewBag.Title = "Detail";
-    string guid = Guid.NewGuid().ToString();
-}
-
-@section scripts {
+﻿@section scripts {
     <script type="text/javascript">
-        require(["coco", "shared/error"], function (coco, error) {
-            var appId = "#@guid";
-
+        require(["el", "coco", "shared/error"], function (el, coco, error) {
             var detail = {
-                node: appId,
+                node: el,
                 components: {
                     errorName: {
                         model: error
@@ -88,12 +80,12 @@
                 }
             });
 
-            $(appId).replaceWith(view.el);
+            $(el).replaceWith(view.el);
         });
     </script>
 }
 
-<div id="@guid">
+<div>
     <a href="/person">list</a>
     <br />
     <br />

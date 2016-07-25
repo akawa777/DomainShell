@@ -24,6 +24,16 @@ namespace DomainShell.Tests.Web.Controllers
             return View();
         }
 
+        public ActionResult Tr()
+        {
+            return PartialView();
+        }
+
+        public ActionResult TrCheck()
+        {
+            return PartialView();
+        }
+
         public ActionResult New()
         {
             return View("Detail");

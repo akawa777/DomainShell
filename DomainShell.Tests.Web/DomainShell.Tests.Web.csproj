@@ -180,8 +180,6 @@
   <ItemGroup>
     <Content Include="Scripts\Shared\error.js" />
     <Content Include="Scripts\Person\tr.check.js" />
-    <Content Include="Scripts\Person\tr.check.html" />
-    <Content Include="Scripts\Person\tr.html" />
     <Content Include="Scripts\Person\tr.js" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
@@ -207,6 +205,8 @@
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\text.js" />
     <Content Include="Scripts\_references.js" />
+    <None Include="Views\Person\Tr.cshtml" />
+    <None Include="Views\Person\TrCheck.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

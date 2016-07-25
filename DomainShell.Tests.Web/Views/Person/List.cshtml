@@ -1,16 +1,8 @@
-﻿
-@{
-    ViewBag.Title = "List";
-    string guid = Guid.NewGuid().ToString();
-}
-
-@section scripts {
+﻿@section scripts {
     <script type="text/javascript">
-        require(["coco", "person/tr"], function (coco, tr) {
-            var appId = "#@guid";
-
+        require(["el", "coco", "person/tr"], function (el, coco, tr) {
             var list = {
-                node: appId,
+                node: el,
                 ready: function () {
                     var self = this;
 
@@ -37,12 +29,12 @@
                 model: list
             });
 
-            $(appId).replaceWith(view.el);
+            $(el).replaceWith(view.el);
         });   
     </script>
 }
 
-<div id="@guid">
+<div>
     <a href="/person/new">new</a>
     <a href="/person/bulk">bulk</a>
     <br />

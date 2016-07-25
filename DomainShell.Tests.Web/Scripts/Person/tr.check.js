@@ -1,4 +1,4 @@
-﻿define(["coco", "person/tr", "text!person/tr.check.html"], function (coco, tr, template) {
+﻿define(["coco", "person/tr", "text!/person/trcheck"], function (coco, tr, template) {
     var trCheck = coco.extend(tr, {
         node: template,
         ready: function () {
