@@ -7,8 +7,8 @@ using System.Reflection;
 using DomainShell.Extension;
 
 namespace DomainShell.Tests.Domain.Infrastructure
-{    
-    public class TransactionBundle : ITransactionBundle
+{
+    internal class TransactionBundle : ITransactionBundle
     {
         public void Bundle(ITransactionRegister register)
         {            

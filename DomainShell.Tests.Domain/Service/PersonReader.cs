@@ -14,12 +14,12 @@ namespace DomainShell.Tests.Domain.Service
     {
         private PersonReadRepository _repository = new PersonReadRepository();
 
-        public Person Get(string id)
+        public PersonModel Get(string id)
         {
             return _repository.Get(id);
         }
 
-        public Person[] GetAll()
+        public PersonModel[] GetAll()
         {
             return _repository.GetAll();
         }

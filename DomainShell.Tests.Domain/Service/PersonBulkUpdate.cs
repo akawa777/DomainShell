@@ -16,7 +16,7 @@ namespace DomainShell.Tests.Domain.Service
         public class Result
         {
             public bool Success { get; set; }
-            public List<Person> ErrorPersons { get; set; }
+            public List<PersonModel> ErrorPersons { get; set; }
         }
 
         public Result BulkUpdate(string[] ids, string name)
@@ -26,20 +26,20 @@ namespace DomainShell.Tests.Domain.Service
                 return new Result 
                 {
                     Success = false,
-                    ErrorPersons = new List<Person>() 
+                    ErrorPersons = new List<PersonModel>() 
                 };
             }
 
-            List<Person> errors = new List<Person>();     
+            List<PersonModel> errors = new List<PersonModel>();     
 
-            using (ITransaction tran = TransactionProvider.BeginTran<Person>())
+            using (ITransaction tran = TransactionProvider.BeginTran<PersonModel>())
             {
                 foreach (string id in ids)
                 {
-                    Person person = _repository.Get(id, tran.TranContext);
+                    PersonModel person = _repository.Get(id, tran.Session());
                     person.Name = name;
 
-                    if (!person.UpdateInTran(tran.TranContext))
+                    if (!person.UpdateInTran(tran.Session()))
                     {
                         errors.Add(person);
                     }

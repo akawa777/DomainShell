@@ -11,7 +11,7 @@ using DomainShell.Tests.Domain.Models;
 
 namespace DomainShell.Tests.Domain.Infrastructure
 {
-    public class DomainEventBundle : IDomainEventBundle
+    internal class DomainEventBundle : IDomainEventBundle
     {
         public void Bundle(IDomainEventRegister register)
         {

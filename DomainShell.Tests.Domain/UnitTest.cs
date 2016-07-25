@@ -15,7 +15,7 @@ namespace DomainShell.Tests
         [TestMethod]
         public void Main()
         {
-            Person person = new Person();
+            PersonModel person = new PersonModel();
 
             person.Name = "add";
 
@@ -41,7 +41,7 @@ namespace DomainShell.Tests
 
             Assert.AreEqual(null, person);
 
-            Person[] persons = reader.GetAll();
+            PersonModel[] persons = reader.GetAll();
 
             string[] ids = persons.Select(x => x.Id).ToArray();
 
@@ -51,7 +51,7 @@ namespace DomainShell.Tests
 
             persons = reader.GetAll();
 
-            foreach (Person item in persons)
+            foreach (PersonModel item in persons)
             {
                 Assert.AreEqual("bulk", item.Name);
             }

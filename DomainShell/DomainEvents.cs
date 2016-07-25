@@ -51,7 +51,7 @@ namespace DomainShell
             }
         }
 
-        private static dynamic Raise(IDomainEvent @event, Type returnType)
+        private static object Raise(IDomainEvent @event, Type returnType)
         {
             Bundle(@event);
 
@@ -70,18 +70,9 @@ namespace DomainShell
             dynamic result;
 
             try
-            {
-                dynamic dynamicHandler = handler as dynamic;
-
-                if (returnType == typeof(void))
-                {
-                    dynamicHandler.Handle(@event as dynamic);
-                    result = null;
-                }
-                else
-                {
-                    result = dynamicHandler.Handle(@event as dynamic);
-                }
+            {                
+                MethodInfo method = handler.GetType().GetMethod("Handle", new Type[] { @event.GetType() });
+                result = method.Invoke(handler, new object[] { @event });
 
                 if (canAspect)
                 {

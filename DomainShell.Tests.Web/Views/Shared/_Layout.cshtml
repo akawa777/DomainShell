@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{ 
+    string appStateId = DomainShell.Tests.Web.MvcApplication.AppStateId;
+}
+
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -33,6 +37,15 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/require")    
     @Scripts.Render("~/bundles/bootstrap")    
+    <script type="text/javascript">
+        require.config({
+            baseUrl: "/Scripts",
+            urlArgs: "bust=@appStateId",
+            paths: {
+                text: "/Scripts/text"                
+            }
+        });
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

@@ -9,12 +9,12 @@ using DomainShell.Tests.Domain.Models;
 using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Repositories.Write
-{ 
-    public class PersonWriteRepository
+{
+    internal class PersonWriteRepository
     {
         private static object o = new object();
 
-        public void Add(Person person)
+        public void Add(PersonModel person)
         {
             using (DbConnection connection = DataStore.CreateConnection())
             {
@@ -46,7 +46,7 @@ namespace DomainShell.Tests.Domain.Repositories.Write
             }
         }
 
-        public void Update(Person person)
+        public void Update(PersonModel person)
         {
             using (DbConnection connection = DataStore.CreateConnection())
             {
@@ -56,9 +56,9 @@ namespace DomainShell.Tests.Domain.Repositories.Write
             }
         }
 
-        public void Update(Person person, object tranContext)
+        public void Update(PersonModel person, object session)
         {
-            DbCommand command = (tranContext as DbConnection).CreateCommand();
+            DbCommand command = (session as DbConnection).CreateCommand();
 
             command.CommandText = "update Person set Name = @name where Id = @id";
 
@@ -79,7 +79,7 @@ namespace DomainShell.Tests.Domain.Repositories.Write
             command.ExecuteNonQuery();
         }
 
-        public void Delete(Person person)
+        public void Delete(PersonModel person)
         {
             using (DbConnection connection = DataStore.CreateConnection())
             {

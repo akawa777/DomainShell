@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewBag.Title = "Bulk";
+    string guid = Guid.NewGuid().ToString();
+}
+
+@section scripts {
+    <script type="text/javascript">
+        require(["coco", "person/tr.check", "shared/error"], function (coco, trCheck, error) {
+            var appId = "#@guid";
+
+            var bulk = {
+                node: appId,
+                components: {
+                    errorTable: {
+                        model: error
+                    },
+                    errorName: {
+                        model: error
+                    }
+                },
+                ready: function () {
+                    var self = this;
+
+                    var trViews = [];
+
+                    $.get("/api/person/getall").success(function (persons) {
+                        for (var id in persons) {
+                            view = self.$coco({
+                                model: trCheck,
+                                params: persons[id]
+                            });
+
+                            self.$context("table tbody").append(view.el);
+
+                            trViews.push(view);
+                        }
+                    }).fail(function (result) {
+                        $("body").html(result.responseText);
+                    });
+
+                    self.$context("[name=save]").on("click", function () {
+                        self.components.errorTable.view.clear();
+                        self.components.errorName.view.clear();
+
+                        var ids = [];
+
+                        trViews.forEach(function (trView) {
+                            if (trView.checked()) {
+                                ids.push(trView.Id);
+                            }
+                        });
+
+                        var valid = true;
+
+                        if (ids.length == 0) {
+                            self.components.errorTable.view.message("no select target.");
+                            valid = false;
+                        }
+
+                        var name = self.$context("input[name=name]").val();
+
+                        if (name == "") {
+                            self.components.errorName.view.message("no set name.");
+                            valid = false;
+                        }
+
+                        if (!valid) {
+                            alert("exist error.");
+                            return;
+                        }
+
+                        $.post("/api/person/bulkupdate", { ids: ids, name: name }).success(function (result) {
+                            if (result.Success) {
+                                location.href = "/person";
+                            } else {
+                                alert("failed.");
+                            }
+                        }).fail(function (result) {
+                            $("body").html(result.responseText);
+                        });
+                    });
+
+                    self.$context(".allTarget").on("click", function () {
+                        var checked = $(this).is(':checked');
+
+                        trViews.forEach(function (trView) {
+                            trView.check(checked);
+                        });
+                    });
+                }
+            }
+
+            var view = coco({
+                model: bulk
+            });
+
+            $(appId).replaceWith(view.el);
+        });
+    </script>
+}
+
+<div id="@guid">
+    <a href="/person">list</a><br />
+    <br />
+    <form>
+        <coco-error-table></coco-error-table>
+        <table>
+            <thead>
+                <tr>
+                    <th><input class="allTarget" type="checkbox" /></th>
+                    <th>Id</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <br />
+        <label>
+            name
+            <input type="text" name="name" />
+        </label>
+        <coco-error-name></coco-error-name>
+        <br />
+        <br />
+        <button name="save" type="button">save</button>
+    </form>
+</div>
+

@@ -17,20 +17,7 @@ namespace DomainShell.Tests.Web
                 name: "Api",
                 url: "api/{controller}/{action}/{id}",
                 defaults: new { controller = "Person", action = "Index", id = UrlParameter.Optional }
-            );
-
-            routes.MapRoute(
-                name: "App",
-                url: "{app}/{main}/{id}",
-                defaults: new 
-                    { 
-                        controller = "Facade", 
-                        action = "Index", 
-                        app = "Person",
-                        main = "List", 
-                        id = UrlParameter.Optional 
-                    }
-            );
+            );            
 
             routes.MapRoute(
                 name: "Default",

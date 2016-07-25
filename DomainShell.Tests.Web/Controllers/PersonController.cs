@@ -14,42 +14,67 @@ namespace DomainShell.Tests.Web.Controllers
         private PersonReader _personReader = new PersonReader();
         private PersonBulkUpdate _bulkUpdate = new PersonBulkUpdate();
 
-        public JsonResult GetAll()
+        public ActionResult Index()
         {
-            Person[] persons = _personReader.GetAll();
+            return View("List");
+        }
+
+        public ActionResult List()
+        {
+            return View();
+        }
+
+        public ActionResult New()
+        {
+            return View("Detail");
+        }
+
+        public ActionResult Detail()
+        {
+            return View();
+        }
+
+        public ActionResult Bulk()
+        {
+            return View();
+        }
+
+        public ActionResult GetAll()
+        {
+            PersonModel[] persons = _personReader.GetAll();
 
             return Json(persons, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult Get(string id)
+        public ActionResult Get(string id)
         {
-            Person person = _personReader.Get(id);
+            PersonModel person = _personReader.Get(id);
 
             return Json(person, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult Add(Person person)
+        public ActionResult Add(PersonModel person)
         {
             bool result = person.Add();
 
             return Json(result);
         }
 
-        public JsonResult Update(Person person)
+        public ActionResult Update(PersonModel person)
         {
             bool result = person.Update();
 
             return Json(result);
         }
 
-        public JsonResult Remove(Person person)
+        public ActionResult Remove(PersonModel person)
         {
             bool result = person.Remove();
 
             return Json(result);
         }
 
-        public JsonResult BulkUpdate(string[] ids, string name)
+        public ActionResult BulkUpdate(string[] ids, string name)
         {
             PersonBulkUpdate.Result result = _bulkUpdate.BulkUpdate(ids, name);
 

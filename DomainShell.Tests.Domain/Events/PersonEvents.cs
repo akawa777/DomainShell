@@ -11,29 +11,29 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events
 {
-    public class PersonAddedEvent : IDomainEvent<bool>
+    internal class PersonAddedEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    public class PersonUpdatedEvent : IDomainEvent<bool>
+    internal class PersonUpdatedEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    public class PersonRemovedEvent : IDomainEvent<bool>
+    internal class PersonRemovedEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    public class PersonEventHandler : 
+    internal class PersonEventHandler : 
         IDomainEventHandler<PersonAddedEvent, bool>,
         IDomainEventHandler<PersonUpdatedEvent, bool>,        
         IDomainEventHandler<PersonRemovedEvent, bool>
     {
         protected PersonWriteRepository _repository = new PersonWriteRepository();        
 
-        protected bool Validate(Person person)
+        protected bool Validate(PersonModel person)
         {
             if (string.IsNullOrEmpty(person.Name))
             {
@@ -45,7 +45,7 @@ namespace DomainShell.Tests.Domain.Events
 
         public bool Handle(PersonAddedEvent @event)
         {
-            Person person = @event.AggregateRoot as Person;
+            PersonModel person = @event.AggregateRoot as PersonModel;
 
             if (!Validate(person))
             {
@@ -59,7 +59,7 @@ namespace DomainShell.Tests.Domain.Events
 
         public bool Handle(PersonUpdatedEvent @event)
         {
-            Person person = @event.AggregateRoot as Person;
+            PersonModel person = @event.AggregateRoot as PersonModel;
 
             if (!Validate(person))
             {
@@ -73,7 +73,7 @@ namespace DomainShell.Tests.Domain.Events
 
         public bool Handle(PersonRemovedEvent @event)
         {
-            Person person = @event.AggregateRoot as Person;
+            PersonModel person = @event.AggregateRoot as PersonModel;
 
             _repository.Delete(person);
 

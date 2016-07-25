@@ -10,11 +10,11 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Repositories.Read
 { 
-    public class PersonReadRepository
+    internal class PersonReadRepository
     {
-        public Person Get(string id)
+        public PersonModel Get(string id)
         {
-            Person person = null;
+            PersonModel person = null;
 
             using (DbConnection connection = DataStore.CreateConnection())
             {
@@ -26,11 +26,11 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             return person;
         }
 
-        public Person Get(string id, object tranContext)
+        public PersonModel Get(string id, object session)
         {
-            Person person = null;
+            PersonModel person = null;
 
-            DbCommand command = (tranContext as DbConnection).CreateCommand();
+            DbCommand command = (session as DbConnection).CreateCommand();
 
             command.CommandText = "select * from Person where Id = @id";
 
@@ -45,7 +45,7 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             {
                 while (reader.Read())
                 {
-                    person = new Person();
+                    person = new PersonModel();
 
                     person.Id = id;
                     person.Name = reader["Name"].ToString();
@@ -55,9 +55,9 @@ namespace DomainShell.Tests.Domain.Repositories.Read
             return person;
         }
 
-        public Person[] GetAll()
+        public PersonModel[] GetAll()
         {
-            List<Person> persons = new List<Person>();
+            List<PersonModel> persons = new List<PersonModel>();
 
             using (DbConnection connection = DataStore.CreateConnection())
             {
@@ -71,7 +71,7 @@ namespace DomainShell.Tests.Domain.Repositories.Read
                 {
                     while (reader.Read())
                     {
-                        Person person = new Person();
+                        PersonModel person = new PersonModel();
 
                         person.Id = reader["Id"].ToString();
                         person.Name = reader["Name"].ToString();

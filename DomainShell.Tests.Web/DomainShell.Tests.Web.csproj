@@ -171,7 +171,6 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\FacadeController.cs" />
     <Compile Include="Controllers\PersonController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -179,18 +178,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Apps\Person\Main\bulk.html" />
-    <Content Include="Apps\Person\Main\bulk.js" />
-    <Content Include="Apps\Person\Main\detail.html" />
-    <Content Include="Apps\Person\Main\detail.js" />
-    <Content Include="Apps\Person\Main\list.html" />
-    <Content Include="Apps\Person\Main\list.js" />
-    <Content Include="Apps\Person\Main\new.js" />
-    <Content Include="Apps\Person\Parts\error.js" />
-    <Content Include="Apps\Person\Parts\tr.check.js" />
-    <Content Include="Apps\Person\Parts\tr.check.html" />
-    <Content Include="Apps\Person\Parts\tr.html" />
-    <Content Include="Apps\Person\Parts\tr.js" />
+    <Content Include="Scripts\Shared\error.js" />
+    <Content Include="Scripts\Person\tr.check.js" />
+    <Content Include="Scripts\Person\tr.check.html" />
+    <Content Include="Scripts\Person\tr.html" />
+    <Content Include="Scripts\Person\tr.js" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="favicon.ico" />
@@ -227,8 +219,9 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
-    <Content Include="Views\Shared\Lockout.cshtml" />
-    <Content Include="Views\Facade\Index.cshtml" />
+    <Content Include="Views\Person\List.cshtml" />
+    <Content Include="Views\Person\Detail.cshtml" />
+    <Content Include="Views\Person\Bulk.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

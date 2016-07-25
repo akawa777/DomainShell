@@ -8,7 +8,7 @@ using DomainShell.Extension;
 
 namespace DomainShell.Tests.Domain.Infrastructure
 {
-    public class Transaction : ITransaction
+    internal class Transaction : ITransaction
     {
         public Transaction()
         {
@@ -21,9 +21,9 @@ namespace DomainShell.Tests.Domain.Infrastructure
         private System.Data.Common.DbTransaction _transaction;
         private bool _complete = false;
 
-        public object TranContext
+        public object Session()
         {
-            get { return _connection; }
+            return _connection;
         }
 
         public void Complete()

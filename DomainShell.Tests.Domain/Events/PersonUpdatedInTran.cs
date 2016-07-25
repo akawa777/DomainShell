@@ -11,21 +11,21 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events
 {
-    public class PersonUpdatedInTranEvent : IDomainEvent<bool>
+    internal class PersonUpdatedInTranEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
-        public object TranContext { get; set; }
+        public object Session { get; set; }
     }
 
-    public class PersonUpdatedInTranEventHandler :
+    internal class PersonUpdatedInTranEventHandler :
         PersonEventHandler,
         IDomainEventHandler<PersonUpdatedInTranEvent, bool>
     {
         public bool Handle(PersonUpdatedInTranEvent @event)
         {
-            Person person = @event.AggregateRoot as Person;
+            PersonModel person = @event.AggregateRoot as PersonModel;
 
-            _repository.Update(person, @event.TranContext);
+            _repository.Update(person, @event.Session);
 
             return true;
         }
