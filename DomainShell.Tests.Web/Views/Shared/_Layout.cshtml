@@ -1,10 +1,4 @@
-﻿@{ 
-    string appStateId = DomainShell.Tests.Web.MvcApplication.AppStateId;
-    string appId = Guid.NewGuid().ToString();
-    ViewBag.appId = appId;
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -29,9 +23,7 @@
         </div>
     </div>
     <div class="container body-content">
-        <div id = "@appId">
-            @RenderBody()
-        </div>        
+        @RenderBody()
         <hr />
         <footer>
             <p>&copy; @DateTime.Now.Year - マイ ASP.NET アプリケーション</p>
@@ -40,20 +32,7 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/require")    
-    @Scripts.Render("~/bundles/bootstrap")    
-    <script type="text/javascript">
-    require.config({
-        baseUrl: "/Scripts",
-        urlArgs: "bust=@appStateId",
-            paths: {
-                text: "/Scripts/text"
-            }
-        });
-
-        define("el", [], function () {
-            return document.getElementById("@appId");
-        });
-    </script>
+    @Scripts.Render("~/bundles/bootstrap")        
     @RenderSection("scripts", required: false)
 </body>
 </html>

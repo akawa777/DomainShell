@@ -1,0 +1,18 @@
+﻿@{
+    string appStateId = DomainShell.Tests.Web.MvcApplication.AppStateId;
+    string appId = Guid.NewGuid().ToString();
+
+    string app = Request.RequestContext.RouteData.Values["app"].ToString();
+    string script = Request.RequestContext.RouteData.Values["script"].ToString();
+    string scriptFile = script + ".js";
+}
+
+@section scripts {   
+    <script type="text/javascript">
+        var $appId = "@appId";
+    </script>
+    <script type="text/javascript" src="~/Scripts/Infrastructure/startup.js?appStateId=@appStateId"></script>
+    <script type="text/javascript" src="~/Scripts/@app/@scriptFile?appStateId=@appStateId"></script>
+}
+
+<div id="@appId"></div>

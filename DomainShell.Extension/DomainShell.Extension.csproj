@@ -41,8 +41,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transaction.cs" />
-    <Compile Include="TransactionContainer.cs" />
-    <Compile Include="TransactionBundle.cs" />
+    <Compile Include="Config\TransactionContainer.cs" />
+    <Compile Include="Config\TransactionBundle.cs" />
     <Compile Include="TransactionProvider.cs" />
   </ItemGroup>
   <ItemGroup>

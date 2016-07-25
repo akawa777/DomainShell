@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using DomainShell.Extension;
+using DomainShell.Extension.Config;
+using DomainShell.Tests.Domain.Infrastructure;
 
-namespace DomainShell.Tests.Domain.Infrastructure
+namespace DomainShell.Tests.Domain.Config
 {
     internal class TransactionBundle : ITransactionBundle
     {

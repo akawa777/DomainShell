@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using DomainShell.Base;
-using DomainShell.Infrastructure;
+using DomainShell.Config;
 
 namespace DomainShell
 {   

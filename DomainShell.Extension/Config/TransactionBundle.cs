@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-namespace DomainShell.Extension
+namespace DomainShell.Extension.Config
 {
     public interface ITransactionBundle
     {

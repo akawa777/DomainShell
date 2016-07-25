@@ -1,40 +1,4 @@
-﻿@section scripts {
-    <script type="text/javascript">
-        require(["el", "coco", "person/tr"], function (el, coco, tr) {
-            var list = {
-                node: el,
-                ready: function () {
-                    var self = this;
-
-                    $.get("api/person/getall").success(function (persons) {
-                        for (var id in persons) {
-                            view = self.$coco({
-                                model: tr,
-                                params: persons[id]
-                            });
-
-                            self.$context("table tbody").append(view.el);
-                        }
-                    }).fail(function (result) {
-                        $("body").html(result.responseText);
-                    });
-
-                    self.$context("[name=output]").on("click", function () {
-                        location.href = "api/person/output";
-                    });
-                }
-            }
-
-            var view = coco({
-                model: list
-            });
-
-            $(el).replaceWith(view.el);
-        });   
-    </script>
-}
-
-<div>
+﻿<div>
     <a href="/person/new">new</a>
     <a href="/person/bulk">bulk</a>
     <br />

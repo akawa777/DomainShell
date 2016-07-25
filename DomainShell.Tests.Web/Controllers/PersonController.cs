@@ -12,42 +12,7 @@ namespace DomainShell.Tests.Web.Controllers
     public class PersonController : Controller
     {       
         private PersonReader _personReader = new PersonReader();
-        private PersonBulkUpdate _bulkUpdate = new PersonBulkUpdate();
-
-        public ActionResult Index()
-        {
-            return View("List");
-        }
-
-        public ActionResult List()
-        {
-            return View();
-        }
-
-        public ActionResult Tr()
-        {
-            return PartialView();
-        }
-
-        public ActionResult TrCheck()
-        {
-            return PartialView();
-        }
-
-        public ActionResult New()
-        {
-            return View("Detail");
-        }
-
-        public ActionResult Detail()
-        {
-            return View();
-        }
-
-        public ActionResult Bulk()
-        {
-            return View();
-        }
+        private PersonBulkUpdate _bulkUpdate = new PersonBulkUpdate();        
 
         public ActionResult GetAll()
         {

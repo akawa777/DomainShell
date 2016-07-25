@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data;
-using DomainShell.Infrastructure;
+using DomainShell.Config;
 using DomainShell.Tests.Domain.Repositories.Write;
 using DomainShell.Tests.Domain.Events;
 using DomainShell.Tests.Domain.Models;
 
-namespace DomainShell.Tests.Domain.Infrastructure
+namespace DomainShell.Tests.Domain.Config
 {
     internal class DomainEventBundle : IDomainEventBundle
     {

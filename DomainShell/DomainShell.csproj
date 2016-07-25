@@ -44,7 +44,8 @@
     <Compile Include="DomainEventHandler.cs" />
     <Compile Include="Base\Base.cs" />
     <Compile Include="DomainEvents.cs" />
-    <Compile Include="Infrastructure\Infrastructure.cs" />
+    <Compile Include="Config\DomainEventBundle.cs" />
+    <Compile Include="Config\DomainEventContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

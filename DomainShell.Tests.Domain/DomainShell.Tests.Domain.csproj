@@ -61,8 +61,8 @@
     <Compile Include="Infrastructure\DataStore.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Infrastructure\DomainEventBundle.cs" />
-    <Compile Include="Infrastructure\TransactionBundle.cs" />
+    <Compile Include="Config\DomainEventBundle.cs" />
+    <Compile Include="Config\TransactionBundle.cs" />
     <Compile Include="Models\PersonModel.cs" />
     <Compile Include="Repositories\Read\PersonReadRepository.cs" />
     <Compile Include="Repositories\Write\PersonWriteRepository.cs" />

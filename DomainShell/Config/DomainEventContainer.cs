@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Base;
 
-namespace DomainShell.Infrastructure
+namespace DomainShell.Config
 {
     public interface IDomainEventRegister
     {
@@ -48,10 +48,5 @@ namespace DomainShell.Infrastructure
             Func<IDomainEventHandler> handler = _handlerMap[@event.GetType()];
             return handler();
         }
-    }
-
-    public interface IDomainEventBundle
-    {
-        void Bundle(IDomainEventRegister register);
     }
 }
