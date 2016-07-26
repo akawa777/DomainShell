@@ -20,29 +20,24 @@ namespace DomainShell.Tests.Domain.Repositories.Write
             {
                 connection.Open();
 
-                using (DbTransaction tran = connection.BeginTransaction())
-                {
-                    DbCommand command = connection.CreateCommand();
+                DbCommand command = connection.CreateCommand();
 
-                    command.CommandText = "insert into Person(Name) values (@name)";
+                command.CommandText = "insert into Person(Name) values (@name)";
 
-                    DbParameter parameter = command.CreateParameter();
+                DbParameter parameter = command.CreateParameter();
 
-                    parameter.ParameterName = "@name";
-                    parameter.Value = person.Name;
+                parameter.ParameterName = "@name";
+                parameter.Value = person.Name;
 
-                    command.Parameters.Add(parameter);
+                command.Parameters.Add(parameter);
 
-                    command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
 
-                    command.CommandText = "select max(id) from Person";
+                command.CommandText = "select max(id) from Person";
 
-                    string id = command.ExecuteScalar().ToString();
+                string id = command.ExecuteScalar().ToString();
 
-                    person.Id = id;
-
-                    tran.Commit();
-                }
+                person.Id = id;
             }
         }
 
