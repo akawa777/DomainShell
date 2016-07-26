@@ -9,7 +9,7 @@ using DomainShell.Tests.Domain.Infrastructure;
 
 namespace DomainShell.Tests.Domain.Config
 {
-    internal class TransactionBundle : ITransactionBundle
+    public class TransactionBundle : ITransactionBundle
     {
         public void Bundle(ITransactionRegister register)
         {            

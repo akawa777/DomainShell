@@ -8,7 +8,7 @@ using DomainShell.Extension;
 
 namespace DomainShell.Tests.Domain.Infrastructure
 {
-    internal class Transaction : ITransaction
+    public class Transaction : ITransaction
     {
         public Transaction()
         {

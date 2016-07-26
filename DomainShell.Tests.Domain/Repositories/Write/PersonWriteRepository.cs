@@ -10,7 +10,7 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Repositories.Write
 {
-    internal class PersonWriteRepository
+    public class PersonWriteRepository
     {
         private static object o = new object();
 

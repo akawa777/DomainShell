@@ -11,7 +11,7 @@ using System.Data.SQLite;
 
 namespace DomainShell.Tests.Domain.Infrastructure
 {
-    internal class DataStore
+    public class DataStore
     {
         private static string _db = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\", "test.db");
         private static string _connectionString = "data source=" + _db;

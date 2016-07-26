@@ -10,7 +10,7 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Repositories.Read
 { 
-    internal class PersonReadRepository
+    public class PersonReadRepository
     {
         public PersonModel Get(string id)
         {

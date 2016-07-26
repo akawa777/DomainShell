@@ -11,22 +11,22 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events
 {
-    internal class PersonAddedEvent : IDomainEvent<bool>
+    public class PersonAddedEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    internal class PersonUpdatedEvent : IDomainEvent<bool>
+    public class PersonUpdatedEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    internal class PersonRemovedEvent : IDomainEvent<bool>
+    public class PersonRemovedEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
     }
 
-    internal class PersonEventHandler : 
+    public class PersonEventHandler : 
         IDomainEventHandler<PersonAddedEvent, bool>,
         IDomainEventHandler<PersonUpdatedEvent, bool>,        
         IDomainEventHandler<PersonRemovedEvent, bool>

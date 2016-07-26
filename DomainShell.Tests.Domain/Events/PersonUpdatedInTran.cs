@@ -11,13 +11,13 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Domain.Events
 {
-    internal class PersonUpdatedInTranEvent : IDomainEvent<bool>
+    public class PersonUpdatedInTranEvent : IDomainEvent<bool>
     {
         public IAggregateRoot AggregateRoot { get; set; }
         public object Session { get; set; }
     }
 
-    internal class PersonUpdatedInTranEventHandler :
+    public class PersonUpdatedInTranEventHandler :
         PersonEventHandler,
         IDomainEventHandler<PersonUpdatedInTranEvent, bool>
     {
