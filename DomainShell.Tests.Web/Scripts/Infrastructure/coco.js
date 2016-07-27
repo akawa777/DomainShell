@@ -136,6 +136,14 @@
             }
         }
 
+        model.$context = context;
+        model.$params = params;
+        model.$coco = coco;
+
+        if (model.init) {
+            model.init();
+        }
+
         if (model.components) {
             var components = model.components;
 
@@ -163,10 +171,6 @@
                 component.view = componentView;
             }
         }
-
-        model.$context = context;
-        model.$params = params;
-        model.$coco = coco;
 
         model.ready();
 

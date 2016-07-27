@@ -183,6 +183,7 @@
     <Content Include="Scripts\Person\list.js">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="Scripts\Person\modal.js" />
     <Content Include="Scripts\Person\new.js" />
     <Content Include="Scripts\Shared\error.js" />
     <Content Include="Scripts\Person\tr.check.js" />
@@ -216,6 +217,7 @@
     <Content Include="Scripts\Person\detail.js" />
     <None Include="Views\Person\Tr.cshtml" />
     <None Include="Views\Person\TrCheck.cshtml" />
+    <None Include="Views\Person\Modal.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
