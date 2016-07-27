@@ -3,8 +3,6 @@
         node: template,
         ready: function () {
             var self = this;
-            
-            self.$context(".modal-body").text(self.$params.body);
 
             self.$context(".btn-primary").on("click", function () {
                 var name = self.$context("[name=name]").val();
