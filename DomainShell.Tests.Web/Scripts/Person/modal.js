@@ -1,4 +1,4 @@
-﻿define(["coco", "text!/views/person/modal"], function (coco, template) {
+﻿define(["text!/views/person/modal"], function (template) {
     var modal = {
         node: template,
         ready: function () {
