@@ -1,6 +1,6 @@
 ﻿require(
     ["el", "coco", "text!/views/person/bulk", "person/tr.check", "shared/error", "person/modal"],
-    function (el, coco, template, trCheck, error, modal) {
+    function (el, coco, template, trCheck, error, modal) {        
         var bulk = {
             node: template,            
             init: function() {
@@ -18,28 +18,27 @@
                         params: {
                             nameTextEl: self.$context("[name=name]")
                         }
+                    },
+                    trCheck: {
+                        model: trCheck
                     }
                 };
+
+                var dfd = $.Deferred();
+
+                $.get("/api/person/getall").success(function (persons) {
+                    self.$components.trCheck.eachParams = persons;
+                    dfd.resolve();
+                }).fail(function (result) {
+                    $("body").html(result.responseText);
+                });
+
+                return dfd.promise();
             },
             ready: function () {
                 var self = this;
 
-                var trViews = [];
-
-                $.get("/api/person/getall").success(function (persons) {
-                    for (var id in persons) {
-                        view = self.$coco({
-                            model: trCheck,
-                            params: persons[id]
-                        });
-
-                        self.$context("table tbody").append(view.el);
-
-                        trViews.push(view);
-                    }
-                }).fail(function (result) {
-                    $("body").html(result.responseText);
-                });
+                var trViews = self.$components.trCheck.views;
 
                 self.$context("[name=save]").on("click", function () {
                     self.$components.errorTable.view.clear();

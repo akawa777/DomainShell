@@ -1,8 +1,8 @@
 ﻿<div>
     <a href="/person">list</a><br />
     <br />
-    <form>
-        <coco-error-table></coco-error-table>
+    <form>        
+        <div coco-component="errorTable"></div>
         <table>
             <thead>
                 <tr>
@@ -11,19 +11,21 @@
                     <th>Name</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr coco-component="trCheck" coco-component-type="each"></tr>
+            </tbody>
         </table>
         <br />
         <label>
             name
             <input type="text" name="name" />
-        </label>
-        <coco-error-name></coco-error-name>
+        </label>        
+        <div coco-component="errorName"></div>
         <br />
         <br />
         <button name="save" type="button">save</button>
         <button name="modal" type="button">modal</button>                
-    </form>
-    <coco-modal></coco-modal>
+    </form>    
+    <div coco-component="modal"></div>
 </div>
 

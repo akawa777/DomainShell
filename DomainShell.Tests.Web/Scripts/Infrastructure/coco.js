@@ -71,6 +71,8 @@
     var viewIdKey = "coco-view-id";
     var componentTag = "coco-"
     var cocoPin = "coco-pin"
+    var componentAttr = "coco-component"
+    var componentTypeAttr = "coco-component-type"
 
     var viewId = 0;
 
@@ -95,6 +97,8 @@
         }
 
         var el = $(node);
+        el.removeAttr(componentAttr);
+        el.removeAttr(componentTypeAttr);
 
         var viewId = getViewId();
         el.attr(viewIdKey, viewId);
@@ -151,39 +155,72 @@
             }
         }
 
+        var dfd;
+
         if (model.init) {
-            model.init();
+            dfd = model.init();
         }
 
-        if (model.$components) {
-            var components = model.$components;
+        var applyComponent = function () {
+            if (model.$components) {
+                var components = model.$components;
 
-            for (var key in components) {
-                if (!components.hasOwnProperty(key)) {
-                    continue;
+                for (var key in components) {
+                    if (!components.hasOwnProperty(key)) {
+                        continue;
+                    }
+
+                    var componentEl = context("[" + componentAttr + "=" + key + "]");
+
+                    if (componentEl.length == 0) {
+                        continue;
+                    }
+
+                    var component = components[key];
+
+                    if (componentEl.attr(componentTypeAttr) == "each") {
+                        var eachParams = component.eachParams;
+                        
+                        var views = [];
+
+                        eachParams.forEach(function (params) {
+                            var view = coco({
+                                model: component.model,
+                                params: params
+                            });
+
+                            views.push(view);
+
+                            componentEl.append(view.el);
+                        });
+
+                        component.views = views;                        
+                    } else {
+                        var view = coco({
+                            model: component.model,
+                            params: component.params
+                        });
+
+                        componentEl.append(view.el);                        
+                        component.view = view;
+                        
+                    }
+
+                    componentEl.children().first().unwrap();
                 }
-
-                var componentEl = context(componentTag + key.replace(/[A-Z]/g, function(ch){
-                    return "-" + ch;
-                }));
-
-                if (componentEl.length == 0) {
-                    continue;
-                }
-
-                var component = components[key];
-
-                var componentView = coco({
-                    model: component.model,
-                    params: component.params
-                });
-
-                componentEl.replaceWith(componentView.el);
-                component.view = componentView;
             }
         }
 
-        model.ready();
+        if (dfd && dfd.done) {
+            dfd.done(function () {
+                applyComponent();
+                model.ready();
+            });
+
+        } else {
+            applyComponent();
+            model.ready();
+        }
 
         return view;
     }

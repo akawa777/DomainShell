@@ -1,21 +1,28 @@
 ﻿require(["el", "coco", "text!/views/person/list", "person/tr"], function (el, coco, template, tr) {
     var list = {
         node: template,
-        ready: function () {
+        init: function() {
             var self = this;
 
-            $.get("/api/person/getall").success(function (persons) {
-                for (var id in persons) {
-                    view = self.$coco({
-                        model: tr,
-                        params: persons[id]
-                    });
+            var dfd = $.Deferred();
 
-                    self.$context("table tbody").append(view.el);
+            $.get("/api/person/getall").success(function (persons) {
+                self.$components = {
+                    tr: {
+                        model: tr,
+                        eachParams: persons
+                    }
                 }
+
+                dfd.resolve();
             }).fail(function (result) {
                 $("body").html(result.responseText);
             });
+
+            return dfd.promise();
+        },
+        ready: function () {
+            var self = this;
 
             self.$context("[name=output]").on("click", function () {
                 location.href = "api/person/output";
