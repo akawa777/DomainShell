@@ -216,10 +216,12 @@
     <Content Include="Views\Facade\Index.cshtml" />
     <Content Include="Scripts\Person\bulk.js" />
     <Content Include="Scripts\Person\detail.js" />
-    <Content Include="Views\Person\List2.cshtml" />
     <None Include="Views\Person\Tr.cshtml" />
     <None Include="Views\Person\TrCheck.cshtml" />
     <None Include="Views\Person\Modal.cshtml" />
+    <Content Include="Views\Person\List2.cshtml">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
