@@ -180,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\Infrastructure\startup.js" />
+    <Content Include="Scripts\Person\list2.js" />
     <Content Include="Scripts\Person\list.js">
       <SubType>Code</SubType>
     </Content>
@@ -215,6 +216,7 @@
     <Content Include="Views\Facade\Index.cshtml" />
     <Content Include="Scripts\Person\bulk.js" />
     <Content Include="Scripts\Person\detail.js" />
+    <Content Include="Views\Person\List2.cshtml" />
     <None Include="Views\Person\Tr.cshtml" />
     <None Include="Views\Person\TrCheck.cshtml" />
     <None Include="Views\Person\Modal.cshtml" />

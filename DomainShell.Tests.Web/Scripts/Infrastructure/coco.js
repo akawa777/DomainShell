@@ -178,10 +178,16 @@
 
                     var component = components[key];
 
+                    if (!component.model.node) {
+                        component.model.node = componentEl.prop("outerHTML");
+                    }
+
                     if (componentEl.attr(componentTypeAttr) == "each") {
                         var eachParams = component.eachParams;
                         
                         var views = [];
+
+                        var prevEl;
 
                         eachParams.forEach(function (params) {
                             var view = coco({
@@ -189,9 +195,15 @@
                                 params: params
                             });
 
-                            views.push(view);
+                            if (prevEl) {
+                                prevEl.after(view.el);
+                                prevEl = view.el;
+                            } else {
+                                componentEl.replaceWith(view.el);
+                                prevEl = view.el;
+                            }
 
-                            componentEl.append(view.el);
+                            views.push(view);
                         });
 
                         component.views = views;                        
@@ -201,9 +213,8 @@
                             params: component.params
                         });
 
-                        componentEl.append(view.el);                        
-                        component.view = view;
-                        
+                        componentEl.replaceWith(view.el);                        
+                        component.view = view;                        
                     }
 
                     componentEl.children().first().unwrap();
@@ -214,12 +225,16 @@
         if (dfd && dfd.done) {
             dfd.done(function () {
                 applyComponent();
-                model.ready();
+                if (model.ready) {
+                    model.ready();
+                }                
             });
 
         } else {
             applyComponent();
-            model.ready();
+            if (model.ready) {
+                model.ready();
+            }
         }
 
         return view;
