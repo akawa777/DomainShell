@@ -80,8 +80,6 @@
     }
 
     var coco = function (options) {
-        var params = options.params;
-
         var model;
         if (typeof options.model == "string") {            
             model = container.get(options.model);
@@ -136,16 +134,29 @@
             }
         }
 
+        var params = options.params;
+
         model.$context = context;
         model.$params = params;
         model.$coco = coco;
+        model.$components = {};
+
+        var view = model;
+        view.el = el;
+
+        if (model.validate) {
+            if (!model.validate()) {
+                $(el).html("");
+                return view;
+            }
+        }
 
         if (model.init) {
             model.init();
         }
 
-        if (model.components) {
-            var components = model.components;
+        if (model.$components) {
+            var components = model.$components;
 
             for (var key in components) {
                 if (!components.hasOwnProperty(key)) {
@@ -173,10 +184,6 @@
         }
 
         model.ready();
-
-        var view = model;        
-
-        view.el = el;
 
         return view;
     }

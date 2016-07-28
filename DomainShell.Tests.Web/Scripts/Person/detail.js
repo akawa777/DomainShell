@@ -1,10 +1,14 @@
 ﻿require(["el", "coco", "text!/views/person/detail", "shared/error"], function (el, coco, template, error) {
     var detail = {
         node: template,
-        components: {
-            errorName: {
-                model: error
-            }
+        init: function () {
+            var self = this;
+
+            self.$components = {
+                errorName: {
+                    model: error
+                }
+            };
         },
         ready: function () {
             var self = this;
@@ -28,12 +32,12 @@
             }
 
             self.$context("[name=save]").on("click", function () {
-                self.components.errorName.view.clear();
+                self.$components.errorName.view.clear();
 
                 var name = self.$context("[name=name]").val();
 
                 if (name == "") {
-                    self.components.errorName.view.message("not set name.");
+                    self.$components.errorName.view.message("not set name.");
                     alert("exist error.");
                     return;
                 }
@@ -54,7 +58,7 @@
             });
 
             self.$context("[name=remove]").on("click", function () {
-                self.components.errorName.view.clear();
+                self.$components.errorName.view.clear();
 
                 var name = self.$context("[name=name]").val();
 

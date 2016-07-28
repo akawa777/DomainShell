@@ -2,23 +2,24 @@
     ["el", "coco", "text!/views/person/bulk", "person/tr.check", "shared/error", "person/modal"],
     function (el, coco, template, trCheck, error, modal) {
         var bulk = {
-            node: template,
-            components: {
-                errorTable: {
-                    model: error
-                },
-                errorName: {
-                    model: error
-                },
-                modal: {
-                    model: modal,
-                    params: {}
-                }
-            },
+            node: template,            
             init: function() {
                 var self = this;
-                
-                self.components.modal.params.nameTextEl = self.$context("[name=name]");
+
+                self.$components = {
+                    errorTable: {
+                        model: error
+                    },
+                    errorName: {
+                        model: error
+                    },
+                    modal: {
+                        model: modal,
+                        params: {
+                            nameTextEl: self.$context("[name=name]")
+                        }
+                    }
+                };
             },
             ready: function () {
                 var self = this;
@@ -41,8 +42,8 @@
                 });
 
                 self.$context("[name=save]").on("click", function () {
-                    self.components.errorTable.view.clear();
-                    self.components.errorName.view.clear();
+                    self.$components.errorTable.view.clear();
+                    self.$components.errorName.view.clear();
 
                     var ids = [];
 
@@ -55,14 +56,14 @@
                     var valid = true;
 
                     if (ids.length == 0) {
-                        self.components.errorTable.view.message("no select target.");
+                        self.$components.errorTable.view.message("no select target.");
                         valid = false;
                     }
 
                     var name = self.$context("input[name=name]").val();
 
                     if (name == "") {
-                        self.components.errorName.view.message("no set name.");
+                        self.$components.errorName.view.message("no set name.");
                         valid = false;
                     }
 
@@ -91,7 +92,7 @@
                 });
 
                 self.$context("[name=modal]").on("click", function () {
-                    self.components.modal.view.show();
+                    self.$components.modal.view.show();
                 });
             }
         }
