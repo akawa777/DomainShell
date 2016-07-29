@@ -89,12 +89,7 @@
             model = createModel(options.model);
         }
 
-        var node;
-        if (model.node.nodeType || model.node.indexOf("#") == 0) {
-            node = $(model.node).prop("outerHTML");
-        } else {
-            node = model.node;
-        }
+        var node = model.node;
 
         var el = $(node);
         el.removeAttr(componentAttr);
@@ -182,42 +177,161 @@
                         component.model.node = componentEl.prop("outerHTML");
                     }
 
-                    if (componentEl.attr(componentTypeAttr) == "each") {
-                        var eachParams = component.eachParams;
-                        
-                        var views = [];
+                    var createFakeBaseEl = function (el) {
+                        var baseEl = $("<script></script>");
+                        el.replaceWith(baseEl)
 
-                        var prevEl;
+                        return baseEl;
+                    }
 
-                        eachParams.forEach(function (params) {
+                    var baseEl = createFakeBaseEl(componentEl);
+
+                    if (componentEl.attr(componentTypeAttr) == "each") {                        
+                        var eachCoco = function (eachParams) {
+                            var prevEl;
+                            var views = [];
+
+                            if (eachParams.length == 0) {
+                                
+                            } else {
+                                eachParams.forEach(function (params) {
+                                    var view = coco({
+                                        model: component.model,
+                                        params: params
+                                    });
+
+                                    if (prevEl) {
+                                        prevEl.after(view.el);
+                                        prevEl = view.el;
+                                    } else {
+                                        baseEl.replaceWith(view.el);
+                                        baseEl = view.el;
+                                        prevEl = view.el;
+                                    }
+
+                                    views.push(view);
+                                });
+                            }                            
+
+                            component.views = views;
+
+                            component.views.append = function (params, index) {
+                                if (index == null) {
+                                    index = component.views.length - 1;
+                                }
+
+                                var targetEl = component.views.length == 0 ? baseEl : component.views[index].el;
+
+                                var view = coco({
+                                    model: component.model,
+                                    params: params
+                                });
+
+                                if (component.views.length == 0) {
+                                    targetEl.replaceWith(view.el);
+                                } else {
+                                    targetEl.after(view.el);
+                                }
+
+                                if (index == component.views.length - 1) {
+                                    component.views.push(view);
+                                } else {
+                                    component.views.splice(index + 1, 0, view);
+                                }
+                            }
+
+                            component.views.prepend = function (params, index) {
+                                if (index == null) {
+                                    index = 0;
+                                }
+
+                                var targetEl = component.views.length == 0 ? baseEl : component.views[index].el;
+
+                                var view = coco({
+                                    model: component.model,
+                                    params: params
+                                });
+
+                                if (component.views.length == 0) {
+                                    targetEl.replaceWith(view.el);
+                                } else {
+                                    targetEl.before(view.el);
+                                }
+
+                                if (index == 0) {
+                                    component.views.unshift(view);
+                                } else {
+                                    component.views.splice(index, 0, view);
+                                }
+                            }
+
+                            component.views.remove = function (index) {
+                                if (component.views.length == 0) {
+                                    return;
+                                }
+
+                                if (index == null) {
+                                    index = component.views.length - 1;
+                                }
+
+                                if (component.views.length == 1) {                                    
+                                    baseEl = createFakeBaseEl(component.views[index].el);
+                                } else {
+                                    component.views[index].el.remove();
+                                }
+
+                                component.views.splice(index, 1);
+                            }
+
+                            component.views.removeAll = function () {
+                                if (component.views.length == 0) {
+                                    return;
+                                }
+
+                                for (var index = 0; index < component.views.length; index++) {
+                                    if (index == 0) {
+                                        baseEl = createFakeBaseEl(component.views[0].el);
+                                    }
+
+                                    component.views[index].el.remove();
+                                }
+
+                                component.views.length = 0;
+                            }
+                        }
+
+                        eachCoco(component.eachParams, componentEl);
+
+                        component.reload = function (eachParams) {
+                            for (var index = 0; index < component.views.length; index++) {
+                                if (index == 0) {
+                                    baseEl = createFakeBaseEl(component.views[0].el);
+                                }
+
+                                component.views[index].el.remove();
+                            }
+
+                            component.views.length = 0;
+
+                            eachCoco(eachParams, baseEl);
+                        }
+                    } else {
+                        var singleCoco = function (params, firstEl) {
                             var view = coco({
                                 model: component.model,
                                 params: params
                             });
 
-                            if (prevEl) {
-                                prevEl.after(view.el);
-                                prevEl = view.el;
-                            } else {
-                                componentEl.replaceWith(view.el);
-                                prevEl = view.el;
-                            }
+                            firstEl.replaceWith(view.el);
+                            component.view = view;
+                        }
 
-                            views.push(view);
-                        });
+                        singleCoco(component.params, componentEl);
 
-                        component.views = views;                        
-                    } else {
-                        var view = coco({
-                            model: component.model,
-                            params: component.params
-                        });
-
-                        componentEl.replaceWith(view.el);                        
-                        component.view = view;                        
+                        component.reload = function (params) {
+                            singleCoco(params, component.view.el);
+                        }
                     }
-
-                    componentEl.children().first().unwrap();
                 }
             }
         }
