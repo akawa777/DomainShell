@@ -1,10 +1,10 @@
 ﻿require(["el", "coco", "text!/views/person/list2"], function (el, coco, template) {
     var list = {
-        node: template,
-        init: function() {
+        node: template,        
+        ready: function () {
             var self = this;
 
-            self.tr = {
+            var tr = {
                 node: self.$context("table tbody").html(),
                 ready: function () {
                     var self = this;
@@ -33,10 +33,7 @@
                         self.$context().remove();
                     });
                 }
-            }        
-        },
-        ready: function () {
-            var self = this;
+            }
 
             var eachParams = [
                 { Id: 1, Name: "1_name" },
@@ -47,7 +44,7 @@
             self.$context("table tbody").empty();
             eachParams.forEach(function (params) {
                 var view = self.$coco({
-                    model: self.tr,
+                    model: tr,
                     params: params
                 });
 
@@ -56,7 +53,7 @@
 
             self.$context("[name=new]").on("click", function () {
                 var view = self.$coco({
-                    model: self.tr,
+                    model: tr,
                     params: { Id: "", Name: "new" }
                 });
 

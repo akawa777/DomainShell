@@ -150,11 +150,11 @@
             }
         }
 
-        var dfd;
+        //var dfd;
 
-        if (model.init) {
-            dfd = model.init();
-        }
+        //if (model.init) {
+        //    dfd = model.init();
+        //}
 
         var applyComponent = function () {
             //if (model.$components) {
@@ -336,19 +336,23 @@
             //}
         }
 
-        if (dfd && dfd.done) {
-            dfd.done(function () {
-                //applyComponent();
-                if (model.ready) {
-                    model.ready();
-                }                
-            });
+        //if (dfd && dfd.done) {
+        //    dfd.done(function () {
+        //        applyComponent();
+        //        if (model.ready) {
+        //            model.ready();
+        //        }                
+        //    });
 
-        } else {
-            //applyComponent();
-            if (model.ready) {
-                model.ready();
-            }
+        //} else {
+        //    applyComponent();
+        //    if (model.ready) {
+        //        model.ready();
+        //    }
+        //}
+
+        if (model.ready) {
+            model.ready();
         }
 
         return view;
