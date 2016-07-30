@@ -1,21 +1,22 @@
 ﻿<div>    
-    <button type="button" name="prev">prev</button>
-    <button type="button" name="next">next</button>
-    <button type="button" name="append">append</button>
-    <button type="button" name="prepend">prepend</button>
-    <button type="button" name="remove">remove</button>
-    <button type="button" name="removeAll">removeAll</button>
+    <button type="button" name="new">new</button>
     <table>
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Name</th>
+                <th></th>
             </tr>
         </thead>        
         <tbody>            
-            <tr coco-component="tr" coco-component-type="each">
-                <td class="id"></td>
-                <td class="name"></td>
+            <tr>
+                <td class="id"><input type="text" /></td>
+                <td class="name"><input type="text" /></td>
+                <td>
+                    <button type="button" name="append">append</button>
+                    <button type="button" name="prepend">prepend</button>
+                    <button type="button" name="remove">remove</button>
+                </td>
             </tr>
         </tbody>
     </table>    

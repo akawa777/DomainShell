@@ -1,15 +1,6 @@
 ﻿require(["el", "coco", "text!/views/person/detail", "shared/error"], function (el, coco, template, error) {
     var detail = {
-        node: template,
-        init: function () {
-            var self = this;
-
-            self.$components = {
-                errorName: {
-                    model: error
-                }
-            };
-        },
+        node: template,        
         ready: function () {
             var self = this;
 
@@ -31,13 +22,30 @@
                 });
             }
 
+            var errorNameView = self.$coco({
+                model: error,
+                params: {
+                    verify: function (message) {
+                        var name = self.$context("input[name=name]").val();
+
+                        if (name == "") {
+                            message("no set name.");
+                            return false;
+                        }
+
+                        return true;
+                    }
+                }
+            });
+
+            self.$context("input[name=name]").after(errorNameView.el);
+
             self.$context("[name=save]").on("click", function () {
-                self.$components.errorName.view.clear();
+                errorNameView.clear();
 
                 var name = self.$context("[name=name]").val();
 
-                if (name == "") {
-                    self.$components.errorName.view.message("not set name.");
+                if (!errorNameView.verify()) {                    
                     alert("exist error.");
                     return;
                 }

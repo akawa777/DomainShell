@@ -5,10 +5,15 @@
             var self = this;
             self.$context().hide();
         },
-        message: function (message) {
+        verify: function () {
             var self = this;
-            self.$context().text("*" + message);
-            self.$context().show();
+            
+            var message = function (message) {                
+                self.$context().text("*" + message);
+                self.$context().show();
+            }
+
+            return self.$params.verify(message);
         },
         clear: function () {
             var self = this;

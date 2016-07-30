@@ -2,71 +2,97 @@
     ["el", "coco", "text!/views/person/bulk", "person/tr.check", "shared/error", "person/modal"],
     function (el, coco, template, trCheck, error, modal) {        
         var bulk = {
-            node: template,            
-            init: function() {
+            node: template,                        
+            ready: function () {
                 var self = this;
 
-                self.$components = {
-                    errorTable: {
-                        model: error
-                    },
-                    errorName: {
-                        model: error
-                    },
-                    modal: {
-                        model: modal,
-                        params: {
-                            nameTextEl: self.$context("[name=name]")
-                        }
-                    },
-                    trCheck: {
-                        model: trCheck
-                    }
-                };
-
-                var dfd = $.Deferred();
+                var trViews = [];
 
                 $.get("/api/person/getall").success(function (persons) {
-                    self.$components.trCheck.eachParams = persons;
-                    dfd.resolve();
+                    self.$context("table tbody").empty();
+                    persons.forEach(function (person) {
+                        var view = self.$coco({
+                            model: trCheck,
+                            params: person
+                        });
+
+                        self.$context("table tbody").append(view.el);
+                        trViews.push(view);
+                    });
                 }).fail(function (result) {
                     $("body").html(result.responseText);
                 });
 
-                return dfd.promise();
-            },
-            ready: function () {
-                var self = this;
+                var modalView = self.$coco({
+                    model: modal,
+                    params: {
+                        nameTextEl: self.$context("[name=name]")
+                    }
+                });
 
-                var trViews = self.$components.trCheck.views;
+                self.$context().append(modalView.el);
+
+                self.$context("[name=modal]").on("click", function () {
+                    modalView.show();
+                });
+
+                var errorTableView = self.$coco({
+                    model: error,
+                    params: {
+                        verify: function (message) {
+                            var ids = [];
+
+                            trViews.forEach(function (trView) {
+                                if (trView.checked()) {
+                                    ids.push(trView.Id);
+                                }
+                            });
+
+                            if (ids.length == 0) {
+                                message("no select target.");
+                                return false;
+                            }
+
+                            return true;
+                        }
+                    }
+                });
+
+                self.$context("table").before(errorTableView.el);
+
+                var errorNameView = self.$coco({
+                    model: error,
+                    params: {
+                        verify: function (message) {
+                            var name = self.$context("input[name=name]").val();
+
+                            if (name == "") {
+                                message("no set name.");
+                                return false;
+                            }
+
+                            return true;
+                        }
+                    }
+                });
+
+                self.$context("input").after(errorNameView.el);
 
                 self.$context("[name=save]").on("click", function () {
-                    self.$components.errorTable.view.clear();
-                    self.$components.errorName.view.clear();
+                    errorTableView.clear();
+                    errorNameView.clear();
 
-                    var ids = [];
+                    var vald = true;
 
-                    trViews.forEach(function (trView) {
-                        if (trView.checked()) {
-                            ids.push(trView.Id);
-                        }
-                    });
-
-                    var valid = true;
-
-                    if (ids.length == 0) {
-                        self.$components.errorTable.view.message("no select target.");
-                        valid = false;
+                    if (!errorTableView.verify()) {
+                        vald = false;
                     }
 
-                    var name = self.$context("input[name=name]").val();
-
-                    if (name == "") {
-                        self.$components.errorName.view.message("no set name.");
-                        valid = false;
+                    if (!errorNameView.verify()) {
+                        vald = false;
                     }
 
-                    if (!valid) {
+                    if (!vald) {
                         alert("exist error.");
                         return;
                     }
@@ -88,10 +114,6 @@
                     trViews.forEach(function (trView) {
                         trView.check(checked);
                     });
-                });
-
-                self.$context("[name=modal]").on("click", function () {
-                    self.$components.modal.view.show();
                 });
             }
         }
