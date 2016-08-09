@@ -1,68 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using DomainShell.Tests.Domain.Models;
-using DomainShell.Tests.Domain.Service;
-using System.IO;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Web;
+//using System.Web.Mvc;
+//using DomainShell.Tests.Domain.Apps;
+//using System.IO;
 
-namespace DomainShell.Tests.Web.Controllers
-{
-    public class PersonController : Controller
-    {       
-        private PersonReader _personReader = new PersonReader();
-        private PersonBulkUpdate _bulkUpdate = new PersonBulkUpdate();        
+//namespace DomainShell.Tests.Web.Controllers
+//{
+//    public class PersonController : Controller
+//    {
+//        private PersonApp _app = new PersonApp();
 
-        public ActionResult GetAll()
-        {
-            PersonModel[] persons = _personReader.GetAll();
+//        public ActionResult GetAll()
+//        {
+//            PersonData[] persons = _app.GetAll();
 
-            return Json(persons, JsonRequestBehavior.AllowGet);
-        }
+//            return Json(persons, JsonRequestBehavior.AllowGet);
+//        }
 
-        public ActionResult Get(string id)
-        {
-            PersonModel person = _personReader.Get(id);
+//        public ActionResult Get(string id)
+//        {
+//            PersonData person = _app.Get(id);
 
-            return Json(person, JsonRequestBehavior.AllowGet);
-        }
+//            return Json(person, JsonRequestBehavior.AllowGet);
+//        }
 
-        public ActionResult Add(PersonModel person)
-        {
-            bool result = person.Add();
+//        public ActionResult Add(string name)
+//        {
+//            string id;
+//            Result result = _app.Create(name, out id);
 
-            return Json(result);
-        }
+//            return Json(result.Success);
+//        }
 
-        public ActionResult Update(PersonModel person)
-        {
-            bool result = person.Update();
+//        public ActionResult Update(string id, string name)
+//        {
+//            Result result = _app.Update(id, name);
 
-            return Json(result);
-        }
+//            return Json(result.Success);
+//        }
 
-        public ActionResult Remove(PersonModel person)
-        {
-            bool result = person.Remove();
+//        public ActionResult Remove(string id)
+//        {
+//            Result result = _app.Delete(id);
 
-            return Json(result);
-        }
+//            return Json(result.Success);
+//        }
 
-        public ActionResult BulkUpdate(string[] ids, string name)
-        {
-            PersonBulkUpdate.Result result = _bulkUpdate.BulkUpdate(ids, name);
+//        public ActionResult BulkUpdate(string[] ids, string name)
+//        {
+//            Result result = _app.BulkUpdate(ids, name);
 
-            return Json(result);
-        }
+//            return Json(result);
+//        }
 
-        public FileResult Output()
-        {            
-            using (MemoryStream stream = new MemoryStream())
-            {                
-                _personReader.OutputTsv(stream);    
-                return File(stream.GetBuffer(), System.Net.Mime.MediaTypeNames.Application.Octet, "person.txt");
-            }
-        }
-    }
-}
+//        public FileResult Output()
+//        {
+//            using (MemoryStream stream = new MemoryStream())
+//            {
+//                _app.OutputTsv(stream);
+//                return File(stream.GetBuffer(), System.Net.Mime.MediaTypeNames.Application.Octet, "person.txt");
+//            }
+//        }
+//    }
+//}

@@ -143,8 +143,8 @@
         var view = model;
         view.el = el;
 
-        if (model.validate) {
-            if (!model.validate()) {
+        if (model.verify) {
+            if (!model.verify()) {
                 $(el).html("");
                 return view;
             }

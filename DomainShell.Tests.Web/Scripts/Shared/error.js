@@ -5,7 +5,7 @@
             var self = this;
             self.$context().hide();
         },
-        verify: function () {
+        validate: function () {
             var self = this;
             
             var message = function (message) {                

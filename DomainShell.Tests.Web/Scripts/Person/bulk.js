@@ -39,7 +39,7 @@
                 var errorTableView = self.$coco({
                     model: error,
                     params: {
-                        verify: function (message) {
+                        validate: function (message) {
                             var ids = [];
 
                             trViews.forEach(function (trView) {
@@ -63,7 +63,7 @@
                 var errorNameView = self.$coco({
                     model: error,
                     params: {
-                        verify: function (message) {
+                        validate: function (message) {
                             var name = self.$context("input[name=name]").val();
 
                             if (name == "") {
