@@ -41,8 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CartApp.cs" />
-    <Compile Include="PaymentApp.cs" />
+    <Compile Include="Cart\CartApp.cs" />
+    <Compile Include="Payment\PaymentApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

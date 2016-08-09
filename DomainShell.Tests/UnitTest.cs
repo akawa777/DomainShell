@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Tests.Infrastructure;
-using DomainShell.Tests.Apps;
+using DomainShell.Tests.Apps.Cart;
+using DomainShell.Tests.Apps.Payment;
 
 namespace DomainShell.Tests
 {
