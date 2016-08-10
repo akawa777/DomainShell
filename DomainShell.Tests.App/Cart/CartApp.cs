@@ -54,8 +54,7 @@ namespace DomainShell.Tests.Apps.Cart
             _productRepository = new ProductRepository(_session);            
             _paymentRepository = new PaymentRepository(_session);                    
 
-            _paymentService = new PaymentService();
-            _postageService = new PostageService();
+            _paymentService = new PaymentService();            
         }
 
         private Session _session;
@@ -66,8 +65,7 @@ namespace DomainShell.Tests.Apps.Cart
         private ProductRepository _productRepository;        
         private PaymentRepository _paymentRepository;
 
-        private IPaymentService _paymentService;
-        private IPostageService _postageService;  
+        private IPaymentService _paymentService;  
 
         public CartItemData[] Get(string customerId)
         {
@@ -155,8 +153,9 @@ namespace DomainShell.Tests.Apps.Cart
             using (Transaction tran = _session.BegingTran())
             {
                 CartModel cart = _cartRepository.Get(data.CartId);
+                decimal postage = _cartReader.GetPostage(data.ShippingAddress);
 
-                PaymentModel payment = cart.Checkout(data.ShippingAddress, _postageService);
+                PaymentModel payment = cart.Checkout(data.ShippingAddress, postage);
 
                 payment.Pay(
                         data.CreditCardNo,

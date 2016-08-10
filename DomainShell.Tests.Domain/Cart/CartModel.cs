@@ -44,11 +44,11 @@ namespace DomainShell.Tests.Domain.Cart
             State = State.UnChanged;
         }
 
-        public PaymentModel Checkout(string shippingAddress, IPostageService service)
+        public PaymentModel Checkout(string shippingAddress, decimal postage)
         {
             PaymentModel payment = new PaymentModel();            
             payment.ShippingAddress = shippingAddress;
-            payment.Postage = service.GetPostage(shippingAddress);
+            payment.Postage = postage;
             
             foreach (CartItemModel item in CartItems)
             {

@@ -42,11 +42,9 @@
   <ItemGroup>
     <Compile Include="Cart\CartReader.cs" />
     <Compile Include="DataStore.cs" />
-    <Compile Include="Delivery\DeliveryReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Cart\CartRepository.cs" />
     <Compile Include="Customer\CustomerRepository.cs" />
-    <Compile Include="Delivery\DeliveryRepository.cs" />
     <Compile Include="Payment\PaymentRepository.cs" />
     <Compile Include="Product\ProductRepository.cs" />
   </ItemGroup>

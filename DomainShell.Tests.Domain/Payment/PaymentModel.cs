@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Product;
-using DomainShell.Tests.Domain.Delivery;
 
 namespace DomainShell.Tests.Domain.Payment
 {
@@ -32,9 +31,7 @@ namespace DomainShell.Tests.Domain.Payment
         public string ShippingAddress { get; set; }
         public decimal Postage { get; set; }        
 
-        public List<PaymentItemModel> PaymentItemList { get; set; }
-
-        public DeliveryModel Delivery { get; set; }
+        public List<PaymentItemModel> PaymentItemList { get; set; }        
 
         public void Pay(
             string creditCardNo, 
@@ -46,9 +43,7 @@ namespace DomainShell.Tests.Domain.Payment
             CreditCardHolder = creditCardHolder;
             CreditCardExpirationDate = creditCardExpirationDate;            
 
-            service.Pay(this);
-
-            Delivery = new DeliveryModel();
+            service.Pay(this);            
 
             State = State.Created;
         }

@@ -21,5 +21,10 @@ namespace DomainShell.Tests.Infrastructure.Cart
         {
             return new List<CartItemReadModel>();
         }
+
+        public decimal GetPostage(string shippingAddress)
+        {
+            return 0;
+        }
     }
 }
