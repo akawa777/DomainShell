@@ -17,12 +17,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private Session _session;
 
-        public List<CartReadModel> GetAll()
-        {
-            return new List<CartReadModel>();
-        }
-
-        public List<CartItemReadModel> GetDetailList(string cartId)
+        public List<CartItemReadModel> GetItemList(string customerId)
         {
             return new List<CartItemReadModel>();
         }

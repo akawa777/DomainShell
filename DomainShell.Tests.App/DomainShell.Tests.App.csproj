@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cart\CartApp.cs" />
-    <Compile Include="Payment\PaymentApp.cs" />
+    <Compile Include="Delivery\DeliveryApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

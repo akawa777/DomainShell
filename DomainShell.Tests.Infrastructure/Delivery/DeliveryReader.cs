@@ -9,23 +9,18 @@ using DomainShell.Tests.Domain.Delivery;
 
 namespace DomainShell.Tests.Infrastructure.Delivery
 {
-    public class DeliveryRepository : IRepositroy<DeliveryModel>
+    public class DeliveryReader
     {
-        public DeliveryRepository(Session session)
+        public DeliveryReader(Session session)
         {
             _session = session;
         }
 
         private Session _session;  
 
-        public DeliveryModel Get(string paymentId, string deliveryId)
+        public List<DeliveryReadModel> GetAllDelivery()
         {
-            return null;
-        }
-
-        public void Save(DeliveryModel delivery)
-        {
-            delivery.Accepted();
+            return new List<DeliveryReadModel>();
         }
     }
 }

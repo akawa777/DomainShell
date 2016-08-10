@@ -10,41 +10,33 @@ namespace DomainShell.Tests.Domain.Delivery
 {
     public class DeliveryModel : IAggregateRoot
     {
-        public DeliveryModel()
-        {
-
-        }
-
-        public DeliveryModel(PaymentModel payment)
-            : this()
-        {
-            Payment = payment;
-        }
-
+        public string PaymentId { get; set; }
         public string DeliveryId { get; set; }
-        public PaymentModel Payment { get; private set; }
-        public string CompleteTime { get; set; }
+        public string BeginDate { get; set; }        
+        public string CompleteDate { get; set; }
 
-        public void Send(PaymentModel payment)
+        public void Send()
         {
-            if (Payment != null)
+            if (!string.IsNullOrEmpty(BeginDate))
             {
                 throw new Exception("already send.");
             }
 
-            Payment = payment;
+            BeginDate = DateTime.Now.ToString("yyyyMMddHHmmss");
 
-            State = State.Created;
+            State = State.Updated;
         }
 
         public void Complete()
         {
-            if (!string.IsNullOrEmpty(CompleteTime))
+            if (!string.IsNullOrEmpty(CompleteDate))
             {
                 throw new Exception("already complete.");
             }
 
-            CompleteTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+            CompleteDate = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            State = State.Updated;
         }
 
         public State State { get; private set; }

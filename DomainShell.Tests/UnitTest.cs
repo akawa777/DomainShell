@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.Apps.Cart;
-using DomainShell.Tests.Apps.Payment;
 
 namespace DomainShell.Tests
 {
@@ -24,19 +23,15 @@ namespace DomainShell.Tests
         {
             CartApp app = new CartApp();
 
-            List<CartData> cartList = app.GetAll();
+            CartItemData[] cartItems = app.Get("1");
         }
 
         [TestMethod]
         public void Test02()
         {
-            PaymentApp app = new PaymentApp();            
+            CartApp app = new CartApp();
 
-            app.Pay(new PaymentData
-            {
-                CartId = "1",
-                Postage = 100
-            });
+            app.Pay(new PaymentData());
         }
     }
 }

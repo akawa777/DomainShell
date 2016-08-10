@@ -6,21 +6,15 @@ using System.Threading.Tasks;
 using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
+using DomainShell.Tests.Domain.Payment;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.Infrastructure.Cart;
 using DomainShell.Tests.Infrastructure.Customer;
 using DomainShell.Tests.Infrastructure.Product;
+using DomainShell.Tests.Infrastructure.Payment;
 
 namespace DomainShell.Tests.Apps.Cart
 {
-    public class CartData
-    {
-        public string CartId { get; set; }
-        public string MainProductName { get; set; }
-        public decimal TotalPrice { get; set; }
-        public decimal TotalNumber { get; set; }
-    }
-
     public class CartItemData
     {
         public string CartId { get; set; }
@@ -31,39 +25,53 @@ namespace DomainShell.Tests.Apps.Cart
         public int Number { get; set; }
     }
 
+    public class PaymentData
+    {
+        public string CartId { get; set; }
+        public string CreditCardNo { get; set; }
+        public string CreditCardHolder { get; set; }
+        public string CreditCardExpirationDate { get; set; }
+        public string ShippingAddress { get; set; }       
+    }
+
+    public class CheckoutData
+    {
+        public string CartId { get; set; }
+        public string ShippingAddress { get; set; }
+        public decimal Postage { get; set; }
+        public decimal PaymentAmount { get; set; }
+    }
+
     public class CartApp
     {
         public CartApp()
         {
             _session = new Session();
+
             _cartReader = new CartReader(_session);
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
-            _productRepository = new ProductRepository(_session);
+            _productRepository = new ProductRepository(_session);            
+            _paymentRepository = new PaymentRepository(_session);                    
+
+            _paymentService = new PaymentService();
+            _postageService = new PostageService();
         }
 
         private Session _session;
+
         private CartReader _cartReader;
         private CartRepository _cartRepository;
         private CustomerRepository _customerRepository;
-        private ProductRepository _productRepository;
+        private ProductRepository _productRepository;        
+        private PaymentRepository _paymentRepository;
 
-        public List<CartData> GetAll()
+        private IPaymentService _paymentService;
+        private IPostageService _postageService;  
+
+        public CartItemData[] Get(string customerId)
         {
-            List<CartReadModel> cartList = _cartReader.GetAll();
-
-            return cartList.Select(x => new CartData
-            {
-                CartId = x.CartId,
-                MainProductName = x.MainProductName,
-                TotalPrice = x.TotalPrice,
-                TotalNumber = x.TotalNumber
-            }).ToList();
-        }
-
-        public List<CartItemData> GetDetailList(string cartId)
-        {
-            List<CartItemReadModel> cartList = _cartReader.GetDetailList(cartId);
+            List<CartItemReadModel> cartList = _cartReader.GetItemList(customerId);
 
             return cartList.Select(x => new CartItemData
             {
@@ -73,7 +81,7 @@ namespace DomainShell.Tests.Apps.Cart
                 ProductName = x.ProductName,
                 Price = x.Price,
                 Number = x.Number
-            }).ToList();
+            }).ToArray();
         }
 
         public void Create(string customerId, CartItemData[] items)
@@ -140,6 +148,27 @@ namespace DomainShell.Tests.Apps.Cart
                 cart.Delete();
 
                 _cartRepository.Save(cart);
+
+                tran.Commit();
+            }
+        }
+
+        public void Pay(PaymentData data)
+        {
+            using (Transaction tran = _session.BegingTran())
+            {
+                CartModel cart = _cartRepository.Get(data.CartId);
+
+                PaymentModel payment = cart.Checkout(data.ShippingAddress, _postageService);
+
+                payment.Pay(
+                        data.CreditCardNo,
+                        data.CreditCardHolder,
+                        data.CreditCardExpirationDate,
+                        _paymentService);
+
+                _cartRepository.Save(cart);
+                _paymentRepository.Save(payment);
 
                 tran.Commit();
             }

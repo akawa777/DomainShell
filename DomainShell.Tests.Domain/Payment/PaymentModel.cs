@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Product;
+using DomainShell.Tests.Domain.Delivery;
 
 namespace DomainShell.Tests.Domain.Payment
 {
@@ -29,53 +30,32 @@ namespace DomainShell.Tests.Domain.Payment
         public string CreditCardHolder { get; set; }
         public string CreditCardExpirationDate { get; set; }
         public string ShippingAddress { get; set; }
-        public decimal Postage { get; set; }
-        public decimal PaymentAmount { get; set; }
+        public decimal Postage { get; set; }        
 
-        private List<PaymentItemModel> PaymentItemList { get; set; }
+        public List<PaymentItemModel> PaymentItemList { get; set; }
 
-        public PaymentItemModel[] PaymentItems()
-        {
-            return PaymentItemList.ToArray();
-        }
-
-        public void Add(CartModel cart)
-        {
-            decimal paymentAmount = 0m;
-            foreach (CartItemModel item in cart.CartItems)
-            {
-                PaymentItemList.Add(new PaymentItemModel
-                {
-                    Product = item.Product,
-                    Number = item.Number,
-                    PriceAtTime = item.Product.Price
-                });
-
-                paymentAmount += item.Product.Price;
-            }
-
-            PaymentAmount += paymentAmount;
-
-            cart.Delete();
-        }
+        public DeliveryModel Delivery { get; set; }
 
         public void Pay(
             string creditCardNo, 
             string creditCardHolder, 
-            string creditCardExpirationDate,
-            string shippingAddress,
-            decimal postage,
+            string creditCardExpirationDate,            
             IPaymentService service)
         {
             CreditCardNo = creditCardNo;
             CreditCardHolder = creditCardHolder;
-            CreditCardExpirationDate = creditCardExpirationDate;
-            ShippingAddress = shippingAddress;
-            Postage = postage;
+            CreditCardExpirationDate = creditCardExpirationDate;            
 
             service.Pay(this);
 
+            Delivery = new DeliveryModel();
+
             State = State.Created;
+        }
+
+        public decimal PaymentAmount()
+        {
+            return PaymentItemList.Sum(x => x.PriceAtTime) + Postage;
         }
 
         public State State { get; private set; }

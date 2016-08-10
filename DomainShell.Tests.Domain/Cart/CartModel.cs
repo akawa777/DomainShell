@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
+using DomainShell.Tests.Domain.Payment;
 
 namespace DomainShell.Tests.Domain.Cart
 {
@@ -41,6 +42,27 @@ namespace DomainShell.Tests.Domain.Cart
         public void Accepted()
         {
             State = State.UnChanged;
+        }
+
+        public PaymentModel Checkout(string shippingAddress, IPostageService service)
+        {
+            PaymentModel payment = new PaymentModel();            
+            payment.ShippingAddress = shippingAddress;
+            payment.Postage = service.GetPostage(shippingAddress);
+            
+            foreach (CartItemModel item in CartItems)
+            {
+                payment.PaymentItemList.Add(new PaymentItemModel
+                {
+                    Product = item.Product,
+                    Number = item.Number,
+                    PriceAtTime = item.Product.Price
+                });
+            }
+
+            Delete();            
+
+            return payment;            
         }
     }
 

@@ -6,14 +6,6 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Tests.Domain.Cart
 {
-    public class CartReadModel
-    {
-        public string CartId { get; set; }
-        public string MainProductName { get; set; }
-        public decimal TotalPrice { get; set; }
-        public decimal TotalNumber { get; set; }
-    }
-
     public class CartItemReadModel
     {
         public string CartId { get; set; }
