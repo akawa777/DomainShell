@@ -85,8 +85,7 @@ namespace DomainShell.Tests.Apps.Cart
         }
 
         public void Create(string customerId, CartItemData[] items)
-        {
-            using (_session.Open())
+        {            
             using (Transaction tran = _session.BegingTran())
             {
                 CartModel cart = new CartModel();
@@ -114,7 +113,6 @@ namespace DomainShell.Tests.Apps.Cart
 
         public void Update(CartItemData[] items)
         {
-            using (_session.Open())
             using (Transaction tran = _session.BegingTran())
             {
                 CartModel cart = _cartRepository.Get(items[0].CartId);                
@@ -140,8 +138,7 @@ namespace DomainShell.Tests.Apps.Cart
         }
 
         public void Delete(string cartId)
-        {
-            using (_session.Open())
+        {            
             using (Transaction tran = _session.BegingTran())
             {
                 CartModel cart = _cartRepository.Get(cartId);
