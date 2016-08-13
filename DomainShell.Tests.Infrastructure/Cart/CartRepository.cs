@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
+using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Customer;
@@ -22,17 +23,41 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public CartModel Get(string cartId)
         {
-            CartModel cart = new CartModel();
-            cart.CartId = cartId;
-            cart.CartItems = new List<CartItemModel>();
-            cart.CartItems.Add(new CartItemModel { CartId = cartId, Product = new ProductModel { Price = 100 }, Number = 1 });
-
-            return cart;
+            return new CartModel();
         }
 
         public void Save(CartModel cart)
         {
+            if (cart.State == State.Created)
+            {
+                Create(cart);
+            } 
+            else if (cart.State == State.Updated)
+            {
+                Update(cart);
+            }
+            else if (cart.State == State.Deleted)
+            {
+                Delete(cart);
+            }
+
             cart.Accepted();
         }
+
+        private void Create(CartModel cart)
+        {
+            
+        }
+
+        private void Update(CartModel cart)
+        {
+
+        }
+
+        private void Delete(CartModel cart)
+        {
+
+        }
+
     }
 }

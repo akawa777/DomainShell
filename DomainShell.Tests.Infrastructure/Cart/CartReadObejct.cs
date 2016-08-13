@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DomainShell.Tests.Domain.Cart
+namespace DomainShell.Tests.Infrastructure.Cart
 {
-    public class CartItemReadModel
+    public class CartItemReadObejct
     {
         public string CartId { get; set; }
         public string CartItemId { get; set; }

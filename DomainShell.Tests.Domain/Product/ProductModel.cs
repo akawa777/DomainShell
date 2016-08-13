@@ -13,22 +13,7 @@ namespace DomainShell.Tests.Domain.Product
         public string ProductName { get; set; }
         public decimal Price { get; set; }
 
-        public State State { get; private set; }
-
-        public void Create()
-        {
-            State = State.Created;
-        }
-
-        public void Update()
-        {
-            State = State.Updated;
-        }
-
-        public void Delete()
-        {
-            State = State.Deleted;
-        }
+        public State State { get; private set; }        
 
         public void Accepted()
         {

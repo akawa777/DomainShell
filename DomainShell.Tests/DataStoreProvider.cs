@@ -58,40 +58,144 @@ namespace DomainShell.Tests
 
             SQLiteConnection.CreateFile(_db);
 
-            using (DbConnection conn = new SQLiteConnection(_connectionString))
+            using (DbConnection connection = new SQLiteConnection(_connectionString))
             {
-                conn.Open();
+                connection.Open();
 
-                using (var command = conn.CreateCommand())
-                {
-                    command.CommandText = @"
-                        create table Person(
-                            Id integer primary key,
-                            Name nvarchar(100)
+                CreateCustomer(connection);
+                CreateProduct(connection);
+                CreateCart(connection);
+                CreatePayment(connection);
+            }
+        }
+
+        private static void CreateCustomer(DbConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                        create table Customer(
+                            CustomerId integer primary key,
+                            CustomerName nvarchar(100)
                         )
                     ";
 
-                    var ret = command.ExecuteNonQuery();
-                }
+                var ret = command.ExecuteNonQuery();
+            }
 
-                using (DbCommand command = conn.CreateCommand())
+            using (DbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = "insert into Customer (CustomerName) values (@name)";
+
+                for (int i = 0; i < 10; i++)
                 {
-                    command.CommandText = "insert into Person(Name) values (@name)";
+                    DbParameter parameter = command.CreateParameter();
 
-                    for (int i = 0; i < 10; i++)
-                    {
-                        DbParameter parameter = command.CreateParameter();
+                    parameter.ParameterName = "@name";
+                    parameter.Value = "customer_" + (i + 1).ToString();
 
-                        parameter.ParameterName = "@name";
-                        parameter.Value = (i + 1).ToString() + "_name";
+                    command.Parameters.Add(parameter);
 
-                        command.Parameters.Add(parameter);
+                    var ret = command.ExecuteNonQuery();
 
-                        var ret = command.ExecuteNonQuery();
-
-                        command.Parameters.Clear();
-                    }
+                    command.Parameters.Clear();
                 }
+            }
+        }
+
+        private static void CreateProduct(DbConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                        create table Product(
+                            ProductId integer primary key,
+                            ProductName nvarchar(100),
+                            Price int
+                        )
+                    ";
+
+                var ret = command.ExecuteNonQuery();
+            }
+
+            using (DbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = "insert into Product (ProductName, Price) values (@name, @price)";
+
+                for (int i = 0; i < 10; i++)
+                {
+                    DbParameter parameter = command.CreateParameter();
+
+                    parameter.ParameterName = "@name";
+                    parameter.Value = "product_" + (i + 1).ToString();
+
+                    command.Parameters.Add(parameter);
+
+                    parameter = command.CreateParameter();
+
+                    parameter.ParameterName = "@price";
+                    parameter.Value = 100 * (i + 1);
+
+                    command.Parameters.Add(parameter);
+
+                    var ret = command.ExecuteNonQuery();
+
+                    command.Parameters.Clear();
+                }
+            }
+        }
+
+        private static void CreateCart(DbConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                        create table Cart(
+                            CartId integer primary key,
+                            CustomerId int
+                        )
+                    ";
+
+                command.CommandText = @"
+                        create table CartItem(
+                            CartId integer primary key,
+                            CartItemdId int,                            
+                            ProductId int,
+                            Number int
+                        )
+                    ";
+
+                var ret = command.ExecuteNonQuery();
+            }
+        }
+
+        private static void CreatePayment(DbConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                        create table Payment(
+                            PaymentId integer primary key,
+                            CustomerId int,                            
+                            CreditCardNo nvarchar(100),
+                            CreditCardHolder nvarchar(100),
+                            CreditCardExpirationDate nvarchar(100),
+                            ShippingAddress nvarchar(100),
+                            Postage int
+                        )
+                    ";
+
+                command.CommandText = @"
+                        create table PaymentItem(
+                            PaymentId integer primary key,
+                            PaymentItemdId int,                            
+                            ProductId int,
+                            PriceAtTime int,
+                            Number int
+                        )
+                    ";
+
+                var ret = command.ExecuteNonQuery();
             }
         }
     }

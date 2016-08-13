@@ -31,7 +31,7 @@ namespace DomainShell.Tests.Infrastructure
 
         public Transaction BegingTran()
         {
-            if (_connection.State != ConnectionState.Open)
+            if (_connection == null ||  _connection.State != ConnectionState.Open)
             {
                 Open();
             }

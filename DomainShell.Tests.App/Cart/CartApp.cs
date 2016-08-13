@@ -52,9 +52,9 @@ namespace DomainShell.Tests.Apps.Cart
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
             _productRepository = new ProductRepository(_session);            
-            _paymentRepository = new PaymentRepository(_session);                    
+            _paymentRepository = new PaymentRepository(_session);
 
-            _paymentService = new PaymentService();            
+            _creditCardService = new CreditCardService();            
         }
 
         private Session _session;
@@ -65,11 +65,11 @@ namespace DomainShell.Tests.Apps.Cart
         private ProductRepository _productRepository;        
         private PaymentRepository _paymentRepository;
 
-        private IPaymentService _paymentService;  
+        private CreditCardService _creditCardService;  
 
         public CartItemData[] Get(string customerId)
         {
-            List<CartItemReadModel> cartList = _cartReader.GetItemList(customerId);
+            List<CartItemReadObejct> cartList = _cartReader.GetItemList(customerId);
 
             return cartList.Select(x => new CartItemData
             {
@@ -85,12 +85,8 @@ namespace DomainShell.Tests.Apps.Cart
         public void Create(string customerId, CartItemData[] items)
         {            
             using (Transaction tran = _session.BegingTran())
-            {
-                CartModel cart = new CartModel();
-                cart.Customer = _customerRepository.Get(customerId);
-
-                cart.CartItems = new List<CartItemModel>();
-
+            {   
+                List<CartItemModel> itemList = new List<CartItemModel>();
                 foreach (CartItemData detail in items)
                 {
                     CartItemModel item = new CartItemModel();
@@ -98,10 +94,12 @@ namespace DomainShell.Tests.Apps.Cart
                     item.Number = detail.Number;
                     item.Product = _productRepository.Get(detail.ProductId);
 
-                    cart.CartItems.Add(item);
+                    itemList.Add(item);
                 }
 
-                cart.Create();
+                CartModel cart = new CartModel();
+
+                cart.Create(customerId, itemList);
 
                 _cartRepository.Save(cart);
 
@@ -113,10 +111,9 @@ namespace DomainShell.Tests.Apps.Cart
         {
             using (Transaction tran = _session.BegingTran())
             {
-                CartModel cart = _cartRepository.Get(items[0].CartId);                
+                CartModel cart = _cartRepository.Get(items[0].CartId);
 
-                cart.CartItems = new List<CartItemModel>();
-
+                List<CartItemModel> itemList = new List<CartItemModel>();
                 foreach (CartItemData item in items)
                 {
                     CartItemModel itemModel = new CartItemModel();
@@ -124,10 +121,10 @@ namespace DomainShell.Tests.Apps.Cart
                     itemModel.Number = item.Number;
                     itemModel.Product = _productRepository.Get(item.ProductId);
 
-                    cart.CartItems.Add(itemModel);
+                    itemList.Add(itemModel);
                 }
 
-                cart.Update();
+                cart.Update(itemList);
 
                 _cartRepository.Save(cart);
 
@@ -161,7 +158,7 @@ namespace DomainShell.Tests.Apps.Cart
                         data.CreditCardNo,
                         data.CreditCardHolder,
                         data.CreditCardExpirationDate,
-                        _paymentService);
+                        _creditCardService);
 
                 _cartRepository.Save(cart);
                 _paymentRepository.Save(payment);

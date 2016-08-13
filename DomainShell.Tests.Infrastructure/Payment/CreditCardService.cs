@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainShell.Domain;
+using DomainShell.Tests.Domain.Payment;
 
-namespace DomainShell.Tests.Domain.Payment
+namespace DomainShell.Tests.Infrastructure.Payment
 {
-    public interface IPaymentService
-    {        
-        void Pay(PaymentModel payment);
-    }
-
-    public class PaymentService : IPaymentService
+    public class CreditCardService : ICreditCardService<PaymentModel>
     {
         public void Pay(PaymentModel payment)
         {

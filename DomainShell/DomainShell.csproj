@@ -38,9 +38,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\IService.cs" />
     <Compile Include="Domain\State.cs" />
-    <Compile Include="Infrastructure\Repository.cs" />
-    <Compile Include="Domain\AggregateRoot.cs">
+    <Compile Include="Infrastructure\IRepository.cs" />
+    <Compile Include="Domain\IAggregateRoot.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />

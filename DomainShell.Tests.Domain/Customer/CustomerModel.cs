@@ -12,22 +12,7 @@ namespace DomainShell.Tests.Domain.Customer
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }        
 
-        public State State { get; private set; }
-
-        public void Create()
-        {
-            State = State.Created;
-        }
-
-        public void Update()
-        {
-            State = State.Updated;
-        }
-
-        public void  Delete()
-        {
-            State = State.Deleted;            
-        }
+        public State State { get; private set; }        
 
         public void Accepted()
         {

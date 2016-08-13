@@ -12,9 +12,9 @@ namespace DomainShell.Tests.Domain.Cart
 {
     public class CartModel : IAggregateRoot
     {
-        public string CartId { get; set; }        
-        
-        public CustomerModel Customer { get; set; }
+        public string CartId { get; set; }
+
+        public string CustomerId { get; set; }
         public List<CartItemModel> CartItems { get; set; }
 
         public decimal TotalPrice()
@@ -24,18 +24,37 @@ namespace DomainShell.Tests.Domain.Cart
 
         public State State { get; private set; }
 
-        public void Create()
+        public void Create(string customerId, List<CartItemModel> items)
         {
+            if (!string.IsNullOrEmpty(CartId))
+            {
+                throw new Exception("already created.");
+            }
+
+            CustomerId = customerId;
+
+            CartItems = items;
             State = State.Created;
         }
 
-        public void Update()
+        public void Update(List<CartItemModel> items)
         {
+            if (string.IsNullOrEmpty(CartId))
+            {
+                throw new Exception("not yet created.");
+            }
+
+            CartItems = items;
             State = State.Updated;
         }
 
         public void  Delete()
         {
+            if (string.IsNullOrEmpty(CartId))
+            {
+                throw new Exception("not yet created.");
+            }
+
             State = State.Deleted;            
         }
 
@@ -46,15 +65,21 @@ namespace DomainShell.Tests.Domain.Cart
 
         public PaymentModel Checkout(string shippingAddress, decimal postage)
         {
+            if (CartItems == null || CartItems.Count == 0)
+            {
+                throw new Exception("not exists CartItems");
+            }
+
             PaymentModel payment = new PaymentModel();            
             payment.ShippingAddress = shippingAddress;
             payment.Postage = postage;
-            
+            payment.PaymentItemList = new List<PaymentItemModel>();
+
             foreach (CartItemModel item in CartItems)
             {
                 payment.PaymentItemList.Add(new PaymentItemModel
                 {
-                    Product = item.Product,
+                    ProductId = item.Product.ProductId,
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
                 });
@@ -70,6 +95,7 @@ namespace DomainShell.Tests.Domain.Cart
     {
         public string CartId { get; set; }
         public string CartItemId { get; set; }
+        public string ProductId { get; set; }
         public ProductModel Product { get; set; }
         public int Number { get; set; }        
     }

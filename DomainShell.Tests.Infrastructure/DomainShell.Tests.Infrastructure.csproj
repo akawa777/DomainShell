@@ -41,7 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cart\CartReader.cs" />
-    <Compile Include="DataStore.cs" />
+    <Compile Include="Cart\CartReadObejct.cs" />
+    <Compile Include="Session.cs" />
+    <Compile Include="Payment\CreditCardService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Cart\CartRepository.cs" />
     <Compile Include="Customer\CustomerRepository.cs" />

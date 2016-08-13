@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
-using DomainShell.Tests.Domain.Cart;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
@@ -17,9 +16,9 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private Session _session;
 
-        public List<CartItemReadModel> GetItemList(string customerId)
+        public List<CartItemReadObejct> GetItemList(string customerId)
         {
-            return new List<CartItemReadModel>();
+            return new List<CartItemReadObejct>();
         }
 
         public decimal GetPostage(string shippingAddress)
