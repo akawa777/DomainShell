@@ -51,7 +51,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Customer\CustomerModel.cs" />
-    <Compile Include="Payment\ICreditCardService.cs" />
+    <Compile Include="Payment\ICreditCardService.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Product\ProductModel.cs" />
     <Compile Include="Payment\PaymentModel.cs" />
     <Compile Include="Cart\CartModel.cs" />
