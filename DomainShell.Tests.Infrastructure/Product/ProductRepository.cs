@@ -18,9 +18,32 @@ namespace DomainShell.Tests.Infrastructure.Product
 
         private Session _session;
 
-        public ProductModel Get(string productId)
+        public ProductModel Find(string productId)
         {
-            return new ProductModel();
+            DbCommand command = _session.CreateCommand();
+
+            command.CommandText = @"
+                select * from Product where ProductId = @ProductId
+            ";
+
+            DbParameter param = command.CreateParameter();
+            param.ParameterName = "@ProductId";
+            param.Value = productId;
+            command.Parameters.Add(param);
+
+            ProductModel product = new ProductModel();
+
+            using (DbDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    product.ProductId = reader["ProductId"].ToString();
+                    product.ProductName = reader["ProductName"].ToString();
+                    product.Price = int.Parse(reader["Price"].ToString());
+                }
+
+                return product;
+            }
         }
 
         public void Save(ProductModel product)

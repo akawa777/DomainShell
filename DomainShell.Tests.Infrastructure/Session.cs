@@ -48,6 +48,11 @@ namespace DomainShell.Tests.Infrastructure
         {
             return _createDataAdapter(selectCommand);
         }
+
+        public DbCommand CreateCommand()
+        {
+            return _connection.CreateCommand();
+        }
     }
 
     public class Transaction : IDisposable

@@ -23,15 +23,23 @@ namespace DomainShell.Tests
         {
             CartApp app = new CartApp();
 
-            CartItemData[] cartItems = app.Get("1");
-        }
+            app.Add("1", new CartItem { ProductId = "1", Number = 1 });
+            app.Add("1", new CartItem { ProductId = "2", Number = 2 });
 
-        [TestMethod]
-        public void Test02()
-        {
-            CartApp app = new CartApp();
+            CartItem[] items = app.Get("1");
 
-            app.Pay(new PaymentData());
+            Assert.AreEqual(2, items.Length);
+
+            Payment payment = new Payment
+            {
+                CartId = items[0].CartId,
+                CreditCardNo = "xxx",
+                CreditCardHolder = "xxx",
+                CreditCardExpirationDate = "xxx",
+                ShippingAddress = "xxx-xxx"
+            };
+
+            app.Pay(payment);
         }
     }
 }

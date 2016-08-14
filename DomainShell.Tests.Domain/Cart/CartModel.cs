@@ -13,18 +13,17 @@ namespace DomainShell.Tests.Domain.Cart
     public class CartModel : IAggregateRoot
     {
         public string CartId { get; set; }
-
-        public string CustomerId { get; set; }
-        public List<CartItemModel> CartItems { get; set; }
+        public string CustomerId { get; set; }        
+        public List<CartItemModel> CartItemList { get; set; }
 
         public decimal TotalPrice()
         {
-            return CartItems.Sum(x => x.Product.Price);
+            return CartItemList.Sum(x => x.Product.Price);
         }
 
         public State State { get; private set; }
 
-        public void Create(string customerId, List<CartItemModel> items)
+        public void Create(string customerId)
         {
             if (!string.IsNullOrEmpty(CartId))
             {
@@ -32,30 +31,40 @@ namespace DomainShell.Tests.Domain.Cart
             }
 
             CustomerId = customerId;
+            CartItemList = new List<CartItemModel>();
 
-            CartItems = items;
             State = State.Created;
         }
 
-        public void Update(List<CartItemModel> items)
+        public void AddItem(CartItemModel item)
         {
-            if (string.IsNullOrEmpty(CartId))
+            if (!string.IsNullOrEmpty(CartId))
             {
-                throw new Exception("not yet created.");
+                State = State.Updated;
             }
 
-            CartItems = items;
-            State = State.Updated;
+            item.CartItemId = (CartItemList.Count + 1).ToString();
+
+            CartItemList.Add(item);
         }
 
-        public void  Delete()
+        public void RemoveItem(string cartItemId)
         {
             if (string.IsNullOrEmpty(CartId))
             {
                 throw new Exception("not yet created.");
             }
 
-            State = State.Deleted;            
+            CartItemModel item = CartItemList.FirstOrDefault(x => x.CartItemId == cartItemId);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            CartItemList.Remove(item);
+
+            State = State.Updated;            
         }
 
         public void Accepted()
@@ -65,17 +74,18 @@ namespace DomainShell.Tests.Domain.Cart
 
         public PaymentModel Checkout(string shippingAddress, decimal postage)
         {
-            if (CartItems == null || CartItems.Count == 0)
+            if (CartItemList == null || CartItemList.Count == 0)
             {
                 throw new Exception("not exists CartItems");
             }
 
-            PaymentModel payment = new PaymentModel();            
+            PaymentModel payment = new PaymentModel();
+            payment.CustomerId = CustomerId;            
             payment.ShippingAddress = shippingAddress;
             payment.Postage = postage;
             payment.PaymentItemList = new List<PaymentItemModel>();
 
-            foreach (CartItemModel item in CartItems)
+            foreach (CartItemModel item in CartItemList)
             {
                 payment.PaymentItemList.Add(new PaymentItemModel
                 {
@@ -85,7 +95,7 @@ namespace DomainShell.Tests.Domain.Cart
                 });
             }
 
-            Delete();            
+            State = State.Deleted;
 
             return payment;            
         }

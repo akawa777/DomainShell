@@ -18,7 +18,7 @@ namespace DomainShell.Tests.Infrastructure.Customer
 
         private Session _session;
 
-        public CustomerModel Get(string customerId)
+        public CustomerModel Find(string customerId)
         {
             return new CustomerModel();
         }

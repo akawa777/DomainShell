@@ -15,7 +15,7 @@ using DomainShell.Tests.Infrastructure.Payment;
 
 namespace DomainShell.Tests.Apps.Cart
 {
-    public class CartItemData
+    public class CartItem
     {
         public string CartId { get; set; }
         public string CartItemId { get; set; }
@@ -25,21 +25,13 @@ namespace DomainShell.Tests.Apps.Cart
         public int Number { get; set; }
     }
 
-    public class PaymentData
+    public class Payment
     {
         public string CartId { get; set; }
         public string CreditCardNo { get; set; }
         public string CreditCardHolder { get; set; }
         public string CreditCardExpirationDate { get; set; }
         public string ShippingAddress { get; set; }       
-    }
-
-    public class CheckoutData
-    {
-        public string CartId { get; set; }
-        public string ShippingAddress { get; set; }
-        public decimal Postage { get; set; }
-        public decimal PaymentAmount { get; set; }
     }
 
     public class CartApp
@@ -65,13 +57,13 @@ namespace DomainShell.Tests.Apps.Cart
         private ProductRepository _productRepository;        
         private PaymentRepository _paymentRepository;
 
-        private CreditCardService _creditCardService;  
+        private CreditCardService _creditCardService;
 
-        public CartItemData[] Get(string customerId)
+        public CartItem[] Get(string customerId)
         {
-            List<CartItemReadObejct> cartList = _cartReader.GetItemList(customerId);
+            List<CartItemReadObject> readObjects = _cartReader.GetItemList(customerId);
 
-            return cartList.Select(x => new CartItemData
+            return readObjects.Select(x => new CartItem
             {
                 CartId = x.CartId,
                 CartItemId = x.CartItemId,
@@ -82,86 +74,62 @@ namespace DomainShell.Tests.Apps.Cart
             }).ToArray();
         }
 
-        public void Create(string customerId, CartItemData[] items)
-        {            
-            using (Transaction tran = _session.BegingTran())
-            {   
-                List<CartItemModel> itemList = new List<CartItemModel>();
-                foreach (CartItemData detail in items)
-                {
-                    CartItemModel item = new CartItemModel();
-                    
-                    item.Number = detail.Number;
-                    item.Product = _productRepository.Get(detail.ProductId);
-
-                    itemList.Add(item);
-                }
-
-                CartModel cart = new CartModel();
-
-                cart.Create(customerId, itemList);
-
-                _cartRepository.Save(cart);
-
-                tran.Commit();
-            }
-        }
-
-        public void Update(CartItemData[] items)
+        public void Add(string customerId, CartItem item)
         {
             using (Transaction tran = _session.BegingTran())
             {
-                CartModel cart = _cartRepository.Get(items[0].CartId);
+                CartModel cartModel = _cartRepository.Get(customerId);
 
-                List<CartItemModel> itemList = new List<CartItemModel>();
-                foreach (CartItemData item in items)
+                if (cartModel == null)
                 {
-                    CartItemModel itemModel = new CartItemModel();
-
-                    itemModel.Number = item.Number;
-                    itemModel.Product = _productRepository.Get(item.ProductId);
-
-                    itemList.Add(itemModel);
+                    cartModel = new CartModel();
+                    cartModel.Create(customerId);
                 }
 
-                cart.Update(itemList);
+                CartItemModel itemModel = new CartItemModel();
 
-                _cartRepository.Save(cart);
+                itemModel.Number = item.Number;
+                itemModel.ProductId = item.ProductId;
+                itemModel.Product = _productRepository.Find(item.ProductId);
+
+                cartModel.AddItem(itemModel);
+
+                _cartRepository.Save(cartModel);
 
                 tran.Commit();
             }
         }
 
-        public void Delete(string cartId)
+        public void Remove(string customerId, CartItem item)
         {            
             using (Transaction tran = _session.BegingTran())
             {
-                CartModel cart = _cartRepository.Get(cartId);
-                cart.Delete();
+                CartModel cartModel = _cartRepository.Get(customerId);
+                cartModel.RemoveItem(item.CartItemId);
 
-                _cartRepository.Save(cart);
+                _cartRepository.Save(cartModel);
 
                 tran.Commit();
             }
         }
 
-        public void Pay(PaymentData data)
+        public void Pay(Payment payment)
         {
             using (Transaction tran = _session.BegingTran())
             {
-                CartModel cart = _cartRepository.Get(data.CartId);
-                decimal postage = _cartReader.GetPostage(data.ShippingAddress);
+                CartModel cartModel = _cartRepository.Get(payment.CartId);
+                decimal postage = _cartReader.GetPostage(payment.ShippingAddress);
 
-                PaymentModel payment = cart.Checkout(data.ShippingAddress, postage);
+                PaymentModel paymentModel = cartModel.Checkout(payment.ShippingAddress, postage);
 
-                payment.Pay(
-                        data.CreditCardNo,
-                        data.CreditCardHolder,
-                        data.CreditCardExpirationDate,
+                paymentModel.Pay(
+                        payment.CreditCardNo,
+                        payment.CreditCardHolder,
+                        payment.CreditCardExpirationDate,
                         _creditCardService);
 
-                _cartRepository.Save(cart);
-                _paymentRepository.Save(payment);
+                _cartRepository.Save(cartModel);
+                _paymentRepository.Save(paymentModel);
 
                 tran.Commit();
             }

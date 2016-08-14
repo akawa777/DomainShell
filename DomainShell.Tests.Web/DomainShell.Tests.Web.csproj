@@ -171,8 +171,10 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\CartController.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Controllers\FacadeController.cs" />
-    <Compile Include="Controllers\PersonController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -249,9 +251,9 @@
     <None Include="Project_Readme.html" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DomainShell.Tests.Domain\DomainShell.Tests.Domain.csproj">
-      <Project>{0c5bdf26-32c2-404c-9293-32f92160a444}</Project>
-      <Name>DomainShell.Tests.Domain</Name>
+    <ProjectReference Include="..\DomainShell.Tests.App\DomainShell.Tests.App.csproj">
+      <Project>{7469064d-d604-4024-91b2-c9bcf615d3bd}</Project>
+      <Name>DomainShell.Tests.App</Name>
     </ProjectReference>
     <ProjectReference Include="..\DomainShell\DomainShell.csproj">
       <Project>{63af8772-ea46-4dda-8424-bc4d9aeebc14}</Project>

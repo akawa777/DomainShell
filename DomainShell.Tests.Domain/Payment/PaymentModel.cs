@@ -33,6 +33,7 @@ namespace DomainShell.Tests.Domain.Payment
                 throw new Exception("already paied.");
             }
 
+            PaymentDate = DateTime.Now.ToString("yyyyMMddHHmmss");
             CreditCardNo = creditCardNo;
             CreditCardHolder = creditCardHolder;
             CreditCardExpirationDate = creditCardExpirationDate;

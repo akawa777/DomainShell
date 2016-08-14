@@ -12,7 +12,7 @@ namespace DomainShell.Tests
 {
     internal class DataStoreProvider
     {
-        private static string _db = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\", "test.db");
+        private static string _db = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\", "test.db");
         private static string _connectionString = "data source=" + _db;
 
         private static bool _inited = false;
@@ -156,16 +156,19 @@ namespace DomainShell.Tests
                         )
                     ";
 
+                command.ExecuteNonQuery();
+
                 command.CommandText = @"
                         create table CartItem(
-                            CartId integer primary key,
-                            CartItemdId int,                            
+                            CartId int,
+                            CartItemId int,                            
                             ProductId int,
-                            Number int
+                            Number int,
+                            primary key (CartId, CartItemId)
                         )
                     ";
 
-                var ret = command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
             }
         }
 
@@ -176,26 +179,30 @@ namespace DomainShell.Tests
                 command.CommandText = @"
                         create table Payment(
                             PaymentId integer primary key,
+                            PaymentDate nvarchar(100),
                             CustomerId int,                            
                             CreditCardNo nvarchar(100),
                             CreditCardHolder nvarchar(100),
-                            CreditCardExpirationDate nvarchar(100),
+                            CreditCardExpirationDate nvarchar(8),
                             ShippingAddress nvarchar(100),
                             Postage int
                         )
                     ";
 
+                command.ExecuteNonQuery();
+
                 command.CommandText = @"
                         create table PaymentItem(
-                            PaymentId integer primary key,
-                            PaymentItemdId int,                            
+                            PaymentId int,
+                            PaymentItemId int,                            
                             ProductId int,
                             PriceAtTime int,
-                            Number int
+                            Number int,
+                            primary key (PaymentId, PaymentItemId)
                         )
                     ";
 
-                var ret = command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
             }
         }
     }

@@ -21,9 +21,73 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private Session _session;  
 
-        public CartModel Get(string cartId)
+        public CartModel Find(string cartId)
+        {   
+            DbCommand command = _session.CreateCommand();
+            DbParameter param = command.CreateParameter();
+            param.ParameterName = "@CartId";
+            param.Value = cartId;
+
+            return Get("Cart.CartId = @CartId", param);
+        }
+
+        public CartModel Get(string customerId)
         {
-            return new CartModel();
+            DbCommand command = _session.CreateCommand();
+            DbParameter param = command.CreateParameter();
+            param.ParameterName = "@CustomerId";
+            param.Value = customerId;
+
+            return Get("Cart.CustomerId = @CustomerId", param);
+        }
+
+        private CartModel Get(string where, params DbParameter[] parameters)
+        {
+            DbCommand command = _session.CreateCommand();
+
+            command.CommandText = string.Format(@"
+                select * from Cart
+                left join CartItem on Cart.CartId = CartItem.CartId
+                left join Product on CartItem.ProductId = Product.ProductId
+                where {0}
+                order by CartItem.CartItemId
+            ", where);
+
+            command.Parameters.AddRange(parameters);
+
+            CartModel cartModel = null;
+
+            using (DbDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (cartModel == null)
+                    {
+                        cartModel = new CartModel();
+
+                        cartModel.CartId = reader["CartId"].ToString();
+                        cartModel.CustomerId = reader["CustomerId"].ToString();
+                        cartModel.CartItemList = new List<CartItemModel>();
+                    }
+
+                    CartItemModel item = new CartItemModel();
+
+                    item.CartId = reader["CartId"].ToString();
+                    item.CartItemId = reader["CartItemId"].ToString();
+                    item.ProductId = reader["ProductId"].ToString();
+                    item.Product = new ProductModel
+                    {
+                        ProductId = reader["ProductId"].ToString(),
+                        ProductName = reader["ProductName"].ToString(),
+                        Price = int.Parse(reader["Price"].ToString())
+                    };
+                    item.Number = int.Parse(reader["Number"].ToString());
+
+                    cartModel.CartItemList.Add(item);
+                }
+
+                return cartModel;
+            }
         }
 
         public void Save(CartModel cart)
@@ -36,28 +100,108 @@ namespace DomainShell.Tests.Infrastructure.Cart
             {
                 Update(cart);
             }
-            else if (cart.State == State.Deleted)
-            {
-                Delete(cart);
-            }
 
             cart.Accepted();
         }
 
         private void Create(CartModel cart)
         {
+            DbCommand command = _session.CreateCommand();
+
+            command.CommandText = @"
+                insert into Cart (CustomerId) values (@CustomerId) 
+            ";
+
+            DbParameter param = command.CreateParameter();
+
+            param.ParameterName = "@CustomerId";
+            param.Value = cart.CustomerId;
+
+            command.Parameters.Add(param);
+
+            command.ExecuteNonQuery();
+
+            command.CommandText = @"
+                select CartId from Cart where ROWID = last_insert_rowid();         
+            ";
+
+            var id = command.ExecuteScalar();
+
+            cart.CartId = id.ToString();
             
+            foreach (CartItemModel item in cart.CartItemList)
+            {
+                command.CommandText = @"
+                    insert into CartItem (CartId, CartItemId, ProductId, Number) values (@CartId, @CartItemId, @ProductId, @Number) 
+                ";
+
+                param = command.CreateParameter();
+                param.ParameterName = "@CartId";
+                param.Value = cart.CartId;
+                command.Parameters.Add(param);
+
+                param = command.CreateParameter();
+                param.ParameterName = "@CartItemId";
+                param.Value = item.CartItemId;
+                command.Parameters.Add(param);
+
+                param = command.CreateParameter();
+                param.ParameterName = "@ProductId";
+                param.Value = item.ProductId;
+                command.Parameters.Add(param);
+
+                param = command.CreateParameter();
+                param.ParameterName = "@Number";
+                param.Value = item.Number;
+                command.Parameters.Add(param);
+
+                command.ExecuteNonQuery();
+            }
         }
 
         private void Update(CartModel cart)
         {
+            DbCommand command = _session.CreateCommand();
 
+            command.CommandText = @"
+                delete from CartItem where CartId = @CartId;                    
+            ";
+
+            DbParameter param = command.CreateParameter();
+            param.ParameterName = "@CartId";
+            param.Value = cart.CartId;
+            command.Parameters.Add(param);
+
+            command.ExecuteNonQuery();
+
+            foreach (CartItemModel item in cart.CartItemList)
+            {
+                command.CommandText = @"                    
+                    insert into CartItem (CartId, CartItemId, ProductId, Number) values (@CartId, @CartItemId, @ProductId, @Number) 
+                ";
+                
+                param = command.CreateParameter();
+                param.ParameterName = "@CartId";
+                param.Value = cart.CartId;
+                command.Parameters.Add(param);
+
+                param = command.CreateParameter();
+                param.ParameterName = "@CartItemId";
+                param.Value = item.CartItemId;
+                command.Parameters.Add(param);
+
+                param = command.CreateParameter();
+                param.ParameterName = "@ProductId";
+                param.Value = item.ProductId;
+                command.Parameters.Add(param);
+
+                param = command.CreateParameter();
+                param.ParameterName = "@Number";
+                param.Value = item.Number;
+                command.Parameters.Add(param);
+
+                command.ExecuteNonQuery();
+            }
         }
-
-        private void Delete(CartModel cart)
-        {
-
-        }
-
     }
 }

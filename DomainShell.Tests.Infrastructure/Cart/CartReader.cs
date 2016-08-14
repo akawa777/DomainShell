@@ -7,6 +7,16 @@ using System.Data.Common;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
+    public class CartItemReadObject
+    {
+        public string CartId { get; set; }
+        public string CartItemId { get; set; }
+        public string ProductId { get; set; }
+        public string ProductName { get; set; }
+        public decimal Price { get; set; }
+        public int Number { get; set; }
+    }
+
     public class CartReader
     {
         public CartReader(Session session)
@@ -16,9 +26,43 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private Session _session;
 
-        public List<CartItemReadObejct> GetItemList(string customerId)
+        public List<CartItemReadObject> GetItemList(string customerId)
         {
-            return new List<CartItemReadObejct>();
+            DbCommand command = _session.CreateCommand();
+
+            command.CommandText = @"
+                select * from Cart
+                left join CartItem on Cart.CartId = CartItem.CartId
+                left join Product on CartItem.ProductId = Product.ProductId
+                where Cart.CustomerId = @CustomerId
+                order by CartItem.CartItemId
+            ";
+
+            DbParameter param = command.CreateParameter();
+            param.ParameterName = "@CustomerId";
+            param.Value = customerId;
+            command.Parameters.Add(param);
+
+            List<CartItemReadObject> items = new List<CartItemReadObject>();
+
+            using (DbDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    CartItemReadObject item = new CartItemReadObject();
+
+                    item.CartId = reader["CartId"].ToString();
+                    item.CartItemId = reader["CartItemId"].ToString();
+                    item.ProductId = reader["ProductId"].ToString();
+                    item.ProductName = reader["ProductName"].ToString();
+                    item.Price = int.Parse(reader["Price"].ToString());
+                    item.Number = int.Parse(reader["Number"].ToString());
+
+                    items.Add(item);
+                }
+
+                return items;
+            }
         }
 
         public decimal GetPostage(string shippingAddress)
