@@ -23,12 +23,19 @@ namespace DomainShell.Tests
         {
             CartApp app = new CartApp();
 
-            app.Add("1", new CartItem { ProductId = "1", Number = 1 });
-            app.Add("1", new CartItem { ProductId = "2", Number = 2 });
+            CartAddItemResult addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "1", Number = 1 });
+            addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "2", Number = 2 });
+            addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "3", Number = 3 });
+
+            CartRemoveItem removeItem = new CartRemoveItem { CustomerId = "1", CartItemId = addResult.CartItemId };
+
+            app.Remove(removeItem);
 
             CartItem[] items = app.Get("1");
 
             Assert.AreEqual(2, items.Length);
+
+            decimal amount = app.GetPaymentAmount(new PaymentAmountQuery { CustomerId = "1", ShippingAddress = "xxx-xxx" });
 
             Payment payment = new Payment
             {

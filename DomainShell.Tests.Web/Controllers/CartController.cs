@@ -12,6 +12,13 @@ namespace DomainShell.Tests.Web.Controllers
     {
         private CartApp _app = new CartApp();
 
+        public ActionResult GetProducts()
+        {
+            Product[] products = _app.GetProducts();
+
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult Get(string customerId)
         {
             CartItem[] items = _app.Get(customerId);
@@ -19,25 +26,32 @@ namespace DomainShell.Tests.Web.Controllers
             return Json(items, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Add(string customerId, CartItem item)
+        public ActionResult Add(CartAddItem item)
         {
-            _app.Add(customerId, item);
+            CartAddItemResult result = _app.Add(item);
 
-            return Json(null);
+            return Json(result);
         }
 
-        public ActionResult Remove(string customerId, CartItem item)
+        public ActionResult Remove(CartRemoveItem item)
         {
-            _app.Remove(customerId, item);
+            CartRemoveItemResult result = _app.Remove(item);
 
-            return Json(null);
+            return Json(result);
+        }
+
+        public ActionResult GetPaymentAmount(PaymentAmountQuery query)
+        {
+            decimal paymentAmount = _app.GetPaymentAmount(query);
+
+            return Json(paymentAmount);
         }
 
         public ActionResult Pay(Payment payment)
         {
-            _app.Pay(payment);
+            PaymentResult result = _app.Pay(payment);
 
-            return Json(null);
+            return Json(result);
         }
     }
 }

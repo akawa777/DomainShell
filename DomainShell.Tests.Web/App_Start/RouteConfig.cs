@@ -16,7 +16,7 @@ namespace DomainShell.Tests.Web
             routes.MapRoute(
                 name: "Api",
                 url: "api/{controller}/{action}/{id}",
-                defaults: new { controller = "Person", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Cart", action = "GetProducts", id = UrlParameter.Optional }
             );
 
             routes.MapRoute(
@@ -28,14 +28,14 @@ namespace DomainShell.Tests.Web
             routes.MapRoute(
                 name: "App",
                 url: "{app}/{script}/{id}",
-                defaults: new { controller = "Facade", action = "Index", app = "Person", script = "List", id = UrlParameter.Optional }
+                defaults: new { controller = "Facade", action = "Index", id = UrlParameter.Optional }
             );    
 
-            routes.MapRoute(
-                name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Person", action = "Index", id = UrlParameter.Optional }
-            );
+            //routes.MapRoute(
+            //    name: "Default",
+            //    url: "{controller}/{action}/{id}",
+            //    defaults: new { controller = "Facade", action = "ProductList", id = UrlParameter.Optional }
+            //);
         }
     }
 }

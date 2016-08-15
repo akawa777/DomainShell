@@ -46,6 +46,31 @@ namespace DomainShell.Tests.Infrastructure.Product
             }
         }
 
+        public List<ProductModel> GetAll()
+        {
+            DbCommand command = _session.CreateCommand();
+
+            command.CommandText = @"
+                select * from Product order by ProductId
+            ";            
+
+            using (DbDataReader reader = command.ExecuteReader())
+            {
+                List<ProductModel> list = new List<ProductModel>();
+                while (reader.Read())
+                {
+                    ProductModel product = new ProductModel();
+                    product.ProductId = reader["ProductId"].ToString();
+                    product.ProductName = reader["ProductName"].ToString();
+                    product.Price = int.Parse(reader["Price"].ToString());
+
+                    list.Add(product);
+                }
+
+                return list;
+            }
+        }
+
         public void Save(ProductModel product)
         {
             product.Accepted();

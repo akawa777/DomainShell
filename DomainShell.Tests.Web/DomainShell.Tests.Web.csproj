@@ -181,16 +181,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\Infrastructure\startup.js" />
-    <Content Include="Scripts\Person\list2.js" />
-    <Content Include="Scripts\Person\list.js">
+    <Content Include="Scripts\Cart\cart.js" />
+    <Content Include="Scripts\Cart\productList.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="Scripts\Person\modal.js" />
-    <Content Include="Scripts\Person\new.js" />
+    <Content Include="Scripts\Infrastructure\startup.js" />
     <Content Include="Scripts\Shared\error.js" />
-    <Content Include="Scripts\Person\tr.check.js" />
-    <Content Include="Scripts\Person\tr.js" />
     <Content Include="Content\Infrastructure\bootstrap.css" />
     <Content Include="Content\Infrastructure\bootstrap.min.css" />
     <Content Include="favicon.ico" />
@@ -215,15 +211,11 @@
     <Content Include="Scripts\Infrastructure\respond.min.js" />
     <Content Include="Scripts\Infrastructure\text.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Views\Facade\Index.cshtml" />
-    <Content Include="Scripts\Person\bulk.js" />
-    <Content Include="Scripts\Person\detail.js" />
-    <None Include="Views\Person\Tr.cshtml" />
-    <None Include="Views\Person\TrCheck.cshtml" />
-    <None Include="Views\Person\Modal.cshtml" />
-    <Content Include="Views\Person\List2.cshtml">
+    <Content Include="Views\Cart\Cart.cshtml">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="Views\Facade\Index.cshtml" />
+    <Content Include="Views\Cart\ProductList.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -236,9 +228,6 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Scripts\Infrastructure\jquery-1.10.2.min.map" />
-    <Content Include="Views\Person\List.cshtml" />
-    <Content Include="Views\Person\Detail.cshtml" />
-    <Content Include="Views\Person\Bulk.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -254,6 +243,10 @@
     <ProjectReference Include="..\DomainShell.Tests.App\DomainShell.Tests.App.csproj">
       <Project>{7469064d-d604-4024-91b2-c9bcf615d3bd}</Project>
       <Name>DomainShell.Tests.App</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DomainShell.Tests\DomainShell.Tests.csproj">
+      <Project>{5ccd9fae-4b0c-4c53-a970-fcdbf4566c1a}</Project>
+      <Name>DomainShell.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\DomainShell\DomainShell.csproj">
       <Project>{63af8772-ea46-4dda-8424-bc4d9aeebc14}</Project>

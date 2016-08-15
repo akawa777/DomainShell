@@ -13,14 +13,14 @@ namespace DomainShell.Tests.Infrastructure
     {
         public static void Config(Func<DbConnection> createConnection, Func<DbCommand, DbDataAdapter> createDataAdapter)
         {
-            _createConnection = createConnection;
+            _createConnection = createConnection;            
             _createDataAdapter = createDataAdapter;
         }
 
         private static Func<DbConnection> _createConnection;
         private static Func<DbCommand, DbDataAdapter> _createDataAdapter;
         private DbConnection _connection;
-
+        
         public Session Open()
         {
             _connection = _createConnection();
@@ -42,6 +42,7 @@ namespace DomainShell.Tests.Infrastructure
         public void Dispose()
         {
             _connection.Dispose();
+            _connection = null;
         }
 
         public DbDataAdapter CreateDataAdapter(DbCommand selectCommand)

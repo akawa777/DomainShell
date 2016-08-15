@@ -67,7 +67,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public decimal GetPostage(string shippingAddress)
         {
-            return 0;
+            return 150;
         }
     }
 }

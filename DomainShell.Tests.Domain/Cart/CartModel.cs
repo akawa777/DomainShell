@@ -21,6 +21,11 @@ namespace DomainShell.Tests.Domain.Cart
             return CartItemList.Sum(x => x.Product.Price);
         }
 
+        public decimal TotalPrice(decimal postage)
+        {
+            return TotalPrice() + postage;
+        }
+
         public State State { get; private set; }
 
         public void Create(string customerId)

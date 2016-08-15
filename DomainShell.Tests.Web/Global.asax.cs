@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using System.IO;
+using DomainShell.Tests;
 
 namespace DomainShell.Tests.Web
 {
@@ -21,6 +22,8 @@ namespace DomainShell.Tests.Web
             _appStateId = DateTime.Now.ToString("yyyyMMddHHmmss");
 
             FileWatcher_Load();
+
+            new UnitTest().Init();
         }
 
         private static string _appStateId;
