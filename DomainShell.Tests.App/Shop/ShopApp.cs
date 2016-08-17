@@ -154,18 +154,7 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 CartModel cartModel = _cartRepository.Get(item.CustomerId);
-
-                if (cartModel == null)
-                {
-                    return result;
-                }
-
                 CartItemModel itemModel = cartModel.GetCartItem(item.CartItemId);
-
-                if (itemModel == null)
-                {
-                    return result;
-                }
 
                 itemModel.Number = item.Number;
 
@@ -187,10 +176,15 @@ namespace DomainShell.Tests.App.Shop
                 result.Messages.Add("CustomerId is required.");
             }
 
-            if (_customerRepository.Find(item.CustomerId) == null)
+            if (_cartRepository.Get(item.CustomerId) == null)
             {
                 result.Success = false;
-                result.Messages.Add("not exist CustomerId.");
+                result.Messages.Add("not exist cart.");
+            } 
+            else if (_cartRepository.Get(item.CustomerId).GetCartItem(item.CartItemId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart item.");
             }
 
             if (string.IsNullOrEmpty(item.CartItemId))
@@ -238,10 +232,15 @@ namespace DomainShell.Tests.App.Shop
                 result.Messages.Add("CustomerId is required.");
             }
 
-            if (_customerRepository.Find(item.CustomerId) == null)
+            if (_cartRepository.Get(item.CustomerId) == null)
             {
                 result.Success = false;
-                result.Messages.Add("not exist CustomerId.");
+                result.Messages.Add("not exist cart.");
+            }
+            else if (_cartRepository.Get(item.CustomerId).GetCartItem(item.CartItemId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart item.");
             }
 
             if (string.IsNullOrEmpty(item.CartItemId))
@@ -329,10 +328,15 @@ namespace DomainShell.Tests.App.Shop
                 result.Messages.Add("CustomerId is required.");
             }
 
-            if (_customerRepository.Find(payment.CustomerId) == null)
+            if (_cartRepository.Get(payment.CustomerId) == null)
             {
                 result.Success = false;
-                result.Messages.Add("not exist CustomerId.");
+                result.Messages.Add("not exist cart.");
+            }
+            else if (_cartRepository.Get(payment.CustomerId).CartItemList.Count == 0)
+            {
+                result.Success = false;
+                result.Messages.Add("not has cart items.");
             }
 
             if (string.IsNullOrEmpty(payment.CreditCardNo))
