@@ -73,6 +73,12 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     CartItemModel item = new CartItemModel();
 
                     item.CartId = reader["CartId"].ToString();
+
+                    if (reader["CartItemId"] == DBNull.Value)
+                    {
+                        continue;
+                    }
+
                     item.CartItemId = reader["CartItemId"].ToString();
                     item.ProductId = reader["ProductId"].ToString();
                     item.Product = new ProductModel

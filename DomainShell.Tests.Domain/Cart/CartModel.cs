@@ -48,9 +48,32 @@ namespace DomainShell.Tests.Domain.Cart
                 State = State.Updated;
             }
 
-            item.CartItemId = (CartItemList.Count + 1).ToString();
+            if (CartItemList == null || CartItemList.Count == 0)
+            {
+                CartItemList = new List<CartItemModel>();
+                item.CartItemId = "1";
+            }
+            else
+            {
+                item.CartItemId = (CartItemList.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
+            }
 
             CartItemList.Add(item);
+        }
+
+        public void UpdateItem(CartItemModel item)
+        {
+            if (string.IsNullOrEmpty(CartId))
+            {
+                throw new Exception("not yet created.");
+            }
+
+            if (!CartItemList.Any(x => x == item))
+            {                
+                throw new Exception("not exist item.");
+            }
+
+            State = State.Updated;
         }
 
         public void RemoveItem(string cartItemId)

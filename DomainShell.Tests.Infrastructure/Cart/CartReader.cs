@@ -34,7 +34,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 select * from Cart
                 left join CartItem on Cart.CartId = CartItem.CartId
                 left join Product on CartItem.ProductId = Product.ProductId
-                where Cart.CustomerId = @CustomerId
+                where Cart.CustomerId = @CustomerId and CartItem.CartId is not null
                 order by CartItem.CartItemId
             ";
 
@@ -65,7 +65,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
             }
         }
 
-        public decimal GetPostage(string shippingAddress)
+        public decimal GetPostage()
         {
             return 150;
         }

@@ -76,7 +76,11 @@ namespace DomainShell.Tests
                 command.CommandText = @"
                         create table Customer(
                             CustomerId integer primary key,
-                            CustomerName nvarchar(100)
+                            CustomerName nvarchar(100),
+                            Address nvarchar(100),
+                            CreditCardNo nvarchar(100),
+                            CreditCardHolder nvarchar(100),
+                            CreditCardExpirationDate nvarchar(100)
                         )
                     ";
 
@@ -85,15 +89,33 @@ namespace DomainShell.Tests
 
             using (DbCommand command = connection.CreateCommand())
             {
-                command.CommandText = "insert into Customer (CustomerName) values (@name)";
+                command.CommandText = "insert into Customer (CustomerName, Address, CreditCardNo, CreditCardHolder, CreditCardExpirationDate) values (@name, @address, @creditCardNo, @creditCardHolder, @creditCardExpirationDate)";
 
                 for (int i = 0; i < 10; i++)
                 {
                     DbParameter parameter = command.CreateParameter();
-
                     parameter.ParameterName = "@name";
                     parameter.Value = "customer_" + (i + 1).ToString();
+                    command.Parameters.Add(parameter);
 
+                    parameter = command.CreateParameter();
+                    parameter.ParameterName = "@address";
+                    parameter.Value = "address_" + (i + 1).ToString();
+                    command.Parameters.Add(parameter);
+
+                    parameter = command.CreateParameter();
+                    parameter.ParameterName = "@creditCardNo";
+                    parameter.Value = "creditCardNo_" + (i + 1).ToString();
+                    command.Parameters.Add(parameter);
+
+                    parameter = command.CreateParameter();
+                    parameter.ParameterName = "@creditCardHolder";
+                    parameter.Value = "creditCardHolder_" + (i + 1).ToString();
+                    command.Parameters.Add(parameter);
+
+                    parameter = command.CreateParameter();
+                    parameter.ParameterName = "@creditCardExpirationDate";
+                    parameter.Value = "creditCardExpirationDate_" + (i + 1).ToString();
                     command.Parameters.Add(parameter);
 
                     var ret = command.ExecuteNonQuery();

@@ -40,6 +40,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
@@ -118,9 +122,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="EntityFramework">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -171,9 +172,10 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Controllers\CartController.cs">
+    <Compile Include="Controllers\ShopController.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Controllers\Extension\Extensions.cs" />
     <Compile Include="Controllers\FacadeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -181,8 +183,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Scripts\Cart\cart.js" />
-    <Content Include="Scripts\Cart\productList.js">
+    <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Scripts\Shop\checkout.js" />
+    <Content Include="Scripts\Shop\cart.js" />
+    <Content Include="Scripts\Shop\product.js">
       <SubType>Code</SubType>
     </Content>
     <Content Include="Scripts\Infrastructure\startup.js" />
@@ -195,6 +199,9 @@
     <Content Include="Content\Infrastructure\Site.css" />
     <Content Include="Scripts\Infrastructure\bootstrap.js" />
     <Content Include="Scripts\Infrastructure\bootstrap.min.js" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\fonts\glyphicons-halflings-regular.woff" />
     <None Include="Scripts\Infrastructure\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\Infrastructure\coco.js" />
     <Content Include="Scripts\Infrastructure\jquery-1.10.2.js" />
@@ -211,11 +218,11 @@
     <Content Include="Scripts\Infrastructure\respond.min.js" />
     <Content Include="Scripts\Infrastructure\text.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Views\Cart\Cart.cshtml">
+    <Content Include="Views\Shop\Cart.cshtml">
       <SubType>Code</SubType>
     </Content>
     <Content Include="Views\Facade\Index.cshtml" />
-    <Content Include="Views\Cart\ProductList.cshtml" />
+    <Content Include="Views\Shop\Product.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -228,6 +235,7 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Scripts\Infrastructure\jquery-1.10.2.min.map" />
+    <Content Include="Views\Shop\Checkout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

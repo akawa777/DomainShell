@@ -1,0 +1,84 @@
+﻿<div>     
+    <a href="/Shop/Cart">cart</a>
+    <table coco-pin="cart" class="table">
+        <thead>
+            <tr>
+                <th>CartItemId</th>
+                <th>ProduntId</th>
+                <th>ProduntName</th>
+                <th>Price</th>
+                <th>Number</th>                
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td coco-pin="cartItemId"></td>
+                <td coco-pin="productId"></td>
+                <td coco-pin="productName"></td>
+                <td coco-pin="price"></td>                
+                <td coco-pin="number"></td>                
+            </tr>        
+        </tbody>
+    </table>   
+    <table>
+        <tbody>
+            <tr>
+                <th>
+                    届先
+                </th>
+                <td>
+                    <input type="text" coco-pin="address" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    カード番号
+                </th>
+                <td>
+                    <input type="text" coco-pin="creditCardNo" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    カード名義
+                </th>
+                <td>
+                    <input type="text" coco-pin="creditCardHolder" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    カード期限
+                </th>
+                <td>
+                    <input type="text" coco-pin="creditCardExpirationDate" />
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    商品合計
+                </th>
+                <td>
+                    <span coco-pin="totalPrice"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    送料
+                </th>
+                <td>
+                    <span coco-pin="postage"></span>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    支払金額
+                </th>
+                <td>
+                    <span coco-pin="paymentAmount"></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>        
+    <button type="button" coco-pin="pay" class="btn btn-primary">pay</button> 
+</div>

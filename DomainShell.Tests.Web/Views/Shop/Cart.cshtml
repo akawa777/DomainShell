@@ -1,0 +1,36 @@
+﻿<div>     
+    <a href="/Shop/Product">product</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>CartItemId</th>
+                <th>ProduntId</th>
+                <th>ProduntName</th>
+                <th>Price</th>
+                <th>Number</th>                
+                <th>Remove</th>                
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td coco-pin="cartItemId"></td>
+                <td coco-pin="productId"></td>
+                <td coco-pin="productName"></td>
+                <td coco-pin="price"></td>                
+                <td>
+                    <select coco-pin="number" class="form-control input-sm" style="width:60px;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </td>                
+                <td>
+                    <button coco-pin="remove" type="button" class="btn btn-danger">remove</button>
+                </td>                
+            </tr>        
+        </tbody>
+    </table>   
+    <button type="button" coco-pin="checkout" class="btn btn-primary">checkout</button> 
+</div>

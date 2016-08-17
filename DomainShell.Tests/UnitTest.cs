@@ -21,7 +21,7 @@ namespace DomainShell.Tests
         [TestMethod]
         public void Test01()
         {
-            CartApp app = new CartApp();
+            ShopApp app = new ShopApp();
 
             CartAddItemResult addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "1", Number = 1 });
             addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "2", Number = 2 });
@@ -35,11 +35,11 @@ namespace DomainShell.Tests
 
             Assert.AreEqual(2, items.Length);
 
-            decimal amount = app.GetPaymentAmount(new PaymentAmountQuery { CustomerId = "1", ShippingAddress = "xxx-xxx" });
+            PaymentAmountInfo amount = app.GetPaymentAmount("1");
 
             Payment payment = new Payment
             {
-                CartId = items[0].CartId,
+                CustomerId = "1",
                 CreditCardNo = "xxx",
                 CreditCardHolder = "xxx",
                 CreditCardExpirationDate = "xxx",
