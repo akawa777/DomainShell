@@ -13,129 +13,8 @@ using DomainShell.Tests.Infrastructure.Customer;
 using DomainShell.Tests.Infrastructure.Product;
 using DomainShell.Tests.Infrastructure.Payment;
 
-namespace DomainShell.Tests.Apps.Cart
+namespace DomainShell.Tests.App.Shop
 {
-    public class Customer
-    {
-        public string CustomerId { get; set; }
-        public string CustomerName { get; set; }
-        public string Address { get; set; }
-        public string CreditCardNo { get; set; }
-        public string CreditCardHolder { get; set; }
-        public string CreditCardExpirationDate { get; set; }
-    }   
-
-    public class Product
-    {
-        public string ProductId { get; set; }
-        public string ProductName { get; set; }
-        public decimal Price { get; set; }
-    }   
-
-    public class CartItem
-    {
-        public string CartId { get; set; }
-        public string CartItemId { get; set; }
-        public string ProductId { get; set; }
-        public string ProductName { get; set; }
-        public decimal Price { get; set; }
-        public int Number { get; set; }
-    }
-
-    public class CartAddItem
-    {
-        public string CustomerId { get; set; }        
-        public string ProductId { get; set; }             
-        public int Number { get; set; }
-    }
-
-    public class CartAddItemResult
-    {
-        public CartAddItemResult()
-        {
-            Success = true;
-            Messages = new List<string>();
-        }
-
-        public bool Success { get; set; }
-        public List<string> Messages { get; set; }
-        public string CartItemId { get; set; }
-    }
-
-    public class CartUpdateItem
-    {
-        public string CustomerId { get; set; }
-        public string CartItemId { get; set; }
-        public int Number { get; set; }
-    }
-
-    public class CartUpdateItemResult
-    {
-        public CartUpdateItemResult()
-        {
-            Success = true;
-            Messages = new List<string>();
-        }
-
-        public List<string> Messages { get; set; }
-        public bool Success { get; set; }        
-    }
-
-    public class CartRemoveItem
-    {
-        public string CustomerId { get; set; }
-        public string CartItemId { get; set; }
-    }
-
-    public class CartRemoveItemResult
-    {
-        public CartRemoveItemResult()
-        {
-            Success = true;
-            Messages = new List<string>();
-        }
-
-        public List<string> Messages { get; set; }
-        public bool Success { get; set; }
-    }
-
-    public class PaymentAmountInfo
-    {
-        public decimal Postage { get; set; }
-        public decimal TotalPrice { get; set; }
-        public decimal PaymentAmount { get; set; }
-    }
-
-    public class Payment
-    {
-        public string CustomerId { get; set; }
-        public string CreditCardNo { get; set; }
-        public string CreditCardHolder { get; set; }
-        public string CreditCardExpirationDate { get; set; }
-        public string ShippingAddress { get; set; }       
-    }
-
-    public class PaymentResult
-    {
-        public PaymentResult()
-        {
-            Success = true;
-            Messages = new List<string>();
-        }
-
-        public List<string> Messages { get; set; }
-        public bool Success { get; set; }
-    }
-
-    public class PaymentContent
-    {
-        public string PaymentId { get; set; }
-        public string PaymentDate { get; set; }
-        public string CustomerId { get; set; }        
-        public string ShippingAddress { get; set; }
-        public decimal PaymentAmount { get; set;}        
-    }
-
     public class ShopApp
     {
         public ShopApp()
@@ -193,7 +72,7 @@ namespace DomainShell.Tests.Apps.Cart
             }
         }
 
-        public CartAddItemResult Add(CartAddItem item)
+        public CartAddItemResult Add(CartAddItemCommand item)
         {
             using (Transaction tran = _session.BegingTran())
             {
@@ -228,7 +107,7 @@ namespace DomainShell.Tests.Apps.Cart
             }            
         }
 
-        private bool ValidateAdd(CartAddItem item, CartAddItemResult result)
+        private bool ValidateAdd(CartAddItemCommand item, CartAddItemResult result)
         {   
             if (string.IsNullOrEmpty(item.CustomerId))
             {
@@ -263,7 +142,7 @@ namespace DomainShell.Tests.Apps.Cart
             return result.Success;
         }
 
-        public CartUpdateItemResult Update(CartUpdateItem item)
+        public CartUpdateItemResult Update(CartUpdateItemCommand item)
         {
             using (Transaction tran = _session.BegingTran())
             {
@@ -300,7 +179,7 @@ namespace DomainShell.Tests.Apps.Cart
             }
         }
 
-        private bool ValidateUpdate(CartUpdateItem item, CartUpdateItemResult result)
+        private bool ValidateUpdate(CartUpdateItemCommand item, CartUpdateItemResult result)
         {
             if (string.IsNullOrEmpty(item.CustomerId))
             {
@@ -329,7 +208,7 @@ namespace DomainShell.Tests.Apps.Cart
             return result.Success;
         }
 
-        public CartRemoveItemResult Remove(CartRemoveItem item)
+        public CartRemoveItemResult Remove(CartRemoveItemCommand item)
         {            
             using (Transaction tran = _session.BegingTran())
             {
@@ -351,7 +230,7 @@ namespace DomainShell.Tests.Apps.Cart
             }
         }
 
-        private bool ValidateRemove(CartRemoveItem item, CartRemoveItemResult result)
+        private bool ValidateRemove(CartRemoveItemCommand item, CartRemoveItemResult result)
         {
             if (string.IsNullOrEmpty(item.CustomerId))
             {
@@ -411,7 +290,7 @@ namespace DomainShell.Tests.Apps.Cart
             }
         }
 
-        public PaymentResult Pay(Payment payment)
+        public PaymentResult Pay(PaymentCommand payment)
         {
             using (Transaction tran = _session.BegingTran())
             {
@@ -442,7 +321,7 @@ namespace DomainShell.Tests.Apps.Cart
             }
         }
 
-        private bool ValidatePay(Payment payment, PaymentResult result)
+        private bool ValidatePay(PaymentCommand payment, PaymentResult result)
         {
             if (string.IsNullOrEmpty(payment.CustomerId))
             {

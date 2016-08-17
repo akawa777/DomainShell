@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using DomainShell.Tests.Web.Controllers.Extension;
-using DomainShell.Tests.Apps.Cart;
+using DomainShell.Tests.App.Shop;
 
 namespace DomainShell.Tests.Web.Controllers
 {
@@ -26,21 +26,21 @@ namespace DomainShell.Tests.Web.Controllers
             return this.JsonCamel(items);
         }
 
-        public ActionResult Add(CartAddItem item)
+        public ActionResult Add(CartAddItemCommand item)
         {
             CartAddItemResult result = _app.Add(item);
 
             return this.JsonCamel(result);
         }
 
-        public ActionResult Update(CartUpdateItem item)
+        public ActionResult Update(CartUpdateItemCommand item)
         {
             CartUpdateItemResult result = _app.Update(item);
 
             return this.JsonCamel(result);
         }
 
-        public ActionResult Remove(CartRemoveItem item)
+        public ActionResult Remove(CartRemoveItemCommand item)
         {
             CartRemoveItemResult result = _app.Remove(item);
 
@@ -54,7 +54,7 @@ namespace DomainShell.Tests.Web.Controllers
             return this.JsonCamel(info);
         }
 
-        public ActionResult Pay(Payment payment)
+        public ActionResult Pay(PaymentCommand payment)
         {
             PaymentResult result = _app.Pay(payment);
 

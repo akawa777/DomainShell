@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Tests.Infrastructure;
-using DomainShell.Tests.Apps.Cart;
+using DomainShell.Tests.App.Shop;
 
 namespace DomainShell.Tests
 {
@@ -23,11 +23,11 @@ namespace DomainShell.Tests
         {
             ShopApp app = new ShopApp();
 
-            CartAddItemResult addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "1", Number = 1 });
-            addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "2", Number = 2 });
-            addResult = app.Add(new CartAddItem { CustomerId = "1", ProductId = "3", Number = 3 });
+            CartAddItemResult addResult = app.Add(new CartAddItemCommand { CustomerId = "1", ProductId = "1", Number = 1 });
+            addResult = app.Add(new CartAddItemCommand{ CustomerId = "1", ProductId = "2", Number = 2 });
+            addResult = app.Add(new CartAddItemCommand { CustomerId = "1", ProductId = "3", Number = 3 });
 
-            CartRemoveItem removeItem = new CartRemoveItem { CustomerId = "1", CartItemId = addResult.CartItemId };
+            CartRemoveItemCommand removeItem = new CartRemoveItemCommand { CustomerId = "1", CartItemId = addResult.CartItemId };
 
             app.Remove(removeItem);
 
@@ -37,7 +37,7 @@ namespace DomainShell.Tests
 
             PaymentAmountInfo amount = app.GetPaymentAmount("1");
 
-            Payment payment = new Payment
+            PaymentCommand payment = new PaymentCommand
             {
                 CustomerId = "1",
                 CreditCardNo = "xxx",
