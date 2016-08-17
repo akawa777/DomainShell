@@ -66,7 +66,9 @@
                     if (cartItems.length > 0)
                     {
                         location.href = "/shop/checkout"
-                    }                    
+                    } else {
+                        alert("not item in cart");
+                    }
                 }).fail(function (result) {
                     $("body").html(result.responseText);
                 });

@@ -36,7 +36,7 @@
             });
 
             $.post("/api/shop/findcustomer", { customerId: "1" }).success(function (customer) {
-                self.$context.pin("address").val(customer.address);
+                self.$context.pin("shippingAddress").val(customer.address);
                 self.$context.pin("creditCardNo").val(customer.creditCardNo);
                 self.$context.pin("creditCardHolder").val(customer.creditCardHolder);
                 self.$context.pin("creditCardExpirationDate").val(customer.creditCardExpirationDate);
@@ -50,6 +50,25 @@
                 self.$context.pin("paymentAmount").text(info.paymentAmount);
             }).fail(function (result) {
                 $("body").html(result.responseText);
+            });
+
+            self.$context.pin("pay").on("click", function () {
+                if (window.confirm("do you pay ?")) {
+                    var payment = {
+                        customerId: "1",
+                        creditCardNo: self.$context.pin("creditCardNo").val(),
+                        creditCardHolder: self.$context.pin("creditCardHolder").val(),
+                        creditCardExpirationDate: self.$context.pin("creditCardExpirationDate").val(),
+                        shippingAddress: self.$context.pin("shippingAddress").val()
+                    }
+
+                    $.post("/api/shop/pay", payment).success(function () {
+                        alert("completed payment.");
+                        location.href = "/shop/history"
+                    }).fail(function (result) {
+                        $("body").html(result.responseText);
+                    });
+                }                
             });
         }
     }

@@ -127,6 +127,15 @@ namespace DomainShell.Tests.Apps.Cart
         public bool Success { get; set; }
     }
 
+    public class PaymentContent
+    {
+        public string PaymentId { get; set; }
+        public string PaymentDate { get; set; }
+        public string CustomerId { get; set; }        
+        public string ShippingAddress { get; set; }
+        public decimal PaymentAmount { get; set;}        
+    }
+
     public class ShopApp
     {
         public ShopApp()
@@ -136,7 +145,8 @@ namespace DomainShell.Tests.Apps.Cart
             _cartReader = new CartReader(_session);
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
-            _productRepository = new ProductRepository(_session);            
+            _productRepository = new ProductRepository(_session);
+            _paymentReader = new PaymentReader(_session);
             _paymentRepository = new PaymentRepository(_session);
 
             _creditCardService = new CreditCardService();            
@@ -144,10 +154,11 @@ namespace DomainShell.Tests.Apps.Cart
 
         private Session _session;
 
-        private CartReader _cartReader;
+        private CartReader _cartReader;        
         private CartRepository _cartRepository;
         private CustomerRepository _customerRepository;
-        private ProductRepository _productRepository;        
+        private ProductRepository _productRepository;
+        private PaymentReader _paymentReader;
         private PaymentRepository _paymentRepository;
 
         private CreditCardService _creditCardService;
@@ -225,12 +236,24 @@ namespace DomainShell.Tests.Apps.Cart
                 result.Messages.Add("CustomerId is required.");
             }
 
+            if (_customerRepository.Find(item.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist CustomerId.");
+            }
+
             if (string.IsNullOrEmpty(item.ProductId))
             {
                 result.Success = false;
                 result.Messages.Add("ProductId is required.");
             }
 
+            if (_productRepository.Find(item.ProductId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist ProductId.");
+            }
+            
             if (item.Number == 0)
             {
                 result.Success = false;
@@ -258,7 +281,7 @@ namespace DomainShell.Tests.Apps.Cart
                     return result;
                 }
 
-                CartItemModel itemModel = cartModel.CartItemList.FirstOrDefault(x => x.CartItemId == item.CartItemId);
+                CartItemModel itemModel = cartModel.GetCartItem(item.CartItemId);
 
                 if (itemModel == null)
                 {
@@ -283,6 +306,12 @@ namespace DomainShell.Tests.Apps.Cart
             {
                 result.Success = false;
                 result.Messages.Add("CustomerId is required.");
+            }
+
+            if (_customerRepository.Find(item.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist CustomerId.");
             }
 
             if (string.IsNullOrEmpty(item.CartItemId))
@@ -328,6 +357,12 @@ namespace DomainShell.Tests.Apps.Cart
             {
                 result.Success = false;
                 result.Messages.Add("CustomerId is required.");
+            }
+
+            if (_customerRepository.Find(item.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist CustomerId.");
             }
 
             if (string.IsNullOrEmpty(item.CartItemId))
@@ -415,6 +450,12 @@ namespace DomainShell.Tests.Apps.Cart
                 result.Messages.Add("CustomerId is required.");
             }
 
+            if (_customerRepository.Find(payment.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist CustomerId.");
+            }
+
             if (string.IsNullOrEmpty(payment.CreditCardNo))
             {
                 result.Success = false;
@@ -440,6 +481,23 @@ namespace DomainShell.Tests.Apps.Cart
             }
 
             return result.Success;
+        }
+
+        public PaymentContent[] GetPaymentContents(string customerId)
+        {
+            using (_session.Open())
+            {
+                List<PaymentContentReadObject> readObjects = _paymentReader.GetPaymentContentList(customerId);
+
+                return readObjects.Select(x => new PaymentContent
+                {
+                    PaymentId = x.PaymentId,
+                    CustomerId = x.CustomerId,                    
+                    PaymentDate = x.PaymentDate,
+                    ShippingAddress = x.ShippingAddress,
+                    PaymentAmount = x.PaymentAmount
+                }).ToArray();
+            }
         }
     }
 }

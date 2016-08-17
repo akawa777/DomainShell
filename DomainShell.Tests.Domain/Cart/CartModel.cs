@@ -61,6 +61,13 @@ namespace DomainShell.Tests.Domain.Cart
             CartItemList.Add(item);
         }
 
+        public CartItemModel GetCartItem(string cartItemId)
+        {
+            CartItemModel item = CartItemList.FirstOrDefault(x => x.CartItemId == cartItemId);
+
+            return item;
+        }
+
         public void UpdateItem(CartItemModel item)
         {
             if (string.IsNullOrEmpty(CartId))

@@ -28,7 +28,7 @@ namespace DomainShell.Tests.Web
             routes.MapRoute(
                 name: "App",
                 url: "{app}/{script}/{id}",
-                defaults: new { controller = "Facade", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Facade", action = "Index", id = UrlParameter.Optional, app = "Shop", script = "Product" }
             );    
 
             //routes.MapRoute(

@@ -106,6 +106,10 @@ namespace DomainShell.Tests.Infrastructure.Cart
             {
                 Update(cart);
             }
+            else if (cart.State == State.Deleted)
+            {
+                Delete(cart);
+            }
 
             cart.Accepted();
         }
@@ -208,6 +212,23 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
                 command.ExecuteNonQuery();
             }
+        }
+
+        private void Delete(CartModel cart)
+        {
+            DbCommand command = _session.CreateCommand();
+
+            command.CommandText = @"
+                delete from Cart where CartId = @CartId;   
+                delete from CartItem where CartId = @CartId;                                    
+            ";
+
+            DbParameter param = command.CreateParameter();
+            param.ParameterName = "@CartId";
+            param.Value = cart.CartId;
+            command.Parameters.Add(param);
+
+            command.ExecuteNonQuery();
         }
     }
 }

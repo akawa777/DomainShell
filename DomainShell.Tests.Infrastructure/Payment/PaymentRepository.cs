@@ -17,7 +17,7 @@ namespace DomainShell.Tests.Infrastructure.Payment
             _session = session;
         }
 
-        private Session _session;  
+        private Session _session;          
 
         public void Save(PaymentModel payment)
         {

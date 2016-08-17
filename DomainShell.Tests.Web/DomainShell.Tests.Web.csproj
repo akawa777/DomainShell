@@ -186,6 +186,7 @@
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Scripts\Shop\checkout.js" />
     <Content Include="Scripts\Shop\cart.js" />
+    <Content Include="Scripts\Shop\history.js" />
     <Content Include="Scripts\Shop\product.js">
       <SubType>Code</SubType>
     </Content>
@@ -222,6 +223,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="Views\Facade\Index.cshtml" />
+    <Content Include="Views\Shop\History.cshtml">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="Views\Shop\Product.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

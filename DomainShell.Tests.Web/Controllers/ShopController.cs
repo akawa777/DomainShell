@@ -67,5 +67,12 @@ namespace DomainShell.Tests.Web.Controllers
 
             return this.JsonCamel(customer);
         }
+
+        public ActionResult GetPaymentContents(string customerId)
+        {
+            PaymentContent[] paymentContens = _app.GetPaymentContents(customerId);
+
+            return this.JsonCamel(paymentContens);
+        }
     }
 }
