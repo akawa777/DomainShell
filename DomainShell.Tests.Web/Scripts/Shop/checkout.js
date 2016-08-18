@@ -45,8 +45,9 @@
             });
 
             $.post("/api/shop/getpaymentamountinfo", { customerId: "1" }).success(function (info) {
-                self.$context.pin("totalPrice").text(info.address);
+                self.$context.pin("totalPrice").text(info.totalPrice);
                 self.$context.pin("postage").text(info.postage);
+                self.$context.pin("tax").text(info.tax);
                 self.$context.pin("paymentAmount").text(info.paymentAmount);
             }).fail(function (result) {
                 $("body").html(result.responseText);

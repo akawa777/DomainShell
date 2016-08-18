@@ -11,6 +11,11 @@ namespace DomainShell.Tests.Domain.Payment
 {
     public class PaymentModel : IAggregateRoot
     {
+        public PaymentModel()
+        {
+            State = new State();
+        }
+
         public string PaymentId { get; set; }
         public string PaymentDate { get; set; }
         public string CustomerId { get; set; }
@@ -31,20 +36,25 @@ namespace DomainShell.Tests.Domain.Payment
                 throw new Exception("already paied.");
             }
 
+            if (string.IsNullOrEmpty(ShippingAddress))
+            {
+                throw new Exception("ShippingAddress required.");
+            }
+
+            if (PaymentAmount == 0)
+            {
+                throw new Exception("PaymentAmount required.");
+            }
+
             PaymentDate = DateTime.Now.ToString("yyyyMMddHHmmss");
             CreditCard = creditCard;
 
             creditCardService.Pay(CreditCard, PaymentAmount);
 
-            State = State.Created;
+            State.New();
         }        
 
         public State State { get; private set; }
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
-        }
     }
 
     public class PaymentItemModel

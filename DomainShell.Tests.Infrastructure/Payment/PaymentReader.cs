@@ -32,16 +32,13 @@ namespace DomainShell.Tests.Infrastructure.Payment
 
             command.CommandText = @"
                 select 
-                    Payment.PaymentId, 
-                    Payment.PaymentDate, 
-                    Payment.CustomerId, 
-                    Payment.ShippingAddress, 
-                    Payment.Postage + sum(PriceAtTime) + PaymentTax PaymentAmount
-                from Payment
-                left join PaymentItem on Payment.PaymentId = PaymentItem.PaymentId                
-                where Payment.CustomerId = @CustomerId
-                group by Payment.PaymentId, Payment.PaymentDate, Payment.CustomerId, Payment.ShippingAddress
-                order by Payment.PaymentId desc
+                    *
+                from 
+                    Payment                
+                where 
+                    CustomerId = @CustomerId                
+                order by 
+                    PaymentId desc
             ";
 
             DbParameter param = command.CreateParameter();
@@ -61,7 +58,7 @@ namespace DomainShell.Tests.Infrastructure.Payment
                     item.PaymentDate = reader["PaymentDate"].ToString();
                     item.CustomerId = reader["CustomerId"].ToString();
                     item.ShippingAddress = reader["ShippingAddress"].ToString();
-                    item.PaymentAmount = int.Parse(reader["PaymentAmount"].ToString());
+                    item.PaymentAmount = decimal.Parse(reader["PaymentAmount"].ToString());
 
                     list.Add(item);
                 }

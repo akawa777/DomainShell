@@ -73,7 +73,7 @@ namespace DomainShell.Tests.Infrastructure.Product
 
         public void Save(ProductModel product)
         {
-            product.Accepted();
+            product.State.UnChanged();
         }
     }
 }

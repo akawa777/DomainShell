@@ -49,17 +49,23 @@ namespace DomainShell.Tests.App.Shop
                 if (!Validate(command, result))
                 {
                     return result;
-                }
+                }          
 
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);
 
                 if (cartModel == null)
                 {
                     cartModel = new CartModel();
-                    cartModel.Create(command.CustomerId);
+                    cartModel.CustomerId = command.CustomerId;
+                    cartModel.Create();
                 }
 
-                cartModel.AddItem(_productRepository.Find(command.ProductId), command.Number);
+                cartModel.AddItem(
+                    new CartItemModel
+                    {
+                        Product = _productRepository.Find(command.ProductId),
+                        Number = command.Number
+                    });
 
                 _cartRepository.Save(cartModel);
 
@@ -116,8 +122,11 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);
+                CartItemModel cartItemModel = cartModel.GetCartItem(command.CartItemId);
 
-                cartModel.UpdateItem(command.CartItemId, command.Number);
+                cartItemModel.Number = command.Number;
+
+                cartModel.UpdateItem(cartItemModel);
 
                 _cartRepository.Save(cartModel);
 
@@ -173,6 +182,7 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);
+
                 cartModel.RemoveItem(command.CartItemId);
 
                 _cartRepository.Save(cartModel);
@@ -228,12 +238,13 @@ namespace DomainShell.Tests.App.Shop
                 PaymentModel paymentModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
 
                 paymentModel.Pay(
-                        new CreditCardValue {
-                            CreditCardNo = command.CreditCardNo,
-                            CreditCardHolder = command.CreditCardHolder,
-                            CreditCardExpirationDate = command.CreditCardExpirationDate,
-                        },
-                        _creditCardService);
+                    new CreditCardValue
+                    {
+                        CreditCardNo = command.CreditCardNo,
+                        CreditCardHolder = command.CreditCardHolder,
+                        CreditCardExpirationDate = command.CreditCardExpirationDate,
+                    },
+                    _creditCardService);
 
                 _cartRepository.Save(cartModel);
                 _paymentRepository.Save(paymentModel);

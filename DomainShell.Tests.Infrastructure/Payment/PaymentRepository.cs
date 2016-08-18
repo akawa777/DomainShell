@@ -21,12 +21,12 @@ namespace DomainShell.Tests.Infrastructure.Payment
 
         public void Save(PaymentModel payment)
         {
-            if (payment.State == State.Created)
+            if (payment.State.GetState() == State.StateFlg.New)
             {
                 Create(payment);
             }
 
-            payment.Accepted();
+            payment.State.UnChanged();
         }
 
         private void Create(PaymentModel payment)
@@ -34,8 +34,8 @@ namespace DomainShell.Tests.Infrastructure.Payment
             DbCommand command = _session.CreateCommand();
 
             command.CommandText = @"
-                insert into Payment (PaymentDate, CustomerId, CreditCardNo, CreditCardHolder, CreditCardExpirationDate, ShippingAddress, Postage) 
-                values (@PaymentDate, @CustomerId, @CreditCardNo, @CreditCardHolder, @CreditCardExpirationDate, @ShippingAddress, @Postage) 
+                insert into Payment (PaymentDate, CustomerId, CreditCardNo, CreditCardHolder, CreditCardExpirationDate, ShippingAddress, Postage, Tax, PaymentAmount) 
+                values (@PaymentDate, @CustomerId, @CreditCardNo, @CreditCardHolder, @CreditCardExpirationDate, @ShippingAddress, @Postage, @Tax, @PaymentAmount) 
             ";
 
             DbParameter param = command.CreateParameter();
@@ -71,6 +71,16 @@ namespace DomainShell.Tests.Infrastructure.Payment
             param = command.CreateParameter();
             param.ParameterName = "@Postage";
             param.Value = payment.Postage;
+            command.Parameters.Add(param);
+
+            param = command.CreateParameter();
+            param.ParameterName = "@Tax";
+            param.Value = payment.Tax;
+            command.Parameters.Add(param);
+
+            param = command.CreateParameter();
+            param.ParameterName = "@PaymentAmount";
+            param.Value = payment.PaymentAmount;
             command.Parameters.Add(param);
 
             command.ExecuteNonQuery();

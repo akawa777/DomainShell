@@ -98,20 +98,20 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public void Save(CartModel cart)
         {
-            if (cart.State == State.Created)
+            if (cart.State.GetState() == State.StateFlg.New)
             {
                 Create(cart);
-            } 
-            else if (cart.State == State.Updated)
+            }
+            else if (cart.State.GetState() == State.StateFlg.Modified)
             {
                 Update(cart);
             }
-            else if (cart.State == State.Deleted)
+            else if (cart.State.GetState() == State.StateFlg.Deleted)
             {
                 Delete(cart);
             }
 
-            cart.Accepted();
+            cart.State.UnChanged();
         }
 
         private void Create(CartModel cart)
@@ -135,7 +135,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 select CartId from Cart where ROWID = last_insert_rowid();         
             ";
 
-            var id = command.ExecuteScalar();            
+            cart.CartId = command.ExecuteScalar().ToString();            
             
             foreach (CartItemModel item in cart.CartItemList)
             {

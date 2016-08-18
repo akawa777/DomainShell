@@ -19,7 +19,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public decimal GetTax(decimal amount)
         {
-            return amount * _cartReader.GetTaxRate();
+            return (int)(amount * _cartReader.GetTaxRate());
         }
 
         public decimal Calculate(decimal amount)

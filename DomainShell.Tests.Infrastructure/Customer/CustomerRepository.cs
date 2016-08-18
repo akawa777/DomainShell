@@ -51,7 +51,7 @@ namespace DomainShell.Tests.Infrastructure.Customer
 
         public void Save(CustomerModel customer)
         {
-            customer.Accepted();
+            customer.State.UnChanged();
         }
     }
 }

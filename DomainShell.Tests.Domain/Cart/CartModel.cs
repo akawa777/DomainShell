@@ -12,6 +12,11 @@ namespace DomainShell.Tests.Domain.Cart
 {
     public class CartModel : IAggregateRoot
     {
+        public CartModel()
+        {
+            State = new State();
+        }
+
         public string CartId { get; set; }
         public string CustomerId { get; set; }
 
@@ -19,33 +24,34 @@ namespace DomainShell.Tests.Domain.Cart
 
         public decimal TotalPrice()
         {
-            return CartItemList.Sum(x => x.Product.Price);
+            return CartItemList.Sum(x => x.Product.Price * x.Number);
         }
 
         public State State { get; private set; }
 
-        public void Create(string customerId)
+        public void Create()
         {
             if (!string.IsNullOrEmpty(CartId))
             {
                 throw new Exception("already created.");
             }
 
-            CustomerId = customerId;
-            CartItemList = new List<CartItemModel>();
+            if (string.IsNullOrEmpty(CustomerId))
+            {
+                throw new Exception("CustomerId required.");
+            }
+            
+            CartItemList = new List<CartItemModel>();            
 
-            State = State.Created;
+            State.New();
         }
 
-        public void AddItem(ProductModel product, int number)
+        public void AddItem(CartItemModel item)
         {
-            if (!string.IsNullOrEmpty(CartId))
+            if (CartItemList.Any(x => x == item))
             {
-                State = State.Updated;
+                throw new Exception("already exist in CartItemList.");
             }
-
-            CartItemModel item = new CartItemModel();
-            item.CartId = CartId;            
 
             if (CartItemList == null || CartItemList.Count == 0)
             {
@@ -57,10 +63,11 @@ namespace DomainShell.Tests.Domain.Cart
                 item.CartItemId = (CartItemList.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
             }
 
-            item.ProductId = product.ProductId;
-            item.Number = number;
+            item.ProductId = item.Product.ProductId;
 
             CartItemList.Add(item);
+
+            State.Modified();
         }
 
         public CartItemModel GetCartItem(string cartItemId)
@@ -70,18 +77,19 @@ namespace DomainShell.Tests.Domain.Cart
             return item;
         }
 
-        public void UpdateItem(string cartItemId, int number)
+        public void UpdateItem(CartItemModel item)
         {
             if (string.IsNullOrEmpty(CartId))
             {
                 throw new Exception("not yet created.");
             }
 
-            CartItemModel item = GetCartItem(cartItemId);
+            if (!CartItemList.Any(x => x == item))
+            {
+                throw new Exception("not exist in CartItemList.");
+            }
 
-            item.Number = number;
-
-            State = State.Updated;
+            State.Modified();
         }
 
         public void RemoveItem(string cartItemId)
@@ -100,12 +108,7 @@ namespace DomainShell.Tests.Domain.Cart
 
             CartItemList.Remove(item);
 
-            State = State.Updated;            
-        }
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
+            State.Modified();        
         }
 
         public decimal GetTax(decimal postage, ITaxService taxService)
@@ -147,9 +150,9 @@ namespace DomainShell.Tests.Domain.Cart
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
                 });
-            }            
+            }
 
-            State = State.Deleted;
+            State.Deleted();
 
             return payment;            
         }

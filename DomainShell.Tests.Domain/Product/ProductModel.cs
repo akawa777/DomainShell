@@ -9,15 +9,15 @@ namespace DomainShell.Tests.Domain.Product
 {   
     public class ProductModel : IAggregateRoot
     {
+        public ProductModel()
+        {
+            State = new State();
+        }
+
         public string ProductId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
 
-        public State State { get; private set; }        
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
-        }        
+        public State State { get; private set; } 
     }   
 }
