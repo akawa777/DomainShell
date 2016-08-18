@@ -20,32 +20,25 @@ namespace DomainShell.Tests.App.Shop
         public ShopApp()
         {
             _session = new Session();
-
             _cartReader = new CartReader(_session);
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
             _productRepository = new ProductRepository(_session);
             _paymentReader = new PaymentReader(_session);
             _paymentRepository = new PaymentRepository(_session);
-
             _taxService = new TaxService(_session);
             _creditCardService = new CreditCardService();            
         }
 
         private Session _session;
-
         private CartReader _cartReader;        
         private CartRepository _cartRepository;
-
         private CustomerRepository _customerRepository;
         private ProductRepository _productRepository;
-
         private PaymentReader _paymentReader;
         private PaymentRepository _paymentRepository;
-
         private ITaxService _taxService;
-        private ICreditCardService _creditCardService;        
-        
+        private ICreditCardService _creditCardService;                
 
         public AddCartItemResult AddCartItem(AddCartItemCommand command)
         {
@@ -66,13 +59,7 @@ namespace DomainShell.Tests.App.Shop
                     cartModel.Create(command.CustomerId);
                 }
 
-                CartItemModel itemModel = new CartItemModel();
-
-                itemModel.Number = command.Number;
-                itemModel.ProductId = command.ProductId;
-                itemModel.Product = _productRepository.Find(command.ProductId);
-
-                cartModel.AddItem(itemModel);
+                cartModel.AddItem(_productRepository.Find(command.ProductId), command.Number);
 
                 _cartRepository.Save(cartModel);
 
@@ -129,11 +116,8 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);
-                CartItemModel itemModel = cartModel.GetCartItem(command.CartItemId);
 
-                itemModel.Number = command.Number;
-
-                cartModel.UpdateItem(itemModel);
+                cartModel.UpdateItem(command.CartItemId, command.Number);
 
                 _cartRepository.Save(cartModel);
 
@@ -239,7 +223,7 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 decimal postage = _cartReader.GetPostage();
-                CartModel cartModel = _cartRepository.Get(command.CustomerId);                
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);     
 
                 PaymentModel paymentModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
 

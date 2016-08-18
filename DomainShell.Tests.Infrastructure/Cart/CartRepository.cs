@@ -55,10 +55,10 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
             command.Parameters.AddRange(parameters);
 
-            CartModel cartModel = null;
+            CartModel cartModel = null;            
 
             using (DbDataReader reader = command.ExecuteReader())
-            {
+            {                
                 while (reader.Read())
                 {
                     if (cartModel == null)
@@ -135,9 +135,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 select CartId from Cart where ROWID = last_insert_rowid();         
             ";
 
-            var id = command.ExecuteScalar();
-
-            cart.CartId = id.ToString();
+            var id = command.ExecuteScalar();            
             
             foreach (CartItemModel item in cart.CartItemList)
             {

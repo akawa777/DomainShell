@@ -13,7 +13,8 @@ namespace DomainShell.Tests.Domain.Cart
     public class CartModel : IAggregateRoot
     {
         public string CartId { get; set; }
-        public string CustomerId { get; set; }        
+        public string CustomerId { get; set; }
+
         public List<CartItemModel> CartItemList { get; set; }
 
         public decimal TotalPrice()
@@ -36,12 +37,15 @@ namespace DomainShell.Tests.Domain.Cart
             State = State.Created;
         }
 
-        public void AddItem(CartItemModel item)
+        public void AddItem(ProductModel product, int number)
         {
             if (!string.IsNullOrEmpty(CartId))
             {
                 State = State.Updated;
             }
+
+            CartItemModel item = new CartItemModel();
+            item.CartId = CartId;            
 
             if (CartItemList == null || CartItemList.Count == 0)
             {
@@ -53,6 +57,9 @@ namespace DomainShell.Tests.Domain.Cart
                 item.CartItemId = (CartItemList.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
             }
 
+            item.ProductId = product.ProductId;
+            item.Number = number;
+
             CartItemList.Add(item);
         }
 
@@ -63,17 +70,16 @@ namespace DomainShell.Tests.Domain.Cart
             return item;
         }
 
-        public void UpdateItem(CartItemModel item)
+        public void UpdateItem(string cartItemId, int number)
         {
             if (string.IsNullOrEmpty(CartId))
             {
                 throw new Exception("not yet created.");
             }
 
-            if (!CartItemList.Any(x => x == item))
-            {                
-                throw new Exception("not exist item.");
-            }
+            CartItemModel item = GetCartItem(cartItemId);
+
+            item.Number = number;
 
             State = State.Updated;
         }
