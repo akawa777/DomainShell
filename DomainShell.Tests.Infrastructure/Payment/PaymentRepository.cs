@@ -50,17 +50,17 @@ namespace DomainShell.Tests.Infrastructure.Payment
 
             param = command.CreateParameter();
             param.ParameterName = "@CreditCardNo";
-            param.Value = payment.CreditCardNo;
+            param.Value = payment.CreditCard.CreditCardNo;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@CreditCardHolder";
-            param.Value = payment.CreditCardHolder;
+            param.Value = payment.CreditCard.CreditCardHolder;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@CreditCardExpirationDate";
-            param.Value = payment.CreditCardExpirationDate;
+            param.Value = payment.CreditCard.CreditCardExpirationDate;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();

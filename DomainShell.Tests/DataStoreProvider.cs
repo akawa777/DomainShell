@@ -207,7 +207,9 @@ namespace DomainShell.Tests
                             CreditCardHolder nvarchar(100),
                             CreditCardExpirationDate nvarchar(8),
                             ShippingAddress nvarchar(100),
-                            Postage int
+                            Postage int,
+                            Tax int,
+                            PaymentAmount int
                         )
                     ";
 

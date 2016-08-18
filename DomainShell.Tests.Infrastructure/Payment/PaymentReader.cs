@@ -36,7 +36,7 @@ namespace DomainShell.Tests.Infrastructure.Payment
                     Payment.PaymentDate, 
                     Payment.CustomerId, 
                     Payment.ShippingAddress, 
-                    Payment.Postage + sum(PriceAtTime) PaymentAmount
+                    Payment.Postage + sum(PriceAtTime) + PaymentTax PaymentAmount
                 from Payment
                 left join PaymentItem on Payment.PaymentId = PaymentItem.PaymentId                
                 where Payment.CustomerId = @CustomerId

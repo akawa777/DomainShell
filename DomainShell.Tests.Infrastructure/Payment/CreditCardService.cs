@@ -8,11 +8,11 @@ using DomainShell.Tests.Domain.Payment;
 
 namespace DomainShell.Tests.Infrastructure.Payment
 {
-    public class CreditCardService : ICreditCardService<PaymentModel>
+    public class CreditCardService : ICreditCardService
     {
-        public void Pay(PaymentModel payment)
+        public void Pay(CreditCardValue creditCard, decimal paymentAmount)
         {
-
+            
         }
     } 
 }

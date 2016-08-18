@@ -69,5 +69,10 @@ namespace DomainShell.Tests.Infrastructure.Cart
         {
             return 150;
         }
+
+        public decimal GetTaxRate()
+        {
+            return 0.05m;
+        }
     }
 }

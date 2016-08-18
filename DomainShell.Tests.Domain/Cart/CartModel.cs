@@ -21,11 +21,6 @@ namespace DomainShell.Tests.Domain.Cart
             return CartItemList.Sum(x => x.Product.Price);
         }
 
-        public decimal TotalPrice(decimal postage)
-        {
-            return TotalPrice() + postage;
-        }
-
         public State State { get; private set; }
 
         public void Create(string customerId)
@@ -107,7 +102,17 @@ namespace DomainShell.Tests.Domain.Cart
             State = State.UnChanged;
         }
 
-        public PaymentModel Checkout(string shippingAddress, decimal postage)
+        public decimal GetTax(decimal postage, ITaxService taxService)
+        {
+            return taxService.GetTax(postage + TotalPrice());
+        }
+
+        public decimal GetPaymentAmount(decimal postage, ITaxService taxService)
+        {
+            return taxService.Calculate(postage + TotalPrice());
+        }
+
+        public PaymentModel Checkout(string shippingAddress, decimal postage, ITaxService taxService)
         {
             if (CartItemList == null || CartItemList.Count == 0)
             {
@@ -115,11 +120,14 @@ namespace DomainShell.Tests.Domain.Cart
             }
 
             PaymentModel payment = new PaymentModel();
+
             payment.CustomerId = CustomerId;            
             payment.ShippingAddress = shippingAddress;
             payment.Postage = postage;
-            payment.PaymentItemList = new List<PaymentItemModel>();
+            payment.Tax = GetTax(postage, taxService);
+            payment.PaymentAmount = GetPaymentAmount(postage, taxService);
 
+            payment.PaymentItemList = new List<PaymentItemModel>();
             foreach (CartItemModel item in CartItemList)
             {
                 payment.PaymentItemList.Add(new PaymentItemModel
@@ -128,7 +136,7 @@ namespace DomainShell.Tests.Domain.Cart
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
                 });
-            }
+            }            
 
             State = State.Deleted;
 

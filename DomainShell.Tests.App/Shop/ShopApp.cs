@@ -28,6 +28,7 @@ namespace DomainShell.Tests.App.Shop
             _paymentReader = new PaymentReader(_session);
             _paymentRepository = new PaymentRepository(_session);
 
+            _taxService = new TaxService(_session);
             _creditCardService = new CreditCardService();            
         }
 
@@ -35,12 +36,16 @@ namespace DomainShell.Tests.App.Shop
 
         private CartReader _cartReader;        
         private CartRepository _cartRepository;
+
         private CustomerRepository _customerRepository;
         private ProductRepository _productRepository;
+
         private PaymentReader _paymentReader;
         private PaymentRepository _paymentRepository;
 
-        private CreditCardService _creditCardService;        
+        private ITaxService _taxService;
+        private ICreditCardService _creditCardService;        
+        
 
         public AddCartItemResult AddCartItem(AddCartItemCommand command)
         {
@@ -233,15 +238,17 @@ namespace DomainShell.Tests.App.Shop
                     return result;
                 }
 
-                CartModel cartModel = _cartRepository.Get(command.CustomerId);
                 decimal postage = _cartReader.GetPostage();
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);                
 
-                PaymentModel paymentModel = cartModel.Checkout(command.ShippingAddress, postage);
+                PaymentModel paymentModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
 
                 paymentModel.Pay(
-                        command.CreditCardNo,
-                        command.CreditCardHolder,
-                        command.CreditCardExpirationDate,
+                        new CreditCardValue {
+                            CreditCardNo = command.CreditCardNo,
+                            CreditCardHolder = command.CreditCardHolder,
+                            CreditCardExpirationDate = command.CreditCardExpirationDate,
+                        },
                         _creditCardService);
 
                 _cartRepository.Save(cartModel);
@@ -351,17 +358,15 @@ namespace DomainShell.Tests.App.Shop
         {
             using (_session.Open())
             {
-                CustomerModel customerModel = _customerRepository.Find(query.CustomerId);
-                CartModel cartModel = _cartRepository.Get(query.CustomerId);
-                decimal postage = _cartReader.GetPostage();
-
-                PaymentModel paymentModel = cartModel.Checkout(customerModel.Address, postage);
+                decimal postage = _cartReader.GetPostage();                
+                CartModel cartModel = _cartRepository.Get(query.CustomerId);                
 
                 return new PaymentAmountInfo
                 {
                     Postage = postage,
                     TotalPrice = cartModel.TotalPrice(),
-                    PaymentAmount = paymentModel.PaymentAmount()
+                    Tax = cartModel.GetTax(postage, _taxService),
+                    PaymentAmount = cartModel.GetPaymentAmount(postage, _taxService)
                 };
             }
         }

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
 
-namespace DomainShell.Tests.Domain.Payment
+namespace DomainShell.Tests.Domain.Cart
 {
-    public interface ICreditCardService
+    public interface ITaxService
     {
-        void Pay(CreditCardValue creditCard, decimal paymentAmount);
+        decimal GetTax(decimal amount);
+        decimal Calculate(decimal amount);
     }
 }

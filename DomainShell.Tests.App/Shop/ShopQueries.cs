@@ -52,6 +52,7 @@ namespace DomainShell.Tests.App.Shop
     {
         public decimal Postage { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal Tax { get; set; }
         public decimal PaymentAmount { get; set; }
     }
 
