@@ -40,7 +40,264 @@ namespace DomainShell.Tests.App.Shop
         private PaymentReader _paymentReader;
         private PaymentRepository _paymentRepository;
 
-        private CreditCardService _creditCardService;
+        private CreditCardService _creditCardService;        
+
+        public AddCartItemResult AddCartItem(AddCartItemCommand command)
+        {
+            using (Transaction tran = _session.BegingTran())
+            {
+                AddCartItemResult result = new AddCartItemResult();
+
+                if (!Validate(command, result))
+                {
+                    return result;
+                }
+
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);
+
+                if (cartModel == null)
+                {
+                    cartModel = new CartModel();
+                    cartModel.Create(command.CustomerId);
+                }
+
+                CartItemModel itemModel = new CartItemModel();
+
+                itemModel.Number = command.Number;
+                itemModel.ProductId = command.ProductId;
+                itemModel.Product = _productRepository.Find(command.ProductId);
+
+                cartModel.AddItem(itemModel);
+
+                _cartRepository.Save(cartModel);
+
+                tran.Commit();
+
+                return result;
+            }            
+        }
+
+        private bool Validate(AddCartItemCommand command, AddCartItemResult result)
+        {
+            if (string.IsNullOrEmpty(command.CustomerId))
+            {
+                result.Success = false;
+                result.Messages.Add("CustomerId is required.");
+            }
+
+            if (_customerRepository.Find(command.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist CustomerId.");
+            }
+
+            if (string.IsNullOrEmpty(command.ProductId))
+            {
+                result.Success = false;
+                result.Messages.Add("ProductId is required.");
+            }
+
+            if (_productRepository.Find(command.ProductId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist ProductId.");
+            }
+
+            if (command.Number == 0)
+            {
+                result.Success = false;
+                result.Messages.Add("Number is required.");
+            }
+
+            return result.Success;
+        }
+
+        public UpdateCartItemResult UpdateCartItem(UpdateCartItemCommand command)
+        {
+            using (Transaction tran = _session.BegingTran())
+            {
+                UpdateCartItemResult result = new UpdateCartItemResult();
+
+                if (!Validate(command, result))
+                {
+                    return result;
+                }
+
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);
+                CartItemModel itemModel = cartModel.GetCartItem(command.CartItemId);
+
+                itemModel.Number = command.Number;
+
+                cartModel.UpdateItem(itemModel);
+
+                _cartRepository.Save(cartModel);
+
+                tran.Commit();
+
+                return result;
+            }
+        }
+
+        private bool Validate(UpdateCartItemCommand command, UpdateCartItemResult result)
+        {
+            if (string.IsNullOrEmpty(command.CustomerId))
+            {
+                result.Success = false;
+                result.Messages.Add("CustomerId is required.");
+            }
+
+            if (_cartRepository.Get(command.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart.");
+            }
+            else if (_cartRepository.Get(command.CustomerId).GetCartItem(command.CartItemId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart item.");
+            }
+
+            if (string.IsNullOrEmpty(command.CartItemId))
+            {
+                result.Success = false;
+                result.Messages.Add("CartItemId is required.");
+            }
+
+            if (command.Number == 0)
+            {
+                result.Success = false;
+                result.Messages.Add("Number is required.");
+            }
+
+            return result.Success;
+        }
+
+        public RemoveCartItemResult RemoveCartItem(RemoveCartItemCommand command)
+        {            
+            using (Transaction tran = _session.BegingTran())
+            {
+                RemoveCartItemResult result = new RemoveCartItemResult();
+
+                if (!ValidateRemove(command, result))
+                {
+                    return result;
+                }
+
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);
+                cartModel.RemoveItem(command.CartItemId);
+
+                _cartRepository.Save(cartModel);
+
+                tran.Commit();
+
+                return result;
+            }
+        }
+
+        private bool ValidateRemove(RemoveCartItemCommand command, RemoveCartItemResult result)
+        {
+            if (string.IsNullOrEmpty(command.CustomerId))
+            {
+                result.Success = false;
+                result.Messages.Add("CustomerId is required.");
+            }
+
+            if (_cartRepository.Get(command.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart.");
+            }
+            else if (_cartRepository.Get(command.CustomerId).GetCartItem(command.CartItemId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart item.");
+            }
+
+            if (string.IsNullOrEmpty(command.CartItemId))
+            {
+                result.Success = false;
+                result.Messages.Add("CartItemId is required.");
+            }
+
+            return result.Success;
+        }        
+
+        public PayResult Pay(PayCommand command)
+        {
+            using (Transaction tran = _session.BegingTran())
+            {
+                PayResult result = new PayResult();
+
+                if (!ValidatePay(command, result))
+                {
+                    return result;
+                }
+
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);
+                decimal postage = _cartReader.GetPostage();
+
+                PaymentModel paymentModel = cartModel.Checkout(command.ShippingAddress, postage);
+
+                paymentModel.Pay(
+                        command.CreditCardNo,
+                        command.CreditCardHolder,
+                        command.CreditCardExpirationDate,
+                        _creditCardService);
+
+                _cartRepository.Save(cartModel);
+                _paymentRepository.Save(paymentModel);
+
+                tran.Commit();
+
+                return result;
+            }
+        }
+
+        private bool ValidatePay(PayCommand command, PayResult result)
+        {
+            if (string.IsNullOrEmpty(command.CustomerId))
+            {
+                result.Success = false;
+                result.Messages.Add("CustomerId is required.");
+            }
+
+            if (_cartRepository.Get(command.CustomerId) == null)
+            {
+                result.Success = false;
+                result.Messages.Add("not exist cart.");
+            }
+            else if (_cartRepository.Get(command.CustomerId).CartItemList.Count == 0)
+            {
+                result.Success = false;
+                result.Messages.Add("not has cart items.");
+            }
+
+            if (string.IsNullOrEmpty(command.CreditCardNo))
+            {
+                result.Success = false;
+                result.Messages.Add("CreditCardNo is required.");
+            }
+
+            if (string.IsNullOrEmpty(command.CreditCardHolder))
+            {
+                result.Success = false;
+                result.Messages.Add("CreditCardHolder is required.");
+            }
+
+            if (string.IsNullOrEmpty(command.CreditCardExpirationDate))
+            {
+                result.Success = false;
+                result.Messages.Add("CreditCardExpirationDate is required.");
+            }
+
+            if (string.IsNullOrEmpty(command.ShippingAddress))
+            {
+                result.Success = false;
+                result.Messages.Add("ShippingAddress is required.");
+            }
+
+            return result.Success;
+        }
 
         public Product[] GetProducts()
         {
@@ -54,11 +311,11 @@ namespace DomainShell.Tests.App.Shop
             }
         }
 
-        public CartItem[] Get(string customerId)
+        public CartItem[] GetCartItems(CartItemsQuery query)
         {
             using (_session.Open())
             {
-                List<CartItemReadObject> readObjects = _cartReader.GetItemList(customerId);
+                CartItemReadObject[] readObjects = _cartReader.GetCartItems(query.CustomerId);
 
                 return readObjects.Select(x => new CartItem
                 {
@@ -72,191 +329,11 @@ namespace DomainShell.Tests.App.Shop
             }
         }
 
-        public CartAddItemResult Add(CartAddItemCommand item)
-        {
-            using (Transaction tran = _session.BegingTran())
-            {
-                CartAddItemResult result = new CartAddItemResult();               
-
-                if (!ValidateAdd(item, result))
-                {
-                    return result;
-                }
-
-                CartModel cartModel = _cartRepository.Get(item.CustomerId);
-
-                if (cartModel == null)
-                {
-                    cartModel = new CartModel();
-                    cartModel.Create(item.CustomerId);
-                }
-
-                CartItemModel itemModel = new CartItemModel();
-
-                itemModel.Number = item.Number;
-                itemModel.ProductId = item.ProductId;
-                itemModel.Product = _productRepository.Find(item.ProductId);
-
-                cartModel.AddItem(itemModel);
-
-                _cartRepository.Save(cartModel);
-
-                tran.Commit();
-
-                return result;
-            }            
-        }
-
-        private bool ValidateAdd(CartAddItemCommand item, CartAddItemResult result)
-        {   
-            if (string.IsNullOrEmpty(item.CustomerId))
-            {
-                result.Success = false;
-                result.Messages.Add("CustomerId is required.");
-            }
-
-            if (_customerRepository.Find(item.CustomerId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist CustomerId.");
-            }
-
-            if (string.IsNullOrEmpty(item.ProductId))
-            {
-                result.Success = false;
-                result.Messages.Add("ProductId is required.");
-            }
-
-            if (_productRepository.Find(item.ProductId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist ProductId.");
-            }
-            
-            if (item.Number == 0)
-            {
-                result.Success = false;
-                result.Messages.Add("Number is required.");
-            }
-
-            return result.Success;
-        }
-
-        public CartUpdateItemResult Update(CartUpdateItemCommand item)
-        {
-            using (Transaction tran = _session.BegingTran())
-            {
-                CartUpdateItemResult result = new CartUpdateItemResult();
-
-                if (!ValidateUpdate(item, result))
-                {
-                    return result;
-                }
-
-                CartModel cartModel = _cartRepository.Get(item.CustomerId);
-                CartItemModel itemModel = cartModel.GetCartItem(item.CartItemId);
-
-                itemModel.Number = item.Number;
-
-                cartModel.UpdateItem(itemModel);
-
-                _cartRepository.Save(cartModel);
-
-                tran.Commit();
-
-                return result;
-            }
-        }
-
-        private bool ValidateUpdate(CartUpdateItemCommand item, CartUpdateItemResult result)
-        {
-            if (string.IsNullOrEmpty(item.CustomerId))
-            {
-                result.Success = false;
-                result.Messages.Add("CustomerId is required.");
-            }
-
-            if (_cartRepository.Get(item.CustomerId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist cart.");
-            } 
-            else if (_cartRepository.Get(item.CustomerId).GetCartItem(item.CartItemId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist cart item.");
-            }
-
-            if (string.IsNullOrEmpty(item.CartItemId))
-            {
-                result.Success = false;
-                result.Messages.Add("CartItemId is required.");
-            }
-
-            if (item.Number == 0)
-            {
-                result.Success = false;
-                result.Messages.Add("Number is required.");
-            }
-
-            return result.Success;
-        }
-
-        public CartRemoveItemResult Remove(CartRemoveItemCommand item)
-        {            
-            using (Transaction tran = _session.BegingTran())
-            {
-                CartRemoveItemResult result = new CartRemoveItemResult();
-
-                if (!ValidateRemove(item, result))
-                {
-                    return result;
-                }
-
-                CartModel cartModel = _cartRepository.Get(item.CustomerId);
-                cartModel.RemoveItem(item.CartItemId);
-
-                _cartRepository.Save(cartModel);
-
-                tran.Commit();
-
-                return result;
-            }
-        }
-
-        private bool ValidateRemove(CartRemoveItemCommand item, CartRemoveItemResult result)
-        {
-            if (string.IsNullOrEmpty(item.CustomerId))
-            {
-                result.Success = false;
-                result.Messages.Add("CustomerId is required.");
-            }
-
-            if (_cartRepository.Get(item.CustomerId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist cart.");
-            }
-            else if (_cartRepository.Get(item.CustomerId).GetCartItem(item.CartItemId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist cart item.");
-            }
-
-            if (string.IsNullOrEmpty(item.CartItemId))
-            {
-                result.Success = false;
-                result.Messages.Add("CartItemId is required.");
-            }
-
-            return result.Success;
-        }
-
-        public Customer FindCustomer(string customerId)
+        public Customer GetCustomer(CustomerQuery query)
         {
             using (_session.Open())
             {
-                CustomerModel customerModel = _customerRepository.Find(customerId);
+                CustomerModel customerModel = _customerRepository.Find(query.CustomerId);
 
                 return new Customer
                 {
@@ -270,12 +347,12 @@ namespace DomainShell.Tests.App.Shop
             }
         }
 
-        public PaymentAmountInfo GetPaymentAmount(string customerId)
+        public PaymentAmountInfo GetPaymentAmountInfo(PaymentAmountInfoQuery query)
         {
             using (_session.Open())
             {
-                CustomerModel customerModel = _customerRepository.Find(customerId);
-                CartModel cartModel = _cartRepository.Get(customerId);
+                CustomerModel customerModel = _customerRepository.Find(query.CustomerId);
+                CartModel cartModel = _cartRepository.Get(query.CustomerId);
                 decimal postage = _cartReader.GetPostage();
 
                 PaymentModel paymentModel = cartModel.Checkout(customerModel.Address, postage);
@@ -289,93 +366,16 @@ namespace DomainShell.Tests.App.Shop
             }
         }
 
-        public PaymentResult Pay(PaymentCommand payment)
-        {
-            using (Transaction tran = _session.BegingTran())
-            {
-                PaymentResult result = new PaymentResult();
-
-                if (!ValidatePay(payment, result))
-                {
-                    return result;
-                }
-
-                CartModel cartModel = _cartRepository.Get(payment.CustomerId);
-                decimal postage = _cartReader.GetPostage();
-
-                PaymentModel paymentModel = cartModel.Checkout(payment.ShippingAddress, postage);
-
-                paymentModel.Pay(
-                        payment.CreditCardNo,
-                        payment.CreditCardHolder,
-                        payment.CreditCardExpirationDate,
-                        _creditCardService);
-
-                _cartRepository.Save(cartModel);
-                _paymentRepository.Save(paymentModel);
-
-                tran.Commit();
-
-                return result;
-            }
-        }
-
-        private bool ValidatePay(PaymentCommand payment, PaymentResult result)
-        {
-            if (string.IsNullOrEmpty(payment.CustomerId))
-            {
-                result.Success = false;
-                result.Messages.Add("CustomerId is required.");
-            }
-
-            if (_cartRepository.Get(payment.CustomerId) == null)
-            {
-                result.Success = false;
-                result.Messages.Add("not exist cart.");
-            }
-            else if (_cartRepository.Get(payment.CustomerId).CartItemList.Count == 0)
-            {
-                result.Success = false;
-                result.Messages.Add("not has cart items.");
-            }
-
-            if (string.IsNullOrEmpty(payment.CreditCardNo))
-            {
-                result.Success = false;
-                result.Messages.Add("CreditCardNo is required.");
-            }
-
-            if (string.IsNullOrEmpty(payment.CreditCardHolder))
-            {
-                result.Success = false;
-                result.Messages.Add("CreditCardHolder is required.");
-            }
-
-            if (string.IsNullOrEmpty(payment.CreditCardExpirationDate))
-            {
-                result.Success = false;
-                result.Messages.Add("CreditCardExpirationDate is required.");
-            }
-
-            if (string.IsNullOrEmpty(payment.ShippingAddress))
-            {
-                result.Success = false;
-                result.Messages.Add("ShippingAddress is required.");
-            }
-
-            return result.Success;
-        }
-
-        public PaymentContent[] GetPaymentContents(string customerId)
+        public Payment[] GetPayments(PaymentsQuery query)
         {
             using (_session.Open())
             {
-                List<PaymentContentReadObject> readObjects = _paymentReader.GetPaymentContentList(customerId);
+                PaymentReadObject[] readObjects = _paymentReader.GetPayments(query.CustomerId);
 
-                return readObjects.Select(x => new PaymentContent
+                return readObjects.Select(x => new Payment
                 {
                     PaymentId = x.PaymentId,
-                    CustomerId = x.CustomerId,                    
+                    CustomerId = x.CustomerId,
                     PaymentDate = x.PaymentDate,
                     ShippingAddress = x.ShippingAddress,
                     PaymentAmount = x.PaymentAmount

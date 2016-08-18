@@ -48,7 +48,7 @@
             }
             
             self.$context("table tbody").empty();            
-            $.post("/api/shop/get", { customerId: 1 }).success(function (cartItems) {
+            $.post("/api/shop/getcartitems", { customerId: 1 }).success(function (cartItems) {
                 cartItems.forEach(function (cartItem) {
                     var view = self.$coco({
                         model: tr,
@@ -62,7 +62,7 @@
             });
 
             self.$context.pin("checkout").on("click", function () {
-                $.post("/api/shop/get", { customerId: 1 }).success(function (cartItems) {
+                $.post("/api/shop/getcartitems", { customerId: 1 }).success(function (cartItems) {
                     if (cartItems.length > 0)
                     {
                         location.href = "/shop/checkout"

@@ -12,7 +12,7 @@ namespace DomainShell.Tests.Infrastructure
     public class Session : IDisposable
     {
         public static void Config(Func<DbConnection> createConnection, Func<DbCommand, DbDataAdapter> createDataAdapter)
-        {
+        {            
             _createConnection = createConnection;            
             _createDataAdapter = createDataAdapter;
         }

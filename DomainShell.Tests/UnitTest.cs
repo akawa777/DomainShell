@@ -23,21 +23,19 @@ namespace DomainShell.Tests
         {
             ShopApp app = new ShopApp();
 
-            CartAddItemResult addResult = app.Add(new CartAddItemCommand { CustomerId = "1", ProductId = "1", Number = 1 });
-            addResult = app.Add(new CartAddItemCommand{ CustomerId = "1", ProductId = "2", Number = 2 });
-            addResult = app.Add(new CartAddItemCommand { CustomerId = "1", ProductId = "3", Number = 3 });
+            AddCartItemResult addCartItemResult = app.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "1", Number = 1 });
+            addCartItemResult = app.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "2", Number = 2 });
+            addCartItemResult = app.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "3", Number = 3 });
 
-            CartRemoveItemCommand removeItem = new CartRemoveItemCommand { CustomerId = "1", CartItemId = addResult.CartItemId };
+            RemoveCartItemCommand removeCartItemCommand = new RemoveCartItemCommand { CustomerId = "1", CartItemId = addCartItemResult.CartItemId };
 
-            app.Remove(removeItem);
+            app.RemoveCartItem(removeCartItemCommand);
 
-            CartItem[] items = app.Get("1");
+            CartItem[] items = app.GetCartItems(new CartItemsQuery { CustomerId = "1" });
 
-            Assert.AreEqual(2, items.Length);
+            Assert.AreEqual(2, items.Length);            
 
-            PaymentAmountInfo amount = app.GetPaymentAmount("1");
-
-            PaymentCommand payment = new PaymentCommand
+            PayCommand payCommand = new PayCommand
             {
                 CustomerId = "1",
                 CreditCardNo = "xxx",
@@ -46,7 +44,7 @@ namespace DomainShell.Tests
                 ShippingAddress = "xxx-xxx"
             };
 
-            app.Pay(payment);
+            app.Pay(payCommand);
         }
     }
 }

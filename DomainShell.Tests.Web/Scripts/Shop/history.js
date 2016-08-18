@@ -16,7 +16,7 @@
             }
 
             self.$context("table tbody").empty();
-            $.post("/api/shop/getpaymentcontents", { customerId: "1" }).success(function (paymentContents) {
+            $.post("/api/shop/getpayments", { customerId: "1" }).success(function (paymentContents) {
                 paymentContents.forEach(function (paymentContent) {
                     var view = self.$coco({
                         model: tr,

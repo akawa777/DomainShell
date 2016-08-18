@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Tests.App.Shop
 {
+    public class CustomerQuery
+    {
+        public string CustomerId { get; set; }
+    }
+
     public class Customer
     {
         public string CustomerId { get; set; }
@@ -23,6 +28,11 @@ namespace DomainShell.Tests.App.Shop
         public decimal Price { get; set; }
     }
 
+    public class CartItemsQuery
+    {
+        public string CustomerId { get; set; }
+    }
+
     public class CartItem
     {
         public string CartId { get; set; }
@@ -33,6 +43,11 @@ namespace DomainShell.Tests.App.Shop
         public int Number { get; set; }
     }
 
+    public class PaymentAmountInfoQuery
+    {
+        public string CustomerId { get; set; }
+    }
+
     public class PaymentAmountInfo
     {
         public decimal Postage { get; set; }
@@ -40,7 +55,12 @@ namespace DomainShell.Tests.App.Shop
         public decimal PaymentAmount { get; set; }
     }
 
-    public class PaymentContent
+    public class PaymentsQuery
+    {
+        public string CustomerId { get; set; }
+    }
+
+    public class Payment
     {
         public string PaymentId { get; set; }
         public string PaymentDate { get; set; }

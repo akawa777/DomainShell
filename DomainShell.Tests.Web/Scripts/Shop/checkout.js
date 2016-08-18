@@ -18,7 +18,7 @@
             
             var totalPrice = 0;
             self.$context.pin("cart", "tbody").empty();
-            $.post("/api/shop/get", { customerId: 1 }).success(function (cartItems) {
+            $.post("/api/shop/getcartitems", { customerId: 1 }).success(function (cartItems) {
                 cartItems.forEach(function (cartItem) {
                     var view = self.$coco({
                         model: tr,
@@ -35,7 +35,7 @@
                 $("body").html(result.responseText);
             });
 
-            $.post("/api/shop/findcustomer", { customerId: "1" }).success(function (customer) {
+            $.post("/api/shop/getcustomer", { customerId: "1" }).success(function (customer) {
                 self.$context.pin("shippingAddress").val(customer.address);
                 self.$context.pin("creditCardNo").val(customer.creditCardNo);
                 self.$context.pin("creditCardHolder").val(customer.creditCardHolder);

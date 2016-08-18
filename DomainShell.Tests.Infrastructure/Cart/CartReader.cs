@@ -26,7 +26,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private Session _session;
 
-        public List<CartItemReadObject> GetItemList(string customerId)
+        public CartItemReadObject[] GetCartItems(string customerId)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -61,7 +61,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     items.Add(item);
                 }
 
-                return items;
+                return items.ToArray();
             }
         }
 

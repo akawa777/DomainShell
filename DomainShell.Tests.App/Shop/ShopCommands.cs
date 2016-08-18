@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Tests.App.Shop
 {
-    public class CartAddItemCommand
+    public class AddCartItemCommand
     {
         public string CustomerId { get; set; }
         public string ProductId { get; set; }
         public int Number { get; set; }
     }
 
-    public class CartAddItemResult
+    public class AddCartItemResult
     {
-        public CartAddItemResult()
+        public AddCartItemResult()
         {
             Success = true;
             Messages = new List<string>();
@@ -26,16 +26,16 @@ namespace DomainShell.Tests.App.Shop
         public string CartItemId { get; set; }
     }
 
-    public class CartUpdateItemCommand
+    public class UpdateCartItemCommand
     {
         public string CustomerId { get; set; }
         public string CartItemId { get; set; }
         public int Number { get; set; }
     }
 
-    public class CartUpdateItemResult
+    public class UpdateCartItemResult
     {
-        public CartUpdateItemResult()
+        public UpdateCartItemResult()
         {
             Success = true;
             Messages = new List<string>();
@@ -45,15 +45,15 @@ namespace DomainShell.Tests.App.Shop
         public bool Success { get; set; }
     }
 
-    public class CartRemoveItemCommand
+    public class RemoveCartItemCommand
     {
         public string CustomerId { get; set; }
         public string CartItemId { get; set; }
     }
 
-    public class CartRemoveItemResult
+    public class RemoveCartItemResult
     {
-        public CartRemoveItemResult()
+        public RemoveCartItemResult()
         {
             Success = true;
             Messages = new List<string>();
@@ -63,7 +63,7 @@ namespace DomainShell.Tests.App.Shop
         public bool Success { get; set; }
     }
 
-    public class PaymentCommand
+    public class PayCommand
     {
         public string CustomerId { get; set; }
         public string CreditCardNo { get; set; }
@@ -72,9 +72,9 @@ namespace DomainShell.Tests.App.Shop
         public string ShippingAddress { get; set; }
     }
 
-    public class PaymentResult
+    public class PayResult
     {
-        public PaymentResult()
+        public PayResult()
         {
             Success = true;
             Messages = new List<string>();

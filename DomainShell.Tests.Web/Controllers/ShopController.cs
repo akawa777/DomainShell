@@ -17,62 +17,62 @@ namespace DomainShell.Tests.Web.Controllers
             Product[] products = _app.GetProducts();
 
             return this.JsonCamel(products);
+        }        
+
+        public ActionResult Add(AddCartItemCommand command)
+        {
+            AddCartItemResult result = _app.AddCartItem(command);
+
+            return this.JsonCamel(result);
         }
 
-        public ActionResult Get(string customerId)
+        public ActionResult Update(UpdateCartItemCommand command)
         {
-            CartItem[] items = _app.Get(customerId);
+            UpdateCartItemResult result = _app.UpdateCartItem(command);
+
+            return this.JsonCamel(result);
+        }
+
+        public ActionResult Remove(RemoveCartItemCommand command)
+        {
+            RemoveCartItemResult result = _app.RemoveCartItem(command);
+
+            return this.JsonCamel(result);
+        }
+
+        public ActionResult Pay(PayCommand command)
+        {
+            PayResult result = _app.Pay(command);
+
+            return this.JsonCamel(result);
+        }
+
+        public ActionResult GetCartItems(CartItemsQuery query)
+        {
+            CartItem[] items = _app.GetCartItems(query);
 
             return this.JsonCamel(items);
         }
 
-        public ActionResult Add(CartAddItemCommand item)
+        public ActionResult GetPaymentAmountInfo(PaymentAmountInfoQuery query)
         {
-            CartAddItemResult result = _app.Add(item);
-
-            return this.JsonCamel(result);
-        }
-
-        public ActionResult Update(CartUpdateItemCommand item)
-        {
-            CartUpdateItemResult result = _app.Update(item);
-
-            return this.JsonCamel(result);
-        }
-
-        public ActionResult Remove(CartRemoveItemCommand item)
-        {
-            CartRemoveItemResult result = _app.Remove(item);
-
-            return this.JsonCamel(result);
-        }
-
-        public ActionResult GetPaymentAmountInfo(string customerId)
-        {
-            PaymentAmountInfo info = _app.GetPaymentAmount(customerId);
+            PaymentAmountInfo info = _app.GetPaymentAmountInfo(query);
 
             return this.JsonCamel(info);
         }
 
-        public ActionResult Pay(PaymentCommand payment)
+        public ActionResult GetCustomer(CustomerQuery query)
         {
-            PaymentResult result = _app.Pay(payment);
-
-            return this.JsonCamel(result);
-        }
-
-        public ActionResult FindCustomer(string customerId)
-        {
-            Customer customer = _app.FindCustomer(customerId);
+            Customer customer = _app.GetCustomer(query);
 
             return this.JsonCamel(customer);
         }
 
-        public ActionResult GetPaymentContents(string customerId)
+        public ActionResult GetPayments(PaymentsQuery query)
         {
-            PaymentContent[] paymentContens = _app.GetPaymentContents(customerId);
+            Payment[] payments = _app.GetPayments(query);
 
-            return this.JsonCamel(paymentContens);
+            return this.JsonCamel(payments);
         }
     }
 }

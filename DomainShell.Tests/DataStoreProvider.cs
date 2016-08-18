@@ -12,7 +12,7 @@ namespace DomainShell.Tests
 {
     internal class DataStoreProvider
     {
-        private static string _db = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\", "test.db");
+        private static string _db = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\", "test.db");
         private static string _connectionString = "data source=" + _db;
 
         private static bool _inited = false;

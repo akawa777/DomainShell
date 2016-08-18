@@ -8,7 +8,7 @@ using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Payment
 {
-    public class PaymentContentReadObject
+    public class PaymentReadObject
     {
         public string PaymentId { get; set; }
         public string PaymentDate { get; set; }
@@ -26,7 +26,7 @@ namespace DomainShell.Tests.Infrastructure.Payment
 
         private Session _session;
 
-        public List<PaymentContentReadObject> GetPaymentContentList(string customerId)
+        public PaymentReadObject[] GetPayments(string customerId)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -49,13 +49,13 @@ namespace DomainShell.Tests.Infrastructure.Payment
             param.Value = customerId;
             command.Parameters.Add(param);
 
-            List<PaymentContentReadObject> list = new List<PaymentContentReadObject>();
+            List<PaymentReadObject> list = new List<PaymentReadObject>();
 
             using (DbDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    PaymentContentReadObject item = new PaymentContentReadObject();
+                    PaymentReadObject item = new PaymentReadObject();
 
                     item.PaymentId = reader["PaymentId"].ToString();
                     item.PaymentDate = reader["PaymentDate"].ToString();
@@ -66,7 +66,7 @@ namespace DomainShell.Tests.Infrastructure.Payment
                     list.Add(item);
                 }
 
-                return list;
+                return list.ToArray();
             }
         }
     }
