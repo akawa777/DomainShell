@@ -119,6 +119,11 @@ namespace DomainShell.Tests.Domain.Cart
                 throw new Exception("not exists CartItems");
             }
 
+            if (string.IsNullOrEmpty(shippingAddress))
+            {
+                throw new Exception("shippingAddress required.");
+            }
+
             PaymentModel payment = new PaymentModel();
 
             payment.CustomerId = CustomerId;            
