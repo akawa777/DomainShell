@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Configuration;
 using System.Data.Common;
+using DomainShell.Domain;
 
 namespace DomainShell.Tests.Infrastructure
 {
@@ -58,19 +59,19 @@ namespace DomainShell.Tests.Infrastructure
 
     public class Transaction : IDisposable
     {
-        public Transaction(DbTransaction tran)
+        internal Transaction(DbTransaction tran)
         {
             _tran = tran;
         }
 
-        public Transaction(DbTransaction tran, DbConnection connection)
+        internal Transaction(DbTransaction tran, DbConnection connection)
             : this(tran)
         {
             _connection = connection;
         }
 
         private DbConnection _connection;
-        private DbTransaction _tran;
+        private DbTransaction _tran;        
 
         public void Commit()
         {
