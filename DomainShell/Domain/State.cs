@@ -26,10 +26,7 @@ namespace DomainShell.Domain
 
         public void New()
         {
-            if (_stateFlg == StateFlg.UnChanged)
-            {
-                _stateFlg = StateFlg.New;
-            }
+            _stateFlg = StateFlg.New;
         }
 
         public void Modified()

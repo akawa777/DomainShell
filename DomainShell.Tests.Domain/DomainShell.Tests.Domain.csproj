@@ -52,11 +52,11 @@
   <ItemGroup>
     <Compile Include="Customer\CustomerModel.cs" />
     <Compile Include="Cart\ITaxService.cs" />
-    <Compile Include="Payment\ICreditCardService.cs">
+    <Compile Include="Purchase\ICreditCardService.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Product\ProductModel.cs" />
-    <Compile Include="Payment\PaymentModel.cs" />
+    <Compile Include="Purchase\PurchaseModel.cs" />
     <Compile Include="Cart\CartModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

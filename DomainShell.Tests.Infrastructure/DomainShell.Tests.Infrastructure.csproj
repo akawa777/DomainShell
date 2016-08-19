@@ -42,13 +42,13 @@
   <ItemGroup>
     <Compile Include="Cart\CartReader.cs" />
     <Compile Include="Cart\TaxService.cs" />
-    <Compile Include="Payment\PaymentReader.cs" />
+    <Compile Include="Purchase\PurchaseReader.cs" />
     <Compile Include="Session.cs" />
-    <Compile Include="Payment\CreditCardService.cs" />
+    <Compile Include="Purchase\CreditCardService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Cart\CartRepository.cs" />
     <Compile Include="Customer\CustomerRepository.cs" />
-    <Compile Include="Payment\PaymentRepository.cs" />
+    <Compile Include="Purchase\PurchaseRepository.cs" />
     <Compile Include="Product\ProductRepository.cs" />
   </ItemGroup>
   <ItemGroup>

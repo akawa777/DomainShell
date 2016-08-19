@@ -6,30 +6,30 @@ using System.Threading.Tasks;
 using System.Data.Common;
 using DomainShell.Domain;
 using DomainShell.Infrastructure;
-using DomainShell.Tests.Domain.Payment;
+using DomainShell.Tests.Domain.Purchase;
 
-namespace DomainShell.Tests.Infrastructure.Payment
-{    
-    public class PaymentRepository : IRepositroy<PaymentModel>
+namespace DomainShell.Tests.Infrastructure.Purchase
+{
+    public class PurchaseRepository : IRepositroy<PurchaseModel>
     {
-        public PaymentRepository(Session session)
+        public PurchaseRepository(Session session)
         {
             _session = session;
         }
 
-        private Session _session;          
+        private Session _session;
 
-        public void Save(PaymentModel payment)
+        public void Save(PurchaseModel purchase)
         {
-            if (payment.State.GetState() == State.StateFlg.New)
+            if (purchase.State.GetState() == State.StateFlg.New)
             {
-                Create(payment);
+                Create(purchase);
             }
 
-            payment.State.UnChanged();
+            purchase.State.UnChanged();
         }
 
-        private void Create(PaymentModel payment)
+        private void Create(PurchaseModel purchase)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -40,47 +40,47 @@ namespace DomainShell.Tests.Infrastructure.Payment
 
             DbParameter param = command.CreateParameter();
             param.ParameterName = "@PaymentDate";
-            param.Value = payment.PaymentDate;
+            param.Value = purchase.PaymentDate;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@CustomerId";
-            param.Value = payment.CustomerId;
+            param.Value = purchase.CustomerId;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@CreditCardNo";
-            param.Value = payment.CreditCard.CreditCardNo;
+            param.Value = purchase.CreditCard.CreditCardNo;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@CreditCardHolder";
-            param.Value = payment.CreditCard.CreditCardHolder;
+            param.Value = purchase.CreditCard.CreditCardHolder;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@CreditCardExpirationDate";
-            param.Value = payment.CreditCard.CreditCardExpirationDate;
+            param.Value = purchase.CreditCard.CreditCardExpirationDate;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@ShippingAddress";
-            param.Value = payment.ShippingAddress;
+            param.Value = purchase.ShippingAddress;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@Postage";
-            param.Value = payment.Postage;
+            param.Value = purchase.Postage;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@Tax";
-            param.Value = payment.Tax;
+            param.Value = purchase.Tax;
             command.Parameters.Add(param);
 
             param = command.CreateParameter();
             param.ParameterName = "@PaymentAmount";
-            param.Value = payment.PaymentAmount;
+            param.Value = purchase.PaymentAmount;
             command.Parameters.Add(param);
 
             command.ExecuteNonQuery();
@@ -91,43 +91,40 @@ namespace DomainShell.Tests.Infrastructure.Payment
 
             var id = command.ExecuteScalar();
 
-            payment.PaymentId = id.ToString();
-
-            int paymentItemId = 1;
-            foreach (PaymentItemModel item in payment.PaymentItemList)
+            purchase.PurchaseId = id.ToString();
+            
+            foreach (PurchaseDetailModel detail in purchase.PurchaseDetailList)
             {
                 command.CommandText = @"
                     insert into PaymentItem (PaymentId, PaymentItemId, ProductId, PriceAtTime, Number) values (@PaymentId, @PaymentItemId, @ProductId, @PriceAtTime, @Number) 
                 ";
 
                 param = command.CreateParameter();
-                param.ParameterName = "@PaymentId";
-                param.Value = payment.PaymentId;
+                param.ParameterName = "@PurchaseId";
+                param.Value = purchase.PurchaseId;
                 command.Parameters.Add(param);
 
                 param = command.CreateParameter();
-                param.ParameterName = "@PaymentItemId";
-                param.Value = paymentItemId;
+                param.ParameterName = "@PurchaseDetailId";
+                param.Value = detail.PurchaseDetailId;
                 command.Parameters.Add(param);
 
                 param = command.CreateParameter();
                 param.ParameterName = "@ProductId";
-                param.Value = item.ProductId;
+                param.Value = detail.ProductId;
                 command.Parameters.Add(param);
 
                 param = command.CreateParameter();
                 param.ParameterName = "@PriceAtTime";
-                param.Value = item.PriceAtTime;
+                param.Value = detail.PriceAtTime;
                 command.Parameters.Add(param);
 
                 param = command.CreateParameter();
                 param.ParameterName = "@Number";
-                param.Value = item.Number;
+                param.Value = detail.Number;
                 command.Parameters.Add(param);
 
                 command.ExecuteNonQuery();
-
-                paymentItemId++;
             }
         }
     }

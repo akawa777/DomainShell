@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
-using DomainShell.Tests.Domain.Payment;
+using DomainShell.Tests.Domain.Purchase;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.Infrastructure.Cart;
 using DomainShell.Tests.Infrastructure.Customer;
 using DomainShell.Tests.Infrastructure.Product;
-using DomainShell.Tests.Infrastructure.Payment;
+using DomainShell.Tests.Infrastructure.Purchase;
 
 namespace DomainShell.Tests.App.Shop
 {
@@ -24,8 +24,8 @@ namespace DomainShell.Tests.App.Shop
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
             _productRepository = new ProductRepository(_session);
-            _paymentReader = new PaymentReader(_session);
-            _paymentRepository = new PaymentRepository(_session);
+            _purchasetReader = new PurchasetReader(_session);            
+            _purchaseRepository = new PurchaseRepository(_session);
             _taxService = new TaxService(_session);
             _creditCardService = new CreditCardService();            
         }
@@ -35,8 +35,8 @@ namespace DomainShell.Tests.App.Shop
         private CartRepository _cartRepository;
         private CustomerRepository _customerRepository;
         private ProductRepository _productRepository;
-        private PaymentReader _paymentReader;
-        private PaymentRepository _paymentRepository;
+        private PurchasetReader _purchasetReader;
+        private PurchaseRepository _purchaseRepository;
         private ITaxService _taxService;
         private ICreditCardService _creditCardService;                
 
@@ -233,21 +233,21 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 decimal postage = _cartReader.GetPostage();
-                CartModel cartModel = _cartRepository.Get(command.CustomerId);     
+                CartModel cartModel = _cartRepository.Get(command.CustomerId);                     
 
-                PaymentModel paymentModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
+                PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
 
-                paymentModel.Pay(
-                    new CreditCardValue
-                    {
-                        CreditCardNo = command.CreditCardNo,
-                        CreditCardHolder = command.CreditCardHolder,
-                        CreditCardExpirationDate = command.CreditCardExpirationDate,
-                    },
-                    _creditCardService);
+                CreditCardValue creditCardValue = new CreditCardValue
+                {
+                    CreditCardNo = command.CreditCardNo,
+                    CreditCardHolder = command.CreditCardHolder,
+                    CreditCardExpirationDate = command.CreditCardExpirationDate,
+                };
+
+                purchaseModel.Pay(creditCardValue, _creditCardService);
 
                 _cartRepository.Save(cartModel);
-                _paymentRepository.Save(paymentModel);
+                _purchaseRepository.Save(purchaseModel);
 
                 tran.Commit();
 
@@ -366,15 +366,15 @@ namespace DomainShell.Tests.App.Shop
             }
         }
 
-        public Payment[] GetPayments(PaymentsQuery query)
+        public Purchase[] GetPurchases(PurchasesQuery query)
         {
             using (_session.Open())
             {
-                PaymentReadObject[] readObjects = _paymentReader.GetPayments(query.CustomerId);
+                PurchaseReadObject[] readObjects = _purchasetReader.GetPurchases(query.CustomerId);
 
-                return readObjects.Select(x => new Payment
+                return readObjects.Select(x => new Purchase
                 {
-                    PaymentId = x.PaymentId,
+                    PurchaseId = x.PurchaseId,
                     CustomerId = x.CustomerId,
                     PaymentDate = x.PaymentDate,
                     ShippingAddress = x.ShippingAddress,

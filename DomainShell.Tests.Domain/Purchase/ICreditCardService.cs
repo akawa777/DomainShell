@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
 
-namespace DomainShell.Tests.Domain.Payment
+namespace DomainShell.Tests.Domain.Purchase
 {
     public interface ICreditCardService
     {

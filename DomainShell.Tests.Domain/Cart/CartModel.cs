@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
-using DomainShell.Tests.Domain.Payment;
+using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Domain.Cart
 {
@@ -17,17 +17,18 @@ namespace DomainShell.Tests.Domain.Cart
             State = new State();
         }
 
+        public State State { get; private set; }
+
+
         public string CartId { get; set; }
         public string CustomerId { get; set; }
 
-        public List<CartItemModel> CartItemList { get; set; }
+        public List<CartItemModel> CartItemList { get; set; }        
 
         public decimal TotalPrice()
         {
             return CartItemList.Sum(x => x.Product.Price * x.Number);
         }
-
-        public State State { get; private set; }
 
         public void Create()
         {
@@ -121,7 +122,7 @@ namespace DomainShell.Tests.Domain.Cart
             return taxService.Calculate(postage + TotalPrice());
         }
 
-        public PaymentModel Checkout(string shippingAddress, decimal postage, ITaxService taxService)
+        public PurchaseModel Checkout(string shippingAddress, decimal postage, ITaxService taxService)
         {
             if (CartItemList == null || CartItemList.Count == 0)
             {
@@ -132,29 +133,31 @@ namespace DomainShell.Tests.Domain.Cart
             {
                 throw new Exception("shippingAddress required.");
             }
+            
+            decimal paymentAmount = GetPaymentAmount(postage, taxService);
+            decimal Tax = GetTax(postage, taxService);
 
-            PaymentModel payment = new PaymentModel();
-
-            payment.CustomerId = CustomerId;            
-            payment.ShippingAddress = shippingAddress;
-            payment.Postage = postage;
-            payment.Tax = GetTax(postage, taxService);
-            payment.PaymentAmount = GetPaymentAmount(postage, taxService);
-
-            payment.PaymentItemList = new List<PaymentItemModel>();
+            PurchaseModel purchase = new PurchaseModel();
+            purchase.CustomerId = CustomerId;
+            purchase.ShippingAddress = shippingAddress;
+            purchase.Postage = postage;
+            purchase.Tax = GetTax(postage, taxService);
+            purchase.PaymentAmount = paymentAmount;
+            purchase.PaymentDate = DateTime.Now.ToString("yyyyMMddHHmmss");            
+            
             foreach (CartItemModel item in CartItemList)
             {
-                payment.PaymentItemList.Add(new PaymentItemModel
-                {
+                PurchaseDetailModel purchaseDetail = new PurchaseDetailModel
+                {                    
                     ProductId = item.Product.ProductId,
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
-                });
+                };
+
+                purchase.AddDetail(purchaseDetail);
             }
 
-            State.Deleted();
-
-            return payment;            
+            return purchase;            
         }
     }
 

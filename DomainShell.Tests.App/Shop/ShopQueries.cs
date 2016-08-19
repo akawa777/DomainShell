@@ -56,17 +56,17 @@ namespace DomainShell.Tests.App.Shop
         public decimal PaymentAmount { get; set; }
     }
 
-    public class PaymentsQuery
+    public class PurchasesQuery
     {
         public string CustomerId { get; set; }
     }
 
-    public class Payment
+    public class Purchase
     {
-        public string PaymentId { get; set; }
+        public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }
         public string CustomerId { get; set; }
         public string ShippingAddress { get; set; }
-        public decimal PaymentAmount { get; set; }
+        public decimal PaymentAmount { get; set; }        
     }
 }

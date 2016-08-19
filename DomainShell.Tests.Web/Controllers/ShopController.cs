@@ -68,11 +68,11 @@ namespace DomainShell.Tests.Web.Controllers
             return this.JsonCamel(customer);
         }
 
-        public ActionResult GetPayments(PaymentsQuery query)
+        public ActionResult GetPurchaseHistories(PurchasesQuery query)
         {
-            Payment[] payments = _app.GetPayments(query);
+            Purchase[] purchaseHistories = _app.GetPurchases(query);
 
-            return this.JsonCamel(payments);
+            return this.JsonCamel(purchaseHistories);
         }
     }
 }

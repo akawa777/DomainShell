@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
-using DomainShell.Tests.Domain.Payment;
+using DomainShell.Tests.Domain.Purchase;
 
-namespace DomainShell.Tests.Infrastructure.Payment
+namespace DomainShell.Tests.Infrastructure.Purchase
 {
     public class CreditCardService : ICreditCardService
     {

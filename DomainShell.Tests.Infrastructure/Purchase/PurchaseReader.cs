@@ -6,27 +6,27 @@ using System.Threading.Tasks;
 using System.Data.Common;
 using DomainShell.Infrastructure;
 
-namespace DomainShell.Tests.Infrastructure.Payment
+namespace DomainShell.Tests.Infrastructure.Purchase
 {
-    public class PaymentReadObject
+    public class PurchaseReadObject
     {
-        public string PaymentId { get; set; }
+        public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }
         public string CustomerId { get; set; }        
         public string ShippingAddress { get; set; }
         public decimal PaymentAmount { get; set;}        
     }
 
-    public class PaymentReader
+    public class PurchasetReader
     {
-        public PaymentReader(Session session)
+        public PurchasetReader(Session session)
         {
             _session = session;
         }
 
         private Session _session;
 
-        public PaymentReadObject[] GetPayments(string customerId)
+        public PurchaseReadObject[] GetPurchases(string customerId)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -46,15 +46,15 @@ namespace DomainShell.Tests.Infrastructure.Payment
             param.Value = customerId;
             command.Parameters.Add(param);
 
-            List<PaymentReadObject> list = new List<PaymentReadObject>();
+            List<PurchaseReadObject> list = new List<PurchaseReadObject>();
 
             using (DbDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    PaymentReadObject item = new PaymentReadObject();
+                    PurchaseReadObject item = new PurchaseReadObject();
 
-                    item.PaymentId = reader["PaymentId"].ToString();
+                    item.PurchaseId = reader["PaymentId"].ToString();
                     item.PaymentDate = reader["PaymentDate"].ToString();
                     item.CustomerId = reader["CustomerId"].ToString();
                     item.ShippingAddress = reader["ShippingAddress"].ToString();
