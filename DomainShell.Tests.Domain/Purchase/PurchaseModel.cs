@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace DomainShell.Tests.Domain.Purchase
     {
         public PurchaseModel()
         {
-            State = new State();
+            PurchaseDetailList = new ReadOnlyCollection<PurchaseDetailModel>(_purchaseDetailList);
         }
 
         public string PurchaseId { get; set; }
@@ -24,7 +25,8 @@ namespace DomainShell.Tests.Domain.Purchase
         public decimal Tax { get; set; }
         public decimal PaymentAmount { get; set; }
 
-        public List<PurchaseDetailModel> PurchaseDetailList { get; set; }
+        public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetailList { get; set; }
+        private List<PurchaseDetailModel> _purchaseDetailList = new List<PurchaseDetailModel>();
 
         public void AddDetail(PurchaseDetailModel detail)
         {
@@ -33,9 +35,8 @@ namespace DomainShell.Tests.Domain.Purchase
                 throw new Exception("already exist in PurchaseDetailList.");
             }
 
-            if (PurchaseDetailList == null || PurchaseDetailList.Count == 0)
-            {
-                PurchaseDetailList = new List<PurchaseDetailModel>();
+            if (PurchaseDetailList.Count == 0)
+            {                
                 detail.PurchaseDetailId = "1";
             }
             else
@@ -44,6 +45,8 @@ namespace DomainShell.Tests.Domain.Purchase
             }
 
             detail.PurchaseId = PurchaseId;
+
+            _purchaseDetailList.Add(detail);
         }
 
         public void Pay(CreditCardValue creditCard, ICreditCardService creditCardService)
@@ -76,10 +79,15 @@ namespace DomainShell.Tests.Domain.Purchase
             CreditCard = creditCard;
             creditCardService.Pay(CreditCard, PaymentAmount);
 
-            State.New();
+            State = State.Modified;
         }
 
         public State State { get; private set; }
+
+        public void Accepted()
+        {
+            State = State.UnChanged;
+        }
     }
 
     public class PurchaseDetailModel

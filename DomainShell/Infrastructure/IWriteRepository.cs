@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 
 namespace DomainShell.Infrastructure
-{   
-    public interface IRepositroy<TAggregateRoot> where TAggregateRoot : IAggregateRoot
+{
+    public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
     {
         void Save(TAggregateRoot aggregateRoot);
     }

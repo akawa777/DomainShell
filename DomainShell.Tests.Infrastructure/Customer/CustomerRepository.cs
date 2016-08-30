@@ -9,7 +9,7 @@ using DomainShell.Tests.Domain.Customer;
 
 namespace DomainShell.Tests.Infrastructure.Customer
 {
-    public class CustomerRepository : IRepositroy<CustomerModel>
+    public class CustomerRepository
     {
         public CustomerRepository(Session session)
         {
@@ -47,11 +47,6 @@ namespace DomainShell.Tests.Infrastructure.Customer
 
                 return customer;
             }
-        }
-
-        public void Save(CustomerModel customer)
-        {
-            customer.State.UnChanged();
         }
     }
 }

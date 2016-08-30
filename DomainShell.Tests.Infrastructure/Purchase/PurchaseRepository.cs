@@ -10,23 +10,21 @@ using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Infrastructure.Purchase
 {
-    public class PurchaseRepository : IRepositroy<PurchaseModel>
+    public class PurchaseRepository : IWriteRepository<PurchaseModel>
     {
         public PurchaseRepository(Session session)
         {
             _session = session;
         }
 
-        private Session _session;
+        private Session _session;        
 
         public void Save(PurchaseModel purchase)
         {
-            if (purchase.State.GetState() == State.StateFlg.New)
+            if (purchase.State == State.Modified)
             {
                 Create(purchase);
             }
-
-            purchase.State.UnChanged();
         }
 
         private void Create(PurchaseModel purchase)

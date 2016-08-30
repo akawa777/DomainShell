@@ -9,14 +9,14 @@ using DomainShell.Tests.Domain.Product;
 
 namespace DomainShell.Tests.Infrastructure.Product
 {
-    public class ProductRepository : IRepositroy<ProductModel>
+    public class ProductRepository
     {
         public ProductRepository(Session session)
         {
             _session = session;
         }
 
-        private Session _session;
+        private Session _session;        
 
         public ProductModel Find(string productId)
         {
@@ -62,18 +62,13 @@ namespace DomainShell.Tests.Infrastructure.Product
                     ProductModel product = new ProductModel();
                     product.ProductId = reader["ProductId"].ToString();
                     product.ProductName = reader["ProductName"].ToString();
-                    product.Price = int.Parse(reader["Price"].ToString());
+                    product.Price = int.Parse(reader["Price"].ToString());                    
 
                     list.Add(product);
                 }
 
                 return list;
             }
-        }
-
-        public void Save(ProductModel product)
-        {
-            product.State.UnChanged();
         }
     }
 }

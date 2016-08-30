@@ -12,14 +12,15 @@ using DomainShell.Tests.Domain.Product;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
-    public class CartRepository : IRepositroy<CartModel>
+    public class CartRepository : IWriteRepository<CartModel>
     {
         public CartRepository(Session session)
         {
             _session = session;
         }
 
-        private Session _session;  
+        private Session _session;
+        private Dictionary<CartModel, bool> _storedMap = new Dictionary<CartModel, bool>();
 
         public CartModel Find(string cartId)
         {   
@@ -38,7 +39,9 @@ namespace DomainShell.Tests.Infrastructure.Cart
             param.ParameterName = "@CustomerId";
             param.Value = customerId;
 
-            return Get("Cart.CustomerId = @CustomerId", param);
+            CartModel cart = Get("Cart.CustomerId = @CustomerId", param);            
+
+            return cart;
         }
 
         private CartModel Get(string where, params DbParameter[] parameters)
@@ -66,8 +69,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                         cartModel = new CartModel();
 
                         cartModel.CartId = reader["CartId"].ToString();
-                        cartModel.CustomerId = reader["CustomerId"].ToString();
-                        cartModel.CartItemList = new List<CartItemModel>();
+                        cartModel.CustomerId = reader["CustomerId"].ToString();                        
                     }
 
                     CartItemModel item = new CartItemModel();
@@ -89,8 +91,12 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     };
                     item.Number = int.Parse(reader["Number"].ToString());
 
-                    cartModel.CartItemList.Add(item);
+                    cartModel.AddItem(item);
                 }
+
+                cartModel.Accepted();
+
+                _storedMap[cartModel] = true;
 
                 return cartModel;
             }
@@ -98,20 +104,22 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public void Save(CartModel cart)
         {
-            if (cart.State.GetState() == State.StateFlg.New)
+            if (cart.State == State.Modified && !_storedMap.ContainsKey(cart))
             {
                 Create(cart);
+                _storedMap[cart] = true;
             }
-            else if (cart.State.GetState() == State.StateFlg.Modified)
+            else if (cart.State == State.Modified && _storedMap.ContainsKey(cart))
             {
                 Update(cart);
             }
-            else if (cart.State.GetState() == State.StateFlg.Deleted)
+            else if (cart.State == State.Deleted && _storedMap.ContainsKey(cart))
             {
                 Delete(cart);
+                _storedMap.Remove(cart);
             }
 
-            cart.State.UnChanged();
+            cart.Accepted();
         }
 
         private void Create(CartModel cart)
