@@ -39,9 +39,9 @@ namespace DomainShell.Tests.Domain.Cart
             if (string.IsNullOrEmpty(CustomerId))
             {
                 throw new Exception("CustomerId required.");
-            }            
+            }
 
-            State = State.Modified;
+            State = State.Accepted;
         }
 
         public void AddItem(CartItemModel item)
@@ -64,7 +64,7 @@ namespace DomainShell.Tests.Domain.Cart
 
             _cartItemList.Add(item);
 
-            State = State.Modified;
+            State = State.Accepted;
         }
 
         public CartItemModel GetCartItem(string cartItemId)
@@ -81,7 +81,7 @@ namespace DomainShell.Tests.Domain.Cart
                 throw new Exception("not exist in CartItemList.");
             }
 
-            State = State.Modified;
+            State = State.Accepted;
         }
 
         public void RemoveItem(string cartItemId)
@@ -95,7 +95,7 @@ namespace DomainShell.Tests.Domain.Cart
 
             _cartItemList.Remove(item);
 
-            State = State.Deleted;
+            State = State.Accepted;
         }
 
         public decimal GetTax(decimal postage, ITaxService taxService)
@@ -143,15 +143,12 @@ namespace DomainShell.Tests.Domain.Cart
                 purchase.AddDetail(purchaseDetail);
             }
 
+            State = State.Deleted;
+
             return purchase;            
         }
 
         public State State { get; private set; }
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
-        }
     }
 
     public class CartItemModel

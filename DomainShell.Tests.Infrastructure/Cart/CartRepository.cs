@@ -92,9 +92,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     item.Number = int.Parse(reader["Number"].ToString());
 
                     cartModel.AddItem(item);
-                }
-
-                cartModel.Accepted();
+                }                
 
                 _storedMap[cartModel] = true;
 
@@ -104,12 +102,12 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public void Save(CartModel cart)
         {
-            if (cart.State == State.Modified && !_storedMap.ContainsKey(cart))
+            if (cart.State == State.Accepted && !_storedMap.ContainsKey(cart))
             {
                 Create(cart);
                 _storedMap[cart] = true;
             }
-            else if (cart.State == State.Modified && _storedMap.ContainsKey(cart))
+            else if (cart.State == State.Accepted && _storedMap.ContainsKey(cart))
             {
                 Update(cart);
             }
@@ -118,8 +116,6 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 Delete(cart);
                 _storedMap.Remove(cart);
             }
-
-            cart.Accepted();
         }
 
         private void Create(CartModel cart)

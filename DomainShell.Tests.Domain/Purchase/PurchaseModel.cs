@@ -79,15 +79,10 @@ namespace DomainShell.Tests.Domain.Purchase
             CreditCard = creditCard;
             creditCardService.Pay(CreditCard, PaymentAmount);
 
-            State = State.Modified;
+            State = State.Accepted;
         }
 
         public State State { get; private set; }
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
-        }
     }
 
     public class PurchaseDetailModel

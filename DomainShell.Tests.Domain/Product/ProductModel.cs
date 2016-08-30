@@ -14,10 +14,5 @@ namespace DomainShell.Tests.Domain.Product
         public decimal Price { get; set; }
 
         public State State { get; private set; }
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
-        }
     }   
 }

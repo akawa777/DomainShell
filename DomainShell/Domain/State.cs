@@ -9,8 +9,8 @@ namespace DomainShell.Domain
 {
     public enum State
     {
-        UnChanged = 0,        
-        Modified = 1,
-        Deleted = 2
+        UnChanged = 0,
+        Accepted = 1,                
+        Deleted = 1
     }
 }

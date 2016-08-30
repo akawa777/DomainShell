@@ -21,7 +21,7 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
         public void Save(PurchaseModel purchase)
         {
-            if (purchase.State == State.Modified)
+            if (purchase.State == State.Accepted)
             {
                 Create(purchase);
             }

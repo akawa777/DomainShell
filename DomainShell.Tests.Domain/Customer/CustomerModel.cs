@@ -17,10 +17,5 @@ namespace DomainShell.Tests.Domain.Customer
         public string CreditCardExpirationDate { get; set; }
 
         public State State { get; private set; }
-
-        public void Accepted()
-        {
-            State = State.UnChanged;
-        }
     }
 }
