@@ -11,25 +11,37 @@ using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Domain.Cart
 {
+    public class CartRecord
+    {
+        public string CartId { get; set; }
+        public string CustomerId { get; set; }
+        public List<CartItemRecord> CartItemList { get; set; }
+    }
+
     public class CartModel : IAggregateRoot
     {
-        public CartModel()
-            : this(new List<CartItemModel>())
+        public CartModel()          
         {
-
+            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);
         }
 
-        public CartModel(List<CartItemModel> cartItemList)
+        public CartModel(CartRecord record) : this()
         {
-            _cartItemList = cartItemList;
-            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);
-        }             
+            CartId = record.CartId;
+            CustomerId = record.CustomerId;
+
+            foreach (CartItemRecord itemRecord in record.CartItemList)
+            {
+                CartItemModel item = new CartItemModel(itemRecord);
+                _cartItemList.Add(item);
+            }
+        }
 
         public string CartId { get; set; }
         public string CustomerId { get; set; }
 
         public ReadOnlyCollection<CartItemModel> CartItems { get; set; }
-        protected List<CartItemModel> _cartItemList = new List<CartItemModel>();
+        protected List<CartItemModel> _cartItemList = new List<CartItemModel>();        
 
         public decimal TotalPrice()
         {
@@ -38,18 +50,20 @@ namespace DomainShell.Tests.Domain.Cart
 
         public void AddItem(CartItemModel item)
         {
+            string cartItemId;
             if (CartItems.Count == 0)
             {                
-                item.CartItemId = "1";
+                cartItemId = "1";
             }
             else
             {
-                item.CartItemId = (CartItems.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
+                cartItemId = (CartItems.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
             }
-
+            
             item.CartId = CartId;
-            item.ProductId = item.Product.ProductId;
-
+            item.CartItemId = cartItemId;
+            item.ProductId = item.Product.ProductId;                        
+            
             _cartItemList.Add(item);
         }
 
@@ -92,26 +106,51 @@ namespace DomainShell.Tests.Domain.Cart
 
             foreach (CartItemModel item in CartItems)
             {
-                PurchaseDetailValue purchaseDetailValue = new PurchaseDetailValue
+                PurchaseDetailModel purchaseDetailModel = new PurchaseDetailModel
                 {                    
                     ProductId = item.Product.ProductId,
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
                 };
 
-                purchase.AddDetail(purchaseDetailValue);
+                purchase.AddDetail(purchaseDetailModel);
             }            
 
             return purchase;            
-        }
+        }        
     }
 
-    public class CartItemModel
+    public class CartItemRecord
     {
         public string CartId { get; set; }
         public string CartItemId { get; set; }
         public string ProductId { get; set; }
-        public ProductModel Product { get; set; }
+        public ProductRecord Product { get; set; }
         public int Number { get; set; }        
+    }
+
+    public class CartItemModel
+    {
+        public CartItemModel()
+        {
+            
+        }
+
+        public CartItemModel(CartItemRecord record)
+        {
+            CartId = record.CartId;
+            CartItemId = record.CartItemId;
+            ProductId = record.ProductId;
+
+            ProductModel product = new ProductModel(record.Product);
+
+            Number = record.Number;
+        }
+
+        public string CartId { get; set; }
+        public string CartItemId { get; set; }
+        public string ProductId { get; set; }
+        public ProductModel Product { get; set; }
+        public int Number { get; set; }
     }
 }

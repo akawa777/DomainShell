@@ -11,15 +11,8 @@ namespace DomainShell.Tests.Domain.Purchase
 {
     public class PurchaseModel : IAggregateRoot
     {
-        public PurchaseModel()
-            : this(new List<PurchaseDetailModel>())
-        {            
-            
-        }
-
-        public PurchaseModel(List<PurchaseDetailModel> purchaseDetailList)          
-        {
-            _purchaseDetailList = purchaseDetailList;
+        public PurchaseModel()          
+        {   
             PurchaseDetails = new ReadOnlyCollection<PurchaseDetailModel>(_purchaseDetailList);
         } 
 
@@ -35,7 +28,7 @@ namespace DomainShell.Tests.Domain.Purchase
         public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetails { get; set; }
         private List<PurchaseDetailModel> _purchaseDetailList = new List<PurchaseDetailModel>();
 
-        public void AddDetail(PurchaseDetailValue value)
+        public void AddDetail(PurchaseDetailModel detail)
         {
             string purchaseDetailId;
             if (PurchaseDetails.Count == 0)
@@ -47,11 +40,8 @@ namespace DomainShell.Tests.Domain.Purchase
                 purchaseDetailId = (PurchaseDetails.Max(x => int.Parse(x.PurchaseDetailId)) + 1).ToString();
             }
 
-            PurchaseDetailModel detail = new PurchaseDetailModel(PurchaseId, purchaseDetailId);
-
-            detail.ProductId = value.ProductId;
-            detail.Number = value.Number;
-            detail.PriceAtTime = value.PriceAtTime;
+            detail.PurchaseId = PurchaseId;
+            detail.PurchaseDetailId = purchaseDetailId;
 
             _purchaseDetailList.Add(detail);
         }
@@ -63,41 +53,10 @@ namespace DomainShell.Tests.Domain.Purchase
         }
     }
 
-    public class PurchaseDetailEntiy
+    public class PurchaseDetailModel
     {
         public string PurchaseId { get; set; }
         public string PurchaseDetailId { get; set; }
-        public string ProductId { get; set; }
-        public decimal PriceAtTime { get; set; }
-        public int Number { get; set; }
-    }
-
-    public class PurchaseDetailModel : IDomainModel<PurchaseDetailEntiy>
-    {
-        public PurchaseDetailModel(string purchaseId, string purchaseDetailId)
-        {
-            PurchaseId = purchaseId;
-            PurchaseDetailId = purchaseDetailId;
-        }
-
-        public string PurchaseId { get; private set; }
-        public string PurchaseDetailId { get; private set; }
-        public string ProductId { get; set; }
-        public decimal PriceAtTime { get; set; }
-        public int Number { get; set; }
-
-        void IDomainModel<PurchaseDetailEntiy>.Map(PurchaseDetailEntiy entity)
-        {
-            PurchaseId = entity.PurchaseId;
-            PurchaseDetailId = entity.PurchaseDetailId;
-            ProductId = entity.ProductId;
-            PriceAtTime = entity.PriceAtTime;
-            Number = entity.Number;
-        }
-    }
-
-    public class PurchaseDetailValue
-    {
         public string ProductId { get; set; }
         public decimal PriceAtTime { get; set; }
         public int Number { get; set; }

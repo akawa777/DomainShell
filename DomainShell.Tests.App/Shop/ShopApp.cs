@@ -72,6 +72,8 @@ namespace DomainShell.Tests.App.Shop
 
                 tran.Commit();
 
+                
+
                 return result;
             }            
         }

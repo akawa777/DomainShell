@@ -55,24 +55,24 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 order by CartItem.CartItemId
             ", where);
 
-            command.Parameters.AddRange(parameters);
-
-            CartModel cartModel = null;
-            List<CartItemModel> itemList = new List<CartItemModel>();
+            command.Parameters.AddRange(parameters);            
 
             using (DbDataReader reader = command.ExecuteReader())
-            {                
+            {
+                CartRecord record = null;            
+
                 while (reader.Read())
                 {
-                    if (cartModel == null)
+                    if (record == null)
                     {
-                        cartModel = new CartModel(itemList);
+                        record = new CartRecord();
 
-                        cartModel.CartId = reader["CartId"].ToString();
-                        cartModel.CustomerId = reader["CustomerId"].ToString();                        
+                        record.CartId = reader["CartId"].ToString();
+                        record.CustomerId = reader["CustomerId"].ToString();
+                        record.CartItemList = new List<CartItemRecord>();
                     }
 
-                    CartItemModel item = new CartItemModel();
+                    CartItemRecord item = new CartItemRecord();
 
                     item.CartId = reader["CartId"].ToString();
 
@@ -83,7 +83,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
                     item.CartItemId = reader["CartItemId"].ToString();
                     item.ProductId = reader["ProductId"].ToString();
-                    item.Product = new ProductModel
+                    item.Product = new ProductRecord
                     {
                         ProductId = reader["ProductId"].ToString(),
                         ProductName = reader["ProductName"].ToString(),
@@ -91,10 +91,10 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     };
                     item.Number = int.Parse(reader["Number"].ToString());
 
-                    itemList.Add(item);
-                }                                
+                    record.CartItemList.Add(item);
+                }
 
-                return cartModel;
+                return record == null ? null : new CartModel(record);
             }
         }
 

@@ -70,5 +70,5 @@ namespace DomainShell.Tests.Infrastructure.Product
                 return list;
             }
         }
-    }
+    }   
 }

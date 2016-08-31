@@ -30,27 +30,23 @@ namespace DomainShell.Tests.Infrastructure.Customer
             DbParameter param = command.CreateParameter();
             param.ParameterName = "@CustomerId";
             param.Value = customerId;
-            command.Parameters.Add(param);
-
-            CustomerEntity entity = new CustomerEntity();            
+            command.Parameters.Add(param);            
 
             using (DbDataReader reader = command.ExecuteReader())
             {
+                CustomerRecord record = new CustomerRecord();            
+
                 while (reader.Read())
                 {
-                    entity.CustomerId = reader["CustomerId"].ToString();
-                    entity.CustomerName = reader["CustomerName"].ToString();
-                    entity.Address = reader["Address"].ToString();
-                    entity.CreditCardNo = reader["CreditCardNo"].ToString();
-                    entity.CreditCardHolder = reader["CreditCardHolder"].ToString();
-                    entity.CreditCardExpirationDate = reader["CreditCardExpirationDate"].ToString();
+                    record.CustomerId = reader["CustomerId"].ToString();
+                    record.CustomerName = reader["CustomerName"].ToString();
+                    record.Address = reader["Address"].ToString();
+                    record.CreditCardNo = reader["CreditCardNo"].ToString();
+                    record.CreditCardHolder = reader["CreditCardHolder"].ToString();
+                    record.CreditCardExpirationDate = reader["CreditCardExpirationDate"].ToString();
                 }
 
-                CustomerModel model = new CustomerModel();
-
-                (model as IDomainModel<CustomerEntity>).Map(entity);
-
-                return model;
+                return record == null ? null : new CustomerModel(record);                
             }
         }
     }
