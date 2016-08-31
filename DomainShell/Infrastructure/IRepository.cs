@@ -7,8 +7,8 @@ using DomainShell.Domain;
 
 namespace DomainShell.Infrastructure
 {
-    public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
+    public interface IRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
     {
-        void Save(TAggregateRoot aggregateRoot);
+        
     }
 }

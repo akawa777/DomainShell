@@ -10,92 +10,61 @@ using DomainShell.Tests.Domain.Product;
 using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Domain.Cart
-{    
+{
     public class CartModel : IAggregateRoot
     {
         public CartModel()
-        {            
-            CartItemList = new ReadOnlyCollection<CartItemModel>(_cartItemList);
-        }        
+            : this(new List<CartItemModel>())
+        {
+
+        }
+
+        public CartModel(List<CartItemModel> cartItemList)
+        {
+            _cartItemList = cartItemList;
+            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);
+        }             
 
         public string CartId { get; set; }
         public string CustomerId { get; set; }
 
-        public ReadOnlyCollection<CartItemModel> CartItemList { get; set; }
-        private List<CartItemModel> _cartItemList = new List<CartItemModel>();
+        public ReadOnlyCollection<CartItemModel> CartItems { get; set; }
+        protected List<CartItemModel> _cartItemList = new List<CartItemModel>();
 
         public decimal TotalPrice()
         {
-            return CartItemList.Sum(x => x.Product.Price * x.Number);
-        }
-
-        public void Create()
-        {
-            if (!string.IsNullOrEmpty(CartId))
-            {
-                throw new Exception("already created.");
-            }
-
-            if (string.IsNullOrEmpty(CustomerId))
-            {
-                throw new Exception("CustomerId required.");
-            }
-
-            State = State.Accepted;
+            return CartItems.Sum(x => x.Product.Price * x.Number);
         }
 
         public void AddItem(CartItemModel item)
         {
-            if (CartItemList.Any(x => x == item))
-            {
-                throw new Exception("already exist in CartItemList.");
-            }
-
-            if (CartItemList.Count == 0)
+            if (CartItems.Count == 0)
             {                
                 item.CartItemId = "1";
             }
             else
             {
-                item.CartItemId = (CartItemList.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
+                item.CartItemId = (CartItems.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
             }
 
+            item.CartId = CartId;
             item.ProductId = item.Product.ProductId;
 
             _cartItemList.Add(item);
-
-            State = State.Accepted;
         }
 
         public CartItemModel GetCartItem(string cartItemId)
         {
-            CartItemModel item = CartItemList.FirstOrDefault(x => x.CartItemId == cartItemId);
+            CartItemModel item = CartItems.FirstOrDefault(x => x.CartItemId == cartItemId);
 
             return item;
         }
 
-        public void UpdateItem(CartItemModel item)
-        {
-            if (!CartItemList.Any(x => x == item))
-            {
-                throw new Exception("not exist in CartItemList.");
-            }
-
-            State = State.Accepted;
-        }
-
         public void RemoveItem(string cartItemId)
         {
-            CartItemModel item = CartItemList.FirstOrDefault(x => x.CartItemId == cartItemId);
-
-            if (item == null)
-            {
-                throw new Exception("not exist in CartItemList.");
-            }
+            CartItemModel item = CartItems.FirstOrDefault(x => x.CartItemId == cartItemId);
 
             _cartItemList.Remove(item);
-
-            State = State.Accepted;
         }
 
         public decimal GetTax(decimal postage, ITaxService taxService)
@@ -109,17 +78,7 @@ namespace DomainShell.Tests.Domain.Cart
         }
 
         public PurchaseModel Checkout(string shippingAddress, decimal postage, ITaxService taxService)
-        {
-            if (CartItemList == null || CartItemList.Count == 0)
-            {
-                throw new Exception("not exists CartItems");
-            }
-
-            if (string.IsNullOrEmpty(shippingAddress))
-            {
-                throw new Exception("shippingAddress required.");
-            }
-            
+        {   
             decimal paymentAmount = GetPaymentAmount(postage, taxService);
             decimal Tax = GetTax(postage, taxService);
 
@@ -129,26 +88,22 @@ namespace DomainShell.Tests.Domain.Cart
             purchase.Postage = postage;
             purchase.Tax = GetTax(postage, taxService);
             purchase.PaymentAmount = paymentAmount;
-            purchase.PaymentDate = DateTime.Now.ToString("yyyyMMddHHmmss");            
-            
-            foreach (CartItemModel item in CartItemList)
+            purchase.PaymentDate = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            foreach (CartItemModel item in CartItems)
             {
-                PurchaseDetailModel purchaseDetail = new PurchaseDetailModel
+                PurchaseDetailValue purchaseDetailValue = new PurchaseDetailValue
                 {                    
                     ProductId = item.Product.ProductId,
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
                 };
 
-                purchase.AddDetail(purchaseDetail);
-            }
-
-            State = State.Deleted;
+                purchase.AddDetail(purchaseDetailValue);
+            }            
 
             return purchase;            
         }
-
-        public State State { get; private set; }
     }
 
     public class CartItemModel

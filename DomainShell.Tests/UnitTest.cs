@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.App.Shop;
+using DomainShell.Tests.Infrastructure.Customer;
+using DomainShell.Tests.Domain.Customer;
 
 namespace DomainShell.Tests
 {
@@ -45,6 +47,21 @@ namespace DomainShell.Tests
             };
 
             app.Pay(payCommand);
+        }
+
+        [TestMethod]
+        public void Test02()
+        {
+            Session session = new Session();
+
+            using (session.Open())
+            {
+                CustomerRepository repository = new CustomerRepository(session);
+
+                CustomerModel model = repository.Find("1");
+
+                string id = model.CustomerId;
+            }
         }
     }
 }

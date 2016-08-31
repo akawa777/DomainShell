@@ -12,9 +12,16 @@ namespace DomainShell.Tests.Domain.Purchase
     public class PurchaseModel : IAggregateRoot
     {
         public PurchaseModel()
-        {
-            PurchaseDetailList = new ReadOnlyCollection<PurchaseDetailModel>(_purchaseDetailList);
+            : this(new List<PurchaseDetailModel>())
+        {            
+            
         }
+
+        public PurchaseModel(List<PurchaseDetailModel> purchaseDetailList)          
+        {
+            _purchaseDetailList = purchaseDetailList;
+            PurchaseDetails = new ReadOnlyCollection<PurchaseDetailModel>(_purchaseDetailList);
+        } 
 
         public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }
@@ -25,70 +32,72 @@ namespace DomainShell.Tests.Domain.Purchase
         public decimal Tax { get; set; }
         public decimal PaymentAmount { get; set; }
 
-        public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetailList { get; set; }
+        public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetails { get; set; }
         private List<PurchaseDetailModel> _purchaseDetailList = new List<PurchaseDetailModel>();
 
-        public void AddDetail(PurchaseDetailModel detail)
+        public void AddDetail(PurchaseDetailValue value)
         {
-            if (PurchaseDetailList.Any(x => x == detail))
-            {
-                throw new Exception("already exist in PurchaseDetailList.");
-            }
-
-            if (PurchaseDetailList.Count == 0)
+            string purchaseDetailId;
+            if (PurchaseDetails.Count == 0)
             {                
-                detail.PurchaseDetailId = "1";
+                purchaseDetailId = "1";
             }
             else
             {
-                detail.PurchaseDetailId = (PurchaseDetailList.Max(x => int.Parse(x.PurchaseDetailId)) + 1).ToString();
+                purchaseDetailId = (PurchaseDetails.Max(x => int.Parse(x.PurchaseDetailId)) + 1).ToString();
             }
 
-            detail.PurchaseId = PurchaseId;
+            PurchaseDetailModel detail = new PurchaseDetailModel(PurchaseId, purchaseDetailId);
+
+            detail.ProductId = value.ProductId;
+            detail.Number = value.Number;
+            detail.PriceAtTime = value.PriceAtTime;
 
             _purchaseDetailList.Add(detail);
         }
 
         public void Pay(CreditCardValue creditCard, ICreditCardService creditCardService)
         {
-            if (!string.IsNullOrEmpty(PaymentDate))
-            {
-                throw new Exception("already paid.");
-            }
-
-            if (string.IsNullOrEmpty(CustomerId))
-            {
-                throw new Exception("CustomerId required.");
-            }
-
-            if (string.IsNullOrEmpty(ShippingAddress))
-            {
-                throw new Exception("ShippingAddress required.");
-            }
-
-            if (creditCard == null)
-            {
-                throw new Exception("creditCard required.");
-            }
-
-            if (PaymentAmount == 0)
-            {
-                throw new Exception("PaymentAmount required.");
-            }
-
             CreditCard = creditCard;
             creditCardService.Pay(CreditCard, PaymentAmount);
-
-            State = State.Accepted;
         }
-
-        public State State { get; private set; }
     }
 
-    public class PurchaseDetailModel
+    public class PurchaseDetailEntiy
     {
         public string PurchaseId { get; set; }
         public string PurchaseDetailId { get; set; }
+        public string ProductId { get; set; }
+        public decimal PriceAtTime { get; set; }
+        public int Number { get; set; }
+    }
+
+    public class PurchaseDetailModel : IDomainModel<PurchaseDetailEntiy>
+    {
+        public PurchaseDetailModel(string purchaseId, string purchaseDetailId)
+        {
+            PurchaseId = purchaseId;
+            PurchaseDetailId = purchaseDetailId;
+        }
+
+        public string PurchaseId { get; private set; }
+        public string PurchaseDetailId { get; private set; }
+        public string ProductId { get; set; }
+        public decimal PriceAtTime { get; set; }
+        public int Number { get; set; }
+
+        void IDomainModel<PurchaseDetailEntiy>.Map(PurchaseDetailEntiy entity)
+        {
+            PurchaseId = entity.PurchaseId;
+            PurchaseDetailId = entity.PurchaseDetailId;
+            ProductId = entity.ProductId;
+            PriceAtTime = entity.PriceAtTime;
+            Number = entity.Number;
+        }
+    }
+
+    public class PurchaseDetailValue
+    {
         public string ProductId { get; set; }
         public decimal PriceAtTime { get; set; }
         public int Number { get; set; }

@@ -12,7 +12,5 @@ namespace DomainShell.Tests.Domain.Product
         public string ProductId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
-
-        public State State { get; private set; }
     }   
 }

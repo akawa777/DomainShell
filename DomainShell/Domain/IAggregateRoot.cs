@@ -9,6 +9,11 @@ namespace DomainShell.Domain
 {
     public interface IAggregateRoot
     {
-        State State { get; }
+        
+    }
+
+    public interface IDomainModel<TEntity>
+    {
+        void Map(TEntity entity);
     }
 }

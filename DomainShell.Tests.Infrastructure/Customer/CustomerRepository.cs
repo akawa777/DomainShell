@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
+using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain.Customer;
 
@@ -31,21 +32,25 @@ namespace DomainShell.Tests.Infrastructure.Customer
             param.Value = customerId;
             command.Parameters.Add(param);
 
-            CustomerModel customer = new CustomerModel();
+            CustomerEntity entity = new CustomerEntity();            
 
             using (DbDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    customer.CustomerId = reader["CustomerId"].ToString();
-                    customer.CustomerName = reader["CustomerName"].ToString();
-                    customer.Address = reader["Address"].ToString();
-                    customer.CreditCardNo = reader["CreditCardNo"].ToString();
-                    customer.CreditCardHolder = reader["CreditCardHolder"].ToString();
-                    customer.CreditCardExpirationDate = reader["CreditCardExpirationDate"].ToString();
+                    entity.CustomerId = reader["CustomerId"].ToString();
+                    entity.CustomerName = reader["CustomerName"].ToString();
+                    entity.Address = reader["Address"].ToString();
+                    entity.CreditCardNo = reader["CreditCardNo"].ToString();
+                    entity.CreditCardHolder = reader["CreditCardHolder"].ToString();
+                    entity.CreditCardExpirationDate = reader["CreditCardExpirationDate"].ToString();
                 }
 
-                return customer;
+                CustomerModel model = new CustomerModel();
+
+                (model as IDomainModel<CustomerEntity>).Map(entity);
+
+                return model;
             }
         }
     }

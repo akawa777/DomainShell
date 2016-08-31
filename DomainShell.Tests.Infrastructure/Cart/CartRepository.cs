@@ -12,7 +12,7 @@ using DomainShell.Tests.Domain.Product;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
-    public class CartRepository : IWriteRepository<CartModel>
+    public class CartRepository : IRepository<CartModel>
     {
         public CartRepository(Session session)
         {
@@ -20,7 +20,6 @@ namespace DomainShell.Tests.Infrastructure.Cart
         }
 
         private Session _session;
-        private Dictionary<CartModel, bool> _storedMap = new Dictionary<CartModel, bool>();
 
         public CartModel Find(string cartId)
         {   
@@ -58,7 +57,8 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
             command.Parameters.AddRange(parameters);
 
-            CartModel cartModel = null;            
+            CartModel cartModel = null;
+            List<CartItemModel> itemList = new List<CartItemModel>();
 
             using (DbDataReader reader = command.ExecuteReader())
             {                
@@ -66,7 +66,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 {
                     if (cartModel == null)
                     {
-                        cartModel = new CartModel();
+                        cartModel = new CartModel(itemList);
 
                         cartModel.CartId = reader["CartId"].ToString();
                         cartModel.CustomerId = reader["CustomerId"].ToString();                        
@@ -91,34 +91,14 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     };
                     item.Number = int.Parse(reader["Number"].ToString());
 
-                    cartModel.AddItem(item);
-                }                
-
-                _storedMap[cartModel] = true;
+                    itemList.Add(item);
+                }                                
 
                 return cartModel;
             }
         }
 
-        public void Save(CartModel cart)
-        {
-            if (cart.State == State.Accepted && !_storedMap.ContainsKey(cart))
-            {
-                Create(cart);
-                _storedMap[cart] = true;
-            }
-            else if (cart.State == State.Accepted && _storedMap.ContainsKey(cart))
-            {
-                Update(cart);
-            }
-            else if (cart.State == State.Deleted && _storedMap.ContainsKey(cart))
-            {
-                Delete(cart);
-                _storedMap.Remove(cart);
-            }
-        }
-
-        private void Create(CartModel cart)
+        public void Create(CartModel cart)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -139,9 +119,9 @@ namespace DomainShell.Tests.Infrastructure.Cart
                 select CartId from Cart where ROWID = last_insert_rowid();         
             ";
 
-            cart.CartId = command.ExecuteScalar().ToString();            
-            
-            foreach (CartItemModel item in cart.CartItemList)
+            cart.CartId = command.ExecuteScalar().ToString();
+
+            foreach (CartItemModel item in cart.CartItems)
             {
                 command.CommandText = @"
                     insert into CartItem (CartId, CartItemId, ProductId, Number) values (@CartId, @CartItemId, @ProductId, @Number) 
@@ -171,7 +151,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
             }
         }
 
-        private void Update(CartModel cart)
+        public void Update(CartModel cart)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -186,7 +166,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
             command.ExecuteNonQuery();
 
-            foreach (CartItemModel item in cart.CartItemList)
+            foreach (CartItemModel item in cart.CartItems)
             {
                 command.CommandText = @"                    
                     insert into CartItem (CartId, CartItemId, ProductId, Number) values (@CartId, @CartItemId, @ProductId, @Number) 
@@ -216,7 +196,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
             }
         }
 
-        private void Delete(CartModel cart)
+        public void Delete(CartModel cart)
         {
             DbCommand command = _session.CreateCommand();
 

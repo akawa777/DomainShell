@@ -20,7 +20,7 @@ namespace DomainShell.Tests.App.Shop
         public ShopApp()
         {
             _session = new Session();
-            _cartReader = new CartReader(_session);
+            _cartReader = new CartReader(_session);            
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
             _productRepository = new ProductRepository(_session);
@@ -57,7 +57,8 @@ namespace DomainShell.Tests.App.Shop
                 {
                     cartModel = new CartModel();
                     cartModel.CustomerId = command.CustomerId;
-                    cartModel.Create();
+
+                    _cartRepository.Create(cartModel);                    
                 }
 
                 cartModel.AddItem(
@@ -67,7 +68,7 @@ namespace DomainShell.Tests.App.Shop
                         Number = command.Number
                     });
 
-                _cartRepository.Save(cartModel);
+                _cartRepository.Update(cartModel);
 
                 tran.Commit();
 
@@ -122,13 +123,11 @@ namespace DomainShell.Tests.App.Shop
                 }
 
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);
+
                 CartItemModel cartItemModel = cartModel.GetCartItem(command.CartItemId);
+                cartItemModel.Number = command.Number;                
 
-                cartItemModel.Number = command.Number;
-
-                cartModel.UpdateItem(cartItemModel);
-
-                _cartRepository.Save(cartModel);
+                _cartRepository.Update(cartModel);
 
                 tran.Commit();
 
@@ -185,7 +184,7 @@ namespace DomainShell.Tests.App.Shop
 
                 cartModel.RemoveItem(command.CartItemId);
 
-                _cartRepository.Save(cartModel);
+                _cartRepository.Update(cartModel);
 
                 tran.Commit();
 
@@ -246,8 +245,8 @@ namespace DomainShell.Tests.App.Shop
 
                 purchaseModel.Pay(creditCardValue, _creditCardService);
 
-                _cartRepository.Save(cartModel);
-                _purchaseRepository.Save(purchaseModel);
+                _cartRepository.Delete(cartModel);
+                _purchaseRepository.Create(purchaseModel);
 
                 tran.Commit();
 
@@ -268,7 +267,7 @@ namespace DomainShell.Tests.App.Shop
                 result.Success = false;
                 result.Messages.Add("not exist cart.");
             }
-            else if (_cartRepository.Get(command.CustomerId).CartItemList.Count == 0)
+            else if (_cartRepository.Get(command.CustomerId).CartItems.Count == 0)
             {
                 result.Success = false;
                 result.Messages.Add("not has cart items.");

@@ -38,8 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Domain\State.cs" />
-    <Compile Include="Infrastructure\IWriteRepository.cs" />
+    <Compile Include="Infrastructure\IRepository.cs" />
     <Compile Include="Domain\IAggregateRoot.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -10,24 +10,16 @@ using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Infrastructure.Purchase
 {
-    public class PurchaseRepository : IWriteRepository<PurchaseModel>
+    public class PurchaseRepository : IRepository<PurchaseModel>
     {
         public PurchaseRepository(Session session)
         {
             _session = session;
         }
 
-        private Session _session;        
+        private Session _session;  
 
-        public void Save(PurchaseModel purchase)
-        {
-            if (purchase.State == State.Accepted)
-            {
-                Create(purchase);
-            }
-        }
-
-        private void Create(PurchaseModel purchase)
+        public void Create(PurchaseModel purchase)
         {
             DbCommand command = _session.CreateCommand();
 
@@ -89,9 +81,9 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
             var id = command.ExecuteScalar();
 
-            purchase.PurchaseId = id.ToString();
+            purchase.PurchaseId = id.ToString();            
             
-            foreach (PurchaseDetailModel detail in purchase.PurchaseDetailList)
+            foreach (PurchaseDetailModel detail in purchase.PurchaseDetails)
             {
                 command.CommandText = @"
                     insert into PaymentItem (PaymentId, PaymentItemId, ProductId, PriceAtTime, Number) values (@PaymentId, @PaymentItemId, @ProductId, @PriceAtTime, @Number) 
