@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Tests.Domain.Cart;
-using DomainShell.Tests.Infrastructure;
+using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {

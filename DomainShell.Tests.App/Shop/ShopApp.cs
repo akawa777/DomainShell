@@ -7,6 +7,7 @@ using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
 using DomainShell.Tests.Domain.Purchase;
+using DomainShell.Infrastructure;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.Infrastructure.Cart;
 using DomainShell.Tests.Infrastructure.Customer;
@@ -19,7 +20,8 @@ namespace DomainShell.Tests.App.Shop
     {
         public ShopApp()
         {
-            _session = new Session();
+            _session = new Session(new SqliteSessionKernel());
+
             _cartReader = new CartReader(_session);            
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
@@ -42,7 +44,7 @@ namespace DomainShell.Tests.App.Shop
 
         public AddCartItemResult AddCartItem(AddCartItemCommand command)
         {
-            using (Transaction tran = _session.BegingTran())
+            using (ITran tran = _session.Tran())
             {
                 AddCartItemResult result = new AddCartItemResult();
 
@@ -69,7 +71,7 @@ namespace DomainShell.Tests.App.Shop
 
                 _cartRepository.Save(cartModel);
 
-                tran.Commit();
+                tran.Complete();
 
                 result.CartItemId = cartItemModel.CartItemId;
 
@@ -114,7 +116,7 @@ namespace DomainShell.Tests.App.Shop
 
         public UpdateCartItemResult UpdateCartItem(UpdateCartItemCommand command)
         {
-            using (Transaction tran = _session.BegingTran())
+            using (ITran tran = _session.Tran())
             {
                 UpdateCartItemResult result = new UpdateCartItemResult();
 
@@ -130,7 +132,7 @@ namespace DomainShell.Tests.App.Shop
 
                 _cartRepository.Save(cartModel);
 
-                tran.Commit();
+                tran.Complete();
 
                 return result;
             }
@@ -171,8 +173,8 @@ namespace DomainShell.Tests.App.Shop
         }
 
         public RemoveCartItemResult RemoveCartItem(RemoveCartItemCommand command)
-        {            
-            using (Transaction tran = _session.BegingTran())
+        {
+            using (ITran tran = _session.Tran())
             {
                 RemoveCartItemResult result = new RemoveCartItemResult();
 
@@ -187,7 +189,7 @@ namespace DomainShell.Tests.App.Shop
 
                 _cartRepository.Save(cartModel);
 
-                tran.Commit();
+                tran.Complete();
 
                 return result;
             }
@@ -223,7 +225,7 @@ namespace DomainShell.Tests.App.Shop
 
         public PayResult Pay(PayCommand command)
         {
-            using (Transaction tran = _session.BegingTran())
+            using (ITran tran = _session.Tran())
             {
                 PayResult result = new PayResult();
 
@@ -248,7 +250,7 @@ namespace DomainShell.Tests.App.Shop
                 _cartRepository.Save(cartModel);
                 _purchaseRepository.Save(purchaseModel);
 
-                tran.Commit();
+                tran.Complete();
 
                 return result;
             }
@@ -302,7 +304,7 @@ namespace DomainShell.Tests.App.Shop
 
         public Product[] GetProducts()
         {
-            using (_session.Open())
+            using (_session.Connect())
             {
                 List<ProductModel> productList = _productRepository.GetAll();
 
@@ -314,7 +316,7 @@ namespace DomainShell.Tests.App.Shop
 
         public CartItem[] GetCartItems(CartItemsQuery query)
         {
-            using (_session.Open())
+            using (_session.Connect())
             {
                 CartItemReadObject[] readObjects = _cartReader.GetCartItems(query.CustomerId);
 
@@ -332,7 +334,7 @@ namespace DomainShell.Tests.App.Shop
 
         public Customer GetCustomer(CustomerQuery query)
         {
-            using (_session.Open())
+            using (_session.Connect())
             {
                 CustomerModel customerModel = _customerRepository.Find(query.CustomerId);
 
@@ -350,7 +352,7 @@ namespace DomainShell.Tests.App.Shop
 
         public PaymentAmountInfo GetPaymentAmountInfo(PaymentAmountInfoQuery query)
         {
-            using (_session.Open())
+            using (_session.Connect())
             {
                 decimal postage = _cartReader.GetPostage();                
                 CartModel cartModel = _cartRepository.Get(query.CustomerId);                
@@ -367,7 +369,7 @@ namespace DomainShell.Tests.App.Shop
 
         public Purchase[] GetPurchases(PurchasesQuery query)
         {
-            using (_session.Open())
+            using (_session.Connect())
             {
                 PurchaseReadObject[] readObjects = _purchasetReader.GetPurchases(query.CustomerId);
 

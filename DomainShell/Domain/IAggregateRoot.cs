@@ -9,7 +9,8 @@ namespace DomainShell.Domain
 {   
     public interface IAggregateRoot
     {
-
+        State State { get; }
+        void Stored();
     }
 
     public enum State

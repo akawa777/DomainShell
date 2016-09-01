@@ -15,14 +15,23 @@ namespace DomainShell.Tests.Domain.Customer
 
         }
 
-        public CustomerModel(CustomerRecord record)
+        public CustomerModel(CustomerProxy proxy)
         {
-            CustomerId = record.CustomerId;
-            CustomerName = record.CustomerName;
-            Address = record.Address;
-            CreditCardNo = record.CreditCardNo;
-            CreditCardHolder = record.CreditCardHolder;
-            CreditCardExpirationDate = record.CreditCardExpirationDate;
+            CustomerId = proxy.CustomerId;
+            CustomerName = proxy.CustomerName;
+            Address = proxy.Address;
+            CreditCardNo = proxy.CreditCardNo;
+            CreditCardHolder = proxy.CreditCardHolder;
+            CreditCardExpirationDate = proxy.CreditCardExpirationDate;
+
+            State = State.Stored;
+        }
+
+        public State State { get; private set;  }
+
+        public void Stored()
+        {
+            State = State.Stored;
         }
 
         public string CustomerId { get; set; }

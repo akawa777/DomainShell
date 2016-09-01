@@ -26,9 +26,14 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
         private Session _session;
 
+        private DbCommand CreateDbCommand()
+        {
+            return _session.GetConnectionPort<DbConnection>().CreateCommand();
+        }
+
         public PurchaseReadObject[] GetPurchases(string customerId)
         {
-            DbCommand command = _session.CreateCommand();
+            DbCommand command = CreateDbCommand();
 
             command.CommandText = @"
                 select 

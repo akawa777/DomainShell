@@ -12,7 +12,7 @@ namespace DomainShell.Tests.Domain.Customer
         string Address { get; set; }        
     }
 
-    public class CustomerRecord : ICustomerRecord
+    public class CustomerProxy : ICustomerRecord
     {
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }

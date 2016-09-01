@@ -14,12 +14,21 @@ namespace DomainShell.Tests.Domain.Product
 
         }
 
-        public ProductModel(ProductRecord record)
+        public ProductModel(ProductProxy proxy)
         {
-            ProductId = record.ProductId;
-            ProductName = record.ProductName;
-            Price = record.Price;
+            ProductId = proxy.ProductId;
+            ProductName = proxy.ProductName;
+            Price = proxy.Price;
+
+            State = State.Stored;
         }
+
+        public State State { get; private set; }
+
+        public void Stored()
+        {
+            State = State.Stored;
+        }        
 
         public string ProductId { get; set; }
         public string ProductName { get; set; }

@@ -20,14 +20,15 @@ namespace DomainShell.Tests.Domain.Cart
             State = State.Added;
         }
 
-        public CartModel(CartRecord record) : this()
+        public CartModel(CartProxy proxy)
+            : this()
         {
-            CartId = record.CartId;
-            CustomerId = record.CustomerId;
+            CartId = proxy.CartId;
+            CustomerId = proxy.CustomerId;
 
-            foreach (CartItemRecord itemRecord in record.CartItemList)
+            foreach (CartItemProxy itemProxy in proxy.CartItemList)
             {
-                CartItemModel item = new CartItemModel(itemRecord);
+                CartItemModel item = new CartItemModel(itemProxy);
                 _cartItemList.Add(item);
             }
 
@@ -136,13 +137,13 @@ namespace DomainShell.Tests.Domain.Cart
             
         }
 
-        public CartItemModel(CartItemRecord record)
+        public CartItemModel(CartItemProxy proxy)
         {
-            CartId = record.CartId;
-            CartItemId = record.CartItemId;
-            ProductId = record.ProductId;
-            Product = new ProductModel(record.Product);
-            Number = record.Number;
+            CartId = proxy.CartId;
+            CartItemId = proxy.CartItemId;
+            ProductId = proxy.ProductId;
+            Product = new ProductModel(proxy.Product);
+            Number = proxy.Number;
         }
 
         public string CartId { get; set; }

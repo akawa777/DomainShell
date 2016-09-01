@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DomainShell.Infrastructure;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.App.Shop;
 using DomainShell.Tests.Infrastructure.Customer;
@@ -16,8 +17,8 @@ namespace DomainShell.Tests
     {
         [TestInitialize]
         public void Init()
-        {
-            Session.Config(DataStoreProvider.CreateConnection, DataStoreProvider.CreateDataAdapter);
+        {   
+            SqliteSessionKernel.Config(DataStoreProvider.CreateConnection);
         }
 
         [TestMethod]
@@ -52,15 +53,28 @@ namespace DomainShell.Tests
         [TestMethod]
         public void Test02()
         {
-            Session session = new Session();
+            SqliteSessionKernel kernel = new SqliteSessionKernel();
 
-            using (session.Open())
+            DomainShell.Infrastructure.Session session = new DomainShell.Infrastructure.Session(kernel);
+
+            using (session.Connect())
             {
                 CustomerRepository repository = new CustomerRepository(session);
 
                 CustomerModel model = repository.Find("1");
 
                 string id = model.CustomerId;
+            }
+            
+            using (ITran tran = session.Tran())
+            {
+                CustomerRepository repository = new CustomerRepository(session);
+
+                CustomerModel model = repository.Find("1");
+
+                string id = model.CustomerId;
+
+                tran.Complete();
             }
         }
     }

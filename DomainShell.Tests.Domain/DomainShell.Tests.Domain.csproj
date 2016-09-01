@@ -50,11 +50,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Cart\CartRecord.cs" />
-    <Compile Include="Customer\CustomerRecord.cs" />
+    <Compile Include="Cart\CartProxy.cs" />
+    <Compile Include="Customer\CustomerProxy.cs" />
     <Compile Include="Customer\CustomerModel.cs" />
     <Compile Include="Cart\ITaxService.cs" />
-    <Compile Include="Product\ProductRecord.cs" />
+    <Compile Include="Product\ProductProxy.cs" />
     <Compile Include="Purchase\ICreditCardService.cs">
       <SubType>Code</SubType>
     </Compile>

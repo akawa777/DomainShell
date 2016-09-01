@@ -13,7 +13,7 @@ using DomainShell.Tests.Domain.Product;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
-    public class CartRepository : IRepository<CartModel>
+    public class CartRepository : IWriteRepository<CartModel>
     {
         public CartRepository(Session session)
         {
@@ -34,7 +34,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private CartModel Get(string where, object parameters)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnection());
+            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
 
             string template = @"
                 select * from Cart
@@ -46,7 +46,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
             string sql = new TextBuilder(template, new { where = where }).Generate();
 
-            CartRecord record = db.Query<CartRecord>(sql, parameters)
+            CartProxy proxy = db.Query<CartProxy>(sql, parameters)
                 .Unique("CartId")
                 .Each((currentRecord, row) =>
                 {
@@ -57,7 +57,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
                     
                 }).Single();
 
-            return record == null ? null : new CartModel(record);
+            return proxy == null ? null : new CartModel(proxy);
         }
 
         public void Save(CartModel cart)
@@ -75,7 +75,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private void Create(CartModel cart)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnection());
+            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
 
             db.Command<CartModel>("Cart", "CartId").Insert(cart);
 
@@ -92,7 +92,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private void Update(CartModel cart)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnection());
+            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
 
             db.Command<CartModel>("Cart", "CartId").Update(cart);
 

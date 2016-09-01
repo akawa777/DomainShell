@@ -11,7 +11,7 @@ using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Infrastructure.Purchase
 {
-    public class PurchaseRepository : IRepository<PurchaseModel>
+    public class PurchaseRepository : IWriteRepository<PurchaseModel>
     {
         public PurchaseRepository(Session session)
         {
@@ -31,7 +31,7 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
         private void Create(PurchaseModel purchase)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnection());
+            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
 
             db.Command<PurchaseModel>("Purchase", "PurchaseId").Insert(purchase);
 

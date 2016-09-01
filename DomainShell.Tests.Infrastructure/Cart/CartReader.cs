@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
+using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
@@ -26,9 +27,14 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private Session _session;
 
+        private DbCommand CreateDbCommand()
+        {
+            return _session.GetConnectionPort<DbConnection>().CreateCommand();
+        }
+
         public CartItemReadObject[] GetCartItems(string customerId)
         {
-            DbCommand command = _session.CreateCommand();
+            DbCommand command = CreateDbCommand();
 
             command.CommandText = @"
                 select * from Cart

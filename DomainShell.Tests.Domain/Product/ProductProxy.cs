@@ -7,7 +7,7 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Domain.Product
 {
-    public class ProductRecord
+    public class ProductProxy
     {
         public string ProductId { get; set; }
         public string ProductName { get; set; }
