@@ -11,4 +11,11 @@ namespace DomainShell.Domain
     {
 
     }
+
+    public enum State
+    {
+        Added,
+        Stored,
+        Removed
+    }
 }

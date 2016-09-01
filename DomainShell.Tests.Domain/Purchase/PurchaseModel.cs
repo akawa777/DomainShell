@@ -14,7 +14,16 @@ namespace DomainShell.Tests.Domain.Purchase
         public PurchaseModel()          
         {   
             PurchaseDetails = new ReadOnlyCollection<PurchaseDetailModel>(_purchaseDetailList);
-        } 
+
+            State = State.Added;
+        }
+
+        public State State { get; private set; }
+
+        public void Stored()
+        {
+            State = State.Stored;
+        }
 
         public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }

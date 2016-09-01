@@ -60,23 +60,37 @@ namespace DomainShell.Tests.Infrastructure.Cart
             return record == null ? null : new CartModel(record);
         }
 
-        public void Create(CartModel cart)
+        public void Save(CartModel cart)
+        {
+            if (cart.State == State.Added)
+            {
+                Create(cart);
+                cart.Stored();
+            }
+            else if (cart.State == State.Stored)
+            {
+                Update(cart);
+            }
+        }
+
+        private void Create(CartModel cart)
         {
             DagentDatabase db = new DagentDatabase(_session.GetConnection());
 
             db.Command<CartModel>("Cart", "CartId").Insert(cart);
 
+            string cartId = db.Query("select CartId from Cart where ROWID = last_insert_rowid();").Scalar<string>();
+
             foreach (CartItemModel item in cart.CartItems)
             {
+                item.CartId = cartId;
                 db.Command<CartItemModel>("CartItem", "CartId", "CartItemId").Insert(item);
-            }
-
-            string cartId = db.Query("select CartId from Cart where ROWID = last_insert_rowid();").Scalar<string>();
+            }            
 
             cart.CartId = cartId;            
         }
 
-        public void Update(CartModel cart)
+        private void Update(CartModel cart)
         {
             DagentDatabase db = new DagentDatabase(_session.GetConnection());
 
@@ -88,16 +102,6 @@ namespace DomainShell.Tests.Infrastructure.Cart
             {   
                 db.Command<CartItemModel>("CartItem", "CartId", "CartItemId").Insert(item);
             }
-        }
-
-        public void Delete(CartModel cart)
-        {
-            DagentDatabase db = new DagentDatabase(_session.GetConnection());            
-
-            db.Command<CartModel>("Cart", "CartId").Delete(cart);
-            db.ExecuteReader("delete from CartItem where CartId = @CartId", new Parameter("CartId", cart.CartId));
-
-            
         }
     }
 }

@@ -56,9 +56,7 @@ namespace DomainShell.Tests.App.Shop
                 if (cartModel == null)
                 {
                     cartModel = new CartModel();
-                    cartModel.CustomerId = command.CustomerId;
-
-                    _cartRepository.Create(cartModel);                    
+                    cartModel.CustomerId = command.CustomerId;                    
                 }
 
                 CartItemModel cartItemModel = new CartItemModel
@@ -69,7 +67,7 @@ namespace DomainShell.Tests.App.Shop
 
                 cartModel.AddItem(cartItemModel);
 
-                _cartRepository.Update(cartModel);
+                _cartRepository.Save(cartModel);
 
                 tran.Commit();
 
@@ -128,9 +126,9 @@ namespace DomainShell.Tests.App.Shop
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);
 
                 CartItemModel cartItemModel = cartModel.GetCartItem(command.CartItemId);
-                cartItemModel.Number = command.Number;                
+                cartItemModel.Number = command.Number;
 
-                _cartRepository.Update(cartModel);
+                _cartRepository.Save(cartModel);
 
                 tran.Commit();
 
@@ -187,7 +185,7 @@ namespace DomainShell.Tests.App.Shop
 
                 cartModel.RemoveItem(command.CartItemId);
 
-                _cartRepository.Update(cartModel);
+                _cartRepository.Save(cartModel);
 
                 tran.Commit();
 
@@ -237,7 +235,7 @@ namespace DomainShell.Tests.App.Shop
                 decimal postage = _cartReader.GetPostage();
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);                     
 
-                PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
+                PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);               
 
                 purchaseModel.CreditCardNo = command.CreditCardNo;
                 purchaseModel.CreditCardHolder = command.CreditCardHolder;
@@ -245,8 +243,10 @@ namespace DomainShell.Tests.App.Shop
 
                 purchaseModel.Pay(_creditCardService);
 
-                _cartRepository.Delete(cartModel);
-                _purchaseRepository.Create(purchaseModel);
+                cartModel.Empty();
+
+                _cartRepository.Save(cartModel);
+                _purchaseRepository.Save(purchaseModel);
 
                 tran.Commit();
 

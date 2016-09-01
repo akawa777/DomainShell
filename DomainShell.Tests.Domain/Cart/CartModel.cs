@@ -15,7 +15,9 @@ namespace DomainShell.Tests.Domain.Cart
     {
         public CartModel()          
         {
-            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);            
+            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);
+
+            State = State.Added;
         }
 
         public CartModel(CartRecord record) : this()
@@ -28,6 +30,20 @@ namespace DomainShell.Tests.Domain.Cart
                 CartItemModel item = new CartItemModel(itemRecord);
                 _cartItemList.Add(item);
             }
+
+            State = State.Stored;
+        }
+
+        public State State { get; private set; }
+
+        public void Stored()
+        {
+            State = State.Stored;
+        }
+
+        public void Empty()
+        {
+            _cartItemList.Clear();
         }
 
         public string CartId { get; set; }
@@ -110,7 +126,7 @@ namespace DomainShell.Tests.Domain.Cart
             }            
 
             return purchase;            
-        }        
+        }
     }
 
     public class CartItemModel

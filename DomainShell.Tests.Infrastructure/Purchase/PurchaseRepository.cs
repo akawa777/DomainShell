@@ -18,9 +18,18 @@ namespace DomainShell.Tests.Infrastructure.Purchase
             _session = session;
         }
 
-        private Session _session;  
+        private Session _session;
 
-        public void Create(PurchaseModel purchase)
+        public void Save(PurchaseModel purchase)
+        {
+            if (purchase.State == State.Added)
+            {
+                Create(purchase);
+                purchase.Stored();
+            }
+        }
+
+        private void Create(PurchaseModel purchase)
         {
             DagentDatabase db = new DagentDatabase(_session.GetConnection());
 
