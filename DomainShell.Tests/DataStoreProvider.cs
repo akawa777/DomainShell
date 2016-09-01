@@ -29,7 +29,7 @@ namespace DomainShell.Tests
             DbProviderFactory factory = DbProviderFactories.GetFactory("System.Data.SQLite");
 
             DbConnection connection = factory.CreateConnection();
-            connection.ConnectionString = _connectionString;
+            connection.ConnectionString = _connectionString;            
 
             return connection;
         }
@@ -65,7 +65,7 @@ namespace DomainShell.Tests
                 CreateCustomer(connection);
                 CreateProduct(connection);
                 CreateCart(connection);
-                CreatePayment(connection);
+                CreatePurchase(connection);
             }
         }
 
@@ -194,13 +194,13 @@ namespace DomainShell.Tests
             }
         }
 
-        private static void CreatePayment(DbConnection connection)
+        private static void CreatePurchase(DbConnection connection)
         {
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"
-                        create table Payment(
-                            PaymentId integer primary key,
+                        create table Purchase(
+                            PurchaseId integer primary key,
                             PaymentDate nvarchar(100),
                             CustomerId int,                            
                             CreditCardNo nvarchar(100),
@@ -216,13 +216,13 @@ namespace DomainShell.Tests
                 command.ExecuteNonQuery();
 
                 command.CommandText = @"
-                        create table PaymentItem(
-                            PaymentId int,
-                            PaymentItemId int,                            
+                        create table PurchaseDetail(
+                            PurchaseId int,
+                            PurchaseDetailId int,                            
                             ProductId int,
                             PriceAtTime int,
                             Number int,
-                            primary key (PaymentId, PaymentItemId)
+                            primary key (PurchaseId, PurchaseDetailId)
                         )
                     ";
 

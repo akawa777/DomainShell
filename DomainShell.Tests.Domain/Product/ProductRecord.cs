@@ -7,22 +7,10 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Domain.Product
 {
-    public class ProductModel : IAggregateRoot
+    public class ProductRecord
     {
-        public ProductModel()
-        {
-
-        }
-
-        public ProductModel(ProductRecord record)
-        {
-            ProductId = record.ProductId;
-            ProductName = record.ProductName;
-            Price = record.Price;
-        }
-
         public string ProductId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
-    }   
+    }  
 }

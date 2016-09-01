@@ -9,6 +9,6 @@ namespace DomainShell.Tests.Domain.Purchase
 {
     public interface ICreditCardService
     {
-        void Pay(CreditCardValue creditCard, decimal paymentAmount);
+        void Pay(string creditCardNo, string creditCardHolder, string creditCardExpirationDate, decimal paymentAmount);
     }
 }

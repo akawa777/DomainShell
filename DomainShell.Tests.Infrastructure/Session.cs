@@ -21,6 +21,11 @@ namespace DomainShell.Tests.Infrastructure
         private static Func<DbConnection> _createConnection;
         private static Func<DbCommand, DbDataAdapter> _createDataAdapter;
         private DbConnection _connection;
+
+        public DbConnection GetConnection()
+        {
+            return _connection;
+        }
         
         public Session Open()
         {

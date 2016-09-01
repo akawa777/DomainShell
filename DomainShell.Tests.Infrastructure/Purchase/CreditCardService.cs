@@ -10,9 +10,9 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 {
     public class CreditCardService : ICreditCardService
     {
-        public void Pay(CreditCardValue creditCard, decimal paymentAmount)
+        public void Pay(string creditCardNo, string creditCardHolder, string creditCardExpirationDate, decimal paymentAmount)
         {
             
         }
-    } 
+    }
 }

@@ -61,18 +61,19 @@ namespace DomainShell.Tests.App.Shop
                     _cartRepository.Create(cartModel);                    
                 }
 
-                cartModel.AddItem(
-                    new CartItemModel
-                    {
-                        Product = _productRepository.Find(command.ProductId),
-                        Number = command.Number
-                    });
+                CartItemModel cartItemModel = new CartItemModel
+                {
+                    Product = _productRepository.Find(command.ProductId),
+                    Number = command.Number
+                };
+
+                cartModel.AddItem(cartItemModel);
 
                 _cartRepository.Update(cartModel);
 
                 tran.Commit();
 
-                
+                result.CartItemId = cartItemModel.CartItemId;
 
                 return result;
             }            
@@ -238,14 +239,11 @@ namespace DomainShell.Tests.App.Shop
 
                 PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);
 
-                CreditCardValue creditCardValue = new CreditCardValue
-                {
-                    CreditCardNo = command.CreditCardNo,
-                    CreditCardHolder = command.CreditCardHolder,
-                    CreditCardExpirationDate = command.CreditCardExpirationDate,
-                };
+                purchaseModel.CreditCardNo = command.CreditCardNo;
+                purchaseModel.CreditCardHolder = command.CreditCardHolder;
+                purchaseModel.CreditCardExpirationDate = command.CreditCardExpirationDate;
 
-                purchaseModel.Pay(creditCardValue, _creditCardService);
+                purchaseModel.Pay(_creditCardService);
 
                 _cartRepository.Delete(cartModel);
                 _purchaseRepository.Create(purchaseModel);

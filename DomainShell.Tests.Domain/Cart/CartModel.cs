@@ -11,18 +11,11 @@ using DomainShell.Tests.Domain.Purchase;
 
 namespace DomainShell.Tests.Domain.Cart
 {
-    public class CartRecord
-    {
-        public string CartId { get; set; }
-        public string CustomerId { get; set; }
-        public List<CartItemRecord> CartItemList { get; set; }
-    }
-
     public class CartModel : IAggregateRoot
     {
         public CartModel()          
         {
-            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);
+            CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);            
         }
 
         public CartModel(CartRecord record) : this()
@@ -120,15 +113,6 @@ namespace DomainShell.Tests.Domain.Cart
         }        
     }
 
-    public class CartItemRecord
-    {
-        public string CartId { get; set; }
-        public string CartItemId { get; set; }
-        public string ProductId { get; set; }
-        public ProductRecord Product { get; set; }
-        public int Number { get; set; }        
-    }
-
     public class CartItemModel
     {
         public CartItemModel()
@@ -141,9 +125,7 @@ namespace DomainShell.Tests.Domain.Cart
             CartId = record.CartId;
             CartItemId = record.CartItemId;
             ProductId = record.ProductId;
-
-            ProductModel product = new ProductModel(record.Product);
-
+            Product = new ProductModel(record.Product);
             Number = record.Number;
         }
 
