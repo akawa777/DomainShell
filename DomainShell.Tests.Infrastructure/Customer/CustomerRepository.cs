@@ -21,7 +21,7 @@ namespace DomainShell.Tests.Infrastructure.Customer
 
         public CustomerModel Find(string customerId)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
             CustomerProxy proxy = db.Query<CustomerProxy>("Customer", new { CustomerId = customerId }).Single();
 

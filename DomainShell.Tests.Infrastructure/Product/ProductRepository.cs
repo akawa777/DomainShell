@@ -20,7 +20,7 @@ namespace DomainShell.Tests.Infrastructure.Product
 
         private DbCommand CreateDbCommand()
         {
-            return _session.GetConnectionPort<DbConnection>().CreateCommand();
+            return _session.GetPort<DbConnection>().CreateCommand();
         }
 
         public ProductModel Find(string productId)

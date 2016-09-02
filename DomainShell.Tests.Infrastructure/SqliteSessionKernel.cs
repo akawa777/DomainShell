@@ -10,7 +10,7 @@ using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure
 {
-    public class SqliteSessionKernel : ISessionKernel
+    public class SqliteSessionKernel : ISessionKernel<DbConnection>
     {
         public static void Config(Func<DbConnection> createConnection)
         {
@@ -27,12 +27,7 @@ namespace DomainShell.Tests.Infrastructure
         private DbConnection _connection;
         private DbTransaction _transaction;
 
-        public Type GetConnectionPortType()
-        {
-            return typeof(DbConnection);
-        }
-
-        public object GetConnectionPort()
+        public DbConnection GetConnectionPort()
         {
             return _connection;
         }

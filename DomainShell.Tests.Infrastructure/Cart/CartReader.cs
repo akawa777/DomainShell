@@ -29,7 +29,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private DbCommand CreateDbCommand()
         {
-            return _session.GetConnectionPort<DbConnection>().CreateCommand();
+            return _session.GetPort<DbConnection>().CreateCommand();
         }
 
         public CartItemReadObject[] GetCartItems(string customerId)

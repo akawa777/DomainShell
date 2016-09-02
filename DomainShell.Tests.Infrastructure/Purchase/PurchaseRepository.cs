@@ -31,7 +31,7 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
         private void Create(PurchaseModel purchase)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
             db.Command<PurchaseModel>("Purchase", "PurchaseId").Insert(purchase);
 

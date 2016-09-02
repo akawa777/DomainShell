@@ -55,12 +55,12 @@ namespace DomainShell.Tests
         {
             SqliteSessionKernel kernel = new SqliteSessionKernel();
 
-            DomainShell.Infrastructure.Session session = new DomainShell.Infrastructure.Session(kernel);
+            Session session = new Session(kernel);
+
+            CustomerRepository repository = new CustomerRepository(session);
 
             using (session.Connect())
             {
-                CustomerRepository repository = new CustomerRepository(session);
-
                 CustomerModel model = repository.Find("1");
 
                 string id = model.CustomerId;
@@ -68,8 +68,6 @@ namespace DomainShell.Tests
             
             using (ITran tran = session.Tran())
             {
-                CustomerRepository repository = new CustomerRepository(session);
-
                 CustomerModel model = repository.Find("1");
 
                 string id = model.CustomerId;

@@ -34,7 +34,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private CartModel Get(string where, object parameters)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
             string template = @"
                 select * from Cart
@@ -75,7 +75,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private void Create(CartModel cart)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
             db.Command<CartModel>("Cart", "CartId").Insert(cart);
 
@@ -92,7 +92,7 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         private void Update(CartModel cart)
         {
-            DagentDatabase db = new DagentDatabase(_session.GetConnectionPort<DbConnection>());
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
             db.Command<CartModel>("Cart", "CartId").Update(cart);
 

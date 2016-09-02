@@ -28,7 +28,7 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
         private DbCommand CreateDbCommand()
         {
-            return _session.GetConnectionPort<DbConnection>().CreateCommand();
+            return _session.GetPort<DbConnection>().CreateCommand();
         }
 
         public PurchaseReadObject[] GetPurchases(string customerId)
