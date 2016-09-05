@@ -51,14 +51,17 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Cart\CartProxy.cs" />
+    <Compile Include="Common\IIdService.cs" />
     <Compile Include="Customer\CustomerProxy.cs" />
     <Compile Include="Customer\CustomerModel.cs" />
     <Compile Include="Cart\ITaxService.cs" />
     <Compile Include="Product\ProductProxy.cs" />
+    <Compile Include="Purchase\ICartIdService.cs" />
     <Compile Include="Purchase\ICreditCardService.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Product\ProductModel.cs" />
+    <Compile Include="Purchase\PurchaseProxy.cs" />
     <Compile Include="Purchase\PurchaseModel.cs" />
     <Compile Include="Cart\CartModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

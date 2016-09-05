@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
+using Dagent;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain.Product;
 
@@ -25,55 +26,23 @@ namespace DomainShell.Tests.Infrastructure.Product
 
         public ProductModel Find(string productId)
         {
-            DbCommand command = CreateDbCommand();
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            command.CommandText = @"
-                select * from Product where ProductId = @ProductId
-            ";
+            ProductModel model = db.Query<ProductModel>("Product", new { ProductId = productId }).Single();
 
-            DbParameter param = command.CreateParameter();
-            param.ParameterName = "@ProductId";
-            param.Value = productId;
-            command.Parameters.Add(param);
-
-            ProductProxy proxy = new ProductProxy();
-
-            using (DbDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    proxy.ProductId = reader["ProductId"].ToString();
-                    proxy.ProductName = reader["ProductName"].ToString();
-                    proxy.Price = int.Parse(reader["Price"].ToString());
-                }
-
-                return proxy == null ? null : new ProductModel(proxy);
-            }
+            return model;
         }
 
         public List<ProductModel> GetAll()
         {
-            DbCommand command = CreateDbCommand();
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            command.CommandText = @"
-                select * from Product order by ProductId
-            ";            
+            List<ProductModel> list = db.Query<ProductModel>(@"
+                select * from Product order by ProductId        
+            ").List();
 
-            using (DbDataReader reader = command.ExecuteReader())
-            {
-                List<ProductModel> list = new List<ProductModel>();
-                while (reader.Read())
-                {
-                    ProductProxy proxy = new ProductProxy();
-                    proxy.ProductId = reader["ProductId"].ToString();
-                    proxy.ProductName = reader["ProductName"].ToString();
-                    proxy.Price = int.Parse(reader["Price"].ToString());                    
 
-                    list.Add(new ProductModel(proxy));
-                }
-
-                return list;
-            }
+            return list;
         }
     }   
 }

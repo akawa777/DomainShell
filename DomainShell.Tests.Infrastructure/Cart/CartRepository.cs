@@ -12,7 +12,7 @@ using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
 
 namespace DomainShell.Tests.Infrastructure.Cart
-{
+{   
     public class CartRepository : IWriteRepository<CartModel>
     {
         public CartRepository(Session session)
@@ -77,17 +77,12 @@ namespace DomainShell.Tests.Infrastructure.Cart
         {
             DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            db.Command<CartModel>("Cart", "CartId").Insert(cart);
-
-            string cartId = db.Query("select CartId from Cart where ROWID = last_insert_rowid();").Scalar<string>();
+            db.Command<CartModel>("Cart", "CartId").Insert(cart);            
 
             foreach (CartItemModel item in cart.CartItems)
-            {
-                item.CartId = cartId;
+            {                
                 db.Command<CartItemModel>("CartItem", "CartId", "CartItemId").Insert(item);
-            }            
-
-            cart.CartId = cartId;            
+            }
         }
 
         private void Update(CartModel cart)

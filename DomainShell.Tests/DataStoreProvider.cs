@@ -66,6 +66,7 @@ namespace DomainShell.Tests
                 CreateProduct(connection);
                 CreateCart(connection);
                 CreatePurchase(connection);
+                CreateIdManege(connection);
             }
         }
 
@@ -173,8 +174,9 @@ namespace DomainShell.Tests
             {
                 command.CommandText = @"
                         create table Cart(
-                            CartId integer primary key,
-                            CustomerId int
+                            CartId integer,
+                            CustomerId int,
+                            primary key (CartId)
                         )
                     ";
 
@@ -200,7 +202,7 @@ namespace DomainShell.Tests
             {
                 command.CommandText = @"
                         create table Purchase(
-                            PurchaseId integer primary key,
+                            PurchaseId integer,
                             PaymentDate nvarchar(100),
                             CustomerId int,                            
                             CreditCardNo nvarchar(100),
@@ -209,7 +211,8 @@ namespace DomainShell.Tests
                             ShippingAddress nvarchar(100),
                             Postage int,
                             Tax int,
-                            PaymentAmount int
+                            PaymentAmount int,
+                            primary key (PurchaseId)
                         )
                     ";
 
@@ -223,6 +226,23 @@ namespace DomainShell.Tests
                             PriceAtTime int,
                             Number int,
                             primary key (PurchaseId, PurchaseDetailId)
+                        )
+                    ";
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        private static void CreateIdManege(DbConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = @"
+                        create table IdManege(
+                            TableName nvarchar(100),
+                            Id integer,
+                            Guid nvarchar(100),
+                            primary key (TableName, Id)
                         )
                     ";
 

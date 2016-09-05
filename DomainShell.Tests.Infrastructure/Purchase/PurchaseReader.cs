@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
+using Dagent;
 using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Purchase
@@ -33,9 +34,9 @@ namespace DomainShell.Tests.Infrastructure.Purchase
 
         public PurchaseReadObject[] GetPurchases(string customerId)
         {
-            DbCommand command = CreateDbCommand();
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            command.CommandText = @"
+            List<PurchaseReadObject> list = db.Query<PurchaseReadObject>(@"
                 select 
                     *
                 from 
@@ -44,32 +45,9 @@ namespace DomainShell.Tests.Infrastructure.Purchase
                     CustomerId = @CustomerId                
                 order by 
                     PaymentId desc
-            ";
+            ", new { CustomerId = customerId }).List();
 
-            DbParameter param = command.CreateParameter();
-            param.ParameterName = "@CustomerId";
-            param.Value = customerId;
-            command.Parameters.Add(param);
-
-            List<PurchaseReadObject> list = new List<PurchaseReadObject>();
-
-            using (DbDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    PurchaseReadObject item = new PurchaseReadObject();
-
-                    item.PurchaseId = reader["PaymentId"].ToString();
-                    item.PaymentDate = reader["PaymentDate"].ToString();
-                    item.CustomerId = reader["CustomerId"].ToString();
-                    item.ShippingAddress = reader["ShippingAddress"].ToString();
-                    item.PaymentAmount = decimal.Parse(reader["PaymentAmount"].ToString());
-
-                    list.Add(item);
-                }
-
-                return list.ToArray();
-            }
+            return list.ToArray();
         }
     }
 }

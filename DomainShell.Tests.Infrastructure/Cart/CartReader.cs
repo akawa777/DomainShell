@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
+using Dagent;
 using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Cart
@@ -34,41 +35,17 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
         public CartItemReadObject[] GetCartItems(string customerId)
         {
-            DbCommand command = CreateDbCommand();
+            DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            command.CommandText = @"
+            List<CartItemReadObject> list = db.Query<CartItemReadObject>(@"
                 select * from Cart
                 left join CartItem on Cart.CartId = CartItem.CartId
                 left join Product on CartItem.ProductId = Product.ProductId
                 where Cart.CustomerId = @CustomerId and CartItem.CartId is not null
                 order by CartItem.CartItemId
-            ";
+            ", new { CustomerId = customerId }).List();
 
-            DbParameter param = command.CreateParameter();
-            param.ParameterName = "@CustomerId";
-            param.Value = customerId;
-            command.Parameters.Add(param);
-
-            List<CartItemReadObject> items = new List<CartItemReadObject>();
-
-            using (DbDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    CartItemReadObject item = new CartItemReadObject();
-
-                    item.CartId = reader["CartId"].ToString();
-                    item.CartItemId = reader["CartItemId"].ToString();
-                    item.ProductId = reader["ProductId"].ToString();
-                    item.ProductName = reader["ProductName"].ToString();
-                    item.Price = int.Parse(reader["Price"].ToString());
-                    item.Number = int.Parse(reader["Number"].ToString());
-
-                    items.Add(item);
-                }
-
-                return items.ToArray();
-            }
+            return list.ToArray();
         }
 
         public decimal GetPostage()

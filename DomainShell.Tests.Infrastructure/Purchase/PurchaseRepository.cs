@@ -33,13 +33,10 @@ namespace DomainShell.Tests.Infrastructure.Purchase
         {
             DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            db.Command<PurchaseModel>("Purchase", "PurchaseId").Insert(purchase);
-
-            string purchaseId = db.Query("select PurchaseId from Purchase where ROWID = last_insert_rowid();").Scalar<string>();
+            db.Command<PurchaseModel>("Purchase", "PurchaseId").Insert(purchase);            
 
             foreach (PurchaseDetailModel detail in purchase.PurchaseDetails)
-            {
-                detail.PurchaseId = purchaseId;
+            {                
                 db.Command<PurchaseDetailModel>("PurchaseDetail", "PurchaseId", "PurchaseDetailId").Insert(detail);
             }
         }

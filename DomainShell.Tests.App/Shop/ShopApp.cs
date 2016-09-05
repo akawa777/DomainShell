@@ -9,6 +9,7 @@ using DomainShell.Tests.Domain.Product;
 using DomainShell.Tests.Domain.Purchase;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Infrastructure;
+using DomainShell.Tests.Infrastructure.Common;
 using DomainShell.Tests.Infrastructure.Cart;
 using DomainShell.Tests.Infrastructure.Customer;
 using DomainShell.Tests.Infrastructure.Product;
@@ -22,6 +23,7 @@ namespace DomainShell.Tests.App.Shop
         {
             _session = new Session(new SqliteSessionKernel());
 
+            _idService = new IdService(_session);
             _cartReader = new CartReader(_session);            
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
@@ -33,6 +35,7 @@ namespace DomainShell.Tests.App.Shop
         }
 
         private Session _session;
+        private IdService _idService;
         private CartReader _cartReader;        
         private CartRepository _cartRepository;
         private CustomerRepository _customerRepository;
@@ -57,15 +60,14 @@ namespace DomainShell.Tests.App.Shop
 
                 if (cartModel == null)
                 {
-                    cartModel = new CartModel();
-                    cartModel.CustomerId = command.CustomerId;                    
+                    cartModel = new CartModel(_idService, command.CustomerId);                    
                 }
 
-                CartItemModel cartItemModel = new CartItemModel
-                {
-                    Product = _productRepository.Find(command.ProductId),
-                    Number = command.Number
-                };
+                CartItemModel cartItemModel = cartModel.CreateItem();
+
+                cartItemModel.ProductId = command.ProductId;
+                cartItemModel.Product = _productRepository.Find(command.ProductId);
+                cartItemModel.Number = command.Number;                
 
                 cartModel.AddItem(cartItemModel);
 
@@ -237,7 +239,7 @@ namespace DomainShell.Tests.App.Shop
                 decimal postage = _cartReader.GetPostage();
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);                     
 
-                PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService);               
+                PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService, _idService);
 
                 purchaseModel.CreditCardNo = command.CreditCardNo;
                 purchaseModel.CreditCardHolder = command.CreditCardHolder;

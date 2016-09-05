@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Cart\CartReader.cs" />
     <Compile Include="Cart\TaxService.cs" />
+    <Compile Include="Common\IdService.cs" />
     <Compile Include="Purchase\PurchaseReader.cs" />
     <Compile Include="SqliteSessionKernel.cs" />
     <Compile Include="Purchase\CreditCardService.cs" />

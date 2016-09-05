@@ -30,8 +30,7 @@ namespace DomainShell.Infrastructure
             }
         }
 
-        private Dictionary<Type, ISessionKernel> _kernelMap = new Dictionary<Type, ISessionKernel>();
-        private bool _opened = false;
+        private Dictionary<Type, ISessionKernel> _kernelMap = new Dictionary<Type, ISessionKernel>();        
 
         public TConnection GetPort<TConnection>() where TConnection : class
         {
@@ -49,8 +48,6 @@ namespace DomainShell.Infrastructure
             {
                 kernel.Open();
             }
-
-            _opened = true;
 
             return new Connection(_kernelMap);
         }
@@ -74,14 +71,12 @@ namespace DomainShell.Infrastructure
 
     internal class Connection : IConnection
     {
-        public Connection(Dictionary<Type, ISessionKernel> kernelMap, Action dispose)
+        public Connection(Dictionary<Type, ISessionKernel> kernelMap)
         {
             _kernelMap = kernelMap;
-            _dispose = dispose;
         }
 
         private Dictionary<Type, ISessionKernel> _kernelMap = new Dictionary<Type, ISessionKernel>();
-        private Action _dispose;
 
         public void Dispose()
         {

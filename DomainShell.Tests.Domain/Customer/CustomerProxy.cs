@@ -6,13 +6,8 @@ using System.Threading.Tasks;
 using DomainShell.Domain;
 
 namespace DomainShell.Tests.Domain.Customer
-{
-    public interface ICustomerRecord
-    {        
-        string Address { get; set; }        
-    }
-
-    public class CustomerProxy : ICustomerRecord
+{   
+    public class CustomerProxy
     {
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }
