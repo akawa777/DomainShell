@@ -129,8 +129,6 @@ namespace DomainShell.Tests.Domain.Cart
                     Number = item.Number,
                     PriceAtTime = item.Product.Price
                 };
-
-                
             }            
 
             return purchase;            
