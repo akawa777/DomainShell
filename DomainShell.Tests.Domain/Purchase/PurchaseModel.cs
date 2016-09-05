@@ -12,13 +12,12 @@ namespace DomainShell.Tests.Domain.Purchase
 {
     public class PurchaseModel : IAggregateRoot
     {
-        private PurchaseModel()
-        {
+        private PurchaseModel()          
+        {   
             PurchaseDetails = new ReadOnlyCollection<PurchaseDetailModel>(_purchaseDetailList);
 
             State = State.Added;
         }
-
         public PurchaseModel(IIdService idService) : this()
         {
             PurchaseId = idService.CreateId<PurchaseModel>();
@@ -50,7 +49,7 @@ namespace DomainShell.Tests.Domain.Purchase
             State = State.Stored;
         }
 
-        public string PurchaseId { get; private set; }
+        public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }
         public string CustomerId { get; set; }
         public string CreditCardNo { get; set; }
@@ -61,15 +60,14 @@ namespace DomainShell.Tests.Domain.Purchase
         public decimal Tax { get; set; }
         public decimal PaymentAmount { get; set; }
 
-        public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetails { get; private set; }
-
+        public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetails { get; set; }
         private List<PurchaseDetailModel> _purchaseDetailList = new List<PurchaseDetailModel>();
 
-        public PurchaseDetailModel CreateDetail()
+        public void AddDetail(PurchaseDetailModel detail)
         {
             string purchaseDetailId;
             if (PurchaseDetails.Count == 0)
-            {
+            {                
                 purchaseDetailId = "1";
             }
             else
@@ -77,15 +75,9 @@ namespace DomainShell.Tests.Domain.Purchase
                 purchaseDetailId = (PurchaseDetails.Max(x => int.Parse(x.PurchaseDetailId)) + 1).ToString();
             }
 
-            PurchaseDetailModel detail = new PurchaseDetailModel(PurchaseId, purchaseDetailId);
+            detail.PurchaseId = PurchaseId;
+            detail.PurchaseDetailId = purchaseDetailId;
 
-            _purchaseDetailList.Add(detail);
-
-            return detail;
-        }
-
-        public void AddDetail(PurchaseDetailModel detail)
-        {   
             _purchaseDetailList.Add(detail);
         }
 
@@ -97,10 +89,9 @@ namespace DomainShell.Tests.Domain.Purchase
 
     public class PurchaseDetailModel
     {
-        public PurchaseDetailModel(string purchaseId, string purchaseDetailId)
+        public PurchaseDetailModel()
         {
-            PurchaseId = purchaseId;
-            PurchaseDetailId = purchaseDetailId;
+
         }
 
         public PurchaseDetailModel(PurchaseDetailProxy proxy)
@@ -112,8 +103,8 @@ namespace DomainShell.Tests.Domain.Purchase
             Number = proxy.Number;
         }
 
-        public string PurchaseId { get; private set; }
-        public string PurchaseDetailId { get; private set; }
+        public string PurchaseId { get; set; }
+        public string PurchaseDetailId { get; set; }
         public string ProductId { get; set; }
         public decimal PriceAtTime { get; set; }
         public int Number { get; set; }

@@ -19,11 +19,10 @@ namespace DomainShell.Tests.Domain.Cart
             CartItems = new ReadOnlyCollection<CartItemModel>(_cartItemList);
         }
 
-        public CartModel(IIdService idService, string customerId)
+        public CartModel(IIdService idService)
             : this()
         {
             CartId = idService.CreateId<CartModel>();
-            CustomerId = customerId;
 
             State = State.Added;
         }        
@@ -48,13 +47,17 @@ namespace DomainShell.Tests.Domain.Cart
         public void Stored()
         {
             State = State.Stored;
-        }       
+        }
+
+        public void Empty()
+        {
+            _cartItemList.Clear();
+        }
 
         public string CartId { get; private set; }
-        public string CustomerId { get; private set; }
+        public string CustomerId { get; set; }
 
-        public ReadOnlyCollection<CartItemModel> CartItems { get; private set; }
-
+        public ReadOnlyCollection<CartItemModel> CartItems { get; set; }
         protected List<CartItemModel> _cartItemList = new List<CartItemModel>();        
 
         public decimal TotalPrice()
@@ -63,11 +66,6 @@ namespace DomainShell.Tests.Domain.Cart
         }
 
         public void AddItem(CartItemModel item)
-        {
-            _cartItemList.Add(item);
-        }
-
-        public CartItemModel CreateItem()
         {
             string cartItemId;
             if (CartItems.Count == 0)
@@ -78,8 +76,12 @@ namespace DomainShell.Tests.Domain.Cart
             {
                 cartItemId = (CartItems.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
             }
-
-            return new CartItemModel(CartId, cartItemId);
+            
+            item.CartId = CartId;
+            item.CartItemId = cartItemId;
+            item.ProductId = item.Product.ProductId;                        
+            
+            _cartItemList.Add(item);
         }
 
         public CartItemModel GetCartItem(string cartItemId)
@@ -121,30 +123,25 @@ namespace DomainShell.Tests.Domain.Cart
 
             foreach (CartItemModel item in CartItems)
             {
-                PurchaseDetailModel purchaseDetailModel = purchase.CreateDetail();
-                
-                purchaseDetailModel.ProductId = item.Product.ProductId;
-                purchaseDetailModel.Number = item.Number;
-                purchaseDetailModel.PriceAtTime = item.Product.Price;
+                PurchaseDetailModel purchaseDetailModel = new PurchaseDetailModel
+                {                    
+                    ProductId = item.Product.ProductId,
+                    Number = item.Number,
+                    PriceAtTime = item.Product.Price
+                };
 
-                purchase.AddDetail(purchaseDetailModel);
+                
             }            
 
             return purchase;            
-        }
-
-        public void Empty()
-        {
-            _cartItemList.Clear();
         }
     }
 
     public class CartItemModel
     {
-        public CartItemModel(string cartId, string cartItemId)
+        public CartItemModel()
         {
-            CartId = cartId;
-            CartItemId = cartItemId;
+            
         }
 
         public CartItemModel(CartItemProxy proxy)
@@ -156,8 +153,8 @@ namespace DomainShell.Tests.Domain.Cart
             Number = proxy.Number;
         }
 
-        public string CartId { get; private set; }
-        public string CartItemId { get; private set; }
+        public string CartId { get; set; }
+        public string CartItemId { get; set; }
         public string ProductId { get; set; }
         public ProductModel Product { get; set; }
         public int Number { get; set; }

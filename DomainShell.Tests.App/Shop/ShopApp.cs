@@ -60,14 +60,15 @@ namespace DomainShell.Tests.App.Shop
 
                 if (cartModel == null)
                 {
-                    cartModel = new CartModel(_idService, command.CustomerId);                    
+                    cartModel = new CartModel(_idService);
+                    cartModel.CustomerId = command.CustomerId;                    
                 }
 
-                CartItemModel cartItemModel = cartModel.CreateItem();
-
-                cartItemModel.ProductId = command.ProductId;
-                cartItemModel.Product = _productRepository.Find(command.ProductId);
-                cartItemModel.Number = command.Number;                
+                CartItemModel cartItemModel = new CartItemModel
+                {
+                    Product = _productRepository.Find(command.ProductId),
+                    Number = command.Number
+                };
 
                 cartModel.AddItem(cartItemModel);
 
