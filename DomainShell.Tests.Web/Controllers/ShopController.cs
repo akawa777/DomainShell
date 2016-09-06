@@ -40,9 +40,9 @@ namespace DomainShell.Tests.Web.Controllers
             return this.JsonCamel(result);
         }
 
-        public ActionResult Pay(PayCommand command)
+        public ActionResult Checkout(CheckoutCommand command)
         {
-            PayResult result = _app.Pay(command);
+            CheckoutResult result = _app.Checkout(command);
 
             return this.JsonCamel(result);
         }

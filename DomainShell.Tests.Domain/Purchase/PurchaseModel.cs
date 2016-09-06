@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Tests.Domain.Common;
+using DomainShell.Tests.Domain.Customer;
+using DomainShell.Tests.Domain.Product;
 using DomainShell.Tests.Domain.Cart;
 
 namespace DomainShell.Tests.Domain.Purchase
@@ -27,7 +29,7 @@ namespace DomainShell.Tests.Domain.Purchase
         {
             PurchaseId = proxy.PurchaseId;
             PaymentDate = proxy.PaymentDate;
-            CustomerId = proxy.CustomerId;
+            Customer = new CustomerModel(proxy.Customer);
             CreditCardNo = proxy.CreditCardNo;
             CreditCardHolder = proxy.CreditCardHolder;
             CreditCardExpirationDate = proxy.CreditCardExpirationDate;
@@ -51,7 +53,8 @@ namespace DomainShell.Tests.Domain.Purchase
 
         public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }
-        public string CustomerId { get; set; }
+        public string CustomerId { get { return Customer.CustomerId; } }
+        public CustomerModel Customer { get; set; }
         public string CreditCardNo { get; set; }
         public string CreditCardHolder { get; set; }
         public string CreditCardExpirationDate { get; set; }
@@ -63,7 +66,7 @@ namespace DomainShell.Tests.Domain.Purchase
         public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetails { get; set; }
         private List<PurchaseDetailModel> _purchaseDetailList = new List<PurchaseDetailModel>();
 
-        public void AddDetail(PurchaseDetailModel detail)
+        public PurchaseDetailModel CreateDetail()
         {
             string purchaseDetailId;
             if (PurchaseDetails.Count == 0)
@@ -75,37 +78,40 @@ namespace DomainShell.Tests.Domain.Purchase
                 purchaseDetailId = (PurchaseDetails.Max(x => int.Parse(x.PurchaseDetailId)) + 1).ToString();
             }
 
-            detail.PurchaseId = PurchaseId;
-            detail.PurchaseDetailId = purchaseDetailId;
+            PurchaseDetailModel detail = new PurchaseDetailModel(PurchaseId, purchaseDetailId);
 
             _purchaseDetailList.Add(detail);
-        }
 
-        public void Pay(ICreditCardService creditCardService)
-        {   
-            creditCardService.Pay(CreditCardNo, CreditCardHolder, CreditCardExpirationDate, PaymentAmount);
+            return detail;
         }
     }
 
     public class PurchaseDetailModel
     {
-        public PurchaseDetailModel()
+        private PurchaseDetailModel()
         {
 
+        }
+
+        public PurchaseDetailModel(string purchaseId, string purchaseDetailId)
+        {
+            PurchaseId = purchaseId;
+            PurchaseDetailId = purchaseDetailId;
         }
 
         public PurchaseDetailModel(PurchaseDetailProxy proxy)
         {
             PurchaseId = proxy.PurchaseId;            
             PurchaseDetailId = proxy.PurchaseDetailId;
-            ProductId = proxy.ProductId;
+            Product = new ProductModel(proxy.Product);
             PriceAtTime = proxy.PriceAtTime;
             Number = proxy.Number;
         }
 
-        public string PurchaseId { get; set; }
-        public string PurchaseDetailId { get; set; }
-        public string ProductId { get; set; }
+        public string PurchaseId { get; private set; }
+        public string PurchaseDetailId { get; private set; }
+        public string ProductId { get { return Product.ProductId; } }
+        public ProductModel Product { get; set; }
         public decimal PriceAtTime { get; set; }
         public int Number { get; set; }
     }

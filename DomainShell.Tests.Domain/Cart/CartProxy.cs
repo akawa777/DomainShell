@@ -14,15 +14,14 @@ namespace DomainShell.Tests.Domain.Cart
     public class CartProxy
     {
         public string CartId { get; set; }
-        public string CustomerId { get; set; }
+        public CustomerProxy Customer { get; set; }
         public List<CartItemProxy> CartItemList { get; set; }
     }
 
     public class CartItemProxy
     {
         public string CartId { get; set; }
-        public string CartItemId { get; set; }
-        public string ProductId { get; set; }
+        public string CartItemId { get; set; }        
         public ProductProxy Product { get; set; }
         public int Number { get; set; }
     }

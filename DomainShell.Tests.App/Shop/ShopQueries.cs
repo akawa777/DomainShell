@@ -50,6 +50,9 @@ namespace DomainShell.Tests.App.Shop
 
     public class PaymentAmountInfo
     {
+        public string CreditCardNo { get; set; }
+        public string CreditCardHolder { get; set; }
+        public string CreditCardExpirationDate { get; set; }
         public decimal Postage { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal Tax { get; set; }

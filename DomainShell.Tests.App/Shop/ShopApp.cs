@@ -61,22 +61,19 @@ namespace DomainShell.Tests.App.Shop
                 if (cartModel == null)
                 {
                     cartModel = new CartModel(_idService);
-                    cartModel.CustomerId = command.CustomerId;                    
+                    cartModel.Customer = _customerRepository.Find(command.CustomerId);
                 }
 
-                CartItemModel cartItemModel = new CartItemModel
-                {
-                    Product = _productRepository.Find(command.ProductId),
-                    Number = command.Number
-                };
+                CartItemModel cartItemModel = cartModel.CreateDetail();
 
-                cartModel.AddItem(cartItemModel);
+                cartItemModel.Product = _productRepository.Find(command.ProductId);
+                cartItemModel.Number = command.Number;
 
                 _cartRepository.Save(cartModel);
 
-                tran.Complete();
-
                 result.CartItemId = cartItemModel.CartItemId;
+
+                tran.Complete();                
 
                 return result;
             }            
@@ -224,15 +221,15 @@ namespace DomainShell.Tests.App.Shop
             }
 
             return result.Success;
-        }        
+        }
 
-        public PayResult Pay(PayCommand command)
+        public CheckoutResult Checkout(CheckoutCommand command)
         {
             using (ITran tran = _session.Tran())
             {
-                PayResult result = new PayResult();
+                CheckoutResult result = new CheckoutResult();
 
-                if (!ValidatePay(command, result))
+                if (!ValidateCheckout(command, result))
                 {
                     return result;
                 }
@@ -240,15 +237,15 @@ namespace DomainShell.Tests.App.Shop
                 decimal postage = _cartReader.GetPostage();
                 CartModel cartModel = _cartRepository.Get(command.CustomerId);                     
 
-                PurchaseModel purchaseModel = cartModel.Checkout(command.ShippingAddress, postage, _taxService, _idService);
-
-                purchaseModel.CreditCardNo = command.CreditCardNo;
-                purchaseModel.CreditCardHolder = command.CreditCardHolder;
-                purchaseModel.CreditCardExpirationDate = command.CreditCardExpirationDate;
-
-                purchaseModel.Pay(_creditCardService);
-
-                cartModel.Empty();
+                PurchaseModel purchaseModel = cartModel.Checkout(
+                    command.CreditCardNo,
+                    command.CreditCardHolder,
+                    command.CreditCardExpirationDate,
+                    command.ShippingAddress, 
+                    postage, 
+                    _taxService, 
+                    _creditCardService,
+                    _idService);                                
 
                 _cartRepository.Save(cartModel);
                 _purchaseRepository.Save(purchaseModel);
@@ -259,7 +256,7 @@ namespace DomainShell.Tests.App.Shop
             }
         }
 
-        private bool ValidatePay(PayCommand command, PayResult result)
+        private bool ValidateCheckout(CheckoutCommand command, CheckoutResult result)
         {
             if (string.IsNullOrEmpty(command.CustomerId))
             {
@@ -363,7 +360,7 @@ namespace DomainShell.Tests.App.Shop
                 return new PaymentAmountInfo
                 {
                     Postage = postage,
-                    TotalPrice = cartModel.TotalPrice(),
+                    TotalPrice = cartModel.GetTotalPrice(),
                     Tax = cartModel.GetTax(postage, _taxService),
                     PaymentAmount = cartModel.GetPaymentAmount(postage, _taxService)
                 };

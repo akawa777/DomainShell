@@ -63,7 +63,7 @@ namespace DomainShell.Tests.App.Shop
         public bool Success { get; set; }
     }
 
-    public class PayCommand
+    public class CheckoutCommand
     {
         public string CustomerId { get; set; }
         public string CreditCardNo { get; set; }
@@ -72,9 +72,9 @@ namespace DomainShell.Tests.App.Shop
         public string ShippingAddress { get; set; }
     }
 
-    public class PayResult
+    public class CheckoutResult
     {
-        public PayResult()
+        public CheckoutResult()
         {
             Success = true;
             Messages = new List<string>();

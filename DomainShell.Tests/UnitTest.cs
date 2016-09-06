@@ -36,9 +36,9 @@ namespace DomainShell.Tests
 
             CartItem[] items = app.GetCartItems(new CartItemsQuery { CustomerId = "1" });
 
-            Assert.AreEqual(2, items.Length);            
+            Assert.AreEqual(2, items.Length);
 
-            PayCommand payCommand = new PayCommand
+            CheckoutCommand checkoutCommand = new CheckoutCommand
             {
                 CustomerId = "1",
                 CreditCardNo = "xxx",
@@ -47,7 +47,7 @@ namespace DomainShell.Tests
                 ShippingAddress = "xxx-xxx"
             };
 
-            app.Pay(payCommand);
+            app.Checkout(checkoutCommand);
         }
 
         [TestMethod]

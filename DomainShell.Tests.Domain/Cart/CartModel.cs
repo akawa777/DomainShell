@@ -31,7 +31,7 @@ namespace DomainShell.Tests.Domain.Cart
             : this()
         {
             CartId = proxy.CartId;
-            CustomerId = proxy.CustomerId;
+            Customer = new CustomerModel(proxy.Customer);
 
             foreach (CartItemProxy itemProxy in proxy.CartItemList)
             {
@@ -49,39 +49,30 @@ namespace DomainShell.Tests.Domain.Cart
             State = State.Stored;
         }
 
-        public void Empty()
-        {
-            _cartItemList.Clear();
-        }
-
         public string CartId { get; private set; }
-        public string CustomerId { get; set; }
+        public string CustomerId { get { return Customer.CustomerId; } }
+        public CustomerModel Customer { get; set; }
 
         public ReadOnlyCollection<CartItemModel> CartItems { get; set; }
-        protected List<CartItemModel> _cartItemList = new List<CartItemModel>();        
-
-        public decimal TotalPrice()
-        {
-            return CartItems.Sum(x => x.Product.Price * x.Number);
-        }
-
-        public void AddItem(CartItemModel item)
+        protected List<CartItemModel> _cartItemList = new List<CartItemModel>();
+        
+        public CartItemModel CreateDetail()
         {
             string cartItemId;
             if (CartItems.Count == 0)
-            {                
+            {
                 cartItemId = "1";
             }
             else
             {
                 cartItemId = (CartItems.Max(x => int.Parse(x.CartItemId)) + 1).ToString();
             }
-            
-            item.CartId = CartId;
-            item.CartItemId = cartItemId;
-            item.ProductId = item.Product.ProductId;                        
-            
+
+            CartItemModel item = new CartItemModel(CartId, cartItemId);
+
             _cartItemList.Add(item);
+
+            return item;
         }
 
         public CartItemModel GetCartItem(string cartItemId)
@@ -98,23 +89,39 @@ namespace DomainShell.Tests.Domain.Cart
             _cartItemList.Remove(item);
         }
 
+        public decimal GetTotalPrice()
+        {
+            return CartItems.Sum(x => x.Product.Price * x.Number);
+        }
+
         public decimal GetTax(decimal postage, ITaxService taxService)
         {
-            return taxService.GetTax(postage + TotalPrice());
+            return taxService.GetTax(postage + GetTotalPrice());
         }
 
         public decimal GetPaymentAmount(decimal postage, ITaxService taxService)
         {
-            return taxService.Calculate(postage + TotalPrice());
+            return taxService.Calculate(postage + GetTotalPrice());
         }
 
-        public PurchaseModel Checkout(string shippingAddress, decimal postage, ITaxService taxService, IIdService idService)
+        public PurchaseModel Checkout(
+            string creditCardNo,
+            string creditCardHolder,
+            string creditCardExpirationDate,
+            string shippingAddress, 
+            decimal postage, 
+            ITaxService taxService, 
+            ICreditCardService creditCardService,
+            IIdService idService)
         {   
             decimal paymentAmount = GetPaymentAmount(postage, taxService);
             decimal Tax = GetTax(postage, taxService);
 
             PurchaseModel purchase = new PurchaseModel(idService);
-            purchase.CustomerId = CustomerId;
+            purchase.Customer = Customer;
+            purchase.CreditCardNo = creditCardNo;
+            purchase.CreditCardHolder = creditCardHolder;
+            purchase.CreditCardExpirationDate = creditCardExpirationDate;
             purchase.ShippingAddress = shippingAddress;
             purchase.Postage = postage;
             purchase.Tax = GetTax(postage, taxService);
@@ -123,13 +130,16 @@ namespace DomainShell.Tests.Domain.Cart
 
             foreach (CartItemModel item in CartItems)
             {
-                PurchaseDetailModel purchaseDetailModel = new PurchaseDetailModel
-                {                    
-                    ProductId = item.Product.ProductId,
-                    Number = item.Number,
-                    PriceAtTime = item.Product.Price
-                };
-            }            
+                PurchaseDetailModel purchaseDetailModel = purchase.CreateDetail();
+
+                purchaseDetailModel.Product = item.Product;
+                purchaseDetailModel.Number = item.Number;
+                purchaseDetailModel.PriceAtTime = item.Product.Price;                
+            }
+
+            creditCardService.Pay(creditCardNo, creditCardHolder, creditCardExpirationDate, paymentAmount);
+
+            _cartItemList.Clear();
 
             return purchase;            
         }
@@ -137,23 +147,28 @@ namespace DomainShell.Tests.Domain.Cart
 
     public class CartItemModel
     {
-        public CartItemModel()
+        private CartItemModel()
         {
             
+        }
+
+        public CartItemModel(string cartId, string cartItemId)
+        {
+            CartId = cartId;
+            CartItemId = cartItemId;
         }
 
         public CartItemModel(CartItemProxy proxy)
         {
             CartId = proxy.CartId;
-            CartItemId = proxy.CartItemId;
-            ProductId = proxy.ProductId;
+            CartItemId = proxy.CartItemId;            
             Product = new ProductModel(proxy.Product);
             Number = proxy.Number;
         }
 
-        public string CartId { get; set; }
-        public string CartItemId { get; set; }
-        public string ProductId { get; set; }
+        public string CartId { get; private set; }
+        public string CartItemId { get; private set; }
+        public string ProductId { get { return Product.ProductId;  } }
         public ProductModel Product { get; set; }
         public int Number { get; set; }
     }

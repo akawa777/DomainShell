@@ -56,7 +56,6 @@
     <Compile Include="Customer\CustomerModel.cs" />
     <Compile Include="Cart\ITaxService.cs" />
     <Compile Include="Product\ProductProxy.cs" />
-    <Compile Include="Purchase\ICartIdService.cs" />
     <Compile Include="Purchase\ICreditCardService.cs">
       <SubType>Code</SubType>
     </Compile>

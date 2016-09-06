@@ -48,9 +48,11 @@ namespace DomainShell.Tests.Infrastructure.Cart
 
             CartProxy proxy = db.Query<CartProxy>(sql, parameters)
                 .Unique("CartId")
-                .Each((currentRecord, row) =>
+                .Each((current, row) =>
                 {
-                    row.Map(currentRecord, x => x.CartItemList, "CartItemId")
+                    row.Map(current, x => x.Customer).Do();
+
+                    row.Map(current, x => x.CartItemList, "CartItemId")
                         .Unique("CartId", "CartItemId")
                         .Each(item =>row.Map(item, x => item.Product).Do())
                         .Do();
