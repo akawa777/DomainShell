@@ -66,7 +66,7 @@ namespace DomainShell.Tests.Domain.Purchase
         public ReadOnlyCollection<PurchaseDetailModel> PurchaseDetails { get; set; }
         private List<PurchaseDetailModel> _purchaseDetailList = new List<PurchaseDetailModel>();
 
-        public PurchaseDetailModel CreateDetail()
+        public PurchaseDetailModel AddDetail()
         {
             string purchaseDetailId;
             if (PurchaseDetails.Count == 0)

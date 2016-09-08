@@ -1,4 +1,4 @@
-﻿require(["el", "coco", "text!/Views/Shop/Checkout"], function (el, coco, template) {
+﻿require(["el", "coco", "text!/Views/Shop/Buy"], function (el, coco, template) {
     var list = {
         node: template,        
         ready: function () {
@@ -18,7 +18,7 @@
             
             var totalPrice = 0;
             self.$context.pin("cart", "tbody").empty();
-            $.post("/api/shop/getcartitems", { customerId: 1 }).success(function (cartItems) {
+            $.post("/api/cart/getcartitems", { customerId: 1 }).success(function (cartItems) {
                 cartItems.forEach(function (cartItem) {
                     var view = self.$coco({
                         model: tr,
@@ -35,7 +35,7 @@
                 $("body").html(result.responseText);
             });
 
-            $.post("/api/shop/getcustomer", { customerId: "1" }).success(function (customer) {
+            $.post("/api/cart/getcustomer", { customerId: "1" }).success(function (customer) {
                 self.$context.pin("shippingAddress").val(customer.address);
                 self.$context.pin("creditCardNo").val(customer.creditCardNo);
                 self.$context.pin("creditCardHolder").val(customer.creditCardHolder);
@@ -44,7 +44,7 @@
                 $("body").html(result.responseText);
             });
 
-            $.post("/api/shop/getpaymentamountinfo", { customerId: "1" }).success(function (info) {
+            $.post("/api/cart/getpaymentamountinfo", { customerId: "1" }).success(function (info) {
                 self.$context.pin("totalPrice").text(info.totalPrice);
                 self.$context.pin("postage").text(info.postage);
                 self.$context.pin("tax").text(info.tax);
@@ -53,8 +53,8 @@
                 $("body").html(result.responseText);
             });
 
-            self.$context.pin("pay").on("click", function () {
-                if (window.confirm("do you pay ?")) {
+            self.$context.pin("checkout").on("click", function () {
+                if (window.confirm("do you checkout ?")) {
                     var payment = {
                         customerId: "1",
                         creditCardNo: self.$context.pin("creditCardNo").val(),
@@ -63,8 +63,8 @@
                         shippingAddress: self.$context.pin("shippingAddress").val()
                     }
 
-                    $.post("/api/shop/pay", payment).success(function () {
-                        alert("completed payment.");
+                    $.post("/api/cart/checkout", payment).success(function () {
+                        alert("completed checkout.");
                         location.href = "/shop/history"
                     }).fail(function (result) {
                         $("body").html(result.responseText);

@@ -16,7 +16,7 @@
 
                     self.$context.pin("number").on("change", function (event) {
                         $.post(
-                            "/api/shop/update",
+                            "/api/cart/update",
                             {
                                 customerId: "1",
                                 cartItemId: self.$params.cartItemId,
@@ -31,7 +31,7 @@
 
                     self.$context.pin("remove").on("click", function () {
                         $.post(
-                            "/api/shop/remove",
+                            "/api/cart/remove",
                             {
                                 customerId: "1",
                                 cartItemId: self.$params.cartItemId
@@ -48,7 +48,7 @@
             }
             
             self.$context("table tbody").empty();            
-            $.post("/api/shop/getcartitems", { customerId: 1 }).success(function (cartItems) {
+            $.post("/api/cart/getcartitems", { customerId: 1 }).success(function (cartItems) {
                 cartItems.forEach(function (cartItem) {
                     var view = self.$coco({
                         model: tr,
@@ -61,11 +61,11 @@
                 $("body").html(result.responseText);
             });
 
-            self.$context.pin("checkout").on("click", function () {
-                $.post("/api/shop/getcartitems", { customerId: 1 }).success(function (cartItems) {
+            self.$context.pin("payment").on("click", function () {
+                $.post("/api/cart/getcartitems", { customerId: 1 }).success(function (cartItems) {
                     if (cartItems.length > 0)
                     {
-                        location.href = "/shop/checkout"
+                        location.href = "/cart/payment"
                     } else {
                         alert("not item in cart");
                     }

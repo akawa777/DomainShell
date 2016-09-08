@@ -172,6 +172,8 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\CartController.cs" />
+    <Compile Include="Controllers\PurchaseController.cs" />
     <Compile Include="Controllers\ShopController.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -184,9 +186,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="Scripts\Shop\checkout.js" />
-    <Content Include="Scripts\Shop\cart.js" />
-    <Content Include="Scripts\Shop\history.js" />
+    <Content Include="Scripts\Purchase\history.js" />
+    <Content Include="Scripts\Cart\cart.js" />
+    <Content Include="Scripts\Cart\payment.js" />
     <Content Include="Scripts\Shop\product.js">
       <SubType>Code</SubType>
     </Content>
@@ -219,13 +221,7 @@
     <Content Include="Scripts\Infrastructure\respond.min.js" />
     <Content Include="Scripts\Infrastructure\text.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Views\Shop\Cart.cshtml">
-      <SubType>Code</SubType>
-    </Content>
     <Content Include="Views\Facade\Index.cshtml" />
-    <Content Include="Views\Shop\History.cshtml">
-      <SubType>Code</SubType>
-    </Content>
     <Content Include="Views\Shop\Product.cshtml" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -239,7 +235,9 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Scripts\Infrastructure\jquery-1.10.2.min.map" />
-    <Content Include="Views\Shop\Checkout.cshtml" />
+    <Content Include="Views\Cart\Cart.cshtml" />
+    <Content Include="Views\Cart\Payment.cshtml" />
+    <Content Include="Views\Purchase\History.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

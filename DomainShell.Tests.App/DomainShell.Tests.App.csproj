@@ -41,6 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cart\CartApp.cs" />
+    <Compile Include="Cart\CartCommands.cs" />
+    <Compile Include="Cart\CartQueries.cs" />
+    <Compile Include="Purchase\PurchaseApp.cs" />
+    <Compile Include="Purchase\PurchaseQueries.cs" />
     <Compile Include="Shop\ShopApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shop\ShopCommands.cs" />

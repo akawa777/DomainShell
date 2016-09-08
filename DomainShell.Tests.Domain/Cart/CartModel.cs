@@ -56,7 +56,7 @@ namespace DomainShell.Tests.Domain.Cart
         public ReadOnlyCollection<CartItemModel> CartItems { get; set; }
         protected List<CartItemModel> _cartItemList = new List<CartItemModel>();
         
-        public CartItemModel CreateDetail()
+        public CartItemModel AddDetail()
         {
             string cartItemId;
             if (CartItems.Count == 0)
@@ -130,7 +130,7 @@ namespace DomainShell.Tests.Domain.Cart
 
             foreach (CartItemModel item in CartItems)
             {
-                PurchaseDetailModel purchaseDetailModel = purchase.CreateDetail();
+                PurchaseDetailModel purchaseDetailModel = purchase.AddDetail();
 
                 purchaseDetailModel.Product = item.Product;
                 purchaseDetailModel.Number = item.Number;

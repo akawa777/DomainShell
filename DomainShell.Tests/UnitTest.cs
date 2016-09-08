@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Infrastructure;
-using DomainShell.Tests.App.Shop;
 using DomainShell.Tests.Infrastructure.Customer;
 using DomainShell.Tests.Domain.Customer;
+using DomainShell.Tests.App.Shop;
+using DomainShell.Tests.App.Cart;
+using DomainShell.Tests.App.Purchase;
 
 namespace DomainShell.Tests
 {
@@ -24,17 +26,19 @@ namespace DomainShell.Tests
         [TestMethod]
         public void Test01()
         {
-            ShopApp app = new ShopApp();
+            ShopApp shopApp = new ShopApp();
+            CartApp cartApp = new CartApp();
+            PurchaseApp purchaseApp = new PurchaseApp();
 
-            AddCartItemResult addCartItemResult = app.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "1", Number = 1 });
-            addCartItemResult = app.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "2", Number = 2 });
-            addCartItemResult = app.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "3", Number = 3 });
+            AddCartItemResult addCartItemResult = shopApp.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "1", Number = 1 });
+            addCartItemResult = shopApp.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "2", Number = 2 });
+            addCartItemResult = shopApp.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "3", Number = 3 });
 
             RemoveCartItemCommand removeCartItemCommand = new RemoveCartItemCommand { CustomerId = "1", CartItemId = addCartItemResult.CartItemId };
 
-            app.RemoveCartItem(removeCartItemCommand);
+            cartApp.RemoveCartItem(removeCartItemCommand);
 
-            CartItem[] items = app.GetCartItems(new CartItemsQuery { CustomerId = "1" });
+            CartItem[] items = cartApp.GetCartItems(new CartItemsQuery { CustomerId = "1" });
 
             Assert.AreEqual(2, items.Length);
 
@@ -47,7 +51,7 @@ namespace DomainShell.Tests
                 ShippingAddress = "xxx-xxx"
             };
 
-            app.Checkout(checkoutCommand);
+            cartApp.Checkout(checkoutCommand);
         }
 
         [TestMethod]
