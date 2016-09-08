@@ -1,4 +1,4 @@
-﻿require(["el", "coco", "text!/Views/Shop/Buy"], function (el, coco, template) {
+﻿require(["el", "coco", "text!/Views/Cart/Payment"], function (el, coco, template) {
     var list = {
         node: template,        
         ready: function () {
@@ -65,7 +65,7 @@
 
                     $.post("/api/cart/checkout", payment).success(function () {
                         alert("completed checkout.");
-                        location.href = "/shop/history"
+                        location.href = "/Purchase/history"
                     }).fail(function (result) {
                         $("body").html(result.responseText);
                     });

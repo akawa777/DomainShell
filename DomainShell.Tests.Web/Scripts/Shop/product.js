@@ -21,7 +21,7 @@
                                 number: self.$context.pin("number").val()
                             })
                         .success(function (result) {
-                            
+                            location.href = "/cart/cart"
                         }).fail(function (result) {
                             $("body").html(result.responseText);
                         });

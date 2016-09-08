@@ -1,4 +1,4 @@
-﻿require(["el", "coco", "text!/Views/Shop/Cart"], function (el, coco, template) {
+﻿require(["el", "coco", "text!/Views/Cart/List"], function (el, coco, template) {
     var list = {
         node: template,        
         ready: function () {

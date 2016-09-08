@@ -187,7 +187,7 @@
   <ItemGroup>
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Scripts\Purchase\history.js" />
-    <Content Include="Scripts\Cart\cart.js" />
+    <Content Include="Scripts\Cart\list.js" />
     <Content Include="Scripts\Cart\payment.js" />
     <Content Include="Scripts\Shop\product.js">
       <SubType>Code</SubType>
@@ -235,7 +235,7 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Scripts\Infrastructure\jquery-1.10.2.min.map" />
-    <Content Include="Views\Cart\Cart.cshtml" />
+    <Content Include="Views\Cart\List.cshtml" />
     <Content Include="Views\Cart\Payment.cshtml" />
     <Content Include="Views\Purchase\History.cshtml" />
   </ItemGroup>

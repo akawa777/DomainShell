@@ -40,11 +40,11 @@ namespace DomainShell.Tests.Infrastructure.Purchase
                 select 
                     *
                 from 
-                    Payment                
+                    Purchase                
                 where 
                     CustomerId = @CustomerId                
                 order by 
-                    PaymentId desc
+                    PurchaseId desc
             ", new { CustomerId = customerId }).List();
 
             return list.ToArray();

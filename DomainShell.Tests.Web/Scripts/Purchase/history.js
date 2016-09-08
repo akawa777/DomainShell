@@ -1,4 +1,4 @@
-﻿require(["el", "coco", "text!/Views/Shop/History"], function (el, coco, template) {
+﻿require(["el", "coco", "text!/Views/Purchase/History"], function (el, coco, template) {
     var list = {
         node: template,        
         ready: function () {
@@ -8,7 +8,7 @@
                 node: self.$context("table tbody").html(),
                 ready: function () {
                     var self = this;
-                    self.$context.pin("paymentId").text(self.$params.paymentId);
+                    self.$context.pin("purchaseId").text(self.$params.purchaseId);
                     self.$context.pin("paymentDate").text(self.$params.paymentDate);
                     self.$context.pin("shippingAddress").text(self.$params.shippingAddress);
                     self.$context.pin("paymentAmount").text(self.$params.paymentAmount);
@@ -16,7 +16,7 @@
             }
 
             self.$context("table tbody").empty();
-            $.post("/api/purchase/getpayments", { customerId: "1" }).success(function (paymentContents) {
+            $.post("/api/purchase/getpurchasehistories", { customerId: "1" }).success(function (paymentContents) {
                 paymentContents.forEach(function (paymentContent) {
                     var view = self.$coco({
                         model: tr,
