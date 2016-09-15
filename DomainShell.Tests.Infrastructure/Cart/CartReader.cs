@@ -9,7 +9,7 @@ using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Cart
 {
-    public class CartItemReadObject
+    public class CartItemReadModel
     {
         public string CartId { get; set; }
         public string CartItemId { get; set; }
@@ -33,11 +33,11 @@ namespace DomainShell.Tests.Infrastructure.Cart
             return _session.GetPort<DbConnection>().CreateCommand();
         }
 
-        public CartItemReadObject[] GetCartItems(string customerId)
+        public CartItemReadModel[] GetCartItems(string customerId)
         {
             DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            List<CartItemReadObject> list = db.Query<CartItemReadObject>(@"
+            List<CartItemReadModel> list = db.Query<CartItemReadModel>(@"
                 select * from Cart
                 left join CartItem on Cart.CartId = CartItem.CartId
                 left join Product on CartItem.ProductId = Product.ProductId

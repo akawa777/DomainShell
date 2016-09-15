@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.Mappers;
+using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain.Cart;
 using DomainShell.Tests.Domain.Customer;
 using DomainShell.Tests.Domain.Product;
 using DomainShell.Tests.Domain.Purchase;
-using DomainShell.Infrastructure;
 using DomainShell.Tests.Infrastructure;
 using DomainShell.Tests.Infrastructure.Common;
 using DomainShell.Tests.Infrastructure.Cart;
@@ -26,14 +28,23 @@ namespace DomainShell.Tests.App.Shop
             _idService = new IdService(_session);
             _cartRepository = new CartRepository(_session);
             _customerRepository = new CustomerRepository(_session);
-            _productRepository = new ProductRepository(_session);            
+            _productRepository = new ProductRepository(_session);
+
+            _mapperConfig = new MapperConfiguration(configExpression =>
+            {
+                configExpression.CreateMap<ProductModel, Product>();
+            });
+
+            _mapper = new Mapper(_mapperConfig);
         }
 
         private Session _session;
         private IdService _idService;        
         private CartRepository _cartRepository;
         private CustomerRepository _customerRepository;
-        private ProductRepository _productRepository;        
+        private ProductRepository _productRepository;
+        private MapperConfiguration _mapperConfig;
+        private IMapper _mapper;
 
         public AddCartItemResult AddCartItem(AddCartItemCommand command)
         {
@@ -110,9 +121,7 @@ namespace DomainShell.Tests.App.Shop
             {
                 List<ProductModel> productList = _productRepository.GetAll();
 
-                return productList
-                    .Select(x => new Product { ProductId = x.ProductId, ProductName = x.ProductName, Price = x.Price })
-                    .ToArray();
+                return _mapper.Map<Product[]>(productList);
             }
         }
     }

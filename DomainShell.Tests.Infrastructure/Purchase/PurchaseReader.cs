@@ -9,7 +9,7 @@ using DomainShell.Infrastructure;
 
 namespace DomainShell.Tests.Infrastructure.Purchase
 {
-    public class PurchaseReadObject
+    public class PurchaseReadModel
     {
         public string PurchaseId { get; set; }
         public string PaymentDate { get; set; }
@@ -32,11 +32,11 @@ namespace DomainShell.Tests.Infrastructure.Purchase
             return _session.GetPort<DbConnection>().CreateCommand();
         }
 
-        public PurchaseReadObject[] GetPurchases(string customerId)
+        public PurchaseReadModel[] GetPurchases(string customerId)
         {
             DagentDatabase db = new DagentDatabase(_session.GetPort<DbConnection>());
 
-            List<PurchaseReadObject> list = db.Query<PurchaseReadObject>(@"
+            List<PurchaseReadModel> list = db.Query<PurchaseReadModel>(@"
                 select 
                     *
                 from 
