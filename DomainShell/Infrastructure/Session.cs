@@ -3,24 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainShell.Domain;
 
 namespace DomainShell.Infrastructure
 {
-    public interface ISessionKernel
-    {   
-        void Open();
-        void Close();
-        void BeginTran();
-        void Commit();
-        void Rollback();
-    }
-
-    public interface ISessionKernel<TConnectionPort> : ISessionKernel
-    {        
-        TConnectionPort GetConnectionPort();
-    }
-
-    public class Session
+    public class Session : ISession
     {
         public Session(params ISessionKernel[] kernels)
         {
@@ -42,7 +29,7 @@ namespace DomainShell.Infrastructure
             return null;
         }
 
-        public IConnection Connect()
+        public IConnection Open()
         {
             foreach (ISessionKernel kernel in _kernelMap.Values)
             {
@@ -60,13 +47,8 @@ namespace DomainShell.Infrastructure
                 kernel.BeginTran();
             }
 
-            return new Tran(_kernelMap);
+            return new Tran(_kernelMap, false);
         }
-    }
-
-    public interface IConnection : IDisposable
-    {
-
     }
 
     internal class Connection : IConnection
@@ -85,22 +67,29 @@ namespace DomainShell.Infrastructure
                 kernel.Close();
             }
         }
-    }
 
-    public interface ITran : IDisposable
-    {
-        void Complete();
+        public ITran Tran()
+        {
+            foreach (ISessionKernel kernel in _kernelMap.Values)
+            {   
+                kernel.BeginTran();
+            }
+
+            return new Tran(_kernelMap, true);
+        }
     }
 
     internal class Tran : ITran
     {
-        public Tran(Dictionary<Type, ISessionKernel> kernelMap)
+        public Tran(Dictionary<Type, ISessionKernel> kernelMap, bool opend)
         {
             _kernelMap = kernelMap;
+            _opend = opend;
         }
 
         private Dictionary<Type, ISessionKernel> _kernelMap = new Dictionary<Type, ISessionKernel>();
-        private bool completed = false;
+        private bool _completed = false;
+        private bool _opend = false;
 
         public void Complete()
         {
@@ -109,12 +98,12 @@ namespace DomainShell.Infrastructure
                 kernel.Commit();
             }
 
-            completed = true;
+            _completed = true;
         }
 
         public void Dispose()
         {
-            if (!completed)
+            if (!_completed)
             {
                 foreach (ISessionKernel kernel in _kernelMap.Values)
                 {
@@ -122,9 +111,12 @@ namespace DomainShell.Infrastructure
                 }
             }
 
-            foreach (ISessionKernel kernel in _kernelMap.Values)
+            if (!_opend)
             {
-                kernel.Close();
+                foreach (ISessionKernel kernel in _kernelMap.Values)
+                {
+                    kernel.Close();
+                }
             }
         }
     }

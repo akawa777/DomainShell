@@ -3,20 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
 
 namespace DomainShell.Domain
 {   
-    public interface IAggregateRoot
+    public interface IModel
     {
-        State State { get; }
-        void Stored();
+
     }
 
-    public enum State
+    public interface IValue : IModel
     {
-        Added,
-        Stored,
-        Removed
+        string Value { get; }
+    }
+
+    public interface IDeletable
+    {
+        bool Deleted { get; }
+    }
+
+    public interface IEntity : IModel
+    {        
+        
+    }
+
+    public interface IEntity<TIdentity> : IEntity
+    {
+        TIdentity Id { get; }
+    }
+
+    public interface IAggregateRoot : IEntity, IDomainEventCollection, IDeletable
+    {
+        
+    }
+
+    public interface IAggregateRoot<TIdentity> : IAggregateRoot, IEntity<TIdentity>
+    {
+        
     }
 }

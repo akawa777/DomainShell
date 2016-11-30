@@ -4,13 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using DomainShell.Infrastructure;
-using DomainShell.Tests.Infrastructure;
-using DomainShell.Tests.Infrastructure.Customer;
-using DomainShell.Tests.Domain.Customer;
-using DomainShell.Tests.App.Shop;
-using DomainShell.Tests.App.Cart;
-using DomainShell.Tests.App.Purchase;
+using DomainShell.Domain;
+using DomainShell.Tests.App;
 
 namespace DomainShell.Tests
 {
@@ -20,63 +15,125 @@ namespace DomainShell.Tests
         [TestInitialize]
         public void Init()
         {   
-            SqliteSessionKernel.Config(DataStoreProvider.CreateConnection);
+            
         }
 
         [TestMethod]
         public void Test01()
         {
-            ShopApp shopApp = new ShopApp();
-            CartApp cartApp = new CartApp();
-            PurchaseApp purchaseApp = new PurchaseApp();
+            PersonApp app = new PersonApp();
 
-            AddCartItemResult addCartItemResult = shopApp.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "1", Number = 1 });
-            addCartItemResult = shopApp.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "2", Number = 2 });
-            addCartItemResult = shopApp.AddCartItem(new AddCartItemCommand { CustomerId = "1", ProductId = "3", Number = 3 });
-
-            RemoveCartItemCommand removeCartItemCommand = new RemoveCartItemCommand { CustomerId = "1", CartItemId = addCartItemResult.CartItemId };
-
-            cartApp.RemoveCartItem(removeCartItemCommand);
-
-            CartItem[] items = cartApp.GetCartItems(new CartItemsQuery { CustomerId = "1" });
-
-            Assert.AreEqual(2, items.Length);
-
-            CheckoutCommand checkoutCommand = new CheckoutCommand
+            PersonCreationRequest personCreationRequest = new PersonCreationRequest
             {
-                CustomerId = "1",
-                CreditCardNo = "xxx",
-                CreditCardHolder = "xxx",
-                CreditCardExpirationDate = "xxx",
-                ShippingAddress = "xxx-xxx"
+                PersonId = "1",
+                Name = "xxx",
+                ZipCode = "xxx",
+                EMail = "xxx",
+                Content = "xxx"
+               
             };
 
-            cartApp.Checkout(checkoutCommand);
+            app.Create(personCreationRequest);
+
+            PersonUpdateRequest personUpdateRequest = new PersonUpdateRequest
+            {
+                Name = "xxx",
+                City = "xxxx",
+                Content = "xxxx"
+            };
+
+            app.Update(personUpdateRequest);
+
+            PersonDeletionRequest personDeletionRequest = new PersonDeletionRequest
+            {
+                PersonId = "1"
+            };
+
+            app.Delete(personDeletionRequest);
         }
 
         [TestMethod]
         public void Test02()
         {
-            SqliteSessionKernel kernel = new SqliteSessionKernel();
+            PredicateNode<int> predicate1 = new PredicateNode<int>(1);
+            PredicateNode<int> predicate2 = new PredicateNode<int>(2);
 
-            Session session = new Session(kernel);
+            PredicateNode<int> subPredicateNode1 = new OrPredicateNode<int>(predicate1, predicate2);
 
-            CustomerRepository repository = new CustomerRepository(session);
+            PredicateNode<int> predicate3 = new PredicateNode<int>(3);
+            PredicateNode<int> predicate4 = new PredicateNode<int>(4);
 
-            using (session.Connect())
+            PredicateNode<int> subPredicateNode2 = new OrPredicateNode<int>(predicate3, predicate4);
+
+            PredicateNode<int> summaryPredicateNode1 = new AndPredicateNode<int>(subPredicateNode1, subPredicateNode2);
+
+            PredicateNode<int> predicate5 = new PredicateNode<int>(5);
+            PredicateNode<int> predicate6 = new PredicateNode<int>(6);
+
+            PredicateNode<int> subPredicateNode3 = new OrPredicateNode<int>(predicate5, predicate6);
+
+            PredicateNode<int> predicate7 = new PredicateNode<int>(7);
+            PredicateNode<int> predicate8 = new PredicateNode<int>(8);
+
+            PredicateNode<int> subPredicateNode4 = new OrPredicateNode<int>(predicate7, predicate8);
+
+            PredicateNode<int> summaryPredicateNode2 = new AndPredicateNode<int>(subPredicateNode3, subPredicateNode4);
+
+            PredicateNode<int> totalPredicateNode = new AndPredicateNode<int>(summaryPredicateNode1, summaryPredicateNode2);
+
+            string expression;
+            int no = 1;
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+            ParsePredicateNode(
+                totalPredicateNode, 
+                (p, n, d) => 
+                {
+                    d[string.Format("@name_{0}", n.ToString())] = p.Target;
+                    return string.Format("name = @name_{0}", n.ToString());
+                }  ,
+                out expression, 
+                parameters,
+                ref no);
+        }
+
+        public void ParsePredicateNode<TTarget>(
+             PredicateNode<TTarget> predicate,
+             Func<PredicateNode<TTarget>, int, Dictionary<string, object>, string> get,
+             out string expressoin,
+             Dictionary<string, object> parameters,
+             ref int parameterNo)
+        {
+            IPredicateNode<TTarget> predicateBody = predicate as IPredicateNode<TTarget>;
+
+            expressoin = string.Empty;
+
+            if (predicateBody.PredicateNodeList == null || predicateBody.PredicateNodeList.Count == 0)
             {
-                CustomerModel model = repository.Find("1");
-
-                string id = model.CustomerId;
+                expressoin = get(predicate, parameterNo, parameters);
+                parameterNo++;
             }
-            
-            using (ITran tran = session.Tran())
+            else
             {
-                CustomerModel model = repository.Find("1");
+                string mergeSubNode = string.Empty;
 
-                string id = model.CustomerId;
+                foreach (PredicateNode<TTarget> subPredicateNode in predicateBody.PredicateNodeList)
+                {
+                    string subNode;
 
-                tran.Complete();
+                    ParsePredicateNode<TTarget>(subPredicateNode, get, out subNode, parameters, ref parameterNo);
+
+                    if (mergeSubNode != string.Empty)
+                    {
+                        mergeSubNode += predicateBody.And ? " and " : " or ";
+                    }
+
+                    mergeSubNode += subNode;
+                }
+
+                mergeSubNode = " ( " + mergeSubNode + " ) ";
+
+                expressoin += mergeSubNode;
             }
         }
     }

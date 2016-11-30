@@ -57,22 +57,30 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DataStoreProvider.cs" />
+    <Compile Include="Infrastructure\Services\ZipCodeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="App\PersonApp.cs" />
+    <Compile Include="Domain\AddressValue.cs" />
+    <Compile Include="Domain\Contracts\IZipCodeService.cs" />
+    <Compile Include="Domain\Contracts\IMailService.cs" />
+    <Compile Include="Domain\Contracts\IPersonFactory.cs" />
+    <Compile Include="Domain\Contracts\IPersonRepository.cs" />
+    <Compile Include="Domain\Handlers\PersonHandler.cs" />
+    <Compile Include="Domain\HistoryEntity.cs" />
+    <Compile Include="Domain\PersonEntity.cs" />
+    <Compile Include="Domain\PersonEvent.cs" />
+    <Compile Include="Domain\Specification.cs" />
+    <Compile Include="Infrastructure\Contracts\IPersonViewReader.cs" />
+    <Compile Include="Infrastructure\Factories\PersonFactory.cs" />
+    <Compile Include="Infrastructure\PersonDto.cs" />
+    <Compile Include="Infrastructure\PersonProxy.cs" />
+    <Compile Include="Infrastructure\Repositories\PersonRepository.cs" />
+    <Compile Include="Infrastructure\Services\MailService.cs" />
+    <Compile Include="Infrastructure\Services\PersonSql.cs" />
+    <Compile Include="Infrastructure\Services\PersonViewReader.cs" />
     <Compile Include="UnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DomainShell.Tests.App\DomainShell.Tests.App.csproj">
-      <Project>{7469064d-d604-4024-91b2-c9bcf615d3bd}</Project>
-      <Name>DomainShell.Tests.App</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DomainShell.Tests.Domain\DomainShell.Tests.Domain.csproj">
-      <Project>{0c5bdf26-32c2-404c-9293-32f92160a444}</Project>
-      <Name>DomainShell.Tests.Domain</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DomainShell.Tests.Infrastructure\DomainShell.Tests.Infrastructure.csproj">
-      <Project>{89efadf3-8ed5-4d6d-bb71-0f08bceffae7}</Project>
-      <Name>DomainShell.Tests.Infrastructure</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DomainShell\DomainShell.csproj">
       <Project>{63af8772-ea46-4dda-8424-bc4d9aeebc14}</Project>
       <Name>DomainShell</Name>
@@ -81,6 +89,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Domain\Services\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
