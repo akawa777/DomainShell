@@ -36,45 +36,8 @@ namespace DomainShell.Tests.Infrastructure.Repositories
             return person;
         }
 
-        private List<Func<PersonProxy, bool>> GetSpecFuncList(ISelectionSpec<PersonPredicate> spec)
-        {
-            List<Func<PersonProxy, bool>> list = new List<Func<PersonProxy, bool>>();
-
-            foreach (KeyValuePair<PersonPredicateItem, object> keyValue in spec.Predicate())
-            {
-                Func<PersonProxy, bool> func = person =>
-                {
-                    if (keyValue.Key == PersonPredicateItem.LikeName)
-                    {
-                        return person.Name != null && person.Name.StartsWith(keyValue.Value.ToString());
-                    }
-                    else if (keyValue.Key == PersonPredicateItem.City)
-                    {
-                        return person.Address.City != null && person.Address.City == keyValue.Value.ToString();
-                    }
-
-                    return true;
-                };
-
-                list.Add(func);
-            }
-
-            //if (spec.Predicate().And && !specFuncList.All(x => x(person)))
-            //{
-            //    continue;
-            //}
-            //else if (!spec.Predicate().And && !specFuncList.Any(x => x(person)))
-            //{
-            //    continue;
-            //}
-
-            return list;
-        }
-
         public IEnumerable<PersonEntity> List(ISelectionSpec<PersonPredicate> spec)
         {
-            List<Func<PersonProxy, bool>> specFuncList = GetSpecFuncList(spec);
-
             IEnumerable<PersonDto> dtos = _personDao.GetList(spec.Predicate());
 
             foreach (PersonDto dto in dtos)
