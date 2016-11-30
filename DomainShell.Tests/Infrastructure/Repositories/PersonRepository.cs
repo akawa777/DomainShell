@@ -16,22 +16,22 @@ namespace DomainShell.Tests.Infrastructure.Repositories
         public PersonRepository(ISession session, IDomainEventDispatcher domainEventDispatcher)
         {
             _domainEventDispatcher = domainEventDispatcher;
+            _personDao = new PersonDao(session);
         }
 
         private IDomainEventDispatcher _domainEventDispatcher;
-        private List<PersonDto> _memoryStore = new List<PersonDto>();        
-        private PersonSql _personSql = new PersonSql();
+        private PersonDao _personDao;
 
         public PersonEntity Find(PersonId id)
         {
-            PersonDto memento = _memoryStore.FirstOrDefault(x => x.PersonId == id.Value);
+            PersonDto dto = _personDao.Find(id.Value);
 
-            if (memento == null)
+            if (dto == null)
             {
                 return null;
             }
 
-            PersonProxy person = new PersonProxy(memento);
+            PersonProxy person = new PersonProxy(dto);
 
             return person;
         }
@@ -59,6 +59,15 @@ namespace DomainShell.Tests.Infrastructure.Repositories
                 list.Add(func);
             }
 
+            //if (spec.Predicate().And && !specFuncList.All(x => x(person)))
+            //{
+            //    continue;
+            //}
+            //else if (!spec.Predicate().And && !specFuncList.Any(x => x(person)))
+            //{
+            //    continue;
+            //}
+
             return list;
         }
 
@@ -66,18 +75,11 @@ namespace DomainShell.Tests.Infrastructure.Repositories
         {
             List<Func<PersonProxy, bool>> specFuncList = GetSpecFuncList(spec);
 
-            foreach (PersonDto memento in _memoryStore)
-            {
-                PersonProxy person = new PersonProxy(memento);                
+            IEnumerable<PersonDto> dtos = _personDao.GetList(spec.Predicate());
 
-                if (spec.Predicate().And && !specFuncList.All(x => x(person)))
-                {
-                    continue;
-                }
-                else if (!spec.Predicate().And && !specFuncList.Any(x => x(person)))
-                {
-                    continue;
-                }
+            foreach (PersonDto dto in dtos)
+            {
+                PersonProxy person = new PersonProxy(dto); 
 
                 yield return person;
             }   
@@ -91,17 +93,17 @@ namespace DomainShell.Tests.Infrastructure.Repositories
 
             if (person.Transient && !person.Deleted)
             {
-                _memoryStore.Add(person.Memento);
+                _personDao.Insert(person.Memento);
 
                 person.Transient = false;
             }
             else if (!person.Deleted)
             {
-                
+                _personDao.Update(person.Memento);
             }
             else if (person.Deleted)
             {
-                _memoryStore.Remove(person.Memento);                
+                _personDao.Delete(person.Memento);                
             }
 
             foreach (IDomainEvent domainEvent in person.GetEvents())

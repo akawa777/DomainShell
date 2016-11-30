@@ -12,8 +12,7 @@ using DomainShell.Tests.Infrastructure.Contracts;
 namespace DomainShell.Tests.App
 {
     public class PersonCreationRequest
-    {
-        public string PersonId { get; set; }
+    {   
         public string Name { get; set; }
         public string ZipCode { get; set; }
         public string EMail { get; set; }
@@ -32,15 +31,26 @@ namespace DomainShell.Tests.App
         public string PersonId { get; set; }
     }
 
+    public class PersonViewResult
+    {
+        public string PersonId { get; set; }
+        public string Name { get; set; }
+        public string EMail { get; set; }
+        public string ZipCode { get; set; }
+        public string City { get; set; }
+        public int HistoryNo { get; set; }
+        public string Content { get; set; }
+    }
+
     public class PersonApp
     {
-        public PersonApp()
+        public PersonApp(ISession sessino)
         {
-            _session = new Session();
+            _session = sessino;
 
             DomainEventDispatcher domainEventDispatcher = new DomainEventDispatcher();
-
-            _factory = new Infrastructure.Factories.PersonFactory();
+            
+            _factory = new Infrastructure.Factories.PersonFactory(new Infrastructure.Services.PersonIdGenerator(_session));
             _repository = new Infrastructure.Repositories.PersonRepository(_session, domainEventDispatcher);
             _zipCodeService = new Infrastructure.Services.ZipCodeService();
             _reader = new Infrastructure.Services.PersonViewReader(_session);
@@ -49,7 +59,7 @@ namespace DomainShell.Tests.App
         }
 
         private ISession _session;
-
+        
         private IPersonFactory _factory;        
         private IPersonRepository _repository;
         private IZipCodeService _zipCodeService;
@@ -59,10 +69,11 @@ namespace DomainShell.Tests.App
         {
             using (ITran tran = _session.Tran())
             {
-                PersondCreationSpec spec = new PersondCreationSpec(request.PersonId);
+                PersondCreationSpec spec = new PersondCreationSpec();
                 PersonEntity person = _factory.Create(spec);
 
                 person.Name = request.Name;
+                person.EMail = request.EMail;
 
                 person.SetAddressFromZipCode(request.ZipCode, _zipCodeService);
 
@@ -114,11 +125,23 @@ namespace DomainShell.Tests.App
             }
         }
 
-        public IEnumerable<PersonViewDto> GetCollection()
+        public IEnumerable<PersonViewResult> GetCollection()
         {
             using (_session.Open())
             {
-                return _reader.GetPersonViewList();               
+                foreach (PersonViewDto dto in _reader.GetPersonViewList())
+                {
+                    yield return new PersonViewResult
+                    {
+                         PersonId = dto.PersonId,
+                         Name = dto.Name,
+                         EMail = dto.EMail,
+                         ZipCode = dto.ZipCode,
+                         City = dto.City,
+                         HistoryNo = dto.HistoryNo,
+                         Content = dto.Content
+                    };
+                }
             }
         }
     }

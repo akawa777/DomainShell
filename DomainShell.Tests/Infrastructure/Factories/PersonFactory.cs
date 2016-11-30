@@ -11,9 +11,16 @@ namespace DomainShell.Tests.Infrastructure.Factories
 {
     public class PersonFactory : IPersonFactory
     {
+        public PersonFactory(IPersonIdGenerator personIdGenerator)
+        {
+            _personIdGenerator = personIdGenerator;
+        }
+
+        private IPersonIdGenerator _personIdGenerator;
+
         public PersonEntity Create(ICreationSpec<PersonEntity, PersonOpions> spec)
         {
-            PersonProxy person = new PersonProxy(new PersonDto { PersonId = spec.Options().PersonId, HistoryList = new List<HistoryDto>() });
+            PersonProxy person = new PersonProxy(new PersonDto { PersonId = _personIdGenerator.Generate() });
             person.Transient = true;
 
             spec.Satisfied(person);

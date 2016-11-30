@@ -12,15 +12,14 @@ namespace DomainShell.Tests.Infrastructure.Services
     {
         public PersonViewReader(ISession session)
         {
-            _session = session;
+            _personDao = new PersonDao(session);
         }
-
-        private ISession _session;
-        private PersonSql _personSql = new PersonSql();
+        
+        private PersonDao _personDao;
 
         public IEnumerable<PersonViewDto> GetPersonViewList()
         {
-            return Enumerable.Empty<PersonViewDto>();
+            return _personDao.GetViewList();
         }
     }
 }

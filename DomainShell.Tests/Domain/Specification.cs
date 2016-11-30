@@ -5,28 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
 using DomainShell.Tests.Domain;
+using DomainShell.Tests.Domain.Contracts;
 
 namespace DomainShell.Tests.Domain
 {
     public class PersonOpions
     {
-        public string PersonId { get; set; }
+        public string PersonId { get; set;}
     }
 
     public class PersondCreationSpec : ICreationSpec<PersonEntity, PersonOpions>
     {
-        public PersondCreationSpec(string id)
+        public PersondCreationSpec()
         {
-            _id = id;
+            
         }
-
-        private string _id;
 
         public PersonOpions Options()
         {
             return new PersonOpions
             {
-                PersonId = _id
+                
             };
         }
 

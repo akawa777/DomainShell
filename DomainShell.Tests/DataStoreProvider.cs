@@ -61,192 +61,40 @@ namespace DomainShell.Tests
             using (DbConnection connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
-
-                CreateCustomer(connection);
-                CreateProduct(connection);
-                CreateCart(connection);
-                CreatePurchase(connection);
-                CreateIdManege(connection);
+                CreateTable(connection);
             }
         }
 
-        private static void CreateCustomer(DbConnection connection)
+        private static void CreateTable(DbConnection connection)
         {
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = @"
-                        create table Customer(
-                            CustomerId integer primary key,
-                            CustomerName nvarchar(100),
-                            Address nvarchar(100),
-                            CreditCardNo nvarchar(100),
-                            CreditCardHolder nvarchar(100),
-                            CreditCardExpirationDate nvarchar(100)
-                        )
-                    ";
+                        create table Person (
+                            PersonId integer,
+                            Name nvarchar(100),
+                            EMail nvarchar(100),
+                            ZipCode nvarchar(100),
+                            City nvarchar(100),
+                            primary key(PersonId)
+                        );
 
-                var ret = command.ExecuteNonQuery();
-            }
+                        create table History (
+                            PersonId integer,
+                            HistoryNo integer,
+                            Content nvarchar(100),                            
+                            primary key(PersonId, HistoryNo)
+                        );
 
-            using (DbCommand command = connection.CreateCommand())
-            {
-                command.CommandText = "insert into Customer (CustomerName, Address, CreditCardNo, CreditCardHolder, CreditCardExpirationDate) values (@name, @address, @creditCardNo, @creditCardHolder, @creditCardExpirationDate)";
-
-                for (int i = 0; i < 10; i++)
-                {
-                    DbParameter parameter = command.CreateParameter();
-                    parameter.ParameterName = "@name";
-                    parameter.Value = "customer_" + (i + 1).ToString();
-                    command.Parameters.Add(parameter);
-
-                    parameter = command.CreateParameter();
-                    parameter.ParameterName = "@address";
-                    parameter.Value = "address_" + (i + 1).ToString();
-                    command.Parameters.Add(parameter);
-
-                    parameter = command.CreateParameter();
-                    parameter.ParameterName = "@creditCardNo";
-                    parameter.Value = "creditCardNo_" + (i + 1).ToString();
-                    command.Parameters.Add(parameter);
-
-                    parameter = command.CreateParameter();
-                    parameter.ParameterName = "@creditCardHolder";
-                    parameter.Value = "creditCardHolder_" + (i + 1).ToString();
-                    command.Parameters.Add(parameter);
-
-                    parameter = command.CreateParameter();
-                    parameter.ParameterName = "@creditCardExpirationDate";
-                    parameter.Value = "creditCardExpirationDate_" + (i + 1).ToString();
-                    command.Parameters.Add(parameter);
-
-                    var ret = command.ExecuteNonQuery();
-
-                    command.Parameters.Clear();
-                }
-            }
-        }
-
-        private static void CreateProduct(DbConnection connection)
-        {
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                        create table Product(
-                            ProductId integer primary key,
-                            ProductName nvarchar(100),
-                            Price int
-                        )
-                    ";
-
-                var ret = command.ExecuteNonQuery();
-            }
-
-            using (DbCommand command = connection.CreateCommand())
-            {
-                command.CommandText = "insert into Product (ProductName, Price) values (@name, @price)";
-
-                for (int i = 0; i < 10; i++)
-                {
-                    DbParameter parameter = command.CreateParameter();
-
-                    parameter.ParameterName = "@name";
-                    parameter.Value = "product_" + (i + 1).ToString();
-
-                    command.Parameters.Add(parameter);
-
-                    parameter = command.CreateParameter();
-
-                    parameter.ParameterName = "@price";
-                    parameter.Value = 100 * (i + 1);
-
-                    command.Parameters.Add(parameter);
-
-                    var ret = command.ExecuteNonQuery();
-
-                    command.Parameters.Clear();
-                }
-            }
-        }
-
-        private static void CreateCart(DbConnection connection)
-        {
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                        create table Cart(
-                            CartId integer,
-                            CustomerId int,
-                            primary key (CartId)
-                        )
-                    ";
-
-                command.ExecuteNonQuery();
-
-                command.CommandText = @"
-                        create table CartItem(
-                            CartId int,
-                            CartItemId int,                            
-                            ProductId int,
-                            Number int,
-                            primary key (CartId, CartItemId)
-                        )
-                    ";
-
-                command.ExecuteNonQuery();
-            }
-        }
-
-        private static void CreatePurchase(DbConnection connection)
-        {
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                        create table Purchase(
-                            PurchaseId integer,
-                            PaymentDate nvarchar(100),
-                            CustomerId int,                            
-                            CreditCardNo nvarchar(100),
-                            CreditCardHolder nvarchar(100),
-                            CreditCardExpirationDate nvarchar(8),
-                            ShippingAddress nvarchar(100),
-                            Postage int,
-                            Tax int,
-                            PaymentAmount int,
-                            primary key (PurchaseId)
-                        )
-                    ";
-
-                command.ExecuteNonQuery();
-
-                command.CommandText = @"
-                        create table PurchaseDetail(
-                            PurchaseId int,
-                            PurchaseDetailId int,                            
-                            ProductId int,
-                            PriceAtTime int,
-                            Number int,
-                            primary key (PurchaseId, PurchaseDetailId)
-                        )
-                    ";
-
-                command.ExecuteNonQuery();
-            }
-        }
-
-        private static void CreateIdManege(DbConnection connection)
-        {
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = @"
-                        create table IdManege(
+                        create table IdManege (
                             TableName nvarchar(100),
                             Id integer,
                             Guid nvarchar(100),
                             primary key (TableName, Id)
-                        )
+                        );
                     ";
 
-                command.ExecuteNonQuery();
+                var ret = command.ExecuteNonQuery();
             }
         }
     }

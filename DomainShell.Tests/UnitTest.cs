@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Domain;
+using DomainShell.Infrastructure;
 using DomainShell.Tests.App;
 
 namespace DomainShell.Tests
@@ -14,18 +15,20 @@ namespace DomainShell.Tests
     {
         [TestInitialize]
         public void Init()
-        {   
-            
+        {
+            SqliteSessionKernel.Config(DataStoreProvider.CreateConnection);
+            _session = new DomainShell.Infrastructure.Session(new SqliteSessionKernel());
         }
+
+        private ISession _session;
 
         [TestMethod]
         public void Test01()
         {
-            PersonApp app = new PersonApp();
+            PersonApp app = new PersonApp(_session);
 
             PersonCreationRequest personCreationRequest = new PersonCreationRequest
-            {
-                PersonId = "1",
+            {                
                 Name = "xxx",
                 ZipCode = "xxx",
                 EMail = "xxx",
@@ -49,7 +52,9 @@ namespace DomainShell.Tests
                 PersonId = "1"
             };
 
-            app.Delete(personDeletionRequest);
+            //app.Delete(personDeletionRequest);
+
+            List<PersonViewResult> list = app.GetCollection().ToList();
         }
 
         [TestMethod]
