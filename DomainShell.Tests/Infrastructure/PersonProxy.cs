@@ -8,7 +8,7 @@ using DomainShell.Tests.Domain;
 
 namespace DomainShell.Tests.Infrastructure
 {
-    public class PersonProxy : PersonEntity, ITransient
+    public class PersonProxy : PersonEntity, IProxyModel<PersonDto>, ITransient
     {
         public PersonProxy(PersonDto memento)
         {
