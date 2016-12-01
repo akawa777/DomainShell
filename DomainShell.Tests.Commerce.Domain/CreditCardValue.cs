@@ -11,6 +11,15 @@ namespace DomainShell.Tests.Commerce.Domain
     {
         public CreditCardValue(int cardCompanyId, int cardNo)
         {
+            if (cardCompanyId <= 0)
+            {
+                throw new ArgumentException("cardCompanyId is inivalid");
+            }
+            else if (cardNo <= 0)
+            {
+                throw new ArgumentException("cardNo is inivalid");
+            }
+
             CardCompanyId = cardCompanyId;
             CardNo = cardNo;
         }

@@ -11,5 +11,6 @@ namespace DomainShell.Tests.Commerce.Domain.Contracts
     {
         string GetName(int productId);
         decimal GetPrice(int productId);
+        bool Exist(int productId);
     }
 }

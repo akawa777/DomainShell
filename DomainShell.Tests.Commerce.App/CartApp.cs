@@ -75,11 +75,15 @@ namespace DomainShell.Tests.Commerce.App
 
                 if (cart == null)
                 {
-                    CartCreationSpec spec = new CartCreationSpec(request.CustomerId);
-                    cart = _cartFactory.Create(spec);
+                    CartCreationSpec creationSpec = new CartCreationSpec(request.CustomerId);
+                    cart = _cartFactory.Create(creationSpec);
                 }
 
                 cart.AddProduct(request.ProductId, request.Quantity);
+
+                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
+
+                cart.Validate(validationSpec);
 
                 _cartRepository.Save(cart);
 
@@ -107,7 +111,9 @@ namespace DomainShell.Tests.Commerce.App
             {
                 CartEntity cart = _cartRepository.Find(new CartId(request.CustomerId));
 
-                cart.Purchase(new CreditCardValue(request.CardCompanyId, request.CardNo), _creditCardService, _productReadService);
+                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
+
+                cart.Purchase(new CreditCardValue(request.CardCompanyId, request.CardNo), _creditCardService, _productReadService, validationSpec);
 
                 _cartRepository.Save(cart);
 

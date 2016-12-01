@@ -26,5 +26,10 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Services
         {
             return 100m;
         }
+
+        public bool Exist(int productId)
+        {
+            return true;
+        }
     }
 }

@@ -150,10 +150,12 @@ namespace DomainShell.Tests.Commerce.Domain
             return _cartItemList.Sum(x => productReadService.GetPrice(x.ProductId));
         }
 
-        public void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService)
+        public void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
         {
             decimal totalPrice = GetTotalPrice(productReadService);
             string content = productReadService.GetName(_cartItemList[0].ProductId);
+
+            Validate(spec);
 
             creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 
@@ -179,6 +181,15 @@ namespace DomainShell.Tests.Commerce.Domain
             _events.Add(@event);
 
             Deleted = true;
+        }
+
+        public void Validate(IValidationSpec<CartEntity> spec)
+        {
+            string[] errors;
+            if (!spec.Validate(this, out errors))
+            {
+                throw new Exception(errors[0]);
+            }
         }
     }
 }
