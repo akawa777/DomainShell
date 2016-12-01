@@ -26,8 +26,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure
         public override void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
         {
             base.Purchase(creditCard, creditCardService, productReadService, spec);
-
-            Deleted = true;
+            
             OnceVerified = true;
         }
 
@@ -36,6 +35,13 @@ namespace DomainShell.Tests.Commerce.Infrastructure
             base.Validate(spec);
 
             OnceVerified = true;
+        }
+
+        public override void Delete()
+        {
+            base.Delete();
+
+            Deleted = true;
         }
     }
 }

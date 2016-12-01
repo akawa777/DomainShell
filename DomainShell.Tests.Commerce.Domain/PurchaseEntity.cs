@@ -124,5 +124,10 @@ namespace DomainShell.Tests.Commerce.Domain
                 throw new Exception(errors[0]);
             }
         }
+
+        public virtual void Delete()
+        {
+            throw new Exception("Purchase can not delete");
+        }
     }
 }

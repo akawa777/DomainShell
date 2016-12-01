@@ -153,6 +153,8 @@ namespace DomainShell.Tests.Commerce.Domain
 
             creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 
+            Delete();
+
             List<PucharseDto> list = new List<PucharseDto>();
 
             foreach (CartItemEntity cartItem in _cartItemList)
@@ -182,6 +184,11 @@ namespace DomainShell.Tests.Commerce.Domain
             {
                 throw new Exception(errors[0]);
             }
+        }
+
+        public virtual void Delete()
+        {
+            
         }
     }
 }

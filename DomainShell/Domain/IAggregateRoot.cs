@@ -16,6 +16,11 @@ namespace DomainShell.Domain
         string Value { get; }
     }
 
+    public interface IDeletable
+    {
+        void Delete();
+    }
+
     public interface IEntity : IModel
     {        
         
@@ -26,7 +31,7 @@ namespace DomainShell.Domain
         TIdentity Id { get; }
     }
 
-    public interface IAggregateRoot : IEntity, IDomainEventCollection
+    public interface IAggregateRoot : IEntity, IDomainEventCollection, IDeletable
     {
         
     }

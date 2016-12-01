@@ -16,17 +16,17 @@ namespace DomainShell.Infrastructure
         bool Transient { get; set; }
     }
 
-    public interface IDeletable
+    public interface IDeleted
     {
         bool Deleted { get; }
     }
 
-    public interface IVerifiable
+    public interface IOnceVerified
     {
         bool OnceVerified { get; set; }
     }
 
-    public interface IAggregateProxyModel : IProxyModel, ITransient, IDeletable, IVerifiable
+    public interface IAggregateProxyModel : IProxyModel, ITransient, IDeleted, IOnceVerified
     {
 
     }
