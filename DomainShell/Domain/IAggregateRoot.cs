@@ -16,11 +16,6 @@ namespace DomainShell.Domain
         string Value { get; }
     }
 
-    public interface IDeletable
-    {
-        bool Deleted { get; }
-    }
-
     public interface IEntity : IModel
     {        
         
@@ -31,7 +26,7 @@ namespace DomainShell.Domain
         TIdentity Id { get; }
     }
 
-    public interface IAggregateRoot : IEntity, IDomainEventCollection, IDeletable
+    public interface IAggregateRoot : IEntity, IDomainEventCollection
     {
         
     }

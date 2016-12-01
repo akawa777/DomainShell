@@ -16,6 +16,21 @@ namespace DomainShell.Infrastructure
         bool Transient { get; set; }
     }
 
+    public interface IDeletable
+    {
+        bool Deleted { get; }
+    }
+
+    public interface IVerifiable
+    {
+        bool OnceVerified { get; set; }
+    }
+
+    public interface IAggregateProxyModel : IProxyModel, ITransient, IDeletable, IVerifiable
+    {
+
+    }
+
     public interface IMementable<TMemento>
     {   
         TMemento Memento { get; }
@@ -25,5 +40,10 @@ namespace DomainShell.Infrastructure
     {        
         void RewriteProxy();
         void RewriteMemento();
+    }
+
+    public interface IAggregateProxyModel<TMemento> : IAggregateProxyModel, IMementable<TMemento>
+    {
+        
     }
 }

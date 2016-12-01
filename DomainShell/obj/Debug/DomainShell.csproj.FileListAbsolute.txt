@@ -1,4 +1,0 @@
-E:\Documents\GitHub\DomainShell\DomainShell\bin\Debug\DomainShell.dll
-E:\Documents\GitHub\DomainShell\DomainShell\bin\Debug\DomainShell.pdb
-E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\DomainShell.dll
-E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\DomainShell.pdb

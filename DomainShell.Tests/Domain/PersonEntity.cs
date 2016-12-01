@@ -74,16 +74,9 @@ namespace DomainShell.Tests.Domain
             (HistoryList as List<HistoryEntity>).Remove(history);            
         }
 
-        public bool Deleted
+        public virtual void Delete()
         {
-            get;
-            protected set;
-        }
-
-        public void Delete()
-        {
-            _events.Add(new PersonDeletedEvent { PersonId = Id.Value, PersonName = Name, Email = EMail });
-            Deleted = true;
+            _events.Add(new PersonDeletedEvent { PersonId = Id.Value, PersonName = Name, Email = EMail });         
         }
 
         public IEnumerable<IDomainEvent> GetEvents()

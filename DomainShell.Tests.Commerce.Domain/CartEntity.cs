@@ -105,12 +105,6 @@ namespace DomainShell.Tests.Commerce.Domain
             _events.Clear();
         }
 
-        public bool Deleted
-        {
-            get;
-            protected set;
-        }
-
         public CartId Id
         {
             get;
@@ -147,13 +141,13 @@ namespace DomainShell.Tests.Commerce.Domain
 
         protected decimal GetTotalPrice(IProductReadService productReadService)
         {
-            return _cartItemList.Sum(x => productReadService.GetPrice(x.ProductId));
+            return _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
         }
 
-        public void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
+        public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
         {
             decimal totalPrice = GetTotalPrice(productReadService);
-            string content = productReadService.GetName(_cartItemList[0].ProductId);
+            string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;
 
             Validate(spec);
 
@@ -179,11 +173,9 @@ namespace DomainShell.Tests.Commerce.Domain
             };
 
             _events.Add(@event);
-
-            Deleted = true;
         }
 
-        public void Validate(IValidationSpec<CartEntity> spec)
+        public virtual void Validate(IValidationSpec<CartEntity> spec)
         {
             string[] errors;
             if (!spec.Validate(this, out errors))

@@ -42,6 +42,7 @@
     <Compile Include="CartCreationSpec.cs" />
     <Compile Include="CartEntity.cs" />
     <Compile Include="CartPurchasedEvent.cs" />
+    <Compile Include="PurchaseValidationSpec.cs" />
     <Compile Include="CartValidationSpec.cs" />
     <Compile Include="Contracts\ICartFactory.cs" />
     <Compile Include="Contracts\ICartRepository.cs" />

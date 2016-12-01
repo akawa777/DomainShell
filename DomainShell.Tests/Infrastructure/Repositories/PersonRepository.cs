@@ -50,7 +50,17 @@ namespace DomainShell.Tests.Infrastructure.Repositories
 
         public void Save(PersonEntity aggregateRoot)
         {
-            PersonProxy person = aggregateRoot as PersonProxy;            
+            PersonProxy person = aggregateRoot as PersonProxy;
+
+            if (person.Transient && person.Deleted)
+            {
+                return;
+            }
+
+            if (!person.OnceVerified)
+            {
+                throw new Exception("not verified");
+            }
 
             person.RewriteMemento();            
 
@@ -75,6 +85,8 @@ namespace DomainShell.Tests.Infrastructure.Repositories
             }
 
             person.ClearEvents();
+
+            person.OnceVerified = false;
         }
     }
 }

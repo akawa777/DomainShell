@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain;
 
 namespace DomainShell.Tests.Infrastructure
 {
-    public class PersonProxy : PersonEntity, IProxyModel<PersonDto>, ITransient
+    public class PersonProxy : PersonEntity, IAggregateProxyModel<PersonDto>, ITransient
     {
         public PersonProxy(PersonDto memento)
         {
@@ -57,6 +58,24 @@ namespace DomainShell.Tests.Infrastructure
             }
         }
 
+        public override void Delete()
+        {
+            base.Delete();
+
+            Deleted = true;
+        }
+
+        public override void Validate(IValidationSpec<PersonEntity> spec)
+        {
+            base.Validate(spec);
+
+            OnceVerified = true;
+        }
+
         public bool Transient { get; set; }
+
+        public bool Deleted { get; private set; }
+
+        public bool OnceVerified { get; set; }
     }
 }

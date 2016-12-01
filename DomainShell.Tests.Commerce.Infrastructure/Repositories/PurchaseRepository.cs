@@ -23,14 +23,41 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Repositories
 
         public void Save(PurchaseEntity aggregateRoot)
         {
-            PurchaseProxy purchase = aggregateRoot as PurchaseProxy;            
+            PurchaseProxy proxy = aggregateRoot as PurchaseProxy;
 
-            foreach (IDomainEvent domainEvent in aggregateRoot.GetEvents())
+            if (proxy.Transient && proxy.Deleted)
+            {
+                return;
+            }
+
+            if (!proxy.OnceVerified)
+            {
+                throw new Exception("not verified");
+            }
+
+            if (proxy.Transient)
+            {
+
+            }
+            else if (!proxy.Deleted)
+            {
+
+            }
+            else if (proxy.Deleted)
+            {
+
+            }
+
+            proxy.Transient = false;
+
+            foreach (IDomainEvent domainEvent in proxy.GetEvents())
             {
                 _domainEventDispatcher.Dispatch(domainEvent);
             }
 
-            aggregateRoot.ClearEvents();
+            proxy.ClearEvents();
+
+            proxy.OnceVerified = false;
         }
 
         public PurchaseEntity Find(int id)

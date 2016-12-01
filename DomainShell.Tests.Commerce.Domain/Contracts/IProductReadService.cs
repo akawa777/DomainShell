@@ -7,10 +7,15 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Commerce.Domain.Contracts
 {
+    public interface IProductReadModel
+    {
+        int ProductId { get; }
+        string ProductName { get; }
+        decimal Price { get; }
+    }
+
     public interface IProductReadService : IInfrastructureService
     {
-        string GetName(int productId);
-        decimal GetPrice(int productId);
-        bool Exist(int productId);
+        IProductReadModel Find(int productId);
     }
 }

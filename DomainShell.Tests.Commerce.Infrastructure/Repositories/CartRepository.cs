@@ -23,15 +23,41 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Repositories
 
         public void Save(CartEntity aggregateRoot)
         {
-            CartProxy cart = aggregateRoot as CartProxy;
-            cart.Transient = false;
+            CartProxy proxy = aggregateRoot as CartProxy;
 
-            foreach (IDomainEvent domainEvent in aggregateRoot.GetEvents())
+            if (proxy.Transient && proxy.Deleted)
+            {
+                return;
+            }
+
+            if (!proxy.OnceVerified)
+            {
+                throw new Exception("not verified");
+            }
+
+            if (proxy.Transient)
+            {
+
+            }
+            else if (!proxy.Deleted)
+            {
+
+            }
+            else if (proxy.Deleted)
+            {
+
+            }
+
+            proxy.Transient = false;
+
+            foreach (IDomainEvent domainEvent in proxy.GetEvents())
             {
                 _domainEventDispatcher.Dispatch(domainEvent);
             }
 
-            aggregateRoot.ClearEvents();
+            proxy.ClearEvents();
+
+            proxy.OnceVerified = false;
         }
 
         public CartEntity Find(CartId id)

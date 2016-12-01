@@ -86,12 +86,6 @@ namespace DomainShell.Tests.Commerce.Domain
             throw new NotImplementedException();
         }
 
-        public bool Deleted
-        {
-            get;
-            protected set;
-        }
-
         public int Id
         {
             get;
@@ -120,6 +114,15 @@ namespace DomainShell.Tests.Commerce.Domain
         {
             get;
             protected set;
+        }
+
+        public virtual void Validate(IValidationSpec<PurchaseEntity> spec)
+        {
+            string[] errors;
+            if (!spec.Validate(this, out errors))
+            {
+                throw new Exception(errors[0]);
+            }
         }
     }
 }
