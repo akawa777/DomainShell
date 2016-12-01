@@ -18,7 +18,7 @@ namespace DomainShell.Tests.Infrastructure.Factories
 
         private IPersonIdGenerator _personIdGenerator;
 
-        public PersonEntity Create(ICreationSpec<PersonEntity, PersonOpions> spec)
+        public PersonEntity Create(ICreationSpec<PersonEntity, PersonConstructorParameters> spec)
         {
             PersonProxy person = new PersonProxy(new PersonDto { PersonId = _personIdGenerator.Generate() });
             person.Transient = true;

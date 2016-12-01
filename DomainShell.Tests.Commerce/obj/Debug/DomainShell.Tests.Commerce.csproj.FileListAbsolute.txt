@@ -1,0 +1,13 @@
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\obj\Debug\DomainShell.Tests.Commerce.csprojResolveAssemblyReference.cache
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\obj\Debug\DomainShell.Tests.Commerce.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\obj\Debug\DomainShell.Tests.Commerce.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.App.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.Domain.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.Infrastructure.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.App.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.Domain.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce\bin\Debug\DomainShell.Tests.Commerce.Infrastructure.pdb

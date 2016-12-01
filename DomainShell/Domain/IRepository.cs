@@ -22,8 +22,7 @@ namespace DomainShell.Domain
     }
 
     public interface IRepository<TAggregateRoot, TIdentity> : IIdReposiory<TAggregateRoot, TIdentity>
-        where TAggregateRoot : IAggregateRoot<TIdentity>
-        where TIdentity : IValue
+        where TAggregateRoot : IAggregateRoot<TIdentity>        
     {        
         void Save(TAggregateRoot aggregateRoot);
     }

@@ -9,21 +9,21 @@ using DomainShell.Tests.Domain.Contracts;
 
 namespace DomainShell.Tests.Domain
 {
-    public class PersonOpions
+    public class PersonConstructorParameters
     {
-        public string PersonId { get; set;}
+        
     }
 
-    public class PersondCreationSpec : ICreationSpec<PersonEntity, PersonOpions>
+    public class PersondCreationSpec : ICreationSpec<PersonEntity, PersonConstructorParameters>
     {
         public PersondCreationSpec()
         {
             
         }
 
-        public PersonOpions Options()
+        public PersonConstructorParameters ConstructorParameters()
         {
-            return new PersonOpions
+            return new PersonConstructorParameters
             {
                 
             };

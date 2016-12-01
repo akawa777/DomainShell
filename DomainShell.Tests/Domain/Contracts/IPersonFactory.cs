@@ -7,7 +7,7 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Domain.Contracts
 {
-    public interface IPersonFactory : IFactory<PersonEntity, PersonOpions>
+    public interface IPersonFactory : IFactory<PersonEntity, PersonConstructorParameters>
     {
     }
 }

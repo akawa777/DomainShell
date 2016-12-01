@@ -60,7 +60,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DataStoreProvider.cs" />
-    <Compile Include="Domain\Contracts\IdProvider.cs" />
+    <Compile Include="Domain\Contracts\IPersonIdGenerator.cs" />
     <Compile Include="Infrastructure\Services\IdGenerator.cs" />
     <Compile Include="Infrastructure\Services\PersonDao.cs" />
     <Compile Include="Infrastructure\Services\PersonIdGenerator.cs" />

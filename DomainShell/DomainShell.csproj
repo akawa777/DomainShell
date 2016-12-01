@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\IApp.cs" />
     <Compile Include="Domain\IInfrastructureService.cs" />
     <Compile Include="Domain\IDomainService.cs" />
     <Compile Include="Domain\IDomainEvent.cs" />

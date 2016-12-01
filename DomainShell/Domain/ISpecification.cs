@@ -29,10 +29,10 @@ namespace DomainShell.Domain
         bool Validate(TTarget target, out string[] errors);
     }
 
-    public interface ICreationSpec<TTarget, TOptions> : 
+    public interface ICreationSpec<TTarget, TConstructorParameters> : 
         ISpecification
     {
-        TOptions Options();
+        TConstructorParameters ConstructorParameters();
         void Satisfied(TTarget target);        
     }
 

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Domain
 {
-    public interface IFactory<TAggregateRoot, TOptions> where TAggregateRoot : IAggregateRoot
+    public interface IFactory<TAggregateRoot, TConstructorParameters> where TAggregateRoot : IAggregateRoot
     {
-        TAggregateRoot Create(ICreationSpec<TAggregateRoot, TOptions> spec);
+        TAggregateRoot Create(ICreationSpec<TAggregateRoot, TConstructorParameters> spec);
     }
 }
