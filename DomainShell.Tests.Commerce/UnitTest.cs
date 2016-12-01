@@ -31,7 +31,7 @@ namespace DomainShell.Tests.Commerce
                 CustomerId = 1
             };
 
-            IEnumerable<CartItemListResponse> cartItemListResults = app.Execute(cartItemListRequest);
+            IEnumerable<CartItemResponse> cartItemResponseList = app.Execute(cartItemListRequest);
 
             CartPurchaseRequest cartPurchaseRequest = new CartPurchaseRequest
             {

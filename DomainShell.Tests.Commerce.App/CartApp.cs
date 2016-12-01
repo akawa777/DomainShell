@@ -14,7 +14,7 @@ using DomainShell.Tests.Commerce.Infrastructure.Contracts;
 namespace DomainShell.Tests.Commerce.App
 {
     public interface ICartApp :
-        IApp<CartItemListRequest, IEnumerable<CartItemListResponse>>,
+        IApp<CartItemListRequest, IEnumerable<CartItemResponse>>,
         IApp<CartItemAddRequest>,
         IApp<CartItemRemoveRequest>,
         IApp<CartPurchaseRequest>
@@ -50,11 +50,11 @@ namespace DomainShell.Tests.Commerce.App
         private IProductReadService _productReadService;
         private ICartReader _cartReader;
 
-        public IEnumerable<CartItemListResponse> Execute(CartItemListRequest request)
+        public IEnumerable<CartItemResponse> Execute(CartItemListRequest request)
         {
             foreach (CartItemReadDto dto in _cartReader.GetCartItemList(request.CustomerId))
             {
-                yield return new CartItemListResponse
+                yield return new CartItemResponse
                 {
                     CustomerId = dto.CustomerId,
                     CartNo = dto.CartNo,

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Tests.Commerce.App
 {   
-    public class CartItemListResponse
+    public class CartItemResponse
     {
         public int CustomerId { get; set; }
         public int CartNo { get; set; }
