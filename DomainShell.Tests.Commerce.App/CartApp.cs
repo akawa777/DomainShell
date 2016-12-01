@@ -13,47 +13,16 @@ using DomainShell.Tests.Commerce.Infrastructure.Contracts;
 
 namespace DomainShell.Tests.Commerce.App
 {
-    public class CartItemListRequest
-    {
-        public int CustomerId { get; set; }
-    }
-
-    public class CartItemListResult
-    {
-        public int CustomerId { get; set; }
-        public int CartNo { get; set; }
-        public int ProductId { get; set; }
-        public string ProductName { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-        public decimal TotalPrice { get; set; }
-    }
-
-    public class CartItemAddRequest
-    {
-        public int CustomerId { get; set; }
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-    }
-
-    public class CartItemRemoveRequest
-    {
-        public int CustomerId { get; set; }
-        public int CartItemNo { get; set; }
-    }
-
-    public class CartPurchaseRequest
-    {
-        public int CustomerId { get; set; }
-        public int CardCompanyId { get; set; }
-        public int CardNo { get; set; }
-    }
-
-    public class CartApp : 
-        IApp<CartItemListRequest, IEnumerable<CartItemListResult>>,
+    public interface ICartApp :
+        IApp<CartItemListRequest, IEnumerable<CartItemListResponse>>,
         IApp<CartItemAddRequest>,
         IApp<CartItemRemoveRequest>,
         IApp<CartPurchaseRequest>
+    {
+
+    }
+
+    public class CartApp : ICartApp        
     {
         public CartApp(ISession session)
         {
@@ -63,29 +32,29 @@ namespace DomainShell.Tests.Commerce.App
 
             _cartFactory = new Infrastructure.Factories.CartFactory(_session);
             _cartRepository = new Infrastructure.Repositories.CartRepository(_session, domainEventDispatcher);
-            _purchaseFactory = new Infrastructure.Factories.PurchaseFactory(_session);
-            _purchaseRepository = new Infrastructure.Repositories.PurchaseRepository(_session, domainEventDispatcher);
             _creditCardService = new Infrastructure.Services.CreditCardService();
             _productReadService = new Infrastructure.Services.ProductReadService(_session);
             _cartReader = new Infrastructure.Services.CartReader(_session);
 
-            domainEventDispatcher.Register<CartPurchasedEvent>(new CartEventHandler(_purchaseFactory, _purchaseRepository));
+            Infrastructure.Factories.PurchaseFactory purchaseFactory = new Infrastructure.Factories.PurchaseFactory(_session);
+            Infrastructure.Repositories.PurchaseRepository purchaseRepository = new Infrastructure.Repositories.PurchaseRepository(_session, domainEventDispatcher);
+
+
+            domainEventDispatcher.Register<CartPurchasedEvent>(new CartEventHandler(purchaseFactory, purchaseRepository));
         }
 
         private ISession _session;
         private ICartFactory _cartFactory;
         private ICartRepository _cartRepository;
-        private IPurchaseFactory _purchaseFactory;
-        private IPurchaseRepository _purchaseRepository;
         private ICreditCardService _creditCardService;
         private IProductReadService _productReadService;
         private ICartReader _cartReader;
 
-        public IEnumerable<CartItemListResult> Execute(CartItemListRequest request)
+        public IEnumerable<CartItemListResponse> Execute(CartItemListRequest request)
         {
             foreach (CartItemReadDto dto in _cartReader.GetCartItemList(request.CustomerId))
             {
-                yield return new CartItemListResult
+                yield return new CartItemListResponse
                 {
                     CustomerId = dto.CustomerId,
                     CartNo = dto.CartNo,

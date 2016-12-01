@@ -16,8 +16,8 @@ namespace DomainShell.App
         void Execute(TRequest request);
     }
 
-    public interface IApp<TRequest, TResult> : IApp
+    public interface IApp<TRequest, TResponse> : IApp
     {
-        TResult Execute(TRequest request);
+        TResponse Execute(TRequest request);
     }
 }

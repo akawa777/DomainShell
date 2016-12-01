@@ -40,6 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CartApp.cs" />
+    <Compile Include="CartAppResponse.cs" />
+    <Compile Include="CartAppRequests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

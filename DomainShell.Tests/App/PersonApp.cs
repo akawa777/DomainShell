@@ -50,7 +50,7 @@ namespace DomainShell.Tests.App
 
             DomainEventDispatcher domainEventDispatcher = new DomainEventDispatcher();
             
-            _factory = new Infrastructure.Factories.PersonFactory(new Infrastructure.Services.PersonIdGenerator(_session));
+            _factory = new Infrastructure.Factories.PersonFactory(_session);
             _repository = new Infrastructure.Repositories.PersonRepository(_session, domainEventDispatcher);
             _zipCodeService = new Infrastructure.Services.ZipCodeService();
             _reader = new Infrastructure.Services.PersonViewReader(_session);

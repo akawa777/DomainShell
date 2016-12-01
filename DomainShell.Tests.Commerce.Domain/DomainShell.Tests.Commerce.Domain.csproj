@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="CartCreationSpec.cs" />
     <Compile Include="CartEntity.cs" />
+    <Compile Include="CartPurchasedEvent.cs" />
     <Compile Include="Contracts\ICartFactory.cs" />
     <Compile Include="Contracts\ICartRepository.cs" />
     <Compile Include="Contracts\ICreditCardService.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Handlers\CartEventHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PurchaseCreationSpec.cs" />
+    <Compile Include="PurchaseDto.cs" />
     <Compile Include="PurchaseEntity.cs" />
   </ItemGroup>
   <ItemGroup>
