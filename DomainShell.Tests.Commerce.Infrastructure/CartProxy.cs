@@ -10,7 +10,7 @@ using DomainShell.Tests.Commerce.Domain.Contracts;
 
 namespace DomainShell.Tests.Commerce.Infrastructure
 {
-    public class CartProxy : CartEntity, IAggregateProxyModel, ITransient
+    public class CartProxy : CartEntity, IAggregateProxyModel
     {
         public CartProxy(CartId id) : base(id)
         {

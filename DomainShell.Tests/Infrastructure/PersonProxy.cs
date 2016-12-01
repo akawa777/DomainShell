@@ -9,7 +9,7 @@ using DomainShell.Tests.Domain;
 
 namespace DomainShell.Tests.Infrastructure
 {
-    public class PersonProxy : PersonEntity, IAggregateProxyModel<PersonDto>, ITransient
+    public class PersonProxy : PersonEntity, IAggregateProxyModel<PersonDto>
     {
         public PersonProxy(PersonDto memento)
         {
