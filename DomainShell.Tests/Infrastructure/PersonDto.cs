@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainShell.Tests.Domain.Contracts;
 
 namespace DomainShell.Tests.Infrastructure
 {
@@ -29,7 +30,7 @@ namespace DomainShell.Tests.Infrastructure
         public string Content { get; set; }
     }
 
-    public class PersonViewDto
+    public class PersonReadDto : IPersonReadDto
     {
         public string PersonId { get; set; }
         public string Name { get; set; }

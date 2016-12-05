@@ -60,7 +60,10 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DataStoreProvider.cs" />
-    <Compile Include="Infrastructure\Services\IdGenerator.cs" />
+    <Compile Include="Domain\Contracts\IPersonReadService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Infrastructure\Daos\IdDao.cs" />
     <Compile Include="Infrastructure\Daos\PersonDao.cs" />
     <Compile Include="Infrastructure\Services\ZipCodeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -75,13 +78,12 @@
     <Compile Include="Domain\PersonEntity.cs" />
     <Compile Include="Domain\PersonEvent.cs" />
     <Compile Include="Domain\Specification.cs" />
-    <Compile Include="Infrastructure\Contracts\IPersonViewReader.cs" />
     <Compile Include="Infrastructure\Factories\PersonFactory.cs" />
     <Compile Include="Infrastructure\PersonDto.cs" />
     <Compile Include="Infrastructure\PersonProxy.cs" />
     <Compile Include="Infrastructure\Repositories\PersonRepository.cs" />
     <Compile Include="Infrastructure\Services\MailService.cs" />
-    <Compile Include="Infrastructure\Services\PersonViewReader.cs" />
+    <Compile Include="Infrastructure\Services\PersonReadService.cs" />
     <Compile Include="SqliteSessionKernel.cs" />
     <Compile Include="UnitTest.cs" />
   </ItemGroup>

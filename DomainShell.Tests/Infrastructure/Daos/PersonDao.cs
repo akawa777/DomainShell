@@ -147,13 +147,13 @@ namespace DomainShell.Tests.Infrastructure.Daos
             db.ExequteNonQuery("delete from History where PersonId = @personId", new Parameter("personId", personDto.PersonId));
         }
 
-        public IEnumerable<PersonViewDto> GetViewList()
+        public IEnumerable<PersonReadDto> GetViewList()
         {
             DagentDatabase db = new DagentDatabase(_connection);
 
             string sql = string.Format(_sql, string.Empty);
 
-            IEnumerable<PersonViewDto> personDtos = db.Query<PersonViewDto>(sql).EnumerateList();
+            IEnumerable<PersonReadDto> personDtos = db.Query<PersonReadDto>(sql).EnumerateList();
 
             return personDtos;
         }

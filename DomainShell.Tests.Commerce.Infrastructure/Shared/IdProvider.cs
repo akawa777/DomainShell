@@ -5,16 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
 
-namespace DomainShell.Tests.Commerce.Infrastructure.Services
+namespace DomainShell.Tests.Commerce.Infrastructure.Shared
 {
     public class IdProvider
     {
         public IdProvider(ISession session)
         {
-            _session = session;
+            _connection = session.GetPort<System.Data.Common.DbConnection>();
         }
 
-        private ISession _session;
+        private System.Data.Common.DbConnection _connection;
 
         public int Generate(string tableName)
         {

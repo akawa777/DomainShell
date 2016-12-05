@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 using DomainShell.Infrastructure;
 using Dagent;
 
-namespace DomainShell.Tests.Infrastructure.Services
+namespace DomainShell.Tests.Infrastructure.Daos
 {
-    public class IdGenerator
+    public class IdDao
     {
-        public IdGenerator(ISession session)
+        public IdDao(System.Data.Common.DbConnection connection)
         {
-            _session = session;
+            _connection = connection;
         }
 
-        private ISession _session;
+        private System.Data.Common.DbConnection _connection;
 
         public string Generate(string tablenName)
         {
@@ -26,11 +26,9 @@ namespace DomainShell.Tests.Infrastructure.Services
                 select Id from IdManege where Guid = @guid
             ";
 
-            var connection = _session.GetPort<System.Data.Common.DbConnection>();
-
             string guid = Guid.NewGuid().ToString();
 
-            DagentDatabase db = new DagentDatabase(connection);
+            DagentDatabase db = new DagentDatabase(_connection);
 
             string id = db.Query(sql, new { tableName = tablenName, guid = guid }).Scalar<string>();
 

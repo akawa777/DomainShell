@@ -7,7 +7,7 @@ using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Commerce.Domain;
 using DomainShell.Tests.Commerce.Domain.Contracts;
-using DomainShell.Tests.Commerce.Infrastructure.Services;
+using DomainShell.Tests.Commerce.Infrastructure.Shared;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Factories
 {

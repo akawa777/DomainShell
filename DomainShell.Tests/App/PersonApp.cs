@@ -7,7 +7,6 @@ using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain;
 using DomainShell.Tests.Domain.Contracts;
 using DomainShell.Tests.Infrastructure;
-using DomainShell.Tests.Infrastructure.Contracts;
 
 namespace DomainShell.Tests.App
 {
@@ -53,7 +52,7 @@ namespace DomainShell.Tests.App
             _factory = new Infrastructure.Factories.PersonFactory(_session);
             _repository = new Infrastructure.Repositories.PersonRepository(_session, domainEventDispatcher);
             _zipCodeService = new Infrastructure.Services.ZipCodeService();
-            _reader = new Infrastructure.Services.PersonViewReader(_session);
+            _personReadService = new Infrastructure.Services.PersonReadService(_session);
 
             domainEventDispatcher.Register<PersonDeletedEvent>(new Domain.Handlers.PersonEventHandler(new Infrastructure.Services.MailService()));            
         }
@@ -63,7 +62,7 @@ namespace DomainShell.Tests.App
         private IPersonFactory _factory;        
         private IPersonRepository _repository;
         private IZipCodeService _zipCodeService;
-        private IPersonViewReader _reader;
+        private IPersonReadService _personReadService;
 
         public void Create(PersonCreationRequest request)
         {
@@ -129,7 +128,7 @@ namespace DomainShell.Tests.App
         {
             using (_session.Open())
             {
-                foreach (PersonViewDto dto in _reader.GetPersonViewList())
+                foreach (IPersonReadDto dto in _personReadService.GetPersonList())
                 {
                     yield return new PersonViewResult
                     {

@@ -4,21 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
-using DomainShell.Tests.Infrastructure.Contracts;
+using DomainShell.Tests.Domain.Contracts;
 using DomainShell.Tests.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Infrastructure.Services
 {
-    public class PersonViewReader : IPersonViewReader
+    public class PersonReadService : IPersonReadService
     {
-        public PersonViewReader(ISession session)
+        public PersonReadService(ISession session)
         {
             _personDao = new PersonDao(session.GetPort<System.Data.Common.DbConnection>());
         }
         
         private PersonDao _personDao;
 
-        public IEnumerable<PersonViewDto> GetPersonViewList()
+        public IEnumerable<IPersonReadDto> GetPersonList()
         {
             return _personDao.GetViewList();
         }

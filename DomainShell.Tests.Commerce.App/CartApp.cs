@@ -33,7 +33,7 @@ namespace DomainShell.Tests.Commerce.App
             _cartRepository = new Infrastructure.Repositories.CartRepository(_session, domainEventDispatcher);
             _creditCardService = new Infrastructure.Services.CreditCardService();
             _productReadService = new Infrastructure.Services.ProductReadService(_session);
-            _cartReader = new Infrastructure.Services.CartReadService(_session);
+            _cartReadService = new Infrastructure.Services.CartReadService(_session);
 
             Infrastructure.Factories.PurchaseFactory purchaseFactory = new Infrastructure.Factories.PurchaseFactory(_session);
             Infrastructure.Repositories.PurchaseRepository purchaseRepository = new Infrastructure.Repositories.PurchaseRepository(_session, domainEventDispatcher);
@@ -47,11 +47,11 @@ namespace DomainShell.Tests.Commerce.App
         private ICartRepository _cartRepository;
         private ICreditCardService _creditCardService;
         private IProductReadService _productReadService;
-        private ICartReadService _cartReader;
+        private ICartReadService _cartReadService;
 
         public IEnumerable<CartItemResponse> Execute(CartItemListRequest request)
         {
-            foreach (CartItemReadDto dto in _cartReader.GetCartItemList(request.CustomerId))
+            foreach (ICartItemReadDto dto in _cartReadService.GetCartItemList(request.CustomerId))
             {
                 yield return new CartItemResponse
                 {

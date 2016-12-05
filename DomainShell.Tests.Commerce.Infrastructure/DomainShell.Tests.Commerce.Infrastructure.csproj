@@ -56,7 +56,7 @@
     <Compile Include="Services\CartReadService.cs" />
     <Compile Include="Daos\CartDao.cs" />
     <Compile Include="Services\CreditCardService.cs" />
-    <Compile Include="Services\IdProvider.cs" />
+    <Compile Include="Shared\IdProvider.cs" />
     <Compile Include="Services\ProductReadService.cs" />
     <Compile Include="Shared\BaseRepository.cs" />
     <Compile Include="Shared\IVersion.cs" />
