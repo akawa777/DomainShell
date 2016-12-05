@@ -7,62 +7,38 @@ using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Commerce.Domain;
 using DomainShell.Tests.Commerce.Domain.Contracts;
+using DomainShell.Tests.Commerce.Infrastructure.Shared;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Repositories
 {
-    public class PurchaseRepository : IPurchaseRepository
+    public class PurchaseRepository : BaseRepository<PurchaseEntity, int>, IPurchaseRepository
     {
         public PurchaseRepository(ISession session, IDomainEventDispatcher domainEventDispatcher)
+            : base(domainEventDispatcher)            
         {
             _session = session;
-            _domainEventDispatcher = domainEventDispatcher;
         }
 
         private ISession _session;
-        private IDomainEventDispatcher _domainEventDispatcher;
 
-        public void Save(PurchaseEntity aggregateRoot)
-        {
-            PurchaseProxy proxy = aggregateRoot as PurchaseProxy;
-
-            if (proxy.Transient && proxy.Deleted)
-            {
-                return;
-            }
-
-            if (!proxy.OnceVerified)
-            {
-                throw new Exception("not verified");
-            }
-
-            if (proxy.Transient)
-            {
-
-            }
-            else if (!proxy.Deleted)
-            {
-
-            }
-            else if (proxy.Deleted)
-            {
-
-            }
-
-            proxy.Transient = false;
-
-            foreach (IDomainEvent domainEvent in proxy.GetEvents())
-            {
-                _domainEventDispatcher.Dispatch(domainEvent);
-            }
-
-            proxy.ClearEvents();
-
-            proxy.OnceVerified = false;
-        }
-
-        public PurchaseEntity Find(int id)
+        public override PurchaseEntity Find(int id)
         {
             return null;
+        }
+
+        public override void Insert(PurchaseEntity aggregateRoot)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Update(PurchaseEntity aggregateRoot)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Delete(PurchaseEntity aggregateRoot)
+        {
+            throw new NotImplementedException();
         }
     }
 }

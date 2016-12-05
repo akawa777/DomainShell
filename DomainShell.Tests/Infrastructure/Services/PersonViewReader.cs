@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Infrastructure.Contracts;
+using DomainShell.Tests.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Infrastructure.Services
 {
@@ -12,7 +13,7 @@ namespace DomainShell.Tests.Infrastructure.Services
     {
         public PersonViewReader(ISession session)
         {
-            _personDao = new PersonDao(session);
+            _personDao = new PersonDao(session.GetPort<System.Data.Common.DbConnection>());
         }
         
         private PersonDao _personDao;

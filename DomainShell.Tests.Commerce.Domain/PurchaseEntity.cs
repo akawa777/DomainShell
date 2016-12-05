@@ -7,12 +7,12 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Commerce.Domain
 {
-    public class PurchaseDetailId : IValue
+    public class PurchaseItemId : IValue
     {
-        public PurchaseDetailId(int purchaseId, int purchaseDetailNo)
+        public PurchaseItemId(int purchaseId, int purchaseItemNo)
         {
             PurchaseId = purchaseId;
-            PurchaseDetailNo = purchaseDetailNo;
+            PurchaseItemNo = purchaseItemNo;
         }
 
         public int PurchaseId
@@ -21,7 +21,7 @@ namespace DomainShell.Tests.Commerce.Domain
             protected set;
         }
 
-        public int PurchaseDetailNo
+        public int PurchaseItemNo
         {
             get;
             protected set;
@@ -31,14 +31,19 @@ namespace DomainShell.Tests.Commerce.Domain
         {
 	        get 
             {
-                return string.Join(":", PurchaseId, PurchaseDetailNo);
+                return string.Join(":", PurchaseId, PurchaseItemNo);
             }
         }
     }
 
-    public class PurchaseDetailEntity : IEntity<PurchaseDetailId>
+    public class PurchaseItemEntity : IEntity<PurchaseItemId>
     {
-        public PurchaseDetailId Id
+        public PurchaseItemEntity(int purchaseId, int purchaseItemNo)
+        {
+            Id = new PurchaseItemId(purchaseId, purchaseItemNo);
+        }
+
+        public PurchaseItemId Id
         {
             get;
             protected set;
@@ -110,7 +115,7 @@ namespace DomainShell.Tests.Commerce.Domain
             set;
         }
 
-        public IReadOnlyList<PurchaseDetailEntity> PurchaseDetailList
+        public IReadOnlyList<PurchaseItemEntity> PurchaseDetailList
         {
             get;
             protected set;
@@ -123,11 +128,6 @@ namespace DomainShell.Tests.Commerce.Domain
             {
                 throw new Exception(errors[0]);
             }
-        }
-
-        public virtual void Delete()
-        {
-            throw new Exception("Purchase can not delete");
         }
     }
 }

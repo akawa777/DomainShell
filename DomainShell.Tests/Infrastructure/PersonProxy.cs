@@ -74,7 +74,7 @@ namespace DomainShell.Tests.Infrastructure
 
         public bool Transient { get; set; }
 
-        public bool Deleted { get; private set; }
+        public bool Deleted { get; set; }
 
         public bool OnceVerified { get; set; }
     }

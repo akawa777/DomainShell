@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DomainShell.Domain
-{   
+{
     public interface IModel
     {
 
@@ -16,14 +16,9 @@ namespace DomainShell.Domain
         string Value { get; }
     }
 
-    public interface IDeletable
-    {
-        void Delete();
-    }
-
     public interface IEntity : IModel
-    {        
-        
+    {
+
     }
 
     public interface IEntity<TIdentity> : IEntity
@@ -31,13 +26,13 @@ namespace DomainShell.Domain
         TIdentity Id { get; }
     }
 
-    public interface IAggregateRoot : IEntity, IDomainEventCollection, IDeletable
+    public interface IAggregateRoot : IEntity, IDomainEventCollection
     {
-        
+
     }
 
     public interface IAggregateRoot<TIdentity> : IAggregateRoot, IEntity<TIdentity>
     {
-        
+
     }
 }

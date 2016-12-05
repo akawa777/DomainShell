@@ -3,45 +3,61 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Commerce.Domain;
 using DomainShell.Tests.Commerce.Domain.Contracts;
+using DomainShell.Tests.Commerce.Infrastructure.Shared;
 
 namespace DomainShell.Tests.Commerce.Infrastructure
 {
-    public class CartProxy : CartEntity, IAggregateProxyModel
-    {
-        public CartProxy(CartId id) : base(id)
+    public class CartProxy : CartEntity, IAggregateProxyModel, IVersion
+    {   
+        public CartProxy(int customerId)
+            : base(customerId)
         {
 
         }
 
-        public bool Transient { get; set; }
-
-        public bool Deleted { get; private set; }
-
-        public bool OnceVerified { get; set; }
-
-        public override void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
+        public bool Transient
         {
-            base.Purchase(creditCard, creditCardService, productReadService, spec);
-            
-            OnceVerified = true;
+            get;
+            set;
         }
 
-        public override void Validate(IValidationSpec<CartEntity> spec)
+        public new List<CartItemEntity> CartItemList
+        {
+            get
+            {
+                return _cartItemList;
+            }
+            set
+            {
+                _cartItemList = value;
+            }
+        }
+
+        public bool OnceVerified
+        {
+            get;
+            set;
+        }
+
+        public bool Deleted
+        {
+            get;
+            set;
+        }
+
+        public override void Validate(DomainShell.Domain.IValidationSpec<CartEntity> spec)
         {
             base.Validate(spec);
-
             OnceVerified = true;
         }
 
-        public override void Delete()
+        public int Version
         {
-            base.Delete();
-
-            Deleted = true;
+            get;
+            set;
         }
     }
 }

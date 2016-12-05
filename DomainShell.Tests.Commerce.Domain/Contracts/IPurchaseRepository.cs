@@ -7,7 +7,7 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Commerce.Domain.Contracts
 {
-    public interface IPurchaseRepository : IRepository<PurchaseEntity, int>
+    public interface IPurchaseRepository : IReadReposiory<PurchaseEntity, int>, IWriteRepository<PurchaseEntity>
     {
     }
 }

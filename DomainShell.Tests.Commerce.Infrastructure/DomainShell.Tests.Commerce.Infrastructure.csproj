@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dagent">
+      <HintPath>..\packages\Dagent\Dagent.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,9 +52,12 @@
     <Compile Include="Repositories\CartRepository.cs" />
     <Compile Include="Repositories\PurchaseRepository.cs" />
     <Compile Include="Services\CartReader.cs" />
+    <Compile Include="Daos\CartDao.cs" />
     <Compile Include="Services\CreditCardService.cs" />
     <Compile Include="Services\IdProvider.cs" />
     <Compile Include="Services\ProductReadService.cs" />
+    <Compile Include="Shared\BaseRepository.cs" />
+    <Compile Include="Shared\IVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DomainShell.Tests.Commerce.Domain\DomainShell.Tests.Commerce.Domain.csproj">

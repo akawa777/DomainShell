@@ -22,7 +22,7 @@ namespace DomainShell.Tests.Commerce.Domain
             List<string> errorList = new List<string>();
             foreach (CartItemEntity item in target.CartItemList)
             {
-                if (_productReadService.Find(item.ProductId)== null)
+                if (!_productReadService.Exist(item.ProductId))
                 {
                     errorList.Add(string.Format("CartItemNo {0} Product not exist", item.Id.CartItemNo));
                 }

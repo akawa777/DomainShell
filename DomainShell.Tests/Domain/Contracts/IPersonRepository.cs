@@ -7,7 +7,10 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Domain.Contracts
 {
-    public interface IPersonRepository : IRepository<PersonEntity, PersonId>, IReadReposiory<PersonEntity, PersonPredicate>
+    public interface IPersonRepository :
+        IReadReposiory<PersonEntity, PersonId>, 
+        IReadSpecReposiory<PersonEntity, PersonPredicate>,  
+        IWriteRepository<PersonEntity>
     {
     }
 }

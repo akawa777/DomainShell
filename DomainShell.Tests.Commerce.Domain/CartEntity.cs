@@ -30,9 +30,9 @@ namespace DomainShell.Tests.Commerce.Domain
         }
     }
 
-    public class CartDetailId : IValue
+    public class CartItemId : IValue
     {
-        public CartDetailId(int customerId, int cartItemNo)
+        public CartItemId(int customerId, int cartItemNo)
         {
             CartId = new CartId(customerId);
             CartItemNo = cartItemNo;
@@ -59,14 +59,14 @@ namespace DomainShell.Tests.Commerce.Domain
         }
     }
 
-    public class CartItemEntity : IEntity<CartDetailId>
+    public class CartItemEntity : IEntity<CartItemId>
     {
-        public CartItemEntity(CartDetailId id)
+        public CartItemEntity(int customerId, int cartItemNo)
         {
-            Id = id;
+            Id = new CartItemId(customerId, cartItemNo);
         }
 
-        public CartDetailId Id
+        public CartItemId Id
         {
             get;
             protected set;
@@ -86,14 +86,14 @@ namespace DomainShell.Tests.Commerce.Domain
     }
 
     public class CartEntity : IAggregateRoot<CartId>
-    {
-        public CartEntity(CartId id)
+    {   
+        public CartEntity(int customerId)
         {
-            Id = id;
+            Id = new CartId(customerId);
         }
 
-        private List<IDomainEvent> _events = new List<IDomainEvent>();
-        private List<CartItemEntity> _cartItemList = new List<CartItemEntity>();
+        protected List<IDomainEvent> _events = new List<IDomainEvent>();
+        protected List<CartItemEntity> _cartItemList = new List<CartItemEntity>();
 
         public IEnumerable<IDomainEvent> GetEvents()
         {
@@ -119,7 +119,7 @@ namespace DomainShell.Tests.Commerce.Domain
 
         public void AddProduct(int productId, int quantity)
         {
-            CartItemEntity cartItem = new CartItemEntity(new CartDetailId(Id.CutomerId, _cartItemList.Max(x => x.Id.CartItemNo) + 1));
+            CartItemEntity cartItem = new CartItemEntity(Id.CutomerId, _cartItemList.Max(x => x.Id.CartItemNo) + 1);
 
             cartItem.ProductId = productId;
             cartItem.Quantity = quantity;
@@ -127,9 +127,9 @@ namespace DomainShell.Tests.Commerce.Domain
             _cartItemList.Add(cartItem);
         }
 
-        public void RemoveProduct(CartDetailId cartDetailId)
+        public void RemoveProduct(CartItemId cartItemId)
         {
-            CartItemEntity cartItem = _cartItemList.FirstOrDefault(x => x.Id.Value == cartDetailId.Value);
+            CartItemEntity cartItem = _cartItemList.FirstOrDefault(x => x.Id.Value == cartItemId.Value);
 
             if (cartItem == null)
             {
@@ -141,15 +141,15 @@ namespace DomainShell.Tests.Commerce.Domain
 
         protected decimal GetTotalPrice(IProductReadService productReadService)
         {
-            return _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
+            return _cartItemList.Sum(x => productReadService.GetPrice(x.ProductId) * x.Quantity);
         }
 
         public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
         {
-            decimal totalPrice = GetTotalPrice(productReadService);
-            string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;
-
             Validate(spec);
+
+            decimal totalPrice = GetTotalPrice(productReadService);
+            string content = productReadService.GetName(_cartItemList[0].ProductId);            
 
             creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 
@@ -186,7 +186,7 @@ namespace DomainShell.Tests.Commerce.Domain
             }
         }
 
-        public virtual void Delete()
+        protected virtual void Delete()
         {
             
         }

@@ -8,7 +8,7 @@ namespace DomainShell.Infrastructure
 {
     public interface IProxyModel
     {
-        
+
     }
 
     public interface ITransient
@@ -18,7 +18,7 @@ namespace DomainShell.Infrastructure
 
     public interface IDeleted
     {
-        bool Deleted { get; }
+        bool Deleted { get; set; }
     }
 
     public interface IOnceVerified
@@ -32,18 +32,18 @@ namespace DomainShell.Infrastructure
     }
 
     public interface IMementable<TMemento>
-    {   
+    {
         TMemento Memento { get; }
     }
 
     public interface IProxyModel<TMemento> : IMementable<TMemento>
-    {        
+    {
         void RewriteProxy();
         void RewriteMemento();
     }
 
     public interface IAggregateProxyModel<TMemento> : IAggregateProxyModel, IMementable<TMemento>
     {
-        
+
     }
 }

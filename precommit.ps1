@@ -3,6 +3,7 @@
 $msBuildDirectory = "C:\Windows\Microsoft.NET\Framework\v4.0.30319"
 
 $projects = "DomainShell", "DomainShell.Tests", "DomainShell.Tests.Commerce", "DomainShell.Tests.Commerce.App", "DomainShell.Tests.Commerce.Domain", "DomainShell.Tests.Commerce.Infrastructure"
+    
 
 Remove-Item $myDirectory\DomainShell.v12.suo -Force -ErrorAction Ignore -Recurse
 Remove-Item $myDirectory\TestResults -Force -ErrorAction Ignore -Recurse

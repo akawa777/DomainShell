@@ -7,7 +7,7 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Commerce.Domain.Contracts
 {
-    public interface ICartRepository : IRepository<CartEntity, CartId>
+    public interface ICartRepository : IReadReposiory<CartEntity, CartId>, IWriteRepository<CartEntity>
     {
     }
 }

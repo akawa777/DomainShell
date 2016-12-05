@@ -76,7 +76,7 @@ namespace DomainShell.Tests.Domain
 
         public virtual void Delete()
         {
-            _events.Add(new PersonDeletedEvent { PersonId = Id.Value, PersonName = Name, Email = EMail });         
+            _events.Add(new PersonDeletedEvent { PersonId = Id.Value, PersonName = Name, Email = EMail });
         }
 
         public IEnumerable<IDomainEvent> GetEvents()

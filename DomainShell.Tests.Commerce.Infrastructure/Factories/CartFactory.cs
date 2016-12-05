@@ -23,7 +23,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Factories
         {
             CartConstructorParameters parameters = spec.ConstructorParameters();
 
-            CartProxy cart = new CartProxy(new CartId(parameters.CustomerId));
+            CartProxy cart = new CartProxy(parameters.CustomerId);
             cart.Transient = true;
 
             spec.Satisfied(cart);

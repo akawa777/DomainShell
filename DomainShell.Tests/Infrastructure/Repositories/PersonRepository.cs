@@ -7,7 +7,7 @@ using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain;
 using DomainShell.Tests.Domain.Contracts;
-using DomainShell.Tests.Infrastructure.Services;
+using DomainShell.Tests.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Infrastructure.Repositories
 {
@@ -16,7 +16,7 @@ namespace DomainShell.Tests.Infrastructure.Repositories
         public PersonRepository(ISession session, IDomainEventDispatcher domainEventDispatcher)
         {
             _domainEventDispatcher = domainEventDispatcher;
-            _personDao = new PersonDao(session);
+            _personDao = new PersonDao(session.GetPort<System.Data.Common.DbConnection>());
         }
 
         private IDomainEventDispatcher _domainEventDispatcher;
@@ -38,7 +38,23 @@ namespace DomainShell.Tests.Infrastructure.Repositories
 
         public IEnumerable<PersonEntity> List(ISelectionSpec<PersonPredicate> spec)
         {
-            IEnumerable<PersonDto> dtos = _personDao.GetList(spec.Predicate());
+            PersonDao.Predicate predicate = new PersonDao.Predicate();
+            predicate.And = spec.Predicate().And;
+
+            foreach (KeyValuePair<PersonPredicateItem, object> keyValue in spec.Predicate())
+            {
+                if (keyValue.Key == PersonPredicateItem.LikeName)
+                {
+                    predicate[PersonDao.PredicateItem.LikeName] = keyValue.Value;
+                }
+
+                if (keyValue.Key == PersonPredicateItem.City)
+                {
+                    predicate[PersonDao.PredicateItem.City] = keyValue.Value;
+                }
+            }
+
+            IEnumerable<PersonDto> dtos = _personDao.GetList(predicate);
 
             foreach (PersonDto dto in dtos)
             {
@@ -62,7 +78,7 @@ namespace DomainShell.Tests.Infrastructure.Repositories
                 throw new Exception("not verified");
             }
 
-            person.RewriteMemento();            
+            person.RewriteMemento();
 
             if (person.Transient && !person.Deleted)
             {
@@ -76,7 +92,7 @@ namespace DomainShell.Tests.Infrastructure.Repositories
             }
             else if (person.Deleted)
             {
-                _personDao.Delete(person.Memento);                
+                _personDao.Delete(person.Memento);
             }
 
             foreach (IDomainEvent domainEvent in person.GetEvents())

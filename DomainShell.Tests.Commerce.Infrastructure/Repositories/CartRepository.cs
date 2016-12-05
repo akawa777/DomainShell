@@ -7,62 +7,41 @@ using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Commerce.Domain;
 using DomainShell.Tests.Commerce.Domain.Contracts;
+using DomainShell.Tests.Commerce.Infrastructure.Shared;
+using DomainShell.Tests.Commerce.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Repositories
 {
-    public class CartRepository : ICartRepository
+    public class CartRepository : BaseRepository<CartEntity, CartId>, ICartRepository
     {
         public CartRepository(ISession session, IDomainEventDispatcher domainEventDispatcher)
+            : base(domainEventDispatcher)
         {
             _session = session;
-            _domainEventDispatcher = domainEventDispatcher;
+            _cartDao = new CartDao(session);
         }
 
-        private ISession _session;
-        private IDomainEventDispatcher _domainEventDispatcher;
+        private ISession _session;        
+        private CartDao _cartDao;
 
-        public void Save(CartEntity aggregateRoot)
+        public override CartEntity Find(CartId id)
         {
-            CartProxy proxy = aggregateRoot as CartProxy;
-
-            if (proxy.Transient && proxy.Deleted)
-            {
-                return;
-            }
-
-            if (!proxy.OnceVerified)
-            {
-                throw new Exception("not verified");
-            }
-
-            if (proxy.Transient)
-            {
-
-            }
-            else if (!proxy.Deleted)
-            {
-
-            }
-            else if (proxy.Deleted)
-            {
-
-            }
-
-            proxy.Transient = false;
-
-            foreach (IDomainEvent domainEvent in proxy.GetEvents())
-            {
-                _domainEventDispatcher.Dispatch(domainEvent);
-            }
-
-            proxy.ClearEvents();
-
-            proxy.OnceVerified = false;
+            return _cartDao.Find(id);
         }
 
-        public CartEntity Find(CartId id)
+        public override void Insert(CartEntity aggregateRoot)
         {
-            return null;
+            _cartDao.Insert(aggregateRoot);
+        }
+
+        public override void Update(CartEntity aggregateRoot)
+        {
+            _cartDao.Update(aggregateRoot);
+        }
+
+        public override void Delete(CartEntity aggregateRoot)
+        {
+            _cartDao.Delete(aggregateRoot);
         }
     }
 }

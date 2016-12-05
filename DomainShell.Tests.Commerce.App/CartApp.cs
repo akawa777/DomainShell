@@ -97,7 +97,7 @@ namespace DomainShell.Tests.Commerce.App
             {
                 CartEntity cart = _cartRepository.Find(new CartId(request.CustomerId));
 
-                cart.RemoveProduct(new CartDetailId(request.CustomerId, request.CartItemNo));
+                cart.RemoveProduct(new CartItemId(request.CustomerId, request.CartItemNo));
 
                 _cartRepository.Save(cart);
 
@@ -111,9 +111,10 @@ namespace DomainShell.Tests.Commerce.App
             {
                 CartEntity cart = _cartRepository.Find(new CartId(request.CustomerId));
 
-                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
+                CreditCardValue creditCard = new CreditCardValue(request.CardCompanyId, request.CardNo);
+                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);                
 
-                cart.Purchase(new CreditCardValue(request.CardCompanyId, request.CardNo), _creditCardService, _productReadService, validationSpec);
+                cart.Purchase(creditCard, _creditCardService, _productReadService, validationSpec);
 
                 _cartRepository.Save(cart);
 

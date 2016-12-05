@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Commerce.Infrastructure.Contracts;
+using DomainShell.Tests.Commerce.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Services
 {
@@ -12,14 +13,14 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Services
     {
         public CartReader(ISession session)
         {
-            _session = session;
+            _cartDao = new CartDao(session);
         }
 
-        private ISession _session;
+        private CartDao _cartDao;
 
         public IEnumerable<CartItemReadDto> GetCartItemList(int customerId)
         {
-            return Enumerable.Empty<CartItemReadDto>();
+            return _cartDao.GetCartItemList(customerId);
         }
     }
 }

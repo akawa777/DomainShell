@@ -8,27 +8,6 @@ using DomainShell.Tests.Commerce.Domain.Contracts;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Services
 {
-    public class ProductReadModel : IProductReadModel
-    {
-        public int ProductId
-        {
-            get;
-            set;
-        }
-
-        public string ProductName
-        {
-            get;
-            set;
-        }
-
-        public decimal Price
-        {
-            get;
-            set;
-        }
-    }
-
     public class ProductReadService : IProductReadService
     {
         public ProductReadService(ISession session)
@@ -38,14 +17,19 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Services
 
         private ISession _session;
 
-        public IProductReadModel Find(int productId)
+        public string GetName(int productId)
         {
-            return new ProductReadModel
-            {
-                ProductId = productId,
-                ProductName = "xxx",
-                Price = 100m
-            };
+            return "xxx";
+        }
+
+        public decimal GetPrice(int productId)
+        {
+            return 100m;
+        }
+
+        public bool Exist(int productId)
+        {
+            return true;
         }
     }
 }
