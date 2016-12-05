@@ -59,5 +59,12 @@ namespace DomainShell.Tests.Commerce.Infrastructure
             get;
             set;
         }
+
+        protected override void Delete()
+        {
+            base.Delete();
+
+            Deleted = true;
+        }
     }
 }
