@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainShell.Tests.Commerce.Domain.Contracts;
 
 namespace DomainShell.Tests.Commerce.Infrastructure
 {
-    public class CartItemReadDto
+    public class CartItemReadDto : ICartItemReadDto
     {
         public int CustomerId { get; set;}
         public int CartNo { get; set;}

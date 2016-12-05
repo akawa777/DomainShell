@@ -44,14 +44,16 @@
   <ItemGroup>
     <Compile Include="CartItemReadDto.cs" />
     <Compile Include="CartProxy.cs" />
-    <Compile Include="Contracts\ICartReader.cs" />
     <Compile Include="Factories\CartFactory.cs" />
     <Compile Include="Factories\PurchaseFactory.cs" />
+    <Compile Include="ProductReadDto.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PurchaseProxy.cs" />
     <Compile Include="Repositories\CartRepository.cs" />
     <Compile Include="Repositories\PurchaseRepository.cs" />
-    <Compile Include="Services\CartReader.cs" />
+    <Compile Include="Services\CartReadService.cs" />
     <Compile Include="Daos\CartDao.cs" />
     <Compile Include="Services\CreditCardService.cs" />
     <Compile Include="Services\IdProvider.cs" />

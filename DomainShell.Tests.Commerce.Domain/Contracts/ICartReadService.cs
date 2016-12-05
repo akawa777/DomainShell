@@ -3,19 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DomainShell.Domain;
 
 namespace DomainShell.Tests.Commerce.Domain.Contracts
 {
-    public interface IProductReadDto
+    public interface ICartItemReadDto
     {
+        int CustomerId { get; set; }
+        int CartNo { get; set; }
         int ProductId { get; set; }
         string ProductName { get; set; }
         decimal Price { get; set; }
+        int Quantity { get; set; }
+        decimal TotalPrice { get; set; }
     }
 
-    public interface IProductReadService : IInfrastructureService
+    public interface ICartReadService
     {
-        IProductReadDto Find(int productId);
+        IEnumerable<ICartItemReadDto> GetCartItemList(int customerId);
     }
 }

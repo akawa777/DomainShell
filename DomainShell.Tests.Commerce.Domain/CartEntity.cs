@@ -141,7 +141,7 @@ namespace DomainShell.Tests.Commerce.Domain
 
         protected decimal GetTotalPrice(IProductReadService productReadService)
         {
-            return _cartItemList.Sum(x => productReadService.GetPrice(x.ProductId) * x.Quantity);
+            return _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
         }
 
         public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
@@ -149,7 +149,7 @@ namespace DomainShell.Tests.Commerce.Domain
             Validate(spec);
 
             decimal totalPrice = GetTotalPrice(productReadService);
-            string content = productReadService.GetName(_cartItemList[0].ProductId);            
+            string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;            
 
             creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 

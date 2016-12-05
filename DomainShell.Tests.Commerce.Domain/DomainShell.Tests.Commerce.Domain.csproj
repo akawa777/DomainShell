@@ -44,6 +44,7 @@
     <Compile Include="CartPurchasedEvent.cs" />
     <Compile Include="CartValidationSpec.cs" />
     <Compile Include="Contracts\ICartFactory.cs" />
+    <Compile Include="Contracts\ICartReadService.cs" />
     <Compile Include="Contracts\ICartRepository.cs" />
     <Compile Include="Contracts\ICreditCardService.cs" />
     <Compile Include="Contracts\IProductReadService.cs" />

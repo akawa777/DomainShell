@@ -12,24 +12,12 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Services
     {
         public ProductReadService(ISession session)
         {
-            _session = session;
+            
         }
 
-        private ISession _session;
-
-        public string GetName(int productId)
+        public IProductReadDto Find(int productId)
         {
-            return "xxx";
-        }
-
-        public decimal GetPrice(int productId)
-        {
-            return 100m;
-        }
-
-        public bool Exist(int productId)
-        {
-            return true;
+            throw new NotImplementedException();
         }
     }
 }
