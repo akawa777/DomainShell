@@ -52,7 +52,7 @@ namespace DomainShell.Tests
                 PersonId = "1"
             };
 
-            //app.Delete(personDeletionRequest);
+            app.Delete(personDeletionRequest);
 
             List<PersonViewResult> list = app.GetCollection().ToList();
         }

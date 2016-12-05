@@ -73,7 +73,7 @@ namespace DomainShell.Tests.Infrastructure.Repositories
                 return;
             }
 
-            if (!person.OnceVerified)
+            if (!person.OnceVerified && !person.Deleted)
             {
                 throw new Exception("not verified");
             }

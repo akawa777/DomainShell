@@ -114,7 +114,7 @@ namespace DomainShell.Tests.Infrastructure.Daos
 
         public void Insert(PersonDto personDto)
         {
-            DagentDatabase db = new DagentDatabase();
+            DagentDatabase db = new DagentDatabase(_connection);
 
             db.Command<PersonDto>("Person", "PersonId").Insert(personDto);
 
@@ -126,7 +126,7 @@ namespace DomainShell.Tests.Infrastructure.Daos
 
         public void Update(PersonDto personDto)
         {
-            DagentDatabase db = new DagentDatabase();
+            DagentDatabase db = new DagentDatabase(_connection);
 
             db.Command<PersonDto>("Person", "PersonId").Update(personDto);
 

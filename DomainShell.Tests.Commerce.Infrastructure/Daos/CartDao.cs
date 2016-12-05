@@ -48,7 +48,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Daos
 
             string sql = tb.Generate();
 
-            DagentDatabase db = new DagentDatabase();
+            DagentDatabase db = new DagentDatabase(_connection);
 
             CartProxy cart = db.Query<CartProxy>(sql, parameterList.ToArray())
                 .Unique("CustomerId")

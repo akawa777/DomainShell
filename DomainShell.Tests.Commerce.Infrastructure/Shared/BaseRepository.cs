@@ -35,7 +35,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Shared
                 return;
             }
 
-            if (!proxy.OnceVerified)
+            if (!proxy.OnceVerified && !proxy.Deleted)
             {
                 throw new Exception("not verified");
             }
