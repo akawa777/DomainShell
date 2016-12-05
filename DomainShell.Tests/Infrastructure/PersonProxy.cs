@@ -61,14 +61,12 @@ namespace DomainShell.Tests.Infrastructure
         public override void Delete()
         {
             base.Delete();
-
             Deleted = true;
         }
 
         public override void Validate(IValidationSpec<PersonEntity> spec)
         {
             base.Validate(spec);
-
             OnceVerified = true;
         }
 

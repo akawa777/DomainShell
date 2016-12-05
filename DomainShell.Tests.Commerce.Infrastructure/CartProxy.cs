@@ -63,7 +63,6 @@ namespace DomainShell.Tests.Commerce.Infrastructure
         protected override void Delete()
         {
             base.Delete();
-
             Deleted = true;
         }
     }

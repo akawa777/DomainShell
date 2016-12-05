@@ -27,7 +27,6 @@ namespace DomainShell.Tests.Commerce.Infrastructure
         public override void Validate(IValidationSpec<PurchaseEntity> spec)
         {
             base.Validate(spec);
-
             OnceVerified = true;
         }
 
