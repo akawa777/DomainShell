@@ -11,7 +11,7 @@ using DomainShell.Tests.Commerce.Infrastructure.Shared;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Repositories
 {
-    public class PurchaseRepository : BaseRepository<PurchaseEntity, int>, IPurchaseRepository
+    public class PurchaseRepository : BaseWriteRepository<PurchaseEntity, int>, IPurchaseRepository
     {
         public PurchaseRepository(ISession session, IDomainEventDispatcher domainEventDispatcher)
             : base(domainEventDispatcher)            

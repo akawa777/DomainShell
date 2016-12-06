@@ -139,17 +139,12 @@ namespace DomainShell.Tests.Commerce.Domain
             _cartItemList.Remove(cartItem);
         }
 
-        protected decimal GetTotalPrice(IProductReadService productReadService)
-        {
-            return _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
-        }
-
-        public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity> spec)
+        public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IReadReposiory<ProductEntity, int> productRepository, IValidationSpec<CartEntity, string> spec)
         {
             Validate(spec);
 
-            decimal totalPrice = GetTotalPrice(productReadService);
-            string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;            
+            decimal totalPrice = _cartItemList.Sum(x => productRepository.Find(x.ProductId).Price * x.Quantity);
+            string content = productRepository.Find(_cartItemList[0].ProductId).ProductName;
 
             creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 
@@ -159,7 +154,7 @@ namespace DomainShell.Tests.Commerce.Domain
 
             foreach (CartItemEntity cartItem in _cartItemList)
             {
-                PucharseDto dto = new PucharseDto 
+                PucharseDto dto = new PucharseDto
                 {
                     ProductId = cartItem.ProductId,
                     Quantity = cartItem.Quantity
@@ -170,14 +165,14 @@ namespace DomainShell.Tests.Commerce.Domain
 
             CartPurchasedEvent @event = new CartPurchasedEvent
             {
-                CustomerId = Id.CutomerId,                
+                CustomerId = Id.CutomerId,
                 PucharseDtoList = list
             };
 
             _events.Add(@event);
         }
 
-        public virtual void Validate(IValidationSpec<CartEntity> spec)
+        public virtual void Validate(IValidationSpec<CartEntity, string> spec)
         {
             string[] errors;
             if (!spec.Validate(this, out errors))

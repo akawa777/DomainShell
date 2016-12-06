@@ -23,10 +23,10 @@ namespace DomainShell.Domain
         TPredicate Predicate();
     }
 
-    public interface IValidationSpec<TTarget> : 
+    public interface IValidationSpec<TTarget, TError> : 
         ISpecification
-    {        
-        bool Validate(TTarget target, out string[] errors);
+    {
+        bool Validate(TTarget target, out TError[] errors);
     }
 
     public interface ICreationSpec<TTarget, TConstructorParameters> : 

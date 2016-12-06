@@ -64,7 +64,7 @@ namespace DomainShell.Tests.Infrastructure
             Deleted = true;
         }
 
-        public override void Validate(IValidationSpec<PersonEntity> spec)
+        public override void Validate(IValidationSpec<PersonEntity, string> spec)
         {
             base.Validate(spec);
             OnceVerified = true;

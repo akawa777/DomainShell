@@ -65,7 +65,7 @@ namespace DomainShell.Tests.Domain
         }
     }
 
-    public class PersonValidationSpec : IValidationSpec<PersonEntity>
+    public class PersonValidationSpec : IValidationSpec<PersonEntity, string>
     {
         public bool Validate(PersonEntity target, out string[] errors)
         {

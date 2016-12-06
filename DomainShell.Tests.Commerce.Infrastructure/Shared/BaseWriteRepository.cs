@@ -10,10 +10,10 @@ using DomainShell.Tests.Commerce.Domain.Contracts;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Shared
 {
-    public abstract class BaseRepository<TAggregateRoot, TIdentity> : IReadReposiory<TAggregateRoot, TIdentity>, IWriteRepository<TAggregateRoot>
+    public abstract class BaseWriteRepository<TAggregateRoot, TIdentity> : IWriteRepository<TAggregateRoot>
         where TAggregateRoot : IAggregateRoot<TIdentity>
     {
-        public BaseRepository(IDomainEventDispatcher domainEventDispatcher)
+        public BaseWriteRepository(IDomainEventDispatcher domainEventDispatcher)
         {
             DomainEventDispatcher = domainEventDispatcher;
         }

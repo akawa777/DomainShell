@@ -89,7 +89,7 @@ namespace DomainShell.Tests.Domain
             _events.Clear();
         }
 
-        public virtual void Validate(IValidationSpec<PersonEntity> spec)
+        public virtual void Validate(IValidationSpec<PersonEntity, string> spec)
         {
             string[] errors;
             if (!spec.Validate(this, out errors))

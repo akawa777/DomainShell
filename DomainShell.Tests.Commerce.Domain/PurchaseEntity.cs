@@ -121,7 +121,7 @@ namespace DomainShell.Tests.Commerce.Domain
             protected set;
         }
 
-        public virtual void Validate(IValidationSpec<PurchaseEntity> spec)
+        public virtual void Validate(IValidationSpec<PurchaseEntity, string> spec)
         {
             string[] errors;
             if (!spec.Validate(this, out errors))

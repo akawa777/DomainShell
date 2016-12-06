@@ -8,21 +8,21 @@ using DomainShell.Tests.Commerce.Domain.Contracts;
 
 namespace DomainShell.Tests.Commerce.Domain
 {
-    public class CartValidationSpec : IValidationSpec<CartEntity>
+    public class CartValidationSpec : IValidationSpec<CartEntity, string>
     {
-        public CartValidationSpec(IProductReadService productReadService)
+        public CartValidationSpec(IProductRepository productRepository)
         {
-            _productReadService = productReadService;
+            _productRepository = productRepository;
         }
 
-        private IProductReadService _productReadService;
+        private IProductRepository _productRepository;
 
         public bool Validate(CartEntity target, out string[] errors)
         {
             List<string> errorList = new List<string>();
             foreach (CartItemEntity item in target.CartItemList)
             {
-                if (_productReadService.Find(item.ProductId) == null)
+                if (_productRepository.Find(item.ProductId) == null)
                 {
                     errorList.Add(string.Format("CartItemNo {0} Product not exist", item.Id.CartItemNo));
                 }

@@ -48,7 +48,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure
             set;
         }
 
-        public override void Validate(DomainShell.Domain.IValidationSpec<CartEntity> spec)
+        public override void Validate(DomainShell.Domain.IValidationSpec<CartEntity, string> spec)
         {
             base.Validate(spec);
             OnceVerified = true;

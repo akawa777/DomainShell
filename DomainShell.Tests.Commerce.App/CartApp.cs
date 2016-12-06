@@ -32,7 +32,7 @@ namespace DomainShell.Tests.Commerce.App
             _cartFactory = new Infrastructure.Factories.CartFactory(_session);
             _cartRepository = new Infrastructure.Repositories.CartRepository(_session, domainEventDispatcher);
             _creditCardService = new Infrastructure.Services.CreditCardService();
-            _productReadService = new Infrastructure.Services.ProductReadService(_session);
+            _productRepository = new Infrastructure.Repositories.ProductRepository(_session);
             _cartReadService = new Infrastructure.Services.CartReadService(_session);
 
             Infrastructure.Factories.PurchaseFactory purchaseFactory = new Infrastructure.Factories.PurchaseFactory(_session);
@@ -46,7 +46,7 @@ namespace DomainShell.Tests.Commerce.App
         private ICartFactory _cartFactory;
         private ICartRepository _cartRepository;
         private ICreditCardService _creditCardService;
-        private IProductReadService _productReadService;
+        private IProductRepository _productRepository;
         private ICartReadService _cartReadService;
 
         public IEnumerable<CartItemResponse> Execute(CartItemListRequest request)
@@ -80,7 +80,7 @@ namespace DomainShell.Tests.Commerce.App
 
                 cart.AddProduct(request.ProductId, request.Quantity);
 
-                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
+                CartValidationSpec validationSpec = new CartValidationSpec(_productRepository);
 
                 cart.Validate(validationSpec);
 
@@ -111,9 +111,9 @@ namespace DomainShell.Tests.Commerce.App
                 CartEntity cart = _cartRepository.Find(new CartId(request.CustomerId));
 
                 CreditCardValue creditCard = new CreditCardValue(request.CardCompanyId, request.CardNo);
-                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);                
+                CartValidationSpec validationSpec = new CartValidationSpec(_productRepository);
 
-                cart.Purchase(creditCard, _creditCardService, _productReadService, validationSpec);
+                cart.Purchase(creditCard, _creditCardService, _productRepository, validationSpec);
 
                 _cartRepository.Save(cart);
 

@@ -12,7 +12,7 @@ using DomainShell.Tests.Commerce.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Repositories
 {
-    public class CartRepository : BaseRepository<CartEntity, CartId>, ICartRepository
+    public class CartRepository : BaseWriteRepository<CartEntity, CartId>, ICartRepository
     {
         public CartRepository(ISession session, IDomainEventDispatcher domainEventDispatcher)
             : base(domainEventDispatcher)
