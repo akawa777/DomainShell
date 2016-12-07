@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainShell.App;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain;
 using DomainShell.Tests.Domain.Contracts;
@@ -31,7 +32,12 @@ namespace DomainShell.Tests.App
         public string PersonId { get; set; }
     }
 
-    public class PersonViewResult
+    public class PersonViewRequest
+    {
+
+    }
+
+    public class PersonViewResponse
     {
         public string PersonId { get; set; }
         public string Name { get; set; }
@@ -42,7 +48,16 @@ namespace DomainShell.Tests.App
         public string Content { get; set; }
     }
 
-    public class PersonApp
+    public interface IPersonApp :
+        IApp<PersonCreationRequest>,
+        IApp<PersonUpdateRequest>,
+        IApp<PersonDeletionRequest>,
+        IApp<PersonViewRequest, PersonViewResponse[]>
+    {
+
+    }
+
+    public class PersonApp : IPersonApp
     {
         public PersonApp(ISession sessino)
         {
@@ -65,7 +80,7 @@ namespace DomainShell.Tests.App
         private IZipCodeService _zipCodeService;
         private IPersonReadService _personReadService;
 
-        public void Create(PersonCreationRequest request)
+        public void Execute(PersonCreationRequest request)
         {
             using (ITran tran = _session.Tran())
             {
@@ -84,21 +99,21 @@ namespace DomainShell.Tests.App
 
                 PersonValidationSpec validationSpec = new PersonValidationSpec();
                 person.Validate(validationSpec);
-                
+
                 _repository.Save(person);
 
                 tran.Complete();
             }
         }
 
-        public void Update(PersonUpdateRequest request)
+        public void Execute(PersonUpdateRequest request)
         {
             using (ITran tran = _session.Tran())
             {
                 PersonLikeNameSelectionSpec spec = new PersonLikeNameSelectionSpec(request.Name);
                 PersonEntity[] persons = _repository.List(spec).ToArray();
                 PersonEntity person = persons[0];
-                
+
                 person.Address = new AddressValue(person.Address.ZipCode, request.City);
 
                 person.HistoryList[0].Content = request.Content;
@@ -112,7 +127,7 @@ namespace DomainShell.Tests.App
             }
         }
 
-        public void Delete(PersonDeletionRequest request)
+        public void Execute(PersonDeletionRequest request)
         {
             using (ITran tran = _session.Tran())
             {
@@ -126,22 +141,22 @@ namespace DomainShell.Tests.App
             }
         }
 
-        public PersonViewResult[] GetPersons()
+        public PersonViewResponse[] Execute(PersonViewRequest request)
         {
             using (_session.Open())
             {
-                List<PersonViewResult> list = new List<PersonViewResult>();
+                List<PersonViewResponse> list = new List<PersonViewResponse>();
                 foreach (PersonReadDto dto in _personReadService.GetPersonList())
                 {
-                    list.Add(new PersonViewResult
+                    list.Add(new PersonViewResponse
                     {
-                         PersonId = dto.PersonId,
-                         Name = dto.Name,
-                         EMail = dto.EMail,
-                         ZipCode = dto.ZipCode,
-                         City = dto.City,
-                         HistoryNo = dto.HistoryNo,
-                         Content = dto.Content
+                        PersonId = dto.PersonId,
+                        Name = dto.Name,
+                        EMail = dto.EMail,
+                        ZipCode = dto.ZipCode,
+                        City = dto.City,
+                        HistoryNo = dto.HistoryNo,
+                        Content = dto.Content
                     });
                 }
 

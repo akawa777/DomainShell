@@ -38,9 +38,9 @@ namespace DomainShell.Tests
                
             };
 
-            app.Create(personCreationRequest);
+            app.Execute(personCreationRequest);
             personCreationRequest.ZipCode = "xxxxxx";
-            app.Create(personCreationRequest);
+            app.Execute(personCreationRequest);
 
             PersonUpdateRequest personUpdateRequest = new PersonUpdateRequest
             {
@@ -49,9 +49,11 @@ namespace DomainShell.Tests
                 Content = "xxxx"
             };
 
-            app.Update(personUpdateRequest);
+            app.Execute(personUpdateRequest);
 
-            var list = app.GetPersons();
+            PersonViewRequest personViewRequest = new PersonViewRequest();
+
+            var list = app.Execute(personViewRequest);
 
             var result = list.FirstOrDefault();
 
@@ -60,7 +62,7 @@ namespace DomainShell.Tests
                 PersonId = "1"
             };
 
-            app.Delete(personDeletionRequest);
+            app.Execute(personDeletionRequest);
         }
 
         [TestMethod]
