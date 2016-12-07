@@ -51,9 +51,7 @@ namespace DomainShell.Tests.Infrastructure.Daos
                 .Single();
 
             return personDto;
-        }
-
-        
+        }        
 
         public IEnumerable<PersonDto> GetList<TTarget>(PredicateNode<TTarget, Operator> predicate)
         {
