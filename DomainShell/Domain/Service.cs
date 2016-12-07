@@ -10,4 +10,9 @@ namespace DomainShell.Domain
     {
 
     }
+
+    public interface IInfrastructureService
+    {
+
+    }
 }

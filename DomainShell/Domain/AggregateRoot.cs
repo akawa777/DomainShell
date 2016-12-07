@@ -6,17 +6,12 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Domain
 {
-    public interface IModel
-    {
-
-    }
-
-    public interface IValue : IModel
+    public interface IValue
     {
         string Value { get; }
     }
 
-    public interface IEntity : IModel
+    public interface IEntity
     {
 
     }

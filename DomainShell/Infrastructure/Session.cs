@@ -7,6 +7,37 @@ using DomainShell.Domain;
 
 namespace DomainShell.Infrastructure
 {
+    public interface IConnection : IDisposable
+    {
+        ITran Tran();
+    }
+
+    public interface ITran : IDisposable
+    {
+        void Complete();
+    }
+
+    public interface ISessionKernel
+    {
+        void Open();
+        void Close();
+        void BeginTran();
+        void Commit();
+        void Rollback();
+    }
+
+    public interface ISessionKernel<TConnectionPort> : ISessionKernel
+    {
+        TConnectionPort GetConnectionPort();
+    }
+
+    public interface ISession
+    {
+        TConnection GetPort<TConnection>() where TConnection : class;
+        IConnection Open();
+        ITran Tran();
+    }
+
     public class Session : ISession
     {
         public Session(params ISessionKernel[] kernels)

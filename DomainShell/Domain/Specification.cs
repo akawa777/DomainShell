@@ -6,19 +6,12 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Domain
 {
-    public interface ISpecification
-    {
-        
-    }
-
-    public interface ISpecification<TTarget> : 
-        ISpecification
+    public interface ISpecification<TTarget>
     {
         bool IsSatisfied(TTarget target);        
     }
 
-    public interface ISelectionSpec<TTarget, TPredicate> :
-        ISpecification
+    public interface ISelectionSpec<TTarget, TPredicate>
     {
         TPredicate Predicate();
     }
@@ -29,20 +22,18 @@ namespace DomainShell.Domain
         
     }
 
-    public interface IValidationSpec<TTarget, TError> : 
-        ISpecification
+    public interface IValidationSpec<TTarget, TError>
     {
         bool Validate(TTarget target, out TError[] errors);
     }
 
-    public interface ICreationSpec<TTarget, TConstructorParameters> : 
-        ISpecification
+    public interface ICreationSpec<TTarget, TConstructorParameters>
     {
         TConstructorParameters ConstructorParameters();
         void Satisfied(TTarget target);        
     }
 
-    public interface ICreationWithSpec<TTarget> : ISpecification
+    public interface ICreationWithSpec<TTarget>
     {
         void Satisfied(TTarget target);        
     }

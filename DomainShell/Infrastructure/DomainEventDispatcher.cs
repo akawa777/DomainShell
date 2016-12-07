@@ -7,7 +7,12 @@ using System.Reflection;
 using DomainShell.Domain;
 
 namespace DomainShell.Infrastructure
-{   
+{
+    public interface IDomainEventDispatcher
+    {
+        void Dispatch(IDomainEvent domainEvent);
+    }
+
     public class DomainEventDispatcher : IDomainEventDispatcher
     {
         private Dictionary<Type, Action<IDomainEvent>> _handlerMap = new Dictionary<Type, Action<IDomainEvent>>();

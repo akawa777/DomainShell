@@ -39,25 +39,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App\IApp.cs" />
-    <Compile Include="Domain\IInfrastructureService.cs" />
-    <Compile Include="Domain\IDomainService.cs" />
-    <Compile Include="Domain\IDomainEvent.cs" />
+    <Compile Include="App\App.cs" />
+    <Compile Include="Domain\Service.cs" />
+    <Compile Include="Domain\DomainEvent.cs" />
     <Compile Include="Domain\Predicate.cs" />
-    <Compile Include="Infrastructure\IDomainEventDispatcher.cs" />
-    <Compile Include="Domain\IDomainEventHandler.cs" />
-    <Compile Include="Infrastructure\IProxyModel.cs" />
+    <Compile Include="Infrastructure\ProxyModel.cs" />
     <Compile Include="Infrastructure\PropertyIntercepter.cs" />
-    <Compile Include="Domain\IFactory.cs" />
+    <Compile Include="Domain\Factory.cs" />
     <Compile Include="Infrastructure\ModelTrack.cs" />
     <Compile Include="Infrastructure\DomainEventDispatcher.cs" />
-    <Compile Include="Domain\IRepository.cs" />
+    <Compile Include="Domain\Repository.cs" />
     <Compile Include="Infrastructure\Session.cs" />
-    <Compile Include="Domain\ISpecification.cs" />
-    <Compile Include="Domain\IAggregateRoot.cs">
+    <Compile Include="Domain\Specification.cs" />
+    <Compile Include="Domain\AggregateRoot.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Infrastructure\ISession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

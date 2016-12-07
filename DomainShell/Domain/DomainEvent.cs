@@ -16,4 +16,9 @@ namespace DomainShell.Domain
         IEnumerable<IDomainEvent> GetEvents();
         void ClearEvents();
     }
+
+    public interface IDomianEventHandler<TDomainEvent> where TDomainEvent : IDomainEvent
+    {
+        void Handle(TDomainEvent domainEvent);
+    }
 }
