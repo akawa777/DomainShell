@@ -7,6 +7,7 @@ using DomainShell.Infrastructure;
 using DomainShell.Tests.Domain;
 using DomainShell.Tests.Domain.Contracts;
 using DomainShell.Tests.Infrastructure;
+using DomainShell.Tests.Infrastructure.Contracts;
 
 namespace DomainShell.Tests.App
 {
@@ -95,7 +96,8 @@ namespace DomainShell.Tests.App
             using (ITran tran = _session.Tran())
             {
                 PersonLikeNameSelectionSpec spec = new PersonLikeNameSelectionSpec(request.Name);
-                PersonEntity person = _repository.List(spec).FirstOrDefault();
+                PersonEntity[] persons = _repository.List(spec).ToArray();
+                PersonEntity person = persons[0];
                 
                 person.Address = new AddressValue(person.Address.ZipCode, request.City);
 
@@ -124,13 +126,14 @@ namespace DomainShell.Tests.App
             }
         }
 
-        public IEnumerable<PersonViewResult> GetCollection()
+        public PersonViewResult[] GetPersons()
         {
             using (_session.Open())
             {
-                foreach (IPersonReadDto dto in _personReadService.GetPersonList())
+                List<PersonViewResult> list = new List<PersonViewResult>();
+                foreach (PersonReadDto dto in _personReadService.GetPersonList())
                 {
-                    yield return new PersonViewResult
+                    list.Add(new PersonViewResult
                     {
                          PersonId = dto.PersonId,
                          Name = dto.Name,
@@ -139,8 +142,10 @@ namespace DomainShell.Tests.App
                          City = dto.City,
                          HistoryNo = dto.HistoryNo,
                          Content = dto.Content
-                    };
+                    });
                 }
+
+                return list.ToArray();
             }
         }
     }

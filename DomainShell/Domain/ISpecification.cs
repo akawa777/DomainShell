@@ -23,6 +23,12 @@ namespace DomainShell.Domain
         TPredicate Predicate();
     }
 
+    public interface ISelectionPredicateSpec<TTarget, TOperator> : 
+        ISelectionSpec<PredicateNode<TTarget, TOperator>>
+    {
+        
+    }
+
     public interface IValidationSpec<TTarget, TError> : 
         ISpecification
     {

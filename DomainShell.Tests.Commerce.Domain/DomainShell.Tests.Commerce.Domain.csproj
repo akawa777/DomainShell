@@ -44,9 +44,9 @@
     <Compile Include="CartPurchasedEvent.cs" />
     <Compile Include="CartValidationSpec.cs" />
     <Compile Include="Contracts\ICartFactory.cs" />
-    <Compile Include="Contracts\ICartReadService.cs" />
     <Compile Include="Contracts\ICartRepository.cs" />
     <Compile Include="Contracts\ICreditCardService.cs" />
+    <Compile Include="Contracts\IProductReadService.cs" />
     <Compile Include="Contracts\IProductRepository.cs" />
     <Compile Include="Contracts\IPurchaseFactory.cs" />
     <Compile Include="Contracts\IPurchaseRepository.cs" />
@@ -57,6 +57,7 @@
     <Compile Include="PurchaseCreationSpec.cs" />
     <Compile Include="PurchaseDto.cs" />
     <Compile Include="PurchaseEntity.cs" />
+    <Compile Include="Services\ProductReadService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DomainShell\DomainShell.csproj">

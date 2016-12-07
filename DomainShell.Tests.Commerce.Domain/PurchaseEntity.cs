@@ -126,7 +126,7 @@ namespace DomainShell.Tests.Commerce.Domain
             string[] errors;
             if (!spec.Validate(this, out errors))
             {
-                throw new Exception(errors[0]);
+                throw new Exception(string.Join(Environment.NewLine, errors));
             }
         }
     }

@@ -60,12 +60,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DataStoreProvider.cs" />
-    <Compile Include="Domain\Contracts\IPersonReadService.cs">
+    <Compile Include="Infrastructure\Contracts\IPersonReadService.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Infrastructure\Daos\IdDao.cs" />
     <Compile Include="Infrastructure\Daos\PersonDao.cs" />
     <Compile Include="Infrastructure\Services\ZipCodeService.cs" />
+    <Compile Include="Infrastructure\Daos\SqlGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App\PersonApp.cs" />
     <Compile Include="Domain\AddressValue.cs" />

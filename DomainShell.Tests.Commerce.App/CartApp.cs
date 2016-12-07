@@ -9,6 +9,7 @@ using DomainShell.Tests.Commerce.Domain;
 using DomainShell.Tests.Commerce.Domain.Contracts;
 using DomainShell.Tests.Commerce.Domain.Handlers;
 using DomainShell.Tests.Commerce.Infrastructure;
+using DomainShell.Tests.Commerce.Infrastructure.Contracts;
 
 namespace DomainShell.Tests.Commerce.App
 {
@@ -32,7 +33,7 @@ namespace DomainShell.Tests.Commerce.App
             _cartFactory = new Infrastructure.Factories.CartFactory(_session);
             _cartRepository = new Infrastructure.Repositories.CartRepository(_session, domainEventDispatcher);
             _creditCardService = new Infrastructure.Services.CreditCardService();
-            _productRepository = new Infrastructure.Repositories.ProductRepository(_session);
+            _productReadService = new Domain.Services.ProductReadService(new Infrastructure.Repositories.ProductRepository(_session));
             _cartReadService = new Infrastructure.Services.CartReadService(_session);
 
             Infrastructure.Factories.PurchaseFactory purchaseFactory = new Infrastructure.Factories.PurchaseFactory(_session);
@@ -46,12 +47,12 @@ namespace DomainShell.Tests.Commerce.App
         private ICartFactory _cartFactory;
         private ICartRepository _cartRepository;
         private ICreditCardService _creditCardService;
-        private IProductRepository _productRepository;
+        private IProductReadService _productReadService;
         private ICartReadService _cartReadService;
 
         public IEnumerable<CartItemResponse> Execute(CartItemListRequest request)
         {
-            foreach (ICartItemReadDto dto in _cartReadService.GetCartItemList(request.CustomerId))
+            foreach (CartItemReadDto dto in _cartReadService.GetCartItemList(request.CustomerId))
             {
                 yield return new CartItemResponse
                 {
@@ -80,7 +81,7 @@ namespace DomainShell.Tests.Commerce.App
 
                 cart.AddProduct(request.ProductId, request.Quantity);
 
-                CartValidationSpec validationSpec = new CartValidationSpec(_productRepository);
+                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
 
                 cart.Validate(validationSpec);
 
@@ -111,9 +112,9 @@ namespace DomainShell.Tests.Commerce.App
                 CartEntity cart = _cartRepository.Find(new CartId(request.CustomerId));
 
                 CreditCardValue creditCard = new CreditCardValue(request.CardCompanyId, request.CardNo);
-                CartValidationSpec validationSpec = new CartValidationSpec(_productRepository);
+                CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
 
-                cart.Purchase(creditCard, _creditCardService, _productRepository, validationSpec);
+                cart.Purchase(creditCard, _creditCardService, _productReadService, validationSpec);
 
                 _cartRepository.Save(cart);
 

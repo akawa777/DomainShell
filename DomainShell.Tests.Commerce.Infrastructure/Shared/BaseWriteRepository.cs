@@ -27,11 +27,11 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Shared
         public abstract TAggregateRoot Find(TIdentity id);
 
         public virtual void Save(TAggregateRoot aggregateRoot)
-        {
+        {            
             IAggregateProxyModel proxy = aggregateRoot as IAggregateProxyModel;
 
             if (proxy.Transient && proxy.Deleted)
-            {
+            {                
                 return;
             }
 

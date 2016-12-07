@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="CartItemReadDto.cs" />
     <Compile Include="CartProxy.cs" />
+    <Compile Include="Contracts\ICartReadService.cs" />
     <Compile Include="Factories\CartFactory.cs" />
     <Compile Include="Factories\PurchaseFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,6 +69,7 @@
       <Name>DomainShell</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

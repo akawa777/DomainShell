@@ -35,18 +35,14 @@ namespace DomainShell.Tests.Domain
         }
     }
 
-    public enum PersonPredicateItem
+    public enum Operator
     {
-        LikeName,
-        City
+        Equal,
+        NotEqual,
+        Like
     }
 
-    public class PersonPredicate : Dictionary<PersonPredicateItem, object>
-    {
-        public bool And { get; set; }
-    }
-
-    public class PersonLikeNameSelectionSpec : ISelectionSpec<PersonPredicate>
+    public class PersonLikeNameSelectionSpec : ISelectionPredicateSpec<PersonEntity, Operator>
     {
         public PersonLikeNameSelectionSpec(string name)
         {
@@ -55,11 +51,9 @@ namespace DomainShell.Tests.Domain
 
         private string _name;
 
-        public PersonPredicate Predicate()
+        public  PredicateNode<PersonEntity, Operator> Predicate()
         {
-            PersonPredicate predicate = new PersonPredicate();
-            predicate.And = true;
-            predicate[PersonPredicateItem.LikeName] = _name;
+            PredicateNode<PersonEntity, Operator> predicate = new PredicateNode<PersonEntity, Operator>(x => x.Name, Operator.Like, _name);
 
             return predicate;
         }
@@ -74,4 +68,6 @@ namespace DomainShell.Tests.Domain
             return true;
         }
     }
+
+    
 }

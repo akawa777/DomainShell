@@ -42,7 +42,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Daos
             string where = "where" + Environment.NewLine ;
             where += _indent + "Cart.CustomerId = @customerId";
 
-            parameterList.Add(new Parameter("customerId", id.CutomerId));
+            parameterList.Add(new Parameter("customerId", id.CustomerId));
 
             TextBuilder tb = new TextBuilder(_templateSql, new { where = where });
 
@@ -64,22 +64,40 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Daos
             return cart;
         }
 
+        private ICommand<CartEntity> CreateCartCommand(DagentDatabase database)
+        {
+            return 
+                database.Command<CartEntity>("Cart", "CustomerId")
+                .Map((row, entity) =>
+                {
+                    row["CustomerId"] = entity.Id.CustomerId;
+                });
+        }
+
+        private ICommand<CartItemEntity> CreateCartItemCommand(DagentDatabase database)
+        {
+            return 
+                database.Command<CartItemEntity>("CartItem", "CustomerId", "CartItemNo")
+                .Map((row, entity) =>
+                {
+                    row["CustomerId"] = entity.Id.CartId.CustomerId;
+                    row["CartItemNo"] = entity.Id.CartItemNo;
+                });
+        }
+
         public void Insert(CartEntity cart)
         {
             DagentDatabase db = new DagentDatabase(_connection);
 
-            db.Command<CartEntity>("Cart", "CustomerId").Map((row, entity) =>
-            {
-                row["CustomerId"] = entity.Id.CutomerId;
-            }).Insert(cart);
+            ICommand<CartEntity> cartCommand = CreateCartCommand(db);
+
+            cartCommand.Insert(cart);
+
+            ICommand<CartItemEntity> cartItemCommand = CreateCartItemCommand(db);
 
             foreach (CartItemEntity cartItem in cart.CartItemList)
             {
-                db.Command<CartItemEntity>("CartItem", "CustomerId", "CartItemNo").Map((row, entity) =>
-                {
-                    row["CustomerId"] = entity.Id.CartId.CutomerId;
-                    row["CartItemNo"] = entity.Id.CartItemNo;
-                }).Insert(cartItem);
+                cartItemCommand.Insert(cartItem);
             }
         }
 
@@ -87,18 +105,15 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Daos
         {
             DagentDatabase db = new DagentDatabase(_connection);
 
-            db.Command<CartEntity>("Cart", "CustomerId").Map((row, entity) =>
-            {
-                row["CustomerId"] = entity.Id.CutomerId;
-            }).Update(cart);
+            ICommand<CartEntity> cartCommand = CreateCartCommand(db);
+
+            cartCommand.Update(cart);
+
+            ICommand<CartItemEntity> cartItemCommand = CreateCartItemCommand(db);
 
             foreach (CartItemEntity cartItem in cart.CartItemList)
             {
-                db.Command<CartItemEntity>("CartItem", "CustomerId", "CartItemNo").Map((row, entity) =>
-                {
-                    row["CustomerId"] = entity.Id.CartId.CutomerId;
-                    row["CartItemNo"] = entity.Id.CartItemNo;
-                }).Update(cartItem);
+                cartItemCommand.Update(cartItem);
             }
         }
 
@@ -106,17 +121,31 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Daos
         {
             DagentDatabase db = new DagentDatabase(_connection);
 
-            db.Command<CartEntity>("Cart", "CustomerId").Map((row, entity) =>
-            {
-                row["CustomerId"] = entity.Id.CutomerId;
-            }).Delete(cart);
+            ICommand<CartEntity> cartCommand = CreateCartCommand(db);
 
-            db.ExequteNonQuery("delete from CartItem where CustomerId = @customerId", new Parameter("customerId", cart.Id.CutomerId));
+            cartCommand.Delete(cart);
+
+            db.ExequteNonQuery("delete from CartItem where CustomerId = @customerId", new Parameter("customerId", cart.Id.CustomerId));
         }
 
         public IEnumerable<CartItemReadDto> GetCartItemList(int customerId)
         {
-            return Enumerable.Empty<CartItemReadDto>();
+            List<Parameter> parameterList = new List<Parameter>();
+
+            string where = "where" + Environment.NewLine;
+            where += _indent + "Cart.CustomerId = @customerId";
+
+            parameterList.Add(new Parameter("customerId", customerId));
+
+            TextBuilder tb = new TextBuilder(_templateSql, new { where = where });
+
+            string sql = tb.Generate();
+
+            DagentDatabase db = new DagentDatabase(_connection);
+
+            IEnumerable<CartItemReadDto> list = db.Query<CartItemReadDto>(sql, parameterList.ToArray()).EnumerateList();
+
+            return list;
         }
     }
 }

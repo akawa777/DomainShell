@@ -65,7 +65,7 @@ namespace DomainShell.Tests.Domain
         }
 
         public void AddHisotry(HistoryEntity history)
-        {            
+        {
             (HistoryList as List<HistoryEntity>).Add(history);            
         }
 
@@ -94,7 +94,7 @@ namespace DomainShell.Tests.Domain
             string[] errors;
             if (!spec.Validate(this, out errors))
             {
-                throw new Exception(errors.First());
+                throw new Exception(string.Join(Environment.NewLine, errors));
             }
         }
     }

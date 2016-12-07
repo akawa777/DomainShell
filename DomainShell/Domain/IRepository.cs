@@ -13,12 +13,17 @@ namespace DomainShell.Domain
 
     public interface IReadSpecReposiory<TTarget>
     {
-        IEnumerable<TTarget> List(ISelectionSpec<TTarget> spec);
+        IEnumerable<TTarget> List(ISpecification<TTarget> spec);
     }
 
     public interface IReadSpecReposiory<TTarget, TPredicate>
     {
         IEnumerable<TTarget> List(ISelectionSpec<TPredicate> spec); 
+    }
+
+    public interface IReadPredicateSpecReposiory<TTarget, TOperator>
+    {
+        IEnumerable<TTarget> List(ISelectionPredicateSpec<TTarget, TOperator> spec);
     }
 
     public interface IWriteRepository<TAggregateRoot>

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
-using DomainShell.Tests.Commerce.Domain.Contracts;
+using DomainShell.Tests.Commerce.Infrastructure.Contracts;
 using DomainShell.Tests.Commerce.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Commerce.Infrastructure.Services
@@ -18,7 +18,7 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Services
 
         private CartDao _cartDao;
 
-        public IEnumerable<ICartItemReadDto> GetCartItemList(int customerId)
+        public IEnumerable<CartItemReadDto> GetCartItemList(int customerId)
         {
             return _cartDao.GetCartItemList(customerId);
         }

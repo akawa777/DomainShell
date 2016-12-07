@@ -36,25 +36,9 @@ namespace DomainShell.Tests.Infrastructure.Repositories
             return person;
         }
 
-        public IEnumerable<PersonEntity> List(ISelectionSpec<PersonPredicate> spec)
+        public IEnumerable<PersonEntity> List(ISelectionPredicateSpec<PersonEntity, Operator> spec)        
         {
-            PersonDao.Predicate predicate = new PersonDao.Predicate();
-            predicate.And = spec.Predicate().And;
-
-            foreach (KeyValuePair<PersonPredicateItem, object> keyValue in spec.Predicate())
-            {
-                if (keyValue.Key == PersonPredicateItem.LikeName)
-                {
-                    predicate[PersonDao.PredicateItem.LikeName] = keyValue.Value;
-                }
-
-                if (keyValue.Key == PersonPredicateItem.City)
-                {
-                    predicate[PersonDao.PredicateItem.City] = keyValue.Value;
-                }
-            }
-
-            IEnumerable<PersonDto> dtos = _personDao.GetList(predicate);
+            IEnumerable<PersonDto> dtos = _personDao.GetList(spec.Predicate());            
 
             foreach (PersonDto dto in dtos)
             {

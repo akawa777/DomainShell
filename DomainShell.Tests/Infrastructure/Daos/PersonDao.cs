@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dagent;
+using DomainShell.Domain;
+using DomainShell.Tests.Domain;
 
 namespace DomainShell.Tests.Infrastructure.Daos
 {
@@ -51,62 +53,35 @@ namespace DomainShell.Tests.Infrastructure.Daos
             return personDto;
         }
 
-        public enum PredicateItem
-        {
-            LikeName,
-            City
-        }
+        
 
-        public class Predicate : Dictionary<PredicateItem, object>
+        public IEnumerable<PersonDto> GetList<TTarget>(PredicateNode<TTarget, Operator> predicate)
         {
-            public bool And { get; set; }
-        }
+            SqlGenerator sqlGenerator = new SqlGenerator();
+            var where = sqlGenerator.Generate(predicate);
 
-        public IEnumerable<PersonDto> GetList(Predicate predicate)
-        {
             DagentDatabase db = new DagentDatabase(_connection);
 
             string sql = _sql;
 
-            StringBuilder where = new StringBuilder();
-
-            int suffix = 1;
-
-            List<Parameter> parameters = new List<Parameter>();
-
-            foreach (KeyValuePair<PredicateItem, object> keyValue in predicate)
-            {
-                if (where.ToString() != string.Empty)
-                {
-                    where.Append(predicate.And ? " and " : " or ");
-                    where.Append(Environment.NewLine);
-                }
-
-                string paramName = string.Empty;
-                if (keyValue.Key == PredicateItem.LikeName)
-                {
-                    paramName = string.Format("name_{0}", suffix);
-                    where.Append(string.Format("Person.Name like @{0}", paramName));
-
-                    parameters.Add(new Parameter(paramName, keyValue.Value.ToString() + "%"));
-                }
-                else if (keyValue.Key == PredicateItem.City)
-                {
-                    paramName = string.Format("city_{0}", suffix);
-                    where.Append(string.Format("Person.City = @{0}", paramName));
-
-                    parameters.Add(new Parameter(paramName, keyValue.Value));
-                }
-            }
-
-            if (where.ToString() != string.Empty)
+            if (where != string.Empty)
             {
                 sql = string.Format(sql, "where " + where.ToString());
             }
 
-            IEnumerable<PersonDto> personDtos = db.Query<PersonDto>(sql, parameters.ToArray())
+            List<Parameter> dbParameters = new List<Parameter>();
+
+            foreach (PredicateNode.Parameter parameter in predicate.Parameters)
+            {
+                dbParameters.Add(new Parameter(predicate.ParameterName, predicate.Value));
+            }
+
+            IEnumerable<PersonDto> personDtos = db.Query<PersonDto>(sql, dbParameters.ToArray())
                 .Unique("PersonId")
-                .Each((dto, rows) => rows.Map(dto, x => x.HistoryList, "PersonId", "HistoryNo").Do())
+                .Each((dto, rows) => 
+                {
+                    rows.Map(dto, x => x.HistoryList, "PersonId", "HistoryNo").Do();
+                })
                 .EnumerateList();
 
             return personDtos;

@@ -10,19 +10,19 @@ namespace DomainShell.Tests.Commerce.Domain
 {
     public class CartValidationSpec : IValidationSpec<CartEntity, string>
     {
-        public CartValidationSpec(IProductRepository productRepository)
+        public CartValidationSpec(IProductReadService productReadService)
         {
-            _productRepository = productRepository;
+            _productReadService = productReadService;
         }
 
-        private IProductRepository _productRepository;
+        private IProductReadService _productReadService;
 
         public bool Validate(CartEntity target, out string[] errors)
         {
             List<string> errorList = new List<string>();
             foreach (CartItemEntity item in target.CartItemList)
             {
-                if (_productRepository.Find(item.ProductId) == null)
+                if (_productReadService.Find(item.ProductId) == null)
                 {
                     errorList.Add(string.Format("CartItemNo {0} Product not exist", item.Id.CartItemNo));
                 }

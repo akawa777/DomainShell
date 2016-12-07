@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Infrastructure;
-using DomainShell.Tests.Domain.Contracts;
+using DomainShell.Tests.Infrastructure.Contracts;
 using DomainShell.Tests.Infrastructure.Daos;
 
 namespace DomainShell.Tests.Infrastructure.Services
@@ -18,7 +18,7 @@ namespace DomainShell.Tests.Infrastructure.Services
         
         private PersonDao _personDao;
 
-        public IEnumerable<IPersonReadDto> GetPersonList()
+        public IEnumerable<PersonReadDto> GetPersonList()
         {
             return _personDao.GetViewList();
         }

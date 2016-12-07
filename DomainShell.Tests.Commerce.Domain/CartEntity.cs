@@ -10,12 +10,12 @@ namespace DomainShell.Tests.Commerce.Domain
 {
     public class CartId : IValue
     {
-        public CartId(int cutomerId)
+        public CartId(int customerId)
         {
-            CutomerId = cutomerId;
+            CustomerId = customerId;
         }
 
-        public int CutomerId
+        public int CustomerId
         {
             get;
             protected set;
@@ -25,7 +25,7 @@ namespace DomainShell.Tests.Commerce.Domain
         {
             get
             {
-                return string.Join(":", CutomerId);
+                return string.Join(":", CustomerId);
             }
         }
     }
@@ -119,7 +119,7 @@ namespace DomainShell.Tests.Commerce.Domain
 
         public void AddProduct(int productId, int quantity)
         {
-            CartItemEntity cartItem = new CartItemEntity(Id.CutomerId, _cartItemList.Max(x => x.Id.CartItemNo) + 1);
+            CartItemEntity cartItem = new CartItemEntity(Id.CustomerId, _cartItemList.Max(x => x.Id.CartItemNo) + 1);
 
             cartItem.ProductId = productId;
             cartItem.Quantity = quantity;
@@ -139,12 +139,12 @@ namespace DomainShell.Tests.Commerce.Domain
             _cartItemList.Remove(cartItem);
         }
 
-        public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IReadReposiory<ProductEntity, int> productRepository, IValidationSpec<CartEntity, string> spec)
+        public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity, string> spec)
         {
             Validate(spec);
 
-            decimal totalPrice = _cartItemList.Sum(x => productRepository.Find(x.ProductId).Price * x.Quantity);
-            string content = productRepository.Find(_cartItemList[0].ProductId).ProductName;
+            decimal totalPrice = _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
+            string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;
 
             creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 
@@ -165,7 +165,7 @@ namespace DomainShell.Tests.Commerce.Domain
 
             CartPurchasedEvent @event = new CartPurchasedEvent
             {
-                CustomerId = Id.CutomerId,
+                CustomerId = Id.CustomerId,
                 PucharseDtoList = list
             };
 
@@ -177,7 +177,7 @@ namespace DomainShell.Tests.Commerce.Domain
             string[] errors;
             if (!spec.Validate(this, out errors))
             {
-                throw new Exception(errors[0]);
+                throw new Exception(string.Join(Environment.NewLine, errors));
             }
         }
 

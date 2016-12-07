@@ -8,8 +8,8 @@ using DomainShell.Domain;
 namespace DomainShell.Tests.Domain.Contracts
 {
     public interface IPersonRepository :
-        IReadReposiory<PersonEntity, PersonId>, 
-        IReadSpecReposiory<PersonEntity, PersonPredicate>,  
+        IReadReposiory<PersonEntity, PersonId>,
+        IReadPredicateSpecReposiory<PersonEntity, Operator>,  
         IWriteRepository<PersonEntity>
     {
     }

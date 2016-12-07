@@ -7,6 +7,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DomainShell.Domain;
 using DomainShell.Infrastructure;
 using DomainShell.Tests.App;
+using DomainShell.Tests.Domain;
+using DomainShell.Tests.Infrastructure.Daos;
 
 namespace DomainShell.Tests
 {
@@ -37,6 +39,8 @@ namespace DomainShell.Tests
             };
 
             app.Create(personCreationRequest);
+            personCreationRequest.ZipCode = "xxxxxx";
+            app.Create(personCreationRequest);
 
             PersonUpdateRequest personUpdateRequest = new PersonUpdateRequest
             {
@@ -47,99 +51,38 @@ namespace DomainShell.Tests
 
             app.Update(personUpdateRequest);
 
+            var list = app.GetPersons();
+
+            var result = list.FirstOrDefault();
+
             PersonDeletionRequest personDeletionRequest = new PersonDeletionRequest
             {
                 PersonId = "1"
             };
 
             app.Delete(personDeletionRequest);
-
-            List<PersonViewResult> list = app.GetCollection().ToList();
         }
 
         [TestMethod]
         public void Test02()
         {
-            PredicateNode<int> predicate1 = new PredicateNode<int>(1);
-            PredicateNode<int> predicate2 = new PredicateNode<int>(2);
+            string _name = "xxx";
 
-            PredicateNode<int> subPredicateNode1 = new OrPredicateNode<int>(predicate1, predicate2);
+            var p1 = new PredicateNode<PersonEntity, Operator>(x => x.Name, Operator.Equal, _name);
 
-            PredicateNode<int> predicate3 = new PredicateNode<int>(3);
-            PredicateNode<int> predicate4 = new PredicateNode<int>(4);
+            var p2 = new PredicateNode<PersonEntity, Operator>(x => x.Name, Operator.NotEqual, _name);
 
-            PredicateNode<int> subPredicateNode2 = new OrPredicateNode<int>(predicate3, predicate4);
+            var pOr = new OrPredicateNode<PersonEntity, Operator>(p1, p2);
 
-            PredicateNode<int> summaryPredicateNode1 = new AndPredicateNode<int>(subPredicateNode1, subPredicateNode2);
+            var p3 = new PredicateNode<PersonEntity, Operator>(x => x.Name, Operator.Like, _name);
 
-            PredicateNode<int> predicate5 = new PredicateNode<int>(5);
-            PredicateNode<int> predicate6 = new PredicateNode<int>(6);
+            var pAnd = new AndPredicateNode<PersonEntity, Operator>(pOr, p3);
 
-            PredicateNode<int> subPredicateNode3 = new OrPredicateNode<int>(predicate5, predicate6);
+            var parameters = pAnd.Parameters;
 
-            PredicateNode<int> predicate7 = new PredicateNode<int>(7);
-            PredicateNode<int> predicate8 = new PredicateNode<int>(8);
+            SqlGenerator sqlGenerator = new SqlGenerator();
 
-            PredicateNode<int> subPredicateNode4 = new OrPredicateNode<int>(predicate7, predicate8);
-
-            PredicateNode<int> summaryPredicateNode2 = new AndPredicateNode<int>(subPredicateNode3, subPredicateNode4);
-
-            PredicateNode<int> totalPredicateNode = new AndPredicateNode<int>(summaryPredicateNode1, summaryPredicateNode2);
-
-            string expression;
-            int no = 1;
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-
-            ParsePredicateNode(
-                totalPredicateNode, 
-                (p, n, d) => 
-                {
-                    d[string.Format("@name_{0}", n.ToString())] = p.Target;
-                    return string.Format("name = @name_{0}", n.ToString());
-                }  ,
-                out expression, 
-                parameters,
-                ref no);
-        }
-
-        public void ParsePredicateNode<TTarget>(
-             PredicateNode<TTarget> predicate,
-             Func<PredicateNode<TTarget>, int, Dictionary<string, object>, string> get,
-             out string expressoin,
-             Dictionary<string, object> parameters,
-             ref int parameterNo)
-        {
-            IPredicateNode<TTarget> predicateBody = predicate as IPredicateNode<TTarget>;
-
-            expressoin = string.Empty;
-
-            if (predicateBody.PredicateNodeList == null || predicateBody.PredicateNodeList.Count == 0)
-            {
-                expressoin = get(predicate, parameterNo, parameters);
-                parameterNo++;
-            }
-            else
-            {
-                string mergeSubNode = string.Empty;
-
-                foreach (PredicateNode<TTarget> subPredicateNode in predicateBody.PredicateNodeList)
-                {
-                    string subNode;
-
-                    ParsePredicateNode<TTarget>(subPredicateNode, get, out subNode, parameters, ref parameterNo);
-
-                    if (mergeSubNode != string.Empty)
-                    {
-                        mergeSubNode += predicateBody.And ? " and " : " or ";
-                    }
-
-                    mergeSubNode += subNode;
-                }
-
-                mergeSubNode = " ( " + mergeSubNode + " ) ";
-
-                expressoin += mergeSubNode;
-            }
+            var sql = sqlGenerator.Generate(pAnd);
         }
     }
 }
