@@ -17,14 +17,14 @@ namespace DomainShell.Domain
         bool IsSatisfied(TTarget target);        
     }
 
-    public interface ISelectionSpec<TPredicate> :
+    public interface ISelectionSpec<TTarget, TPredicate> :
         ISpecification
     {
         TPredicate Predicate();
     }
 
-    public interface ISelectionPredicateSpec<TTarget, TOperator> : 
-        ISelectionSpec<PredicateNode<TTarget, TOperator>>
+    public interface ISelectionPredicateSpec<TTarget, TOperator> :
+        ISelectionSpec<TTarget, PredicateNode<TTarget, TOperator>>
     {
         
     }

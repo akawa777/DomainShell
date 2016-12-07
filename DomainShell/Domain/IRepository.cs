@@ -18,7 +18,7 @@ namespace DomainShell.Domain
 
     public interface IReadSpecReposiory<TTarget, TPredicate>
     {
-        IEnumerable<TTarget> List(ISelectionSpec<TPredicate> spec); 
+        IEnumerable<TTarget> List(ISelectionSpec<TTarget, TPredicate> spec); 
     }
 
     public interface IReadPredicateSpecReposiory<TTarget, TOperator>
