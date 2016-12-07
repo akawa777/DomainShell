@@ -21,6 +21,18 @@ namespace DomainShell.Tests.Commerce.Domain
             set;
         }
 
+        public decimal TotalPrice
+        {
+            get;
+            set;
+        }
+
+        public string Content
+        {
+            get;
+            set;
+        }
+
         public List<PucharseDto> PucharseDtoList
         {
             get;

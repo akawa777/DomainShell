@@ -32,7 +32,7 @@ namespace DomainShell.Domain
         void Save(TAggregateRoot aggregateRoot);
     }
 
-    public interface ICollectionWriteRepository<TAggregateRoot>
+    public interface IWriteCollectionRepository<TAggregateRoot>
         where TAggregateRoot : IAggregateRoot
     {
         void Add(TAggregateRoot aggregateRoot);

@@ -139,14 +139,12 @@ namespace DomainShell.Tests.Commerce.Domain
             _cartItemList.Remove(cartItem);
         }
 
-        public virtual void Purchase(CreditCardValue creditCard, ICreditCardService creditCardService, IProductReadService productReadService, IValidationSpec<CartEntity, string> spec)
+        public virtual void Purchase(CreditCardValue creditCard, IProductReadService productReadService, IValidationSpec<CartEntity, string> spec)
         {
             Validate(spec);
 
             decimal totalPrice = _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
             string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;
-
-            creditCardService.Pay(creditCard.CardCompanyId, creditCard.CardNo, totalPrice, content);
 
             Delete();
 
@@ -166,6 +164,9 @@ namespace DomainShell.Tests.Commerce.Domain
             CartPurchasedEvent @event = new CartPurchasedEvent
             {
                 CustomerId = Id.CustomerId,
+                CreditCard = creditCard,
+                TotalPrice = totalPrice,
+                Content = content,
                 PucharseDtoList = list
             };
 
