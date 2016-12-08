@@ -38,4 +38,20 @@ namespace DomainShell.Tests.Commerce.Domain
             return errors.Length == 0;
         }
     }
+
+    public class PurchaseValidationSpec : IValidationSpec<PurchaseEntity, string>
+    {
+        public PurchaseValidationSpec()
+        {
+            
+        }
+
+        private IProductReadService _productReadService;
+
+        public bool Validate(PurchaseEntity target, out string[] errors)
+        {
+            errors = new string[0];
+            return true;
+        }
+    }
 }

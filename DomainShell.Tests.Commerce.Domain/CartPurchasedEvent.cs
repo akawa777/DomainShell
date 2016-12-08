@@ -7,7 +7,7 @@ using DomainShell.Domain;
 
 namespace DomainShell.Tests.Commerce.Domain
 {
-    public class CartPurchasedEvent : IDomainEvent
+    public class CartCheckoutedEvent : IDomainEvent
     {
         public int CustomerId
         {
@@ -16,6 +16,12 @@ namespace DomainShell.Tests.Commerce.Domain
         }
 
         public CreditCardValue CreditCard
+        {
+            get;
+            set;
+        }
+
+        public int PaymentId
         {
             get;
             set;

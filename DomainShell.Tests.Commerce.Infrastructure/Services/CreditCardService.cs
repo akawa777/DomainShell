@@ -11,9 +11,14 @@ namespace DomainShell.Tests.Commerce.Infrastructure.Services
 {
     public class CreditCardService : ICreditCardService
     {
-        public void Pay(CreditCardValue creditCard, decimal price, string content)
+        public void Pay(CreditCardValue creditCard, decimal price, string content, out int paymentId)
         {
-            
+            paymentId = 0;
+        }
+
+        public void Cancel(int paymentId, CreditCardValue creditCard)
+        {
+        
         }
     }
 }

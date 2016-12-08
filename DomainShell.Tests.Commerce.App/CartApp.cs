@@ -40,7 +40,7 @@ namespace DomainShell.Tests.Commerce.App
             IPurchaseFactory purchaseFactory = new Infrastructure.Factories.PurchaseFactory(_session);
             IPurchaseRepository purchaseRepository = new Infrastructure.Repositories.PurchaseRepository(_session, domainEventDispatcher);
 
-            domainEventDispatcher.Register<CartPurchasedEvent>(new CartEventHandler(creditCardService, purchaseFactory, purchaseRepository));
+            domainEventDispatcher.Register<CartCheckoutedEvent>(new CartEventHandler(creditCardService, purchaseFactory, purchaseRepository));
         }
 
         private ISession _session;
@@ -116,7 +116,7 @@ namespace DomainShell.Tests.Commerce.App
                 CreditCardValue creditCard = new CreditCardValue(request.CardCompanyId, request.CardNo);
                 CartValidationSpec validationSpec = new CartValidationSpec(_productReadService);
 
-                cart.Purchase(creditCard, _productReadService, validationSpec);
+                cart.Checkout(creditCard, _productReadService, validationSpec);
 
                 _cartRepository.Save(cart);
 

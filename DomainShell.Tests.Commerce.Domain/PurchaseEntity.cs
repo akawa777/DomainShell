@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainShell.Domain;
+using DomainShell.Tests.Commerce.Domain.Contracts;
 
 namespace DomainShell.Tests.Commerce.Domain
 {
@@ -129,5 +130,11 @@ namespace DomainShell.Tests.Commerce.Domain
                 throw new Exception(string.Join(Environment.NewLine, errors));
             }
         }
+
+        public int PaymentId
+        {
+            get;
+            set;
+        } 
     }
 }

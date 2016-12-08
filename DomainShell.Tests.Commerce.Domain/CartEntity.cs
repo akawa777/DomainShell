@@ -139,14 +139,19 @@ namespace DomainShell.Tests.Commerce.Domain
             _cartItemList.Remove(cartItem);
         }
 
-        public virtual void Purchase(CreditCardValue creditCard, IProductReadService productReadService, IValidationSpec<CartEntity, string> spec)
+        private bool _checkouted = false;
+
+        public virtual void Checkout(CreditCardValue creditCard, IProductReadService productReadService, IValidationSpec<CartEntity, string> spec)
         {
+            if (_checkouted)
+            {
+                throw new Exception("already checkout.");
+            }
+
             Validate(spec);
 
-            decimal totalPrice = _cartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
-            string content = productReadService.Find(_cartItemList[0].ProductId).ProductName;
-
-            Delete();
+            decimal totalPrice = CartItemList.Sum(x => productReadService.Find(x.ProductId).Price * x.Quantity);
+            string content = productReadService.Find(CartItemList[0].ProductId).ProductName;
 
             List<PucharseDto> list = new List<PucharseDto>();
 
@@ -161,16 +166,20 @@ namespace DomainShell.Tests.Commerce.Domain
                 list.Add(dto);
             }
 
-            CartPurchasedEvent @event = new CartPurchasedEvent
+            CartCheckoutedEvent @event = new CartCheckoutedEvent
             {
                 CustomerId = Id.CustomerId,
-                CreditCard = creditCard,
+                CreditCard = creditCard,   
                 TotalPrice = totalPrice,
-                Content = content,
+                Content = content,            
                 PucharseDtoList = list
             };
 
             _events.Add(@event);
+
+            Delete();
+
+            _checkouted = true;
         }
 
         public virtual void Validate(IValidationSpec<CartEntity, string> spec)
