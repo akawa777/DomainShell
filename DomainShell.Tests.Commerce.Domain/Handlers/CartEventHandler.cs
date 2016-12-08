@@ -36,6 +36,10 @@ namespace DomainShell.Tests.Commerce.Domain.Handlers
 
                 purchase.PaymentId = paymentId;
 
+                PurchaseValidationSpec validationSpec = new PurchaseValidationSpec();
+
+                purchase.Validate(validationSpec);
+
                 _purchaseRepository.Save(purchase);
             }
             catch (Exception e)
