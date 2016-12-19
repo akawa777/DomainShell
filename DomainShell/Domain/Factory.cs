@@ -10,4 +10,9 @@ namespace DomainShell.Domain
     {
         TAggregateRoot Create(ICreationSpec<TAggregateRoot, TConstructorParameters> spec);
     }
+
+    public interface ICollectionFactory<TAggregateRoot, TConstructorParameters> where TAggregateRoot : IAggregateRoot
+    {
+        IEnumerable<TAggregateRoot> CreateMultiple(ICreationSpec<TAggregateRoot, TConstructorParameters> spec);
+    }
 }

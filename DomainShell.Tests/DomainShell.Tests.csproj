@@ -59,6 +59,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Cqrs\Infrastructure\CommandResultReposiotry.cs" />
+    <Compile Include="Cqrs\Query\QueryHandler.cs" />
+    <Compile Include="Cqrs\Command\Command.cs" />
+    <Compile Include="Cqrs\Query\Query.cs" />
     <Compile Include="DataStoreProvider.cs" />
     <Compile Include="Infrastructure\Contracts\IPersonReadService.cs">
       <SubType>Code</SubType>
@@ -86,6 +90,8 @@
     <Compile Include="Infrastructure\Services\MailService.cs" />
     <Compile Include="Infrastructure\Services\PersonReadService.cs" />
     <Compile Include="SqliteSessionKernel.cs" />
+    <Compile Include="Cqrs\Test\CustomerCommandHandler.cs" />
+    <Compile Include="Cqrs\Test\UnitTest2.cs" />
     <Compile Include="UnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
