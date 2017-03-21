@@ -1,0 +1,7 @@
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\obj\Debug\DomainShell.Tests.Commerce.Domain.csprojResolveAssemblyReference.cache
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\bin\Debug\DomainShell.Tests.Commerce.Domain.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\bin\Debug\DomainShell.Tests.Commerce.Domain.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\bin\Debug\DomainShell.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\bin\Debug\DomainShell.pdb
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\obj\Debug\DomainShell.Tests.Commerce.Domain.dll
+E:\Documents\GitHub\DomainShell\DomainShell.Tests.Commerce.Domain\obj\Debug\DomainShell.Tests.Commerce.Domain.pdb
