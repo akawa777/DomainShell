@@ -48,7 +48,8 @@ namespace DomainShell.DomainProto
         bool Async { get; }
     }
 
-    public interface IDomainEventHandler<TDomainEvent> where TDomainEvent : IDomainEvent
+    public interface IDomainEventHandler<TDomainEvent> 
+        where TDomainEvent : IDomainEvent
     {
         void Handle(TDomainEvent domainEvent);
     }
@@ -71,7 +72,8 @@ namespace DomainShell.DomainProto
         bool Verified { get; set; }
     }
 
-    public interface IFactory<TAggregateRoot, TCreationSpec> where TAggregateRoot : IAggregateRoot
+    public interface IFactory<TAggregateRoot, TCreationSpec> 
+        where TAggregateRoot : IAggregateRoot
     {
         TAggregateRoot Create(TCreationSpec spec);
     }
@@ -121,7 +123,9 @@ namespace DomainShell.DomainProto
         public virtual bool Desc { get; set; }
     }
 
-    public interface ISelectionSpec<TSelect, TSort> where  TSelect : ISelectItem where TSort : ISortItem
+    public interface ISelectionSpec<TSelect, TSort> 
+        where TSelect : ISelectItem 
+        where TSort : ISortItem
     {
         ISelectItem[] GetSelectItems();
         ISortItem[] GetSortItems();
@@ -132,7 +136,9 @@ namespace DomainShell.DomainProto
         ISelectionSpec<TSelect, TSort> Sort(params TSort[] sorts);
     }
 
-    public class SelectionSpec<TSelect, TSort> : ISelectionSpec<TSelect, TSort> where  TSelect : ISelectItem where TSort : ISortItem
+    public class SelectionSpec<TSelect, TSort> : ISelectionSpec<TSelect, TSort> 
+        where TSelect : ISelectItem 
+        where TSort : ISortItem
     {
         public SelectionSpec(TSelect select)
         {
@@ -208,13 +214,16 @@ namespace DomainShell.DomainProto
         }
     }
 
-    public interface IReadReposiory<TModel, TSelect, TSort> where TSelect : ISelectItem where TSort : ISortItem
+    public interface IReadReposiory<TModel, TSelect, TSort> 
+        where TSelect : ISelectItem 
+        where TSort : ISortItem
     {
         TModel Single(ISelectionSpec<TSelect, TSort> spec);
         IEnumerable<TModel> List(ISelectionSpec<TSelect, TSort> spec);
     }
 
-    public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
+    public interface IWriteRepository<TAggregateRoot> 
+        where TAggregateRoot : IAggregateRoot
     {
         void Save(TAggregateRoot model);
     }
