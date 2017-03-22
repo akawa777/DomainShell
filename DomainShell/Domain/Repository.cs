@@ -45,21 +45,35 @@ namespace DomainShell.DomainProto
 {
     public interface IDomainEvent
     {
+        bool Async { get; }
+    }
 
+    public interface IDomainEventHandler<TDomainEvent> where TDomainEvent : IDomainEvent
+    {
+        void Handle(TDomainEvent domainEvent);
     }
 
     public interface IDomainEvnetPublisher
     {
-        void Publish(IDomainEvent domainEvent);
+        void Publish(IDomainEvent domainEvent);        
     }
 
     public interface IAggregateRoot
     {
-        bool Stored { get; }
-        bool Deleted { get; }
-        void Accepted();
         IDomainEvent[] GetEvents();
-        void ClearEvents();
+        void ClearEvents();        
+    }
+
+    public interface IProxyAggregateRoot
+    {
+        bool Unregistered { get; set; }
+        bool Deleted { get; set; }
+        bool Verified { get; set; }
+    }
+
+    public interface IFactory<TAggregateRoot, TCreationSpec> where TAggregateRoot : IAggregateRoot
+    {
+        TAggregateRoot Create(TCreationSpec spec);
     }
 
     public interface ISelectItem
@@ -72,25 +86,25 @@ namespace DomainShell.DomainProto
 
     public class SelectItem : ISelectItem
     {
-        public object Value
+        public virtual object Value
         {
             get;
             protected set;
         }
 
-        public object[] Values
+        public virtual object[] Values
         {
             get;
             protected set;
         }
 
-        public bool AndOr
+        public virtual bool AndOr
         {
             get;
             set;
         }
 
-        public ISelectItem[] Nodes
+        public virtual ISelectItem[] Nodes
         {
             get;
             set;
@@ -99,7 +113,12 @@ namespace DomainShell.DomainProto
 
     public interface ISortItem
     {
-        bool Desc { get; set; }
+        bool Desc { get; }
+    }
+
+    public class SortItem : ISortItem
+    {
+        public virtual bool Desc { get; set; }
     }
 
     public interface ISelectionSpec<TSelect, TSort> where  TSelect : ISelectItem where TSort : ISortItem
@@ -200,6 +219,14 @@ namespace DomainShell.DomainProto
         void Save(TAggregateRoot model);
     }
 
+    public interface IRepository<TAggregateRoot, TSelect, TSort> : IReadReposiory<TAggregateRoot, TSelect, TSort>, IWriteRepository<TAggregateRoot>
+        where TAggregateRoot : IAggregateRoot
+        where TSelect : ISelectItem
+        where TSort : ISortItem
+    {
+
+    }
+
     public abstract class AggregateRoot : IAggregateRoot
     {
         public AggregateRoot()
@@ -207,31 +234,7 @@ namespace DomainShell.DomainProto
             DomainEvent = new List<IDomainEvent>();
         }
 
-        protected virtual List<IDomainEvent> DomainEvent { get; set; }
-
-        public virtual bool Stored
-        {
-            get;
-            protected set;
-        }
-
-        public virtual bool Deleted
-        {
-            get;
-            protected set;
-        }
-
-        public virtual void Accepted()
-        {
-            if (Deleted)
-            {
-                Stored = false;
-            }
-            else
-            {
-                Stored = true;
-            }
-        }
+        protected virtual List<IDomainEvent> DomainEvent { get; set; }        
 
         public virtual IDomainEvent[] GetEvents()
         {
@@ -250,15 +253,49 @@ namespace DomainShell.DomainProto
     {
         public TModel Single(ISelectionSpec<TSelect, TSort> spec)
         {
-            throw new NotImplementedException();
+            IEnumerable<TModel> list = List(spec);
+
+            return list.FirstOrDefault();
         }
 
         public IEnumerable<TModel> List(ISelectionSpec<TSelect, TSort> spec)
         {
-            throw new NotImplementedException();
-        }
+            int parameterNo = 1;
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            StringBuilder preSql = new StringBuilder();
 
-        protected virtual string GetWhere(ISelectItem[] selectItems, ref int parameterNo, Dictionary<string, object> parameters, StringBuilder preSql)
+            StringBuilder sql = new StringBuilder();
+            sql.Append(GetSelectSql());
+
+            if (spec.GetSelectItems().Length > 0)
+            {
+                string where = GetWhereSql(spec.GetSelectItems(), ref parameterNo, parameters, preSql);
+                
+                sql = new StringBuilder(preSql.ToString() + Environment.NewLine + sql.ToString() + Environment.NewLine + "where" + Environment.NewLine + where);
+            }
+
+            if (spec.GetSortItems().Length > 0)
+            {
+                StringBuilder order = new StringBuilder();
+
+                order.Append(Environment.NewLine + "order by");
+
+                foreach (ISortItem sortItem in spec.GetSortItems())
+                {
+                    string orderColumn = GetOrderItemSql(sortItem);
+
+                    orderColumn = sortItem.Desc ? " desc" : orderColumn;
+
+                    order.Append(Environment.NewLine + orderColumn);
+                }
+
+                sql.Append(order.ToString());
+            }
+
+            return List(sql.ToString(), parameters);
+        }        
+
+        protected virtual string GetWhereSql(ISelectItem[] selectItems, ref int parameterNo, Dictionary<string, object> parameters, StringBuilder preSql)
         {
             StringBuilder where = new StringBuilder();
 
@@ -278,7 +315,7 @@ namespace DomainShell.DomainProto
 
                 if (selectItem.Nodes.Length == 0)
                 {
-                    string whereSelectItem = GetWhereItem(selectItem, parameterNo, parameters, preSql);
+                    string whereSelectItem = GetWhereItemSql(selectItem, parameterNo, parameters, preSql);
                     where.Append(whereSelectItem);
                     parameterNo++;
                 }
@@ -286,7 +323,7 @@ namespace DomainShell.DomainProto
                 {
                     where.Append(" ( ");
 
-                    string nodesWhere = GetWhere(selectItem.Nodes, ref parameterNo, parameters, preSql);
+                    string nodesWhere = GetWhereSql(selectItem.Nodes, ref parameterNo, parameters, preSql);
 
                     where.Append(nodesWhere);
 
@@ -297,49 +334,13 @@ namespace DomainShell.DomainProto
             return where.ToString();
         }
 
-        protected abstract string GetWhereItem(ISelectItem selectItem, int parameterNo, Dictionary<string, object> parameters, StringBuilder preSql);
-        protected abstract string GetOrderItem(ISortItem sortItem);
+        protected abstract string GetSelectSql();
+        protected abstract string GetWhereItemSql(ISelectItem selectItem, int parameterNo, Dictionary<string, object> parameters, StringBuilder preSql);
+        protected abstract string GetOrderItemSql(ISortItem sortItem);
+        protected abstract IEnumerable<TModel> List(string sql, Dictionary<string, object> parameters);
     }
 
-    public abstract class WriteRepository<TAggregateRoot> : IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
-    {
-        public WriteRepository(IDomainEvnetPublisher domainEvnetPublisher)
-        {
-            DomainEvnetPublisher = domainEvnetPublisher;
-        }
-
-        protected virtual IDomainEvnetPublisher DomainEvnetPublisher { get; set; }
-
-        public virtual void Save(TAggregateRoot model)
-        {
-            if (model.Deleted)
-            {
-                Delete(model);
-            }
-            else if (model.Stored)
-            {
-                Update(model);
-            }
-            else
-            {
-                Create(model);
-            }
-
-            IDomainEvent[] domainEvents = model.GetEvents();
-            model.ClearEvents();
-
-            foreach (IDomainEvent domainEvent in domainEvents)
-            {
-                DomainEvnetPublisher.Publish(domainEvent);
-            }
-        }
-
-        protected abstract void Create(TAggregateRoot model);
-        protected abstract void Update(TAggregateRoot model);
-        protected abstract void Delete(TAggregateRoot model);
-    }
-
-    public abstract class SqlRepository<TAggregateRoot, TSelect, TSort> : ReadSqlReposiory<TAggregateRoot, TSelect, TSort>, IWriteRepository<TAggregateRoot> 
+    public abstract class SqlRepository<TAggregateRoot, TSelect, TSort> : ReadSqlReposiory<TAggregateRoot, TSelect, TSort>, IRepository<TAggregateRoot, TSelect, TSort>
         where TSelect : ISelectItem
         where TSort : ISortItem
         where TAggregateRoot : IAggregateRoot
@@ -353,18 +354,33 @@ namespace DomainShell.DomainProto
 
         public virtual void Save(TAggregateRoot model)
         {
-            if (model.Deleted)
+            if (!(model is IProxyAggregateRoot))
             {
-                Delete(model);
+                throw new Exception(string.Format("{0} is not IProxyAggregateRoot", model.GetType().Name));
             }
-            else if (model.Stored)
+
+            IProxyAggregateRoot proxyModel = model as IProxyAggregateRoot;            
+
+            if (!proxyModel.Deleted && !proxyModel.Verified)
+            {
+                throw new Exception(string.Format("{0} is not verified", typeof(TAggregateRoot).Name));
+            }
+
+            if (proxyModel.Unregistered && !proxyModel.Deleted)
+            {
+                Create(model);
+                proxyModel.Unregistered = false;
+            }
+            else if (!proxyModel.Unregistered && !proxyModel.Deleted)
             {
                 Update(model);
             }
-            else
+            else if (!proxyModel.Unregistered && proxyModel.Deleted)
             {
-                Create(model);
+                Delete(model);
             }
+
+            proxyModel.Verified = false;
 
             IDomainEvent[] domainEvents = model.GetEvents();
             model.ClearEvents();
@@ -384,34 +400,74 @@ namespace DomainShell.DomainProto
     {
         public string CustomerId { get; set;}
         public string CustomerName { get; set;}
+
+        public virtual void Delete()
+        {
+
+        }
+
+        public virtual bool Validate(out string[] errors)
+        {
+            errors = new string[0];
+
+            return true;
+        }
     }
 
-    public class CustomerSelectItem : ISelectItem
+    public class CustomerProxy : Customer, IProxyAggregateRoot
     {
-        public object Value
-        {
-            get;
-            protected set;
-        }
-
-        public object[] Values
-        {
-            get;
-            protected set;
-        }
-
-        public bool AndOr
+        public virtual bool Unregistered
         {
             get;
             set;
         }
 
-        public ISelectItem[] Nodes
+        public virtual bool Deleted
         {
             get;
-            protected set;
+            set;
         }
 
+        public virtual bool Verified
+        {
+            get;
+            set;
+        }
+
+        public override void Delete()
+        {
+            base.Delete();
+            Deleted = true;
+        }
+
+        public override bool Validate(out string[] errors)
+        {
+            bool validate = base.Validate(out errors);
+            Verified = validate ? true : false;
+            return validate;
+        }
+    }
+
+    public class CustomerCreationSpec
+    {
+
+    }
+
+    public class CustomerFactory : IFactory<Customer, CustomerCreationSpec>
+    {
+        public Customer Create(CustomerCreationSpec spec)
+        {
+            CustomerProxy proxyModel = new CustomerProxy();
+
+            proxyModel.CustomerId = Guid.NewGuid().ToString();
+            proxyModel.Unregistered = true;
+
+            return proxyModel;
+        }
+    }
+
+    public class CustomerSelectItem : SelectItem
+    {
         public class CustomerId : CustomerSelectItem
         {            
             public CustomerId(params string[] customerIds)
@@ -429,14 +485,8 @@ namespace DomainShell.DomainProto
         }
     }
 
-    public class CustomerSortItem : ISortItem
+    public class CustomerSortItem : SortItem
     {
-        public bool Desc
-        {
-            get;
-            set;
-        }
-
         public class CustomerId : CustomerSortItem
         {            
         }
@@ -454,7 +504,12 @@ namespace DomainShell.DomainProto
             
         }
 
-        protected override string GetWhereItem(ISelectItem selectItem, int parameterNo, Dictionary<string, object> parameters, StringBuilder preSql)
+        protected override string GetSelectSql()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override string GetWhereItemSql(ISelectItem selectItem, int parameterNo, Dictionary<string, object> parameters, StringBuilder preSql)
         {
             if (selectItem is CustomerSelectItem.CustomerId)
             {
@@ -489,7 +544,7 @@ namespace DomainShell.DomainProto
             }
         }
 
-        protected override string GetOrderItem(ISortItem sortItem)
+        protected override string GetOrderItemSql(ISortItem sortItem)
         {
             if (sortItem is CustomerSortItem.CustomerId)
             {
@@ -503,6 +558,15 @@ namespace DomainShell.DomainProto
             {
                 return string.Empty;
             }
+        }
+
+        protected override IEnumerable<Customer> List(string sql, Dictionary<string, object> parameters)
+        {
+            return new CustomerProxy[] 
+            {
+                new CustomerProxy { CustomerId = "1", CustomerName = "name_1" },
+                new CustomerProxy { CustomerId = "1", CustomerName = "name_2" }
+            };
         }
 
         protected override void Create(Customer model)
@@ -525,11 +589,64 @@ namespace DomainShell.DomainProto
     {
         public CustomerApp()
         {
+            _factory = new CustomerFactory();
             _repository = new CustomerRepository(_domainEvnetPublisher);
         }
 
         private IDomainEvnetPublisher _domainEvnetPublisher = null;
-        private CustomerRepository _repository;
+        private IFactory<Customer, CustomerCreationSpec> _factory;
+        private IRepository<Customer, CustomerSelectItem, CustomerSortItem> _repository;
+
+        public void Create(string customerName)
+        {
+            CustomerCreationSpec spec = new CustomerCreationSpec();
+
+            Customer model = _factory.Create(spec);
+            
+            model.CustomerName = customerName;
+
+            string[] errors;
+            bool validate = model.Validate(out errors);
+
+            if (!validate)
+            {
+                throw new Exception(errors[0]);
+            }
+
+            _repository.Save(model);
+        }
+
+        public void Update(string customerId, string customerName)
+        {
+            SelectionSpec<CustomerSelectItem, CustomerSortItem> spec
+                = new SelectionSpec<CustomerSelectItem, CustomerSortItem>(new CustomerSelectItem.CustomerId(customerId));
+
+            Customer model = _repository.Single(spec);
+
+            model.CustomerName = customerName;
+
+            string[] errors;
+            bool validate = model.Validate(out errors);
+
+            if (!validate)
+            {
+                throw new Exception(errors[0]);
+            }
+
+            _repository.Save(model);
+        }
+
+        public void Delete(string customerId)
+        {
+            SelectionSpec<CustomerSelectItem, CustomerSortItem> spec
+                = new SelectionSpec<CustomerSelectItem, CustomerSortItem>(new CustomerSelectItem.CustomerId(customerId));
+
+            Customer model = _repository.Single(spec);
+
+            model.Delete();
+
+            _repository.Save(model);
+        }
 
         public object[] List(string[] customerIds, string likeCustomerName)
         {
@@ -537,6 +654,7 @@ namespace DomainShell.DomainProto
                 = new SelectionSpec<CustomerSelectItem, CustomerSortItem>(new CustomerSelectItem.CustomerId(customerIds));
 
             spec.And(new CustomerSelectItem.LikeCustomerName(likeCustomerName));
+            spec.Sort(new CustomerSortItem.CustomerId());
 
             IEnumerable<Customer> models = _repository.List(spec);
 
