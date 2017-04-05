@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\App.cs" />
+    <Compile Include="Domain\DomainProto.cs" />
     <Compile Include="Domain\Service.cs" />
     <Compile Include="Domain\DomainEvent.cs" />
     <Compile Include="Domain\Predicate.cs" />
