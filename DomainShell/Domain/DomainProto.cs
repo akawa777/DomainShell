@@ -370,7 +370,7 @@ namespace DomainShell.DomainProto
 
     public class Customer : AggregateRoot
     {
-        public string CustomerId { get; set;}
+        public string CustomerId { get; set; }
         public string CustomerName { get; set; }
 
         public virtual void Delete()
@@ -381,7 +381,6 @@ namespace DomainShell.DomainProto
         public virtual bool Validate(out string[] errors)
         {
             errors = new string[0];
-
             return true;
         }
 
@@ -392,11 +391,24 @@ namespace DomainShell.DomainProto
 
         protected List<CustomerHistory> _customerHistoryList = new List<CustomerHistory>();
 
+        public CustomerHistory NewHistory()
+        {
+            CustomerHistory history = new CustomerHistory();
+            history.CustomerId = CustomerId;
+            history.HistoryNo = GetMaxHistoryNo();
+
+            return history;
+        }
+
+        public int GetMaxHistoryNo()
+        {
+            int maxNo = _customerHistoryList.Count == 0 ? 1 : _customerHistoryList.Max(x => x.HistoryNo) + 1;
+
+            return maxNo;
+        }
+
         public virtual void AddHistory(CustomerHistory history)
         {
-            int historyNo = _customerHistoryList.Count == 0 ? 1 : _customerHistoryList.Max(x => x.HistoryNo) + 1;
-            history.HistoryNo = historyNo;
-
             _customerHistoryList.Add(history);
         }
 
@@ -418,12 +430,40 @@ namespace DomainShell.DomainProto
         {
             get { return _customerHistoryDetailList.ToArray(); }
         }
+
+        public CustomerHistoryDetail NewDetail()
+        {
+            CustomerHistoryDetail detail = new CustomerHistoryDetail();
+            detail.CustomerId = CustomerId;
+            detail.HistoryNo = HistoryNo;
+            detail.DetailNo = GetMaxDetailNo();
+
+            return detail;
+        }
+
+        public int GetMaxDetailNo()
+        {
+            int maxNo = _customerHistoryDetailList.Count == 0 ? 1 : _customerHistoryDetailList.Max(x => x.DetailNo) + 1;
+
+            return maxNo;
+        }
+
+        public virtual void AddDetail(CustomerHistoryDetail detail)
+        {
+            _customerHistoryDetailList.Add(detail);
+        }
+
+        public virtual void RemoveDetail(CustomerHistoryDetail detail)
+        {
+            _customerHistoryDetailList.Remove(detail);
+        }
     }
 
     public class CustomerHistoryDetail
     {
         public string CustomerId { get; set; }
         public int HistoryNo { get; set; }
+        public int DetailNo { get; set; }
         public string Text { get; set; }
     }
 
@@ -666,6 +706,18 @@ namespace DomainShell.DomainProto
 
             Customer model = _factory.Create(spec);
 
+            CustomerHistory hisotry = model.NewHistory();
+
+            hisotry.Content = "new";
+
+            CustomerHistoryDetail detail = hisotry.NewDetail();
+            detail.Text = "new";
+
+            hisotry.AddDetail(detail);            
+
+            model.AddHistory(hisotry);
+            
+
             string[] errors;
             bool validate = model.Validate(out errors);
 
@@ -685,6 +737,13 @@ namespace DomainShell.DomainProto
             Customer model = _repository.Single(spec);
 
             model.CustomerName = customerName;
+
+            CustomerHistory history = model.CustomerHistoryList.FirstOrDefault();
+
+            if (history != null)
+            {
+                model.RemoveHistory(history);
+            }
 
             string[] errors;
             bool validate = model.Validate(out errors);
