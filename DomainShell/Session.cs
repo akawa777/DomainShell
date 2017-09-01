@@ -2,17 +2,11 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DomainShell
 {
-    public interface ISession
-    {
-        IOpenScope Open();
-        ITranScope Tran();
-        void OnException(Exception exception);
-    }
-
     public interface IOpenScope : IDisposable
     {
         
@@ -23,63 +17,90 @@ namespace DomainShell
         void Complete();
     }
 
-    public abstract class SessionBase : ISession
+    public static class SessionFoundation
     {
-        private bool _opned = false;
-        private bool _traned = false;
-
-        public IOpenScope Open()
+        public static void Startup(Func<OpenScopeBase> openScope, Func<TranScopeBase> tranScope)        
         {
-            OpenScopeBase openScope = OpenScope();
-            openScope.Init(_opned, () => _opned = false);
+            FieldInfo field = typeof(Session).GetField("_openScope",  BindingFlags.Static | BindingFlags.NonPublic);
+            field.SetValue(null, openScope);
 
-            _opned = true;
-
-            return openScope;
+            field = typeof(Session).GetField("_tranScope",  BindingFlags.Static | BindingFlags.NonPublic);
+            field.SetValue(null, tranScope);
         }
-
-        public ITranScope Tran()
-        {
-            TranScopeBase tranScope = TranScope();
-            tranScope.Init(_traned, () => { _opned = false; _traned = false; });
-
-            _opned = true;
-            _traned = true;
-
-            return tranScope;
-        }
-
-        public void OnException(Exception exception)
-        {
-            try
-            {
-                DomainEventFoundation.DealException(exception);
-            }
-            finally
-            {
-                HandleException(exception);
-            }
-        }
-
-        protected abstract OpenScopeBase OpenScope();
-        protected abstract TranScopeBase TranScope();
-        protected abstract void HandleException(Exception exception);
     }
 
-    public abstract class OpenScopeBase : IOpenScope
+    public static class Session
     {
-        private bool _opned = false;
+        private static Func<OpenScopeBase> _openScope = () => null;
+        private static Func<TranScopeBase> _tranScope = () => null;
+        private static Dictionary<int, IOpenScope> _openMap = new Dictionary<int, IOpenScope>();
+        private static Dictionary<int, ITranScope> _tranMap = new Dictionary<int, ITranScope>();
+
+        private class OpenScope : IOpenScope
+        {
+            public void Dispose()
+            {
+            }
+        }
+
+        private class TranScope : ITranScope
+        {
+            public void Complete()
+            {
+
+            }
+
+            public void Dispose()
+            {
+            }
+        }
+
+        public static IOpenScope Open()
+        {
+            int id = Thread.CurrentThread.ManagedThreadId;
+
+            if (_openMap.ContainsKey(id))
+            {
+                return new OpenScope();
+            }
+
+            OpenScopeBase scope = _openScope();
+            scope.Init(() => _openMap.Remove(id));
+            _openMap[id] = scope;
+
+            return scope;
+        }
+
+        public static ITranScope Tran()
+        {
+            int id = Thread.CurrentThread.ManagedThreadId;
+
+            if (_tranMap.ContainsKey(id))
+            {
+                return new TranScope();
+            }
+
+            TranScopeBase scope = _tranScope();
+            scope.Init(() => _tranMap.Remove(id));
+            _tranMap[id] = scope;
+
+            return scope;
+        }
+
+        public static void OnException(Exception exception)
+        {
+            DomainEventFoundation.DealException(exception);
+        }
+    }   
+
+    public abstract class OpenScopeBase : IOpenScope
+    {        
         private Action _dispose = () => {};
 
-        public void Init(bool opend, Action dispose)
+        public void Init(Action dispose)
         {
-            _opned = opend;
-
-            if (!_opned)
-            {
-                _dispose = dispose;
-                Open();                
-            } 
+            _dispose = dispose;
+            Open();                
         }
 
         protected abstract void Open();
@@ -88,34 +109,25 @@ namespace DomainShell
 
         public void Dispose()
         {
-            if (!_opned) 
+            try
             {
-                try
-                {
-                    Close();                    
-                }
-                finally
-                {                    
-                    _dispose();                    
-                } 
+                Close();                    
             }
+            finally
+            {                    
+                _dispose();                    
+            } 
         }
     }
 
     public abstract class TranScopeBase : ITranScope
     {
-        private bool _traned;
         private Action _dispose = () => {};
 
-        public void Init(bool traned, Action dispose)
+        public void Init(Action dispose)
         {
-            _traned = traned;
-
-            if (!_traned)
-            {
-                 _dispose = dispose;
-                BeginTran();  
-            }
+            _dispose = dispose;
+            BeginTran();  
         }
 
         protected abstract void BeginTran();
@@ -126,25 +138,19 @@ namespace DomainShell
 
         public void Complete()
         {
-            if (!_traned)
-            {
-                Commit();
-                DomainEventFoundation.ExecOutertran();
-            }
+            Commit();
+            DomainEventFoundation.ExecOutertran();
         }
 
         public void Dispose()
         {
-            if (!_traned) 
+            try
             {
-                try
-                {
-                    Rollback();
-                }
-                finally
-                {                    
-                    _dispose();
-                }
+                Rollback();
+            }
+            finally
+            {                    
+                _dispose();
             }
         }
     }

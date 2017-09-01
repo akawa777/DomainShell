@@ -7,15 +7,13 @@ namespace DomainShell.Test
 {
     public class OrderCommandApp
     {
-        public OrderCommandApp(ISession session, IOrderRepository orderRepository, IOrderValidator orderValidator, ICreditCardService creditCardService)
-        {
-            _session = session;
+        public OrderCommandApp(IOrderRepository orderRepository, IOrderValidator orderValidator, ICreditCardService creditCardService)
+        {            
             _orderRepository = orderRepository;
             _orderValidator = orderValidator;
             _creditCardService = creditCardService;
         }
 
-        private ISession _session;
         private IOrderRepository _orderRepository;      
         private IOrderValidator _orderValidator;
         private ICreditCardService _creditCardService;
@@ -24,7 +22,7 @@ namespace DomainShell.Test
         {
             try
             {
-                using(var tran = _session.Tran())
+                using(var tran = Session.Tran())
                 {
                     OrderModel orderModel;
 
@@ -44,7 +42,7 @@ namespace DomainShell.Test
             }
             catch(Exception e)
             {
-                _session.OnException(e);
+                Session.OnException(e);
                 throw e;
             }
         }
@@ -53,7 +51,7 @@ namespace DomainShell.Test
         {
             try
             {
-                using(var tran = _session.Tran())
+                using(var tran = Session.Tran())
                 {
                     OrderModel orderModel = _orderRepository.Find(orderDto.OrderId, true);
                     Map(orderDto, orderModel);
@@ -67,7 +65,7 @@ namespace DomainShell.Test
             }
             catch(Exception e)
             {
-                _session.OnException(e);
+                Session.OnException(e);
                 throw e;
             }
         }
@@ -81,20 +79,18 @@ namespace DomainShell.Test
 
     public class OrderQueryApp
     {
-        public OrderQueryApp(ISession session, IOrderRepository orderRepository)
-        {
-            _session = session;
+        public OrderQueryApp(IOrderRepository orderRepository)
+        {            
             _orderRepository = orderRepository;
         }
-
-        private ISession _session;
+        
         private IOrderRepository _orderRepository;           
 
         public OrderDto Find(string orderId)
         {
             try
             {
-                using(_session.Open())
+                using(Session.Open())
                 {
                     OrderModel orderModel = _orderRepository.Find(orderId, true);
 
@@ -103,7 +99,7 @@ namespace DomainShell.Test
             }
             catch(Exception e)
             {
-                _session.OnException(e);
+                Session.OnException(e);
                 throw e;
             }
         }

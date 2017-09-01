@@ -49,30 +49,6 @@ namespace DomainShell.Test
         }
     }
 
-    public class Session : SessionBase
-    {
-        public Session(IMemoryConnection connection)
-        {
-            _connection = connection;
-        }
-
-        private IMemoryConnection _connection;
-
-        protected override OpenScopeBase OpenScope()
-        {
-            return new OpenScope(_connection as MemoryConnection);
-        }
-
-        protected override TranScopeBase TranScope()
-        {
-            return new TranScope(_connection as MemoryConnection);
-        }
-
-        protected override void HandleException(Exception exception)
-        {
-        }
-    }
-
     public class OpenScope : OpenScopeBase
     {
         public OpenScope(MemoryConnection connection)

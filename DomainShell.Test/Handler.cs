@@ -7,15 +7,13 @@ namespace DomainShell.Test
 {
     public class OrderCompletedEventHandler : IDomainEventHandler<OrderCompletedEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>
     {
-        public OrderCompletedEventHandler(ISession session, IOrderRepository orderRepository, ICreditCardService creditCardService, IMailService mailService)
-        {
-            _session = session;
+        public OrderCompletedEventHandler(IOrderRepository orderRepository, ICreditCardService creditCardService, IMailService mailService)
+        {            
             _orderRepository = orderRepository;
             _creditCardService = creditCardService;
             _mailService = mailService;
         }
-
-        private ISession _session;
+        
         private IOrderRepository _orderRepository;      
         private ICreditCardService  _creditCardService;
         private IMailService _mailService;
@@ -24,7 +22,7 @@ namespace DomainShell.Test
         {
             try
             {
-                using(_session.Open())
+                using(Session.Open())
                 {
                     OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
 
@@ -33,7 +31,7 @@ namespace DomainShell.Test
             }
             catch(Exception e)
             {
-                _session.OnException(e);
+                Session.OnException(e);
                 throw e;
             }
         }
@@ -42,7 +40,7 @@ namespace DomainShell.Test
         {
             try
             {
-                using(var tran = _session.Tran())
+                using(var tran = Session.Tran())
                 {
                     OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
 
@@ -54,7 +52,7 @@ namespace DomainShell.Test
             }
             catch(Exception e)
             {
-                _session.OnException(e);
+                Session.OnException(e);
                 throw e;
             }
         }
