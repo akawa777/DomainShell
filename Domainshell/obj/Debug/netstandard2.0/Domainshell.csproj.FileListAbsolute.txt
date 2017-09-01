@@ -1,0 +1,9 @@
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\bin\Debug\netstandard2.0\Domainshell.deps.json
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\bin\Debug\netstandard2.0\Domainshell.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\bin\Debug\netstandard2.0\Domainshell.pdb
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\obj\Debug\netstandard2.0\Domainshell.csproj.CoreCompileInputs.cache
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\obj\Debug\netstandard2.0\Domainshell.AssemblyInfoInputs.cache
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\obj\Debug\netstandard2.0\Domainshell.AssemblyInfo.cs
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\obj\Debug\netstandard2.0\Domainshell.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\obj\Debug\netstandard2.0\Domainshell.pdb
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell\obj\Debug\netstandard2.0\Domainshell.csprojResolveAssemblyReference.cache

@@ -1,0 +1,16 @@
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\obj\Debug\netcoreapp2.0\Domainshell.Test.csproj.CoreCompileInputs.cache
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\obj\Debug\netcoreapp2.0\Domainshell.Test.AssemblyInfoInputs.cache
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\obj\Debug\netcoreapp2.0\Domainshell.Test.AssemblyInfo.cs
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.Test.deps.json
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.Test.runtimeconfig.json
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.Test.runtimeconfig.dev.json
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.Test.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.Test.pdb
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\bin\Debug\netcoreapp2.0\Domainshell.pdb
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\obj\Debug\netcoreapp2.0\Domainshell.Test.dll
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\obj\Debug\netcoreapp2.0\Domainshell.Test.pdb
+C:\Users\a-kawamoto.GK\Documents\vscode\projects\Domainshell\Domainshell.Test\obj\Debug\netcoreapp2.0\Domainshell.Test.csprojResolveAssemblyReference.cache
