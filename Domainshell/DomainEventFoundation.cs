@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Domainshell
+namespace DomainShell
 {
     public static class DomainEventPublisher
     {

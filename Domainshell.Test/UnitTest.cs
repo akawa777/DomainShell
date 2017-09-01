@@ -1,9 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Domainshell;
+using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 
-namespace Domainshell.Test
+namespace DomainShell.Test
 {
     [TestClass]
     public class UnitTest

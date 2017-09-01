@@ -103,7 +103,7 @@
       ]
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
-      "sha512": "gOj37E2j+FNqLrK6hcd5jCXsAVYSnxfTyicayWS6DXDU+pRmf6Muzy662MRV2OaVPT+QOvjuedkhXRsI0T/9nQ==",
+      "sha512": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
       "type": "package",
       "path": "microsoft.netcore.platforms/1.1.0",
       "files": [
@@ -251,23 +251,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\a-kawamoto.GK\\.nuget\\packages\\": {},
+    "C:\\Users\\Akira\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\a-kawamoto.GK\\Documents\\vscode\\projects\\Domainshell\\Domainshell\\Domainshell.csproj",
-      "projectName": "Domainshell",
-      "projectPath": "c:\\Users\\a-kawamoto.GK\\Documents\\vscode\\projects\\Domainshell\\Domainshell\\Domainshell.csproj",
-      "packagesPath": "C:\\Users\\a-kawamoto.GK\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\a-kawamoto.GK\\Documents\\vscode\\projects\\Domainshell\\Domainshell\\obj\\",
+      "projectUniqueName": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
+      "projectName": "DomainShell",
+      "projectPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
+      "packagesPath": "C:\\Users\\Akira\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\a-kawamoto.GK\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Akira\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -275,8 +275,8 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\a-kawamoto.GK\\.dotnet\\NuGetFallbackFolder": {},
-        "https://www.nuget.org/api/v2/": {}
+        "C:\\Users\\Akira\\.dotnet\\NuGetFallbackFolder": {},
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.0": {

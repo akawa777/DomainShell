@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Domainshell;
+using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 
-namespace Domainshell.Test
+namespace DomainShell.Test
 {
     public class InTranDomainEventScope : IDomainEventScope
     {

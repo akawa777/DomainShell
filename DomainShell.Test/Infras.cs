@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Domainshell;
+using DomainShell;
 
-namespace Domainshell.Test
+namespace DomainShell.Test
 {
     public class OrderRepository : IOrderRepository
     {

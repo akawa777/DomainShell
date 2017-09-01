@@ -1,6 +1,6 @@
 using System;
 
-namespace Domainshell
+namespace DomainShell
 {
     public class VirtualObject<TElement> where TElement : class
     {
