@@ -9,7 +9,7 @@ namespace DomainShell.Test
     {
         OrderModel Find(string orderId, bool throwError = false);
         OrderModel GetLastByUser(string userId);
-        void Apply(OrderModel orderModel);
+        void Save(OrderModel orderModel);
     }
 
     public interface IOrderValidator

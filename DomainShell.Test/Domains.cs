@@ -47,7 +47,7 @@ namespace DomainShell.Test
             _events.Clear();
         }
 
-        public void Regist(IOrderValidator orderValidator)
+        public void Register(IOrderValidator orderValidator)
         {
             orderValidator.ValidateWhenRegist(this);
 

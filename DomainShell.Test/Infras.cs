@@ -38,15 +38,15 @@ namespace DomainShell.Test
             return orderModel;
         }
 
-        public void Apply(OrderModel orderModel)
+        public void Save(OrderModel orderModel)
         {
             ModelState modelState = GetModelState(orderModel);
 
             ValidateConcurrency(orderModel, modelState);
 
-            AdjustWhenApply(orderModel);
+            AdjustWhenSave(orderModel);
 
-            Apply(orderModel, modelState);
+            Save(orderModel, modelState);
 
             PublishDomainEvent(orderModel, modelState);
         }
@@ -71,7 +71,7 @@ namespace DomainShell.Test
             return true;
         }
 
-        private void AdjustWhenApply(OrderModel orderModel)
+        private void AdjustWhenSave(OrderModel orderModel)
         {
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
 
@@ -79,7 +79,7 @@ namespace DomainShell.Test
             vOrderModel.Set(e => e.Dirty, (e, p) => false);
         }
 
-        private void Apply(OrderModel orderModel, ModelState modelState)
+        private void Save(OrderModel orderModel, ModelState modelState)
         {
             if (modelState == ModelState.Deleted)
             {

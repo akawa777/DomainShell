@@ -18,7 +18,7 @@ namespace DomainShell.Test
         private IOrderValidator _orderValidator;
         private ICreditCardService _creditCardService;
 
-        public void Regist(OrderDto orderDto)
+        public void Register(OrderDto orderDto)
         {
             try
             {
@@ -31,9 +31,9 @@ namespace DomainShell.Test
 
                     Map(orderDto, orderModel);
 
-                    orderModel.Regist(_orderValidator);
+                    orderModel.Register(_orderValidator);
 
-                    _orderRepository.Apply(orderModel);
+                    _orderRepository.Save(orderModel);
 
                     tran.Complete();
                 }
@@ -56,7 +56,7 @@ namespace DomainShell.Test
 
                     orderModel.Complete(_orderValidator, _creditCardService, creditCardCode);
 
-                    _orderRepository.Apply(orderModel);
+                    _orderRepository.Save(orderModel);
 
                     tran.Complete();
                 }

@@ -21,7 +21,7 @@ namespace DomainShell.Test
                 order.Price = 999;
                 order.LastUserId = "xxx";
 
-                commandApp.Regist(order);
+                commandApp.Register(order);
 
                 order = queryApp.GetLastByUser("xxx");
 
