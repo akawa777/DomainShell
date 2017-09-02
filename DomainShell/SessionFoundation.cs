@@ -20,7 +20,6 @@ namespace DomainShell
         {
             ISession session = _getSession();
             return session.Open();
-
         }
 
         public static ITranScope Tran()

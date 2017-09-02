@@ -46,7 +46,7 @@ namespace DomainShell.Test
 
                     orderModel.CancelCompleted(_creditCardService);
 
-                    _orderRepository.Commit(orderModel);
+                    _orderRepository.Apply(orderModel);
                     tran.Complete();
                 }
             }

@@ -14,6 +14,14 @@ namespace DomainShell.Test
 
         private IMemoryConnection _connection; 
 
+        private enum ModelState
+        {
+            Added,
+            Deleted,
+            Modified,
+            Unchanged
+        }
+
         public OrderModel Find(string orderId, bool throwError = false)
         {
             OrderModel orderModel = _connection.Database.Get<OrderModel>().Where(x => x.OrderId == orderId).FirstOrDefault();
@@ -23,61 +31,71 @@ namespace DomainShell.Test
             return orderModel;
         }
 
-        public void Commit(OrderModel orderModel)
+        public void Apply(OrderModel orderModel)
         {
-            bool shouldDelete = orderModel.Deleted;
-            bool shouldInsert = orderModel.Dirty && orderModel.RecordVersion == 0;
-            bool shouldUpdate = orderModel.Dirty && orderModel.RecordVersion > 0;
+            ModelState modelState = GetModelState(orderModel);
 
-            int recordVersion = orderModel.RecordVersion;
-            Action validateConcurrency = () =>
-            {
-                OrderModel storedOrderModel = Find(orderModel.OrderId);
+            ValidateConcurrency(orderModel, modelState);
 
-                Func<bool> validateForInsert = () =>
-                {
-                    return shouldInsert && storedOrderModel == null;
-                };
+            AdjustWhenApply(orderModel);
 
-                Func<bool> validateForUpdateOrDelete = () =>
-                {
-                    return 
-                        (shouldUpdate || shouldDelete)
-                        && (storedOrderModel != null && storedOrderModel.RecordVersion != recordVersion);
-                };
+            Apply(orderModel, modelState);
 
-                if (!validateForInsert() && !validateForUpdateOrDelete())
-                {
-                    throw new Exception("concurrency exeption.");
-                }
-            };
+            PublishDomainEvent(orderModel, modelState);
+        }
 
+        private ModelState GetModelState(OrderModel orderModel)
+        {
+            if (orderModel.Deleted) return ModelState.Deleted;
+            if (orderModel.Dirty && orderModel.RecordVersion == 0) return ModelState.Added;
+            if (orderModel.Dirty && orderModel.RecordVersion > 0) return ModelState.Modified;
+
+            return ModelState.Unchanged;
+        }
+
+        private bool ValidateConcurrency(OrderModel orderModel, ModelState modelState)
+        {
+            OrderModel storedOrderModel = Find(orderModel.OrderId);
+
+            if (modelState == ModelState.Added && storedOrderModel != null) return false;
+            if (modelState == ModelState.Modified && storedOrderModel.RecordVersion != orderModel.RecordVersion) return false;
+            if (modelState == ModelState.Deleted && storedOrderModel.RecordVersion != orderModel.RecordVersion) return false;            
+
+            return true;
+        }
+
+        private void AdjustWhenApply(OrderModel orderModel)
+        {
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
 
             vOrderModel.Set(e => e.RecordVersion, (e, p) => e.RecordVersion + 1);
             vOrderModel.Set(e => e.Dirty, (e, p) => false);
+        }
 
-            if (shouldDelete)
-            {                
-                validateConcurrency();
+        private void Apply(OrderModel orderModel, ModelState modelState)
+        {
+            if (modelState == ModelState.Deleted)
+            {
                 _connection.Database.Delete(orderModel);
             }
-            else if (shouldInsert)
+            else if (modelState == ModelState.Added)
             {
-                validateConcurrency();
                 _connection.Database.Insert(orderModel);
-            } 
-            else if (shouldUpdate)
+            }
+            else if (modelState == ModelState.Modified)
             {
-                validateConcurrency();
                 _connection.Database.Update(orderModel);
             }
             else
             {
                 return;
             }
+        }
 
-            DomainEventPublisher.Publish(orderModel);
+        private void PublishDomainEvent(OrderModel orderModel, ModelState modelState)
+        {
+            if (modelState == ModelState.Unchanged) return;
+            else DomainEventPublisher.Publish(orderModel);
         }
     }    
 }

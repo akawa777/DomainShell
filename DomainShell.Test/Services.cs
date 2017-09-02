@@ -9,12 +9,12 @@ namespace DomainShell.Test
     {
         public void ValidateWhenRegist(OrderModel orderModel)
         {
-
+            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegist)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
 
         public void ValidateWhenComplete(OrderModel orderModel)
         {
-
+            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegist)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
     }
 

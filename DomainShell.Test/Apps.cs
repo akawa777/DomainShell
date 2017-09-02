@@ -33,7 +33,7 @@ namespace DomainShell.Test
 
                     orderModel.Regist(_orderValidator);
 
-                    _orderRepository.Commit(orderModel);
+                    _orderRepository.Apply(orderModel);
 
                     tran.Complete();
 
@@ -58,7 +58,7 @@ namespace DomainShell.Test
 
                     orderModel.Complete(_orderValidator, _creditCardService, creditCardCode);
 
-                    _orderRepository.Commit(orderModel);
+                    _orderRepository.Apply(orderModel);
 
                     tran.Complete();
                 }

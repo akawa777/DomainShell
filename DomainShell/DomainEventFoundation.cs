@@ -7,16 +7,6 @@ using System.Threading.Tasks;
 
 namespace DomainShell
 {
-    public interface IDomainEventPublisher
-    {
-        void Publish(IDomainEventAuthor domainEventAuthor);
-    }
-
-    public interface IDomainEventExceptionPublisher
-    {   
-        void Publish(Exception exception);
-    }
-
     public static class DomainEventPublisher
     {
         private static Func<IDomainEventPublisher> _getDomainEventPublisher;

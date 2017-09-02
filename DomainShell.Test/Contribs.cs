@@ -219,7 +219,7 @@ namespace DomainShell.Test
             return _dataMap.Values.Where(x => x is T).Select(x => (T)x);
         }
 
-        public void Insert<T>(T data) where T : class
+        public int Insert<T>(T data) where T : class
         {
             if (_dataMap.ContainsKey(data))
             {
@@ -227,17 +227,21 @@ namespace DomainShell.Test
             }
 
             _dataMap[data] = data;
+
+            return 1;
         }
 
-        public void Update<T>(T data) where T : class
+        public int Update<T>(T data) where T : class
         {
             if (!_dataMap.ContainsKey(data))
             {
                 throw new Exception("data not found.");
             }
+
+            return 1;
         }
 
-        public void Delete<T>(T data) where T : class
+        public int Delete<T>(T data) where T : class
         {
             if (!_dataMap.ContainsKey(data))
             {
@@ -245,6 +249,8 @@ namespace DomainShell.Test
             }
 
             _dataMap.Remove(data);
+
+            return 1;
         }
     }
 }

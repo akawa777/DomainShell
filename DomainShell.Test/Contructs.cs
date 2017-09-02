@@ -8,7 +8,7 @@ namespace DomainShell.Test
     public interface IOrderRepository
     {
         OrderModel Find(string orderId, bool throwError = false);
-        void Commit(OrderModel orderModel);
+        void Apply(OrderModel orderModel);
     }
 
     public interface IOrderValidator

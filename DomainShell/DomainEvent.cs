@@ -38,4 +38,14 @@ namespace DomainShell
         IEnumerable<IDomainEvent> GetEvents();
         void ClearEvents();
     }
+
+    public interface IDomainEventPublisher
+    {
+        void Publish(IDomainEventAuthor domainEventAuthor);
+    }
+
+    public interface IDomainEventExceptionPublisher
+    {
+        void Publish(Exception exception);
+    }
 }
