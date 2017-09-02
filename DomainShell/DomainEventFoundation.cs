@@ -7,135 +7,133 @@ using System.Threading.Tasks;
 
 namespace DomainShell
 {
+    public interface IDomainEventPublisher
+    {
+        void Publish(IDomainEventAuthor domainEventAuthor);
+    }
+
+    public interface IDomainEventExceptionPublisher
+    {   
+        void Publish(Exception exception);
+    }
+
     public static class DomainEventPublisher
     {
-        private static Action<IDomainEventAuthor> _publish = x => {};
+        private static Func<IDomainEventPublisher> _domainEventPublisher;
+
+        public static void Startup(Func<IDomainEventPublisher> domainEventPublisher)
+        {
+            _domainEventPublisher = domainEventPublisher;
+        }
+
         public static void Publish(IDomainEventAuthor domainEventAuthor)
         {
-            _publish(domainEventAuthor);
+            IDomainEventPublisher domainEventPublisher = _domainEventPublisher();
+            domainEventPublisher.Publish(domainEventAuthor);
         }
     }
 
-    public static class DomainEventFoundation
+    public static class DomainEventExceptionPublisher
     {
-        private static Func<IDomainEventScope> _inTranEventScope;
-        private static Func<IDomainEventScope> _outerTranEventScope;
-        private static Dictionary<int, List<IDomainEvent>> _outerTranEventMap = new Dictionary<int, List<IDomainEvent>>();
-        private static Dictionary<int, List<IDomainEvent>> _exceptionEventMap = new Dictionary<int, List<IDomainEvent>>();
+        private static Func<IDomainEventExceptionPublisher> _domainEventExceptionPublisher;
 
-        public static void Startup(Func<IDomainEventScope> inTranEventScope, Func<IDomainEventScope> outerTranEventScope)
+        public static void Startup(Func<IDomainEventExceptionPublisher> domainEventExceptionPublisher)
         {
-            _inTranEventScope = inTranEventScope;
-            _outerTranEventScope = outerTranEventScope;
-
-            FieldInfo field = typeof(DomainEventPublisher).GetField("_publish",  BindingFlags.Static | BindingFlags.NonPublic);
-            Action<IDomainEventAuthor> publish = x => Publish(x);
-
-            field.SetValue(null, publish);
+            _domainEventExceptionPublisher = domainEventExceptionPublisher;
         }
 
-        public static void ExecOutertran()
+        public static void Publish(Exception exception)
         {
-            int id = Thread.CurrentThread.ManagedThreadId;
-
-            List<IDomainEvent> cacheEvents;
-            if (_outerTranEventMap.TryGetValue(id, out cacheEvents))
-            {
-                _outerTranEventMap.Remove(id);
-                Handle(_outerTranEventScope, cacheEvents.Where(x => !(x as IDomainOuterTranEvent).Async).ToArray());
-
-                if (_exceptionEventMap.ContainsKey(id)) _exceptionEventMap.Remove(id);
-
-                Task.Run(() => Handle(_outerTranEventScope, cacheEvents.Where(x => (x as IDomainOuterTranEvent).Async).ToArray()));
-            }
+            IDomainEventExceptionPublisher domainEventExceptionPublisher = _domainEventExceptionPublisher();
+            domainEventExceptionPublisher.Publish(exception);
         }
+    }
 
-        public static void DealException(Exception exception)
-        {
-            int id = Thread.CurrentThread.ManagedThreadId;
+    public abstract class DomainEventFoundationBase : IDomainEventPublisher, IDomainEventExceptionPublisher
+    {
+        private List<IDomainExceptionEvent> _domainExceptionEvents = new List<IDomainExceptionEvent>();
 
-            if (_outerTranEventMap.ContainsKey(id)) _outerTranEventMap.Remove(id);
-
-            List<IDomainEvent> cacheEvents;
-            if (_exceptionEventMap.TryGetValue(id, out cacheEvents))
-            {
-                _exceptionEventMap.Remove(id);
-                Handle(_outerTranEventScope, cacheEvents.ToArray(), exception);
-            }
-        }
-
-        private static void Publish(IDomainEventAuthor domainEventAuthor)
+        public void Publish(IDomainEventAuthor domainEventAuthor)
         {
             var eventSet = GetEvents(domainEventAuthor);
 
-            HandleExceptionEvents(eventSet.exceptionEvents);                
-            HandleInTranEvents(eventSet.inTranEvents);
-            HandleOuterTranEvents(eventSet.outertranEvents);           
-        }          
-
-        private static (IDomainEvent[] inTranEvents, IDomainEvent[] outertranEvents, IDomainEvent[] exceptionEvents) GetEvents(IDomainEventAuthor domainEventAuthor)
-        {
-            IDomainEvent[] events = domainEventAuthor.GetEvents().ToArray();            
-            domainEventAuthor.ClearEvents();
-
-            IDomainEvent[] inTranEvents = events.Where(x => !(x is IDomainOuterTranEvent) && !(x is IDomainExceptionEvent)).ToArray();
-            IDomainEvent[] outertranEvents = events.Where(x => (x is IDomainOuterTranEvent) && !(x is IDomainExceptionEvent)).ToArray();            
-            IDomainEvent[] exceptionEvents = events.Where(x => x is IDomainExceptionEvent).ToArray();            
-
-            return (inTranEvents, outertranEvents, exceptionEvents);
+            Subscribe(eventSet.exceptionEvents);
+            Handle(SyncEventScope, eventSet.syncEvents);
+            Handle(AsyncEventScope, eventSet.asyncEvents, async: true);            
         }        
 
-        private static void HandleInTranEvents(IDomainEvent[] domainEvents)
+        public void Publish(Exception exception)
         {
-            Handle(_inTranEventScope, domainEvents);
+            IDomainEvent[] events = _domainExceptionEvents.ToArray();
+            _domainExceptionEvents.Clear();
+
+            Handle(ExceptionEventScope, events, async: false, exception: exception);
         }
 
-        private static void HandleOuterTranEvents(IDomainEvent[] domainEvents)
+        private static (IDomainEvent[] syncEvents, IDomainEvent[] asyncEvents, IDomainExceptionEvent[] exceptionEvents) GetEvents(IDomainEventAuthor domainEventAuthor)
         {
-            int id = Thread.CurrentThread.ManagedThreadId;
+            IDomainEvent[] events = domainEventAuthor.GetEvents().ToArray();
+            domainEventAuthor.ClearEvents();
 
-            List<IDomainEvent> cacheEvnets;
-            if (!_outerTranEventMap.TryGetValue(id, out cacheEvnets))
+            Func<IDomainEvent, bool> isSyncEvent = e =>
             {
-                cacheEvnets = new List<IDomainEvent>();
-                _outerTranEventMap[id] = cacheEvnets;
-            }
+                if (e is IDomainExceptionEvent) return false;
+                if (e is IDomainAsyncEvent domainEvent && domainEvent.Async) return false;
+                else return true;
+            };
 
-            cacheEvnets.AddRange(domainEvents);
+            Func<IDomainEvent, bool> isAsyncEvent = e =>
+            {
+                if (e is IDomainExceptionEvent) return false;
+                if (isSyncEvent(e)) return false;
+                else return true;
+            };
+
+            Func<IDomainEvent, bool> isExceptionEvent = e =>
+            {
+                return e is IDomainExceptionEvent;
+            };
+
+            IDomainEvent[] syncEvents = events.Where(isSyncEvent).ToArray();
+            IDomainEvent[] asyncEvents = events.Where(isAsyncEvent).ToArray();
+            IDomainExceptionEvent[] exceptionEvents = events.Where(isExceptionEvent).Select(x => x as IDomainExceptionEvent).ToArray();
+
+            return (syncEvents, asyncEvents, exceptionEvents);
         }
 
-        private static void HandleExceptionEvents(IDomainEvent[] domainEvents)
+        private void Subscribe(IDomainExceptionEvent[] domainExceptionEvents)
         {
-            int id = Thread.CurrentThread.ManagedThreadId;
-
-            List<IDomainEvent> cacheEvnets;
-            if (!_exceptionEventMap.TryGetValue(id, out cacheEvnets))
-            {
-                cacheEvnets = new List<IDomainEvent>();
-                _exceptionEventMap[id] = cacheEvnets;
-            }
-
-            cacheEvnets.AddRange(domainEvents);
+            _domainExceptionEvents.AddRange(domainExceptionEvents);
         }
 
-        private static void Handle(Func<IDomainEventScope> getScope, IDomainEvent[] domainEvents, Exception exception = null)  
+        private void Handle(Func<IDomainEventScope> getScope, IDomainEvent[] domainEvents, bool async = false,  Exception exception = null)
         {
-            using (var scope = getScope())
+            Action handle = () =>
             {
-                foreach (IDomainEvent domainEvent in domainEvents)
+                using (var scope = getScope())
                 {
-                    if (domainEvent is IDomainExceptionEvent exceptionEvent) exceptionEvent.Exception = exception;                    
-                    Handle(scope, domainEvent);
+                    foreach (IDomainEvent domainEvent in domainEvents)
+                    {
+                        if (domainEvent is IDomainExceptionEvent exceptionEvent) exceptionEvent.Exception = exception;
+                        Handle(scope, domainEvent);
+                    }
                 }
-            }
-        }   
+            };
 
-        private static void Handle(IDomainEventScope scope, IDomainEvent domainEvent)      
-        {            
+            if (async) Task.Run(handle);
+            else handle();
+        }
+
+        private void Handle(IDomainEventScope scope, IDomainEvent domainEvent)
+        {
             object handler = scope.GetType().GetMethod("GetHandler").MakeGenericMethod(domainEvent.GetType()).Invoke(scope, new object[] { domainEvent });
 
             MethodInfo method = handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() });
-            method.Invoke(handler, new object[] { domainEvent });            
-        }
-    }    
+            method.Invoke(handler, new object[] { domainEvent });
+        }   
+
+        protected abstract IDomainEventScope SyncEventScope();
+        protected abstract IDomainEventScope AsyncEventScope();
+        protected abstract IDomainEventScope ExceptionEventScope();
+    }
 }

@@ -17,7 +17,13 @@ namespace DomainShell.Test
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();             
 
             container.Register<MemoryConnection>(Lifestyle.Scoped);           
-            container.Register<IMemoryConnection, MemoryConnection>(Lifestyle.Scoped);           
+            container.Register<IMemoryConnection, MemoryConnection>(Lifestyle.Scoped);
+
+            container.Register(() => new DomainEventFoundation(container), Lifestyle.Scoped);
+            container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainEventExceptionPublisher, DomainEventFoundation>(Lifestyle.Scoped);
+
+            container.Register<ISession, MemorySession>(Lifestyle.Scoped);
 
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);
 
@@ -33,8 +39,9 @@ namespace DomainShell.Test
 
             container.Verify();
 
-            SessionFoundation.Startup(() => new OpenScope(container.GetInstance<MemoryConnection>()), () => new TranScope(container.GetInstance<MemoryConnection>()));
-            DomainEventFoundation.Startup(() => new InTranDomainEventScope(container), () => new OuterTranDomainEventScope(container));
+            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
+            DomainEventExceptionPublisher.Startup(container.GetInstance<IDomainEventExceptionPublisher>);
+            Session.Startup(container.GetInstance<ISession>);            
 
             Container = container;
         }

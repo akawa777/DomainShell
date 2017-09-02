@@ -7,9 +7,34 @@ using SimpleInjector.Lifestyles;
 
 namespace DomainShell.Test
 {
-    public class InTranDomainEventScope : IDomainEventScope
+    public class DomainEventFoundation : DomainEventFoundationBase
     {
-        public InTranDomainEventScope(Container container)
+        public DomainEventFoundation(Container container)
+        {
+            _container = container;
+        }
+
+        private Container _container;
+
+        protected override IDomainEventScope AsyncEventScope()
+        {
+            return new AsyncEventScope(_container);
+        }
+
+        protected override IDomainEventScope ExceptionEventScope()
+        {
+            return new ExceptionEventScope(_container);
+        }
+
+        protected override IDomainEventScope SyncEventScope()
+        {
+            return new SyncEventScope(_container);
+        }
+    }
+
+    public class SyncEventScope : IDomainEventScope
+    {
+        public SyncEventScope(Container container)
         {
             _container = container;
         }
@@ -27,9 +52,9 @@ namespace DomainShell.Test
         }
     }
 
-    public class OuterTranDomainEventScope : IDomainEventScope
+    public class AsyncEventScope : IDomainEventScope
     {
-        public OuterTranDomainEventScope(Container container)
+        public AsyncEventScope(Container container)
         {
             _container = container;
             _scope = ThreadScopedLifestyle.BeginScope(_container);
@@ -46,6 +71,34 @@ namespace DomainShell.Test
         public void Dispose()
         {
             _scope.Dispose();
+        }
+    }
+
+    public class ExceptionEventScope : AsyncEventScope
+    {
+        public ExceptionEventScope(Container container) : base(container)
+        {
+            
+        }
+    }
+
+    public class MemorySession : SessionBase
+    {
+        public MemorySession(MemoryConnection connection)
+        {
+            _connection = connection;
+        }
+
+        private MemoryConnection _connection;
+
+        protected override OpenScopeBase OpenScopeBase()
+        {
+            return new OpenScope(_connection);
+        }
+
+        protected override TranScopeBase TranScopeBase()
+        {
+            return new TranScope(_connection);
         }
     }
 
@@ -78,21 +131,23 @@ namespace DomainShell.Test
 
         private MemoryConnection _connection;
         protected override void BeginTran()
-        {
-            _connection.Open();
+        {            
             _connection.BeginTran();
         }
 
         protected override void Commit()
         {            
             _connection.Commit();
-            _connection.Close();
         }
 
         protected override void Rollback()
         {
             _connection.Rollback();
-            _connection.Close();
+        }
+
+        protected override void EndTran()
+        {
+
         }
     }
 

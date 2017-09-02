@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace DomainShell
 {
+    public interface ISession
+    {
+        IOpenScope Open();
+        ITranScope Tran();
+        void OnException(Exception exception);
+    }
+
     public interface IOpenScope : IDisposable
     {
         
@@ -17,25 +24,38 @@ namespace DomainShell
         void Complete();
     }
 
-    public static class SessionFoundation
-    {
-        public static void Startup(Func<OpenScopeBase> openScope, Func<TranScopeBase> tranScope)        
-        {
-            FieldInfo field = typeof(Session).GetField("_openScope",  BindingFlags.Static | BindingFlags.NonPublic);
-            field.SetValue(null, openScope);
-
-            field = typeof(Session).GetField("_tranScope",  BindingFlags.Static | BindingFlags.NonPublic);
-            field.SetValue(null, tranScope);
-        }
-    }
-
     public static class Session
     {
-        private static Func<OpenScopeBase> _openScope = () => null;
-        private static Func<TranScopeBase> _tranScope = () => null;
-        private static Dictionary<int, IOpenScope> _openMap = new Dictionary<int, IOpenScope>();
-        private static Dictionary<int, ITranScope> _tranMap = new Dictionary<int, ITranScope>();
+        private static Func<ISession> _session;
 
+        public static void Startup(Func<ISession> session)
+        {
+            _session = session;
+        }
+
+        public static IOpenScope Open()
+        {
+            ISession session = _session();
+            return session.Open();
+            
+        }
+
+        public static ITranScope Tran()
+        {
+            ISession session = _session();
+            return session.Tran();
+        }
+
+        public static void OnException(Exception exception)
+        {
+            ISession session = _session();
+            session.OnException(exception);
+        }
+
+    }
+
+    public abstract class SessionBase : ISession
+    {
         private class OpenScope : IOpenScope
         {
             public void Dispose()
@@ -55,42 +75,52 @@ namespace DomainShell
             }
         }
 
-        public static IOpenScope Open()
-        {
-            int id = Thread.CurrentThread.ManagedThreadId;
+        private IOpenScope _openScope = null;
+        private ITranScope _tranScope = null;
 
-            if (_openMap.ContainsKey(id))
+        public IOpenScope Open()
+        {
+            if (_openScope == null)
             {
-                return new OpenScope();
+                OpenScopeBase openScope = OpenScopeBase();
+                _openScope = openScope;
+
+                openScope.Init(() => _openScope = null);
+
+                return openScope;
             }
 
-            OpenScopeBase scope = _openScope();
-            scope.Init(() => _openMap.Remove(id));
-            _openMap[id] = scope;
-
-            return scope;
+            return new OpenScope();
         }
 
-        public static ITranScope Tran()
+        public ITranScope Tran()
         {
-            int id = Thread.CurrentThread.ManagedThreadId;
+            IOpenScope openScope = Open();
 
-            if (_tranMap.ContainsKey(id))
+            if (_tranScope == null)
             {
-                return new TranScope();
+                TranScopeBase tranScope = TranScopeBase();
+                _tranScope = tranScope;
+
+                tranScope.Init(() =>
+                {
+                    _tranScope = null;
+                    if (openScope is OpenScopeBase) openScope.Dispose();
+                });
+
+                return tranScope;
             }
 
-            TranScopeBase scope = _tranScope();
-            scope.Init(() => _tranMap.Remove(id));
-            _tranMap[id] = scope;
-
-            return scope;
+            return new TranScope();
         }
 
-        public static void OnException(Exception exception)
+        public void OnException(Exception exception)
         {
-            DomainEventFoundation.DealException(exception);
+            DomainEventExceptionPublisher.Publish(exception);
         }
+
+        protected abstract OpenScopeBase OpenScopeBase();
+        protected abstract TranScopeBase TranScopeBase();
     }   
 
     public abstract class OpenScopeBase : IOpenScope
@@ -136,10 +166,11 @@ namespace DomainShell
 
         protected abstract void Rollback();
 
+        protected abstract void EndTran();
+
         public void Complete()
         {
             Commit();
-            DomainEventFoundation.ExecOutertran();
         }
 
         public void Dispose()
@@ -147,6 +178,7 @@ namespace DomainShell
             try
             {
                 Rollback();
+                EndTran();
             }
             finally
             {                    

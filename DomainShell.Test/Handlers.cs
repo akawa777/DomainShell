@@ -27,6 +27,8 @@ namespace DomainShell.Test
                     OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
 
                     orderModel.SendCompletedMail(_mailService);
+
+                    throw new Exception();
                 }
             }
             catch(Exception e)

@@ -12,7 +12,7 @@ namespace DomainShell
         
     }
 
-    public interface IDomainOuterTranEvent : IDomainEvent
+    public interface IDomainAsyncEvent : IDomainEvent
     {
         bool Async { get; set; }
     }

@@ -61,6 +61,7 @@ namespace DomainShell.Test
             PayId = payId;
 
             _events.Add(new OrderCompletedEvent{ Async = false, OrderId = OrderId });
+            _events.Add(new OrderCompletedEvent{ Async = true, OrderId = OrderId });
             _events.Add(new OrderCompletedExceptionEvent{ OrderId = OrderId });
         }
 
@@ -81,8 +82,8 @@ namespace DomainShell.Test
         }
     }
 
-    public class OrderCompletedEvent : IDomainOuterTranEvent
-    {   
+    public class OrderCompletedEvent : IDomainAsyncEvent
+    {           
         public bool Async { get; set; }
         public string OrderId { get; set; }
     }

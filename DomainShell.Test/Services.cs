@@ -23,12 +23,12 @@ namespace DomainShell.Test
         public void Pay(string creditCardCord, decimal price, out string payId)
         {
             payId = Guid.NewGuid().ToString();
-            Console.WriteLine($"{nameof(CreditCardService)} {nameof(Pay)}");
+            Console.WriteLine($"{nameof(CreditCardService)} {nameof(Pay)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
 
         public void Cancel(string payId)
         {
-            Console.WriteLine($"{nameof(CreditCardService)} {nameof(Cancel)}");
+            Console.WriteLine($"{nameof(CreditCardService)} {nameof(Cancel)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
     }
 
@@ -36,7 +36,7 @@ namespace DomainShell.Test
     {
         public void Send(string emailAddress, string title, string contents)
         {
-            Console.WriteLine($"{nameof(MailService)} {nameof(Send)}");
+            Console.WriteLine($"{nameof(MailService)} {nameof(Send)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
     }
 }
