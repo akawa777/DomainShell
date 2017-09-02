@@ -75,8 +75,9 @@ namespace DomainShell.Test
         {
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
 
-            vOrderModel.Set(e => e.RecordVersion, (e, p) => e.RecordVersion + 1);
-            vOrderModel.Set(e => e.Dirty, (e, p) => false);
+            vOrderModel
+                .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
+                .Set(m => m.Dirty, (m, p) => false);
         }
 
         private void Save(OrderModel orderModel, ModelState modelState)

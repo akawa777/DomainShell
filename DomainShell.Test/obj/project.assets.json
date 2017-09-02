@@ -5665,15 +5665,12 @@
   },
   "project": {
     "version": "1.0.0",
-    "restoreSettings": {
-      "hideWarningsAndErrors": true
-    },
     "restore": {
-      "projectUniqueName": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
+      "projectUniqueName": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "projectName": "DomainShell.Test",
-      "projectPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
+      "projectPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "packagesPath": "C:\\Users\\Akira\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\obj\\",
+      "outputPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5693,8 +5690,8 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj": {
-              "projectPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj"
+            "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj": {
+              "projectPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj"
             }
           }
         }
@@ -5708,19 +5705,8 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
-          "MSTest.TestFramework": {
-            "target": "Package",
-            "version": "1.1.18"
-          },
-          "SimpleInjector": {
-            "target": "Package",
-            "version": "4.0.8"
-          },
-          "MSTest.TestAdapter": {
-            "target": "Package",
-            "version": "1.1.18"
-          },
           "Microsoft.NETCore.App": {
+            "suppressParent": "All",
             "target": "Package",
             "version": "2.0.0",
             "autoReferenced": true
@@ -5728,6 +5714,18 @@
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
             "version": "15.3.0-preview-20170628-02"
+          },
+          "MSTest.TestAdapter": {
+            "target": "Package",
+            "version": "1.1.18"
+          },
+          "MSTest.TestFramework": {
+            "target": "Package",
+            "version": "1.1.18"
+          },
+          "SimpleInjector": {
+            "target": "Package",
+            "version": "4.0.8"
           }
         },
         "imports": [
