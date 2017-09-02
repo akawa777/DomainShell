@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
@@ -82,6 +83,9 @@ namespace DomainShell.Test
                 vNodeItem
                     .Set(m => m.Name, (m, p) => $"private {m.Name}");
             }
+
+            vRoot
+                .Set(m => m.NodeCollection, (m, p) => nodeList);            
         }
 
         public class Root
@@ -89,14 +93,27 @@ namespace DomainShell.Test
             public Root()
             {
                 Node = Node.New();
-                Nodes = new Node[] { Node.New(), Node.New(), Node.New() };
+                Nodes = new Node[] { Node.New(), Node.New(), Node.New() };                
             }
 
             public Node Node { get; private set; }
             public Node[] Nodes { get; private set; }
             public List<Node> NodeList { get; private set; }
-            private Node PrivateNode { get; set; }
+            private Node PrivateNode { get; set; }  
             private List<Node> PrivateNodeList { get; set; }
+            public IEnumerable<Node> ReadOnlyNodes { get { return PrivateNodeList; } }
+            private List<Node> _nodeCollection = null;
+            public IEnumerable<Node> NodeCollection 
+            { 
+                get 
+                { 
+                    return _nodeCollection; 
+                } 
+                private set
+                {
+                    _nodeCollection = value.ToList();
+                }
+            }
         }
 
         public class Node

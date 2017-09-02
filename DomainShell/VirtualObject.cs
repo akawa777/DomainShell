@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Linq.Expressions;
 
 namespace DomainShell
 {
@@ -31,34 +34,34 @@ namespace DomainShell
             return new VirtualObject<TProperty>(propertyMaterial);
         }
 
-        public System.Collections.Generic.IEnumerable<VirtualObject<TProperty>> List<TProperty>(string propertyName) where TProperty : class
+        public IEnumerable<VirtualObject<TProperty>> List<TProperty>(string propertyName) where TProperty : class
         {
-            System.Reflection.PropertyInfo property = GetPropertyInfo(propertyName);
+            PropertyInfo property = GetPropertyInfo(propertyName);
 
-            System.Collections.Generic.IEnumerable<TProperty> propertyMaterial = property.GetValue(_material) as System.Collections.Generic.IEnumerable<TProperty>;
+            IEnumerable<TProperty> propertyMaterial = property.GetValue(_material) as IEnumerable<TProperty>;
 
             return propertyMaterial.Select(x => new VirtualObject<TProperty>(x));
         }
 
-        public VirtualObject<TProperty> Get<TProperty>(System.Linq.Expressions.Expression<Func<TMaterial, TProperty>> propertyLambda) where TProperty : class
+        public VirtualObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda) where TProperty : class
         {
-            System.Reflection.PropertyInfo property = GetPropertyInfo(propertyLambda);
+            PropertyInfo property = GetPropertyInfo(propertyLambda);
 
             TProperty propertyMaterial = property.GetValue(_material) as TProperty;
 
             return new VirtualObject<TProperty>(propertyMaterial);
         }
 
-        public System.Collections.Generic.IEnumerable<VirtualObject<TProperty>> List<TProperty>(System.Linq.Expressions.Expression<Func<TMaterial, System.Collections.Generic.IEnumerable<TProperty>>> propertyLambda) where TProperty : class
+        public IEnumerable<VirtualObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> propertyLambda) where TProperty : class
         {
-            System.Reflection.PropertyInfo property = GetPropertyInfo(propertyLambda);
+            PropertyInfo property = GetPropertyInfo(propertyLambda);
 
-            System.Collections.Generic.IEnumerable<TProperty> propertyMaterial = property.GetValue(_material) as System.Collections.Generic.IEnumerable<TProperty>;
+            IEnumerable<TProperty> propertyMaterial = property.GetValue(_material) as IEnumerable<TProperty>;
 
             return propertyMaterial.Select(x => new VirtualObject<TProperty>(x));
         }
 
-        public VirtualObject<TMaterial> Set(string propertyName, Func<TMaterial, System.Reflection.PropertyInfo, object> getValue)
+        public VirtualObject<TMaterial> Set(string propertyName, Func<TMaterial, PropertyInfo, object> getValue)
         {
             if (getValue == null)
             {
@@ -67,7 +70,7 @@ namespace DomainShell
                     propertyName.ToString()));
             }
 
-            System.Reflection.PropertyInfo propertyInfo = GetPropertyInfo(propertyName);
+            PropertyInfo propertyInfo = GetPropertyInfo(propertyName);
 
             object value = getValue(_material, propertyInfo);
 
@@ -86,7 +89,7 @@ namespace DomainShell
             return new VirtualObject<TMaterial>(_material);
         }
 
-        public VirtualObject<TMaterial> Set<TProperty>(System.Linq.Expressions.Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, System.Reflection.PropertyInfo, object> getValue)
+        public VirtualObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue)
         {
             if (getValue == null)
             {
@@ -95,26 +98,19 @@ namespace DomainShell
                     propertyLambda.ToString()));
             }
 
-            System.Reflection.PropertyInfo propertyInfo = GetPropertyInfo(propertyLambda);
+            var memberExpression = propertyLambda.Body as MemberExpression;
 
-            object value = getValue(_material, propertyInfo);
-
-            if (TryChangeType<TProperty>(value, out object convertedValue))
-            {
-                propertyInfo.SetValue(_material, convertedValue);
-            }
-            else
+            if (memberExpression == null)
             {
                 throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, can not change type of '{1}'.",
-                    propertyLambda.ToString(),
-                    typeof(TProperty).FullName));
+                    "Expression '{0}' refers to a method, not a property.",
+                    propertyLambda.ToString()));
             }
 
-            return new VirtualObject<TMaterial>(_material);
+            return Set(memberExpression.Member.Name, getValue);
         }
 
-        private System.Reflection.PropertyInfo GetPropertyInfo(string propertyName)
+        private PropertyInfo GetPropertyInfo(string propertyName)
         {
             if (propertyName == null)
             {
@@ -123,7 +119,13 @@ namespace DomainShell
                     propertyName.ToString()));
             }
 
-            System.Reflection.PropertyInfo propertyInfo = typeof(TMaterial).GetProperty(propertyName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.NonPublic);
+            PropertyInfo propertyInfo =
+                typeof(TMaterial)
+                .GetProperty(
+                    propertyName, System.Reflection.BindingFlags.Instance 
+                    | System.Reflection.BindingFlags.GetProperty 
+                    | System.Reflection.BindingFlags.Public 
+                    | System.Reflection.BindingFlags.NonPublic);
 
             if (!(propertyInfo != null && propertyInfo.CanWrite))
             {  
@@ -135,7 +137,7 @@ namespace DomainShell
             return propertyInfo;
         }
 
-        private System.Reflection.PropertyInfo GetPropertyInfo<TProperty>(System.Linq.Expressions.Expression<Func<TMaterial, TProperty>> propertyLambda)
+        private PropertyInfo GetPropertyInfo<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda)
         {
             if (propertyLambda == null)
             {
@@ -144,7 +146,7 @@ namespace DomainShell
                     propertyLambda.ToString()));
             }
 
-            var memberExpression = propertyLambda.Body as System.Linq.Expressions.MemberExpression;
+            var memberExpression = propertyLambda.Body as MemberExpression;
 
             if (memberExpression == null)
             {
@@ -153,29 +155,23 @@ namespace DomainShell
                     propertyLambda.ToString()));
             }
 
-            if (!(memberExpression.Member is System.Reflection.PropertyInfo propertyInfo && propertyInfo.CanWrite))
-            {  
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, not a property or can not write.",
-                    propertyLambda.ToString()));    
-            }
-
-            return (memberExpression.Member as System.Reflection.PropertyInfo);
+            return GetPropertyInfo(memberExpression.Member.Name);
         }
 
         private bool TryChangeType(Type conversionType, object value, out object convertedValue)
         {
-            convertedValue = null;
-            try
-            {
-                convertedValue = Convert.ChangeType(value, conversionType);
+            MethodInfo method = 
+                this.GetType()
+                .GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Where(x => x.IsGenericMethod && x.Name == "TryChangeType")
+                .First();
 
-                return  true;                
-            }
-            catch
-            {
-                return false;
-            }
+            object[] parameters = new object[] { value, null };
+            object rtn = method.MakeGenericMethod(conversionType).Invoke(this, parameters);
+
+            convertedValue = parameters[1];
+
+            return (bool)rtn;
         }
 
         private bool TryChangeType<TConversion>(object value, out object convertedValue)
@@ -183,6 +179,18 @@ namespace DomainShell
             convertedValue = null;
             try
             {
+                if (value == null && typeof(TConversion).IsClass)
+                {
+                    convertedValue = null;
+                    return true;
+                }
+
+                if (value != null && Is<TConversion>(value))
+                {
+                    convertedValue = value;
+                    return true;
+                }                
+                
                 convertedValue = Convert.ChangeType(value, typeof(TConversion));
 
                 return  true;                
@@ -191,6 +199,11 @@ namespace DomainShell
             {
                 return false;
             }
+        } 
+
+        private bool Is<TConversion>(object value)     
+        {
+            return value is TConversion;
         }
     }
 }
