@@ -25,6 +25,8 @@ namespace DomainShell.Test
                 order = queryApp.Find(orderId);
 
                 commandApp.Complete(order, "9999");
+
+                order = queryApp.Find(order.OrderId);
             }
         }
     }

@@ -45,5 +45,4 @@ namespace DomainShell.Test
             Container = container;
         }
     }
-
 }

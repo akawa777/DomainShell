@@ -109,6 +109,8 @@ namespace DomainShell.Test
             OrderDto dto = new OrderDto();
             dto.OrderId = model.OrderId;
             dto.ProductName = model.ProductName;
+            dto.Price = model.Price;
+            dto.PayId = model.PayId;
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
