@@ -7,14 +7,14 @@ namespace DomainShell.Test
 {
     public class OrderValidator : IOrderValidator
     {
-        public void ValidateWhenRegist(OrderModel orderModel)
+        public void ValidateWhenRegister(OrderModel orderModel)
         {
-            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegist)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegister)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
 
         public void ValidateWhenComplete(OrderModel orderModel)
         {
-            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegist)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenComplete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
     }
 

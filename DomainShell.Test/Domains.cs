@@ -49,7 +49,7 @@ namespace DomainShell.Test
 
         public void Register(IOrderValidator orderValidator)
         {
-            orderValidator.ValidateWhenRegist(this);
+            orderValidator.ValidateWhenRegister(this);
 
             Dirty = true;
         }

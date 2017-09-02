@@ -14,7 +14,7 @@ namespace DomainShell.Test
 
     public interface IOrderValidator
     {
-        void ValidateWhenRegist(OrderModel orderModel);
+        void ValidateWhenRegister(OrderModel orderModel);
         void ValidateWhenComplete(OrderModel orderModel);
     }
 
