@@ -19,32 +19,32 @@ namespace DomainShell
 
     public static class DomainEventPublisher
     {
-        private static Func<IDomainEventPublisher> _domainEventPublisher;
+        private static Func<IDomainEventPublisher> _getDomainEventPublisher;
 
-        public static void Startup(Func<IDomainEventPublisher> domainEventPublisher)
+        public static void Startup(Func<IDomainEventPublisher> getDomainEventPublisher)
         {
-            _domainEventPublisher = domainEventPublisher;
+            _getDomainEventPublisher = getDomainEventPublisher;
         }
 
         public static void Publish(IDomainEventAuthor domainEventAuthor)
         {
-            IDomainEventPublisher domainEventPublisher = _domainEventPublisher();
+            IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
             domainEventPublisher.Publish(domainEventAuthor);
         }
     }
 
     public static class DomainEventExceptionPublisher
     {
-        private static Func<IDomainEventExceptionPublisher> _domainEventExceptionPublisher;
+        private static Func<IDomainEventExceptionPublisher> _getDomainEventExceptionPublisher;
 
-        public static void Startup(Func<IDomainEventExceptionPublisher> domainEventExceptionPublisher)
+        public static void Startup(Func<IDomainEventExceptionPublisher> getDmainEventExceptionPublisher)
         {
-            _domainEventExceptionPublisher = domainEventExceptionPublisher;
+            _getDomainEventExceptionPublisher = getDmainEventExceptionPublisher;
         }
 
         public static void Publish(Exception exception)
         {
-            IDomainEventExceptionPublisher domainEventExceptionPublisher = _domainEventExceptionPublisher();
+            IDomainEventExceptionPublisher domainEventExceptionPublisher = _getDomainEventExceptionPublisher();
             domainEventExceptionPublisher.Publish(exception);
         }
     }

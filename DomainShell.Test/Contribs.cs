@@ -82,9 +82,9 @@ namespace DomainShell.Test
         }
     }
 
-    public class MemorySession : SessionBase
+    public class SessionFoundation : SessionFoundationBase
     {
-        public MemorySession(MemoryConnection connection)
+        public SessionFoundation(MemoryConnection connection)
         {
             _connection = connection;
         }

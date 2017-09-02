@@ -23,7 +23,7 @@ namespace DomainShell.Test
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
             container.Register<IDomainEventExceptionPublisher, DomainEventFoundation>(Lifestyle.Scoped);
 
-            container.Register<ISession, MemorySession>(Lifestyle.Scoped);
+            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
 
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);
 
