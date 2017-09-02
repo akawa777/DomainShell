@@ -19,7 +19,7 @@ namespace DomainShell.Test
 
     public interface ICreditCardService
     {
-        void Pay(string creditCardCord, decimal price, out string payId);
+        string Pay(string creditCardCord, decimal price);
         void Cancel(string payId);
     }
 

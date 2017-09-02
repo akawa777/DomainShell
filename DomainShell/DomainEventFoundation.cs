@@ -47,9 +47,9 @@ namespace DomainShell
         {
             var eventSet = GetEvents(domainEventAuthor);
 
-            Subscribe(eventSet.exceptionEvents);
-            Handle(SyncEventScope, eventSet.syncEvents);
-            Handle(AsyncEventScope, eventSet.asyncEvents, async: true);            
+            SubscribeExceptionEvents(eventSet.exceptionEvents);
+            HandleEvents(SyncEventScope, eventSet.syncEvents);
+            HandleEvents(AsyncEventScope, eventSet.asyncEvents, async: true);            
         }        
 
         public void Publish(Exception exception)
@@ -57,7 +57,7 @@ namespace DomainShell
             IDomainEvent[] events = _domainExceptionEvents.ToArray();
             _domainExceptionEvents.Clear();
 
-            Handle(ExceptionEventScope, events, async: false, exception: exception);
+            HandleEvents(ExceptionEventScope, events, async: false, exception: exception);
         }
 
         private static (IDomainEvent[] syncEvents, IDomainEvent[] asyncEvents, IDomainExceptionEvent[] exceptionEvents) GetEvents(IDomainEventAuthor domainEventAuthor)
@@ -91,12 +91,12 @@ namespace DomainShell
             return (syncEvents, asyncEvents, exceptionEvents);
         }
 
-        private void Subscribe(IDomainExceptionEvent[] domainExceptionEvents)
+        private void SubscribeExceptionEvents(IDomainExceptionEvent[] domainExceptionEvents)
         {
             _domainExceptionEvents.AddRange(domainExceptionEvents);
         }
 
-        private void Handle(Func<IDomainEventScope> getScope, IDomainEvent[] domainEvents, bool async = false,  Exception exception = null)
+        private void HandleEvents(Func<IDomainEventScope> getScope, IDomainEvent[] domainEvents, bool async = false,  Exception exception = null)
         {
             Action handle = () =>
             {
@@ -105,7 +105,7 @@ namespace DomainShell
                     foreach (IDomainEvent domainEvent in domainEvents)
                     {
                         if (domainEvent is IDomainExceptionEvent exceptionEvent) exceptionEvent.Exception = exception;
-                        Handle(scope, domainEvent);
+                        HandleEvent(scope, domainEvent);
                     }
                 }
             };
@@ -114,7 +114,7 @@ namespace DomainShell
             else handle();
         }
 
-        private void Handle(IDomainEventScope scope, IDomainEvent domainEvent)
+        private void HandleEvent(IDomainEventScope scope, IDomainEvent domainEvent)
         {
             object handler = scope.GetType().GetMethod("GetHandler").MakeGenericMethod(domainEvent.GetType()).Invoke(scope, new object[] { domainEvent });
 

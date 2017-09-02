@@ -17,14 +17,14 @@ namespace DomainShell.Test
                 OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
 
                 OrderDto order = new OrderDto();
-                order.ProductName = "x";
-                order.Price = 100m;
+                order.ProductName = "xxx";
+                order.Price = 999;
 
                 string orderId = commandApp.Regist(order);     
 
                 order = queryApp.Find(orderId);
 
-                commandApp.Complete(order, "9999");
+                commandApp.Complete(order, "xxx");
 
                 order = queryApp.Find(order.OrderId);
             }

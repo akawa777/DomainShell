@@ -20,10 +20,13 @@ namespace DomainShell.Test
 
     public class CreditCardService : ICreditCardService
     {
-        public void Pay(string creditCardCord, decimal price, out string payId)
-        {
-            payId = Guid.NewGuid().ToString();
+        public string Pay(string creditCardCord, decimal price)
+        {            
             Console.WriteLine($"{nameof(CreditCardService)} {nameof(Pay)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            string payId = Guid.NewGuid().ToString();
+
+            return payId;
         }
 
         public void Cancel(string payId)

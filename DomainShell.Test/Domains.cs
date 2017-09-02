@@ -57,27 +57,42 @@ namespace DomainShell.Test
             orderValidator.ValidateWhenComplete(this);
 
             Dirty = true;
-            creditCardService.Pay(creditCardCode, Price, out string payId);
-            PayId = payId;
-            
-            _events.Add(new OrderCompletedEvent{ Async = true, OrderId = OrderId });
-            _events.Add(new OrderCompletedExceptionEvent{ OrderId = OrderId });
+
+            Pay(creditCardService, creditCardCode);
+
+            SubscribeCompletedEvent();
         }
 
         public void SendCompletedMail(IMailService mailService)
         {
-            mailService.Send("x", "x", "x");
+            mailService.Send("xxx", "xxx", "xxx");
         }
 
         public void CancelCompleted(ICreditCardService creditCardService)
         {
             Dirty = true;
 
+            CancelPay(creditCardService);
+        }
+
+        private void Pay(ICreditCardService creditCardService, string creditCardCode)
+        {
+            PayId = creditCardService.Pay(creditCardCode, Price);
+        }
+
+        private void CancelPay(ICreditCardService creditCardService)
+        {
             if (!string.IsNullOrEmpty(PayId))
             {
                 creditCardService.Cancel(PayId);
                 PayId = null;
             }
+        }
+
+        private void SubscribeCompletedEvent()
+        {
+            _events.Add(new OrderCompletedEvent { Async = true, OrderId = OrderId });
+            _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });
         }
     }
 
