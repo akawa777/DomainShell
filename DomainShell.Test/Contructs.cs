@@ -8,6 +8,7 @@ namespace DomainShell.Test
     public interface IOrderRepository
     {
         OrderModel Find(string orderId, bool throwError = false);
+        OrderModel GetLastByUser(string userId);
         void Apply(OrderModel orderModel);
     }
 

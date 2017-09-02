@@ -31,6 +31,13 @@ namespace DomainShell.Test
             return orderModel;
         }
 
+        public OrderModel GetLastByUser(string userId)
+        {
+             OrderModel orderModel =_connection.Database.Get<OrderModel>().Where(x => x.LastUserId == userId).LastOrDefault();
+
+            return orderModel;
+        }
+
         public void Apply(OrderModel orderModel)
         {
             ModelState modelState = GetModelState(orderModel);

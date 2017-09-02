@@ -19,13 +19,15 @@ namespace DomainShell.Test
         {
         }
 
-        public string OrderId { get; private set; }       
+        public string OrderId { get; private set; }               
 
         public string ProductName { get; set; }
 
         public decimal Price { get; set; }
 
         public string PayId { get; private set; }
+
+        public string LastUserId { get; set; }
 
         public int RecordVersion { get; private set; }
 

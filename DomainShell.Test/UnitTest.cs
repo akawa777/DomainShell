@@ -19,10 +19,11 @@ namespace DomainShell.Test
                 OrderDto order = new OrderDto();
                 order.ProductName = "xxx";
                 order.Price = 999;
+                order.LastUserId = "xxx";
 
-                string orderId = commandApp.Regist(order);     
+                commandApp.Regist(order);
 
-                order = queryApp.Find(orderId);
+                order = queryApp.GetLastByUser("xxx");
 
                 commandApp.Complete(order, "xxx");
 

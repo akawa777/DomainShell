@@ -18,7 +18,7 @@ namespace DomainShell.Test
         private IOrderValidator _orderValidator;
         private ICreditCardService _creditCardService;
 
-        public string Regist(OrderDto orderDto)
+        public void Regist(OrderDto orderDto)
         {
             try
             {
@@ -36,8 +36,6 @@ namespace DomainShell.Test
                     _orderRepository.Apply(orderModel);
 
                     tran.Complete();
-
-                    return orderModel.OrderId;                    
                 }
             }
             catch(Exception e)
@@ -73,7 +71,8 @@ namespace DomainShell.Test
         private void Map(OrderDto dto, OrderModel model)
         {
             model.ProductName = dto.ProductName;         
-            model.Price = dto.Price;   
+            model.Price = dto.Price;
+            model.LastUserId = dto.LastUserId;
         }
     }
 
@@ -104,13 +103,34 @@ namespace DomainShell.Test
             }
         }
 
+        public OrderDto GetLastByUser(string userId)
+        {
+            try
+            {
+                using (Session.Open())
+                {
+                    OrderModel orderModel = _orderRepository.GetLastByUser(userId);
+
+                    return Map(orderModel);
+                }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
+
         private OrderDto Map(OrderModel model)
         {
+            if (model == null) return null;
+
             OrderDto dto = new OrderDto();
             dto.OrderId = model.OrderId;
             dto.ProductName = model.ProductName;
             dto.Price = model.Price;
             dto.PayId = model.PayId;
+            dto.LastUserId = model.LastUserId;
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
@@ -123,6 +143,7 @@ namespace DomainShell.Test
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public string PayId { get; set; }
+        public string LastUserId { get; set; }
         public int RecordVersion { get; set; }        
     }
 }
