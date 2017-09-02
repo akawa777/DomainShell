@@ -19,7 +19,6 @@ namespace DomainShell.Test
             container.Register<MemoryConnection>(Lifestyle.Scoped);           
             container.Register<IMemoryConnection, MemoryConnection>(Lifestyle.Scoped);
 
-            container.Register(() => new DomainEventFoundation(container), Lifestyle.Scoped);
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
             container.Register<IDomainEventExceptionPublisher, DomainEventFoundation>(Lifestyle.Scoped);
 
