@@ -54,8 +54,10 @@ namespace DomainShell.Test
 
             container.Register<IDbConnection>(() => connection, Lifestyle.Singleton);
 
+            
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainEventExceptionPublisher, DomainEventFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainAsyncEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainExceptionEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
 
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
 
@@ -74,7 +76,8 @@ namespace DomainShell.Test
             container.Verify();
 
             DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
-            DomainEventExceptionPublisher.Startup(container.GetInstance<IDomainEventExceptionPublisher>);
+            DomainAsyncEventPublisher.Startup(container.GetInstance<IDomainAsyncEventPublisher>);
+            DomainExceptionEventPublisher.Startup(container.GetInstance<IDomainExceptionEventPublisher>);
             Session.Startup(container.GetInstance<ISession>);            
 
             Container = container;

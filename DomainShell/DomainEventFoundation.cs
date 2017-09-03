@@ -23,44 +23,73 @@ namespace DomainShell
         }
     }
 
-    public static class DomainEventExceptionPublisher
+    public static class DomainAsyncEventPublisher
     {
-        private static Func<IDomainEventExceptionPublisher> _getDomainEventExceptionPublisher;
+        private static Func<IDomainAsyncEventPublisher> _getDomainAsyncEventPublisher;
 
-        public static void Startup(Func<IDomainEventExceptionPublisher> getDmainEventExceptionPublisher)
+        public static void Startup(Func<IDomainAsyncEventPublisher> getDomainAsyncEventPublisher)
         {
-            _getDomainEventExceptionPublisher = getDmainEventExceptionPublisher;
+            _getDomainAsyncEventPublisher = getDomainAsyncEventPublisher;
+        }
+
+        public static void Publish()
+        {
+            IDomainAsyncEventPublisher domainAsyncEventPublisher = _getDomainAsyncEventPublisher();
+            domainAsyncEventPublisher.Publish();
+        }
+    }
+
+    public static class DomainExceptionEventPublisher
+    {
+        private static Func<IDomainExceptionEventPublisher> _getDomainExceptionEventPublisher;
+
+        public static void Startup(Func<IDomainExceptionEventPublisher> getDomainExceptionEventPublisher)
+        {
+            _getDomainExceptionEventPublisher = getDomainExceptionEventPublisher;
         }
 
         public static void Publish(Exception exception)
         {
-            IDomainEventExceptionPublisher domainEventExceptionPublisher = _getDomainEventExceptionPublisher();
-            domainEventExceptionPublisher.Publish(exception);
+            IDomainExceptionEventPublisher domainExceptionEventPublisher = _getDomainExceptionEventPublisher();
+            domainExceptionEventPublisher.Publish(exception);
         }
     }
 
-    public abstract class DomainEventFoundationBase : IDomainEventPublisher, IDomainEventExceptionPublisher
+    public abstract class DomainEventFoundationBase : IDomainEventPublisher, IDomainAsyncEventPublisher, IDomainExceptionEventPublisher
     {
+        private List<IDomainAsyncEvent> _domainAsyncEvents = new List<IDomainAsyncEvent>();        
         private List<IDomainExceptionEvent> _domainExceptionEvents = new List<IDomainExceptionEvent>();
 
         public void Publish(IDomainEventAuthor domainEventAuthor)
         {
             var eventSet = GetEvents(domainEventAuthor);
 
+            SubscribeAsyncEvents(eventSet.asyncEvents);
             SubscribeExceptionEvents(eventSet.exceptionEvents);
-            HandleEvents(SyncEventScope, eventSet.syncEvents);
-            HandleEvents(AsyncEventScope, eventSet.asyncEvents, async: true);            
-        }        
+            HandleEvents(SyncEventScope, eventSet.syncEvents);                       
+        }       
+
+        public void Publish()
+        {
+            IDomainAsyncEvent[] events = _domainAsyncEvents.ToArray();
+            _domainAsyncEvents.Clear(); 
+
+            IDomainEvent[] syncEvents = events.Where(x => !x.Async).ToArray();
+            IDomainEvent[] asyncEvents = events.Where(x => x.Async).ToArray();
+
+            HandleEvents(SyncEventScope, syncEvents);      
+            HandleEvents(SyncEventScope, asyncEvents, async: true);      
+        } 
 
         public void Publish(Exception exception)
         {
-            IDomainEvent[] events = _domainExceptionEvents.ToArray();
+            IDomainExceptionEvent[] events = _domainExceptionEvents.ToArray();
             _domainExceptionEvents.Clear();
 
             HandleEvents(ExceptionEventScope, events, async: false, exception: exception);
         }
 
-        private static (IDomainEvent[] syncEvents, IDomainEvent[] asyncEvents, IDomainExceptionEvent[] exceptionEvents) GetEvents(IDomainEventAuthor domainEventAuthor)
+        private static (IDomainEvent[] syncEvents, IDomainAsyncEvent[] asyncEvents, IDomainExceptionEvent[] exceptionEvents) GetEvents(IDomainEventAuthor domainEventAuthor)
         {
             IDomainEvent[] events = domainEventAuthor.GetEvents().ToArray();
             domainEventAuthor.ClearEvents();
@@ -68,14 +97,14 @@ namespace DomainShell
             Func<IDomainEvent, bool> isSyncEvent = e =>
             {
                 if (e is IDomainExceptionEvent) return false;
-                if (e is IDomainAsyncEvent domainEvent && domainEvent.Async) return false;
+                if (e is IDomainAsyncEvent) return false;
                 else return true;
             };
 
             Func<IDomainEvent, bool> isAsyncEvent = e =>
             {
                 if (e is IDomainExceptionEvent) return false;
-                if (isSyncEvent(e)) return false;
+                if (!(e is IDomainAsyncEvent)) return false;
                 else return true;
             };
 
@@ -85,10 +114,15 @@ namespace DomainShell
             };
 
             IDomainEvent[] syncEvents = events.Where(isSyncEvent).ToArray();
-            IDomainEvent[] asyncEvents = events.Where(isAsyncEvent).ToArray();
+            IDomainAsyncEvent[] asyncEvents = events.Where(isAsyncEvent).ToArray().Select(x => x as IDomainAsyncEvent).ToArray();
             IDomainExceptionEvent[] exceptionEvents = events.Where(isExceptionEvent).Select(x => x as IDomainExceptionEvent).ToArray();
 
             return (syncEvents, asyncEvents, exceptionEvents);
+        }
+
+        private void SubscribeAsyncEvents(IDomainAsyncEvent[] domainAsyncEvents)
+        {
+            _domainAsyncEvents.AddRange(domainAsyncEvents);
         }
 
         private void SubscribeExceptionEvents(IDomainExceptionEvent[] domainExceptionEvents)

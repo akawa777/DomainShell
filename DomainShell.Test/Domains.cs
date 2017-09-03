@@ -92,7 +92,7 @@ namespace DomainShell.Test
 
         private void SubscribeCompletedEvent()
         {
-            _events.Add(new OrderCompletedEvent { Async = true, OrderId = OrderId });
+            _events.Add(new OrderCompletedEvent { Async = false, OrderId = OrderId });
             _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });
         }
     }

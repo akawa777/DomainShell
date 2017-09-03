@@ -44,7 +44,12 @@ namespace DomainShell
         void Publish(IDomainEventAuthor domainEventAuthor);
     }
 
-    public interface IDomainEventExceptionPublisher
+    public interface IDomainAsyncEventPublisher
+    {
+        void Publish();
+    }
+
+    public interface IDomainExceptionEventPublisher
     {
         void Publish(Exception exception);
     }

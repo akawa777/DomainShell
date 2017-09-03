@@ -157,7 +157,7 @@ namespace DomainShell
 
         public void OnException(Exception exception)
         {
-            DomainEventExceptionPublisher.Publish(exception);
+            DomainExceptionEventPublisher.Publish(exception);
         }
 
         protected abstract OpenScopeBase OpenScopeBase();
@@ -187,6 +187,7 @@ namespace DomainShell
         {            
             Commit();
             _completed = true;
+            DomainAsyncEventPublisher.Publish();
         }
 
         public void Dispose()

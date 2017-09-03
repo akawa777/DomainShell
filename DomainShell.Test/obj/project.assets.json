@@ -6510,12 +6510,15 @@
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
-      "projectUniqueName": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
+      "projectUniqueName": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "projectName": "DomainShell.Test",
-      "projectPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
+      "projectPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "packagesPath": "C:\\Users\\Akira\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\obj\\",
+      "outputPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -6535,8 +6538,8 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj": {
-              "projectPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj"
+            "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj": {
+              "projectPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj"
             }
           }
         }
@@ -6550,15 +6553,26 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
-          "Microsoft.NETCore.App": {
-            "suppressParent": "All",
+          "MSTest.TestFramework": {
             "target": "Package",
-            "version": "2.0.0",
-            "autoReferenced": true
+            "version": "1.1.18"
           },
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",
             "version": "2.0.0"
+          },
+          "SimpleInjector": {
+            "target": "Package",
+            "version": "4.0.8"
+          },
+          "MSTest.TestAdapter": {
+            "target": "Package",
+            "version": "1.1.18"
+          },
+          "Microsoft.NETCore.App": {
+            "target": "Package",
+            "version": "2.0.0",
+            "autoReferenced": true
           },
           "Microsoft.EntityFrameworkCore.SQLite": {
             "target": "Package",
@@ -6567,18 +6581,6 @@
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
             "version": "15.3.0-preview-20170628-02"
-          },
-          "MSTest.TestAdapter": {
-            "target": "Package",
-            "version": "1.1.18"
-          },
-          "MSTest.TestFramework": {
-            "target": "Package",
-            "version": "1.1.18"
-          },
-          "SimpleInjector": {
-            "target": "Package",
-            "version": "4.0.8"
           }
         },
         "imports": [
