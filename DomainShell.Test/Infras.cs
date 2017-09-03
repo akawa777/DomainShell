@@ -24,8 +24,19 @@ namespace DomainShell.Test
         }
 
         public OrderModel Find(string orderId, bool throwError = false)
-        {   
-            OrderModel orderModel = Map(ReadByOrderFormId(orderId)).FirstOrDefault();
+        {  
+            IDataReader reader = Read(command =>
+            {
+                List<string> whereSqls = new List<string>();               
+                List<string> orderSqls = new List<string>();               
+
+                SetWhereByOrderId(orderId, command, whereSqls);
+                SetOrderByOrderId(orderSqls);
+
+                return (whereSqls, orderSqls);
+            });
+
+            OrderModel orderModel = Map(reader).FirstOrDefault();
 
             if (throwError && orderModel == null) throw new Exception("order not found.");
 
@@ -34,7 +45,18 @@ namespace DomainShell.Test
 
         public OrderModel GetLastByUser(string userId)
         {
-             OrderModel orderModel = Map(ReadLastByUser(userId)).FirstOrDefault();
+            IDataReader reader = Read(command =>
+            {
+                List<string> whereSqls = new List<string>();               
+                List<string> orderSqls = new List<string>();               
+
+                SetWhereByLastUser(userId, command, whereSqls);
+                SetOrderByOrderId(orderSqls, "desc");
+
+                return (whereSqls, orderSqls);
+            });
+
+            OrderModel orderModel = Map(reader).FirstOrDefault();
 
             return orderModel;
         }
@@ -107,43 +129,51 @@ namespace DomainShell.Test
             else DomainEventPublisher.Publish(orderModel);
         }
 
-        private IDataReader ReadByOrderFormId(string orderId)
+        private void SetWhereByOrderId(string orderId, IDbCommand command, List<string> whereSqls)
         {
-            string sql = $@"
-                select * from OrderForm
-                where OrderId = @{nameof(orderId)}
-            ";
+            string whereSql = $"OrderId = @{nameof(orderId)}";
+            whereSqls.Add(whereSql);
 
-            var command = _connection.CreateCommand();
+            IDataParameter sqlParam = command.CreateParameter();
 
-            command.CommandText = sql;
+            sqlParam.ParameterName = $"@{nameof(orderId)}";
+            sqlParam.Value = orderId == null ? DBNull.Value : orderId as object;
 
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = $"@{nameof(orderId)}";
-            parameter.Value = orderId == null ? DBNull.Value : orderId as object;
-
-            command.Parameters.Add(parameter);
-
-            return command.ExecuteReader();
+            command.Parameters.Add(sqlParam);
         }
 
-        private IDataReader ReadLastByUser(string userId)
+        private void SetWhereByLastUser(string userId, IDbCommand command, List<string> whereSqls)
         {
+            string whereSql = $"LastUserId = @{nameof(userId)}";
+            whereSqls.Add(whereSql);
+
+            IDataParameter sqlParam = command.CreateParameter();
+
+            sqlParam.ParameterName = $"@{nameof(userId)}";
+            sqlParam.Value = userId == null ? DBNull.Value : userId as object;
+
+            command.Parameters.Add(sqlParam);
+        }
+
+        private void SetOrderByOrderId(List<string> orderSqls,  string ascOrDesc = "")
+        {
+            string orderSql = $"OrderId {ascOrDesc}";
+            orderSqls.Add(orderSql);
+        }
+
+        private IDataReader Read(Func<IDbCommand, (IEnumerable<string> whereSql, IEnumerable<string> orderSqls)> createFilter, string andOr = "and")
+        {
+            IDbCommand command = _connection.CreateCommand();
+
+            var filter = createFilter(command);
+
             string sql = $@"
                 select * from OrderForm
-                where LastUserId = @{nameof(userId)}  
-                order by OrderId desc
-            ";
-
-            var command = _connection.CreateCommand();
+                where {string.Join($" {andOr} ", filter.whereSql)}
+                order by {string.Join(", ", filter.orderSqls)}
+            ";            
 
             command.CommandText = sql;
-
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = $"@{nameof(userId)}";
-            parameter.Value = userId;
-
-            command.Parameters.Add(parameter);
 
             return command.ExecuteReader();
         }
@@ -183,7 +213,7 @@ namespace DomainShell.Test
             {
                 var sqlParam = command.CreateParameter();
                 sqlParam.ParameterName = $"@{vSqlParam.Name}";
-                sqlParam.Value = vSqlParam.value;
+                sqlParam.Value = vSqlParam.Value;
 
                 command.Parameters.Add(sqlParam);
             }
