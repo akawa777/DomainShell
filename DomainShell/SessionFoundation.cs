@@ -39,20 +39,68 @@ namespace DomainShell
     {
         private class OpenScope : IOpenScope
         {
+            public OpenScope()
+            {
+                
+            }
+
+            public OpenScope(OpenScopeBase openScope, Action dispose)
+            {
+                _openScope = openScope;
+                _dispose = dispose;
+
+                _openScope.Open();
+            }
+
+            private OpenScopeBase _openScope = null;
+            private Action _dispose = () => {};
+
             public void Dispose()
             {
+                try
+                {
+                    if(_openScope != null) _openScope.Dispose();                    
+                }
+                finally
+                {
+                    _dispose();
+                }
             }
         }
 
         private class TranScope : ITranScope
         {
+            public TranScope()
+            {
+                
+            }
+
+            public TranScope(TranScopeBase openScope, Action dispose)
+            {
+                _tranScope = openScope;
+                _dispose = dispose;
+
+                _tranScope.BeginTran();
+            }
+
+            private TranScopeBase _tranScope = null;
+            private Action _dispose = () => {};
+
             public void Complete()
             {
-
+                if (_tranScope != null) _tranScope.Complete();
             }
 
             public void Dispose()
             {
+                try
+                {
+                    if(_tranScope != null) _tranScope.Dispose();                    
+                }
+                finally
+                {
+                    _dispose();
+                }
             }
         }
 
@@ -63,12 +111,18 @@ namespace DomainShell
         {
             if (_openScope == null)
             {
-                OpenScopeBase openScope = OpenScopeBase();
-                _openScope = openScope;
+                IOpenScope openScope = OpenScopeBase();
 
-                openScope.Init(() => _openScope = null);
-
-                return openScope;
+                if (openScope is OpenScopeBase scope)
+                {
+                    _openScope = new OpenScope(scope, () => _openScope = null);
+                }
+                else
+                {
+                    _openScope = openScope;
+                }
+                
+                return _openScope;
             }
 
             return new OpenScope();
@@ -80,16 +134,22 @@ namespace DomainShell
 
             if (_tranScope == null)
             {
-                TranScopeBase tranScope = TranScopeBase();
-                _tranScope = tranScope;
+                ITranScope tranScope = TranScopeBase();
 
-                tranScope.Init(() =>
+                if (tranScope is TranScopeBase scope)
                 {
-                    _tranScope = null;
-                    if (openScope is OpenScopeBase) openScope.Dispose();
-                });
+                    _tranScope = new TranScope(scope, () =>
+                    {
+                        _tranScope = null;
+                        if (openScope is OpenScopeBase) openScope.Dispose();
+                    });
+                }
+                else
+                {
+                    _tranScope = tranScope;
+                }
 
-                return tranScope;
+                return _tranScope;
             }
 
             return new TranScope();
@@ -105,66 +165,34 @@ namespace DomainShell
     }   
 
     public abstract class OpenScopeBase : IOpenScope
-    {        
-        private Action _dispose = () => {};
-
-        public void Init(Action dispose)
-        {
-            _dispose = dispose;
-            Open();                
-        }
-
-        protected abstract void Open();
+    {
+        public abstract void Open();
 
         protected abstract void Close();
 
-        public void Dispose()
-        {
-            try
-            {
-                Close();                    
-            }
-            finally
-            {                    
-                _dispose();                    
-            } 
-        }
+        public abstract void Dispose();
     }
 
     public abstract class TranScopeBase : ITranScope
     {
-        private Action _dispose = () => {};
+        private bool _completed = false;        
 
-        public void Init(Action dispose)
-        {
-            _dispose = dispose;
-            BeginTran();  
-        }
-
-        protected abstract void BeginTran();
+        public abstract void BeginTran();
 
         protected abstract void Commit();
 
-        protected abstract void Rollback();
-
-        protected abstract void EndTran();
+        protected abstract void Dispose(bool completed);
 
         public void Complete()
-        {
+        {            
             Commit();
+            _completed = true;
         }
 
         public void Dispose()
         {
-            try
-            {
-                Rollback();
-                EndTran();
-            }
-            finally
-            {                    
-                _dispose();
-            }
+            Dispose(_completed);
+            _completed = false;
         }
     }
 }

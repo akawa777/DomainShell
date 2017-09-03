@@ -4,20 +4,55 @@ using System.Collections.Generic;
 using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
+using Microsoft.Data.Sqlite;
+using System.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace DomainShell.Test
 {
     public static class Bootstrap
     {
         public static Container Container { get; private set; }
+        private static string _databaseFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database.sqlite");
+
+        private class DatabaseContext : DbContext
+        {
+            protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+            {
+                if (System.IO.File.Exists(_databaseFile))
+                {
+                    System.IO.File.Delete(_databaseFile);
+                }
+
+                optionsBuilder.UseSqlite($"Filename={_databaseFile}");
+            }
+        }
 
         static Bootstrap()
         {
+            LaunchDatabase();
+            LaunchContainer();
+        }
+
+        private static string GetConnectionString()
+        {
+            SqliteConnectionStringBuilder builder = new SqliteConnectionStringBuilder();
+
+            builder.DataSource = _databaseFile;
+            builder.Mode = SqliteOpenMode.ReadWrite;
+            
+            return builder.ConnectionString;
+        }
+
+        private static void LaunchContainer()
+        {
             Container container = new Container();        
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();             
+            
+            IDbConnection connection = new SqliteConnection(GetConnectionString());
+            connection.Open();
 
-            container.Register<MemoryConnection>(Lifestyle.Scoped);           
-            container.Register<IMemoryConnection, MemoryConnection>(Lifestyle.Scoped);
+            container.Register<IDbConnection>(() => connection, Lifestyle.Singleton);
 
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
             container.Register<IDomainEventExceptionPublisher, DomainEventFoundation>(Lifestyle.Scoped);
@@ -44,5 +79,33 @@ namespace DomainShell.Test
 
             Container = container;
         }
+
+        private static void LaunchDatabase()
+        {   
+            using(var context = new DatabaseContext())
+            {
+                context.Database.EnsureCreated();
+            }            
+
+            var connection = new SqliteConnection(GetConnectionString());       
+            connection.Open();    
+
+            var command = connection.CreateCommand();
+
+            command.CommandText = @"
+                create table OrderForm (
+                    OrderId integer primary key,
+                    ProductName text,
+                    Price numeric,
+                    PayId text,
+                    LastUserId text,
+                    RecordVersion int
+                )";
+
+            command.ExecuteNonQuery();
+
+            connection.Close();
+        }
+
     }
 }

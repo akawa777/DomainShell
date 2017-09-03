@@ -6,6 +6,21 @@ using System.Linq.Expressions;
 
 namespace DomainShell
 {
+    public class VirtualProperty
+    {
+        public VirtualProperty(PropertyInfo property, Func<object> getValue)
+        {
+            _getValue = getValue;
+            Property = property;
+        }
+
+        private Func<object> _getValue;
+
+        public string Name { get { return Property.Name; } }
+        public object value { get { return _getValue(); } }
+        public PropertyInfo Property { get; private set; }
+    }
+
     public class VirtualObject<TMaterial> where TMaterial : class
     {
         public VirtualObject()
@@ -50,6 +65,14 @@ namespace DomainShell
             TProperty propertyMaterial = property.GetValue(_material) as TProperty;
 
             return new VirtualObject<TProperty>(propertyMaterial);
+        }
+
+        public VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue = null)
+        {            
+            PropertyInfo property = GetPropertyInfo(propertyLambda);
+            if (getValue == null) getValue = (m, p) => property.GetValue(_material);
+
+            return new VirtualProperty(property, () => getValue(Material, property));
         }
 
         public IEnumerable<VirtualObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> propertyLambda) where TProperty : class

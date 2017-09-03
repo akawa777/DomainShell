@@ -91,7 +91,7 @@ namespace DomainShell.Test
             {
                 using(Session.Open())
                 {
-                    OrderModel orderModel = _orderRepository.Find(orderId, true);
+                    OrderModel orderModel = _orderRepository.Find(orderId);
 
                     return Map(orderModel);
                 }

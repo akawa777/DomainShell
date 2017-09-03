@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
+using System.Data;
 
 namespace DomainShell.Test
 {
@@ -84,12 +85,12 @@ namespace DomainShell.Test
 
     public class SessionFoundation : SessionFoundationBase
     {
-        public SessionFoundation(MemoryConnection connection)
+        public SessionFoundation(IDbConnection connection)
         {
             _connection = connection;
         }
 
-        private MemoryConnection _connection;
+        private IDbConnection _connection;
 
         protected override OpenScopeBase OpenScopeBase()
         {
@@ -104,153 +105,52 @@ namespace DomainShell.Test
 
     public class OpenScope : OpenScopeBase
     {
-        public OpenScope(MemoryConnection connection)
+        public OpenScope(IDbConnection connection)
         {
             _connection = connection;
         }
 
-        private MemoryConnection _connection;
+        private IDbConnection _connection;
 
-        protected override void Open()
-        {
-            _connection.Open();
+        public override void Open()
+        {            
+           // _connection.Open();
         }
 
         protected override void Close()
         {
-            _connection.Close();
+            //_connection.Close();
+        }
+
+        public override void Dispose()
+        {
+            //_connection.Dispose();
         }
     }
 
     public class TranScope : TranScopeBase
     {
-        public TranScope(MemoryConnection connection)
+        public TranScope(IDbConnection connection)
         {
             _connection = connection;
         }
 
-        private MemoryConnection _connection;
-        protected override void BeginTran()
+        private IDbConnection _connection;
+        //private IDbTransaction _transaction;
+        
+        public override void BeginTran()
         {            
-            _connection.BeginTran();
+            //_transaction = _connection.BeginTransaction();
         }
 
         protected override void Commit()
         {            
-            _connection.Commit();
+            //_transaction.Commit();
         }
 
-        protected override void Rollback()
+        protected override void Dispose(bool completed)
         {
-            _connection.Rollback();
-        }
-
-        protected override void EndTran()
-        {
-
-        }
-    }
-
-    public interface IMemoryConnection
-    {
-        MemoryDatabase Database { get; }
-    }
-
-    public class MemoryConnection : IMemoryConnection
-    {
-        private static MemoryDatabase _memoryDatabase  = new MemoryDatabase();
-        private bool _opend = false;
-        private bool _traned = false;
-
-        public void Open()
-        {
-            if (_opend)
-            {
-                throw new Exception("already open.");
-            }
-
-            _opend = true;
-        }
-
-        public void Close()
-        {
-            _opend = false;
-        }
-
-        public void BeginTran()
-        {
-            if (_traned)
-            {
-                throw new Exception("already tran.");
-            }
-
-            _traned = true;
-        }
-
-        public void Commit()
-        {
-            _traned = false;
-        }
-
-        public void Rollback()
-        {
-            if (_traned)
-            {
-                throw new Exception("not committed.");
-            }
-        }
-
-        public MemoryDatabase Database 
-        { 
-            get 
-            { 
-                if (_opend) return _memoryDatabase; 
-                else throw new Exception("connection is close.");
-            } 
-        }
-    }    
-
-    public class MemoryDatabase
-    {
-        private Dictionary<object, object> _dataMap = new Dictionary<object, object>();
-
-        public IEnumerable<T> Get<T>() where T : class
-        {
-            return _dataMap.Values.Where(x => x is T).Select(x => (T)x);
-        }
-
-        public int Insert<T>(T data) where T : class
-        {
-            if (_dataMap.ContainsKey(data))
-            {
-                throw new Exception("data is exists.");
-            }
-
-            _dataMap[data] = data;
-
-            return 1;
-        }
-
-        public int Update<T>(T data) where T : class
-        {
-            if (!_dataMap.ContainsKey(data))
-            {
-                throw new Exception("data not found.");
-            }
-
-            return 1;
-        }
-
-        public int Delete<T>(T data) where T : class
-        {
-            if (!_dataMap.ContainsKey(data))
-            {
-                throw new Exception("data not found.");
-            }
-
-            _dataMap.Remove(data);
-
-            return 1;
+            //_transaction.Dispose();
         }
     }
 }

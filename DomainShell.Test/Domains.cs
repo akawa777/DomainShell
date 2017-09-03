@@ -9,8 +9,7 @@ namespace DomainShell.Test
     {
         public static OrderModel NewOrder()
         {
-            OrderModel orderModel = new OrderModel();            
-            orderModel.OrderId = Guid.NewGuid().ToString();
+            OrderModel orderModel = new OrderModel();                        
             orderModel.Dirty = true;
             return orderModel;
         }

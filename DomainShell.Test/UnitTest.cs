@@ -26,13 +26,40 @@ namespace DomainShell.Test
 
                 commandApp.Register(order);
 
-                order = queryApp.GetLastByUser("xxx");
+                order = queryApp.GetLastByUser("xxx");     
 
                 commandApp.Complete(order, "xxx");
 
                 order = queryApp.Find(order.OrderId);
             }
         }
+
+        [TestMethod]
+        public void TestMethod_SQlite()
+        {
+            var connection = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=:memory:");
+
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = "create table OrderForm (OrderFormId integer primary key , UserId string)";
+            command.ExecuteNonQuery();
+
+            command.CommandText = "insert into OrderForm (UserId) values('xxx')";
+            command.ExecuteNonQuery();
+
+            command.CommandText = "select * from OrderForm";
+            var reader = command.ExecuteReader();
+            
+            while (reader.Read())
+            {
+                var values = new object[reader.FieldCount];
+                reader.GetValues(values);
+            }
+
+            connection.Close();
+        }
+
 
         [TestMethod]
         public void TestMethod_VirtualObject()
