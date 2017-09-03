@@ -196,10 +196,11 @@ namespace DomainShell.Test
             }
         }
 
-        private IEnumerable<VirtualProperty> GetVirtualSqlParams(OrderModel orderModel)
+        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderModel orderModel, bool includePrimaryKey = false)
         {
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
 
+            if (includePrimaryKey) vOrderModel.GetProperty(m => m.OrderId);
             yield return vOrderModel.GetProperty(m => m.ProductName);
             yield return vOrderModel.GetProperty(m => m.Price);
             yield return vOrderModel.GetProperty(m => m.PayId, (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
@@ -207,13 +208,13 @@ namespace DomainShell.Test
             yield return vOrderModel.GetProperty(m => m.RecordVersion);              
         }
 
-        private void AddParams(IDbCommand command, IEnumerable<VirtualProperty> vSqlParams)
+        private void AddParams(IDbCommand command, IEnumerable<VirtualProperty> virtualProperties)
         {
-            foreach (var vSqlParam in vSqlParams)
+            foreach (var vProp in virtualProperties)
             {
                 var sqlParam = command.CreateParameter();
-                sqlParam.ParameterName = $"@{vSqlParam.Name}";
-                sqlParam.Value = vSqlParam.Value;
+                sqlParam.ParameterName = $"@{vProp.Name}";
+                sqlParam.Value = vProp.Value;
 
                 command.Parameters.Add(sqlParam);
             }
@@ -230,32 +231,32 @@ namespace DomainShell.Test
 
         private void Insert(OrderModel orderModel)
         {
-            IEnumerable<VirtualProperty> vSqlParams = GetVirtualSqlParams(orderModel);
+            IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderModel);
 
             string sql = $@"
                 insert into OrderForm (
-                    {string.Join(", ", vSqlParams.Select(x => x.Name))}
+                    {string.Join(", ", vProps.Select(x => x.Name))}
                 ) values (
-                    {string.Join(", ", vSqlParams.Select(x => $"@{x.Name}"))}
+                    {string.Join(", ", vProps.Select(x => $"@{x.Name}"))}
                 )
             ";
 
             using(IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddParams(command, vSqlParams);
+                AddParams(command, vProps);
                 command.ExecuteNonQuery();
             }
         }
 
         private void Update(OrderModel orderModel)
         {
-            IEnumerable<VirtualProperty> vSqlParams = GetVirtualSqlParams(orderModel);
+            IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderModel);
 
             string sql = $@"
                 update OrderForm 
                 set
-                    {string.Join(", ", vSqlParams.Select(x => $"{x.Name} = @{x.Name}"))}
+                    {string.Join(", ", vProps.Select(x => $"{x.Name} = @{x.Name}"))}
                 where
                     OrderId = @{nameof(orderModel.OrderId)}
             ";
@@ -263,7 +264,7 @@ namespace DomainShell.Test
             using(IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddParams(command, vSqlParams);
+                AddParams(command, vProps);
                 AddOrderIdParam(command, orderModel);
                 command.ExecuteNonQuery();
             }
