@@ -125,8 +125,6 @@ namespace DomainShell.Test
                         .Set(m => m.LastUserId, (m, p) => reader[p.Name])
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                    DomainModelMarker.Mark(vOrderModel.Material);
-
                     yield return vOrderModel.Material;
                 }
             }

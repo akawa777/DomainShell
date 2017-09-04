@@ -157,7 +157,6 @@ namespace DomainShell
             IDomainEvent[] domainEvents = GetExceptionEvents().ToArray();
             Remove(domainEvents);
             
-
             Dictionary<IDomainEvent, IDomainEvent> domainEventMap = new Dictionary<IDomainEvent, IDomainEvent>();
 
             foreach (IDomainEvent domainEvent in domainEvents)

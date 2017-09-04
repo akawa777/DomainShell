@@ -12,13 +12,14 @@ namespace DomainShell.Test
             OrderModel orderModel = new OrderModel();                        
             orderModel.Dirty = true;
 
-            DomainModelMarker.Mark(orderModel);
+            
 
             return orderModel;
         }
 
         protected OrderModel()
         {
+            DomainModelMarker.Mark(this);
         }
 
         public string OrderId { get; private set; }               
@@ -96,7 +97,7 @@ namespace DomainShell.Test
         private void AddCompletedEvents()
         {
             _events.Add(new OrderCompletedEvent { OrderId = OrderId });
-            _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });
+            _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });            
         }
     }
 
