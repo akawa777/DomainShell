@@ -257,11 +257,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
+      "projectUniqueName": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
       "projectName": "DomainShell",
-      "projectPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
+      "projectPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
       "packagesPath": "C:\\Users\\Akira\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\obj\\",
+      "outputPath": "C:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\DomainShell\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

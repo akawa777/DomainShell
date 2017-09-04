@@ -11,9 +11,7 @@ namespace DomainShell.Test
         {
             OrderModel orderModel = new OrderModel();                        
             orderModel.Dirty = true;
-
             
-
             return orderModel;
         }
 
