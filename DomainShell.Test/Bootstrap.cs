@@ -15,7 +15,6 @@ namespace DomainShell.Test
     {
         public static Container Container { get; private set; }
 
-
         public enum DatabaseType
         {
             Sqlite,
