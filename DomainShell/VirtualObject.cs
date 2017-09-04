@@ -137,7 +137,7 @@ namespace DomainShell
             }
 
             PropertyInfo propertyInfo =
-                typeof(TMaterial)
+                _material.GetType()
                 .GetProperty(
                     propertyName, System.Reflection.BindingFlags.Instance 
                     | System.Reflection.BindingFlags.GetProperty 

@@ -146,12 +146,14 @@ namespace DomainShell.Test
 
     public class SessionFoundation : SessionFoundationBase
     {
-        public SessionFoundation(Connection connection)
+        public SessionFoundation(Connection connection, Container container)
         {
             _connection = connection;
+            _container = container;
         }
 
         private Connection _connection;
+        private Container _container;
 
         protected override OpenScopeBase OpenScopeBase()
         {
@@ -160,7 +162,7 @@ namespace DomainShell.Test
 
         protected override TranScopeBase TranScopeBase()
         {
-            return new TranScope(_connection);
+            return new TranScope(_connection, _container);
         }
     }
 
@@ -186,12 +188,14 @@ namespace DomainShell.Test
 
     public class TranScope : TranScopeBase
     {
-        public TranScope(Connection connection)
+        public TranScope(Connection connection, Container container)
         {
             _connection = connection;
+            _container =  container;
         }
 
         private Connection _connection;        
+        private Container _container;
         
         public override void BeginTran()
         {
@@ -199,7 +203,7 @@ namespace DomainShell.Test
         }
 
         protected override void Commit()
-        {
+        {            
             _connection.Commit();
         }
 

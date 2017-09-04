@@ -49,6 +49,7 @@ namespace DomainShell.Test
                     orderModel.CancelCompleted(_creditCardService);
 
                     _orderRepository.Save(orderModel);
+
                     tran.Complete();
                 }
             }

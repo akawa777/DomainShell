@@ -5,7 +5,7 @@ using DomainShell;
 
 namespace DomainShell.Test
 {
-    public class OrderModel : IDomainEventAuthor
+    public class OrderModel : IAggregateRoot
     {
         public static OrderModel NewOrder()
         {

@@ -15,6 +15,7 @@ namespace DomainShell
     public interface IDomainModelTracker : IDomainModelMarker
     {
         IEnumerable<T> Get<T>() where T : class;
+        IEnumerable<object> GetAll();
         void Revoke();
     }
 
@@ -51,6 +52,13 @@ namespace DomainShell
             return domainModelTracker.Get<T>();
         }
 
+        public static IEnumerable<object> GetAll()
+        {
+            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
+
+            return domainModelTracker.GetAll();
+        }
+
         public static void Revoke()
         {
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
@@ -66,6 +74,11 @@ namespace DomainShell
         public IEnumerable<T> Get<T>() where T : class
         {
             return _list.Where(x => x.Value is T).Select(x => x.Value as T);
+        }
+
+        public IEnumerable<object> GetAll()
+        {
+            return _list.Values;
         }
 
         public void Mark<T>(T domainModel) where T : class

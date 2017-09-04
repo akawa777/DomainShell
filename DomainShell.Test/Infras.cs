@@ -13,15 +13,7 @@ namespace DomainShell.Test
             _connection = connection;
         }
 
-        private IConnection _connection; 
-
-        private enum ModelState
-        {
-            Added,
-            Deleted,
-            Modified,
-            Unchanged
-        }
+        private IConnection _connection;         
 
         public OrderModel Find(string orderId, bool throwError = false)
         {  
@@ -61,76 +53,9 @@ namespace DomainShell.Test
             return orderModel;
         }
 
-        public void Save(OrderModel orderModel)
+        public OrderModel GetStored(OrderModel orderModel)
         {
-            ModelState modelState = GetModelState(orderModel);            
-
-            ValidateConcurrency(orderModel, modelState);
-
-            AdjustWhenSave(orderModel, modelState);
-
-            Save(orderModel, modelState);
-
-            AddDomainEvents(orderModel, modelState);
-        }        
-
-        private ModelState GetModelState(OrderModel orderModel)
-        {
-            if (orderModel.Deleted) return ModelState.Deleted;
-            if (orderModel.Dirty && orderModel.RecordVersion == 0) return ModelState.Added;
-            if (orderModel.Dirty && orderModel.RecordVersion > 0) return ModelState.Modified;
-
-            return ModelState.Unchanged;
-        }
-
-        private void ValidateConcurrency(OrderModel orderModel, ModelState modelState)
-        {
-            OrderModel storedOrderModel = Find(orderModel.OrderId);
-
-            bool valid = true;
-
-            if (modelState == ModelState.Added && storedOrderModel != null) valid = false;
-            if (modelState == ModelState.Modified && storedOrderModel.RecordVersion != orderModel.RecordVersion) valid = false;
-            if (modelState == ModelState.Deleted && storedOrderModel.RecordVersion != orderModel.RecordVersion) valid = false;            
-
-            if (!valid) throw new Exception("concurrency exception.");
-        }
-
-        private void AdjustWhenSave(OrderModel orderModel, ModelState modelState)
-        {
-            if (modelState == ModelState.Unchanged) return;
-
-            VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
-
-            vOrderModel
-                .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
-                .Set(m => m.Dirty, (m, p) => false);
-        }
-
-        private void Save(OrderModel orderModel, ModelState modelState)
-        {
-            if (modelState == ModelState.Deleted)
-            {
-                Delete(orderModel);
-            }
-            else if (modelState == ModelState.Added)
-            {
-                Insert(orderModel);
-            }
-            else if (modelState == ModelState.Modified)
-            {
-                Update(orderModel);
-            }
-            else
-            {
-                return;
-            }
-        }
-
-        private void AddDomainEvents(OrderModel orderModel, ModelState modelState)
-        {
-            if (modelState == ModelState.Unchanged) return;
-            else DomainEventList.Add(orderModel);
+            return Find(orderModel.OrderId);
         }
 
         private void SetWhereByOrderId(string orderId, IDbCommand command, List<string> whereSqls)
@@ -222,6 +147,78 @@ namespace DomainShell.Test
             yield return vOrderModel.GetProperty(m => m.PayId, (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
             yield return vOrderModel.GetProperty(m => m.LastUserId);
             yield return vOrderModel.GetProperty(m => m.RecordVersion);              
+        }
+
+        public void Save(OrderModel orderModel)
+        {
+            ModelState modelState = GetModelState(orderModel);
+
+            ValidateConcurrency(orderModel, modelState);
+
+            AdjustWhenSave(orderModel, modelState);
+
+            Save(orderModel, modelState);
+
+            AddDomainEvents(orderModel, modelState);
+        }
+
+        private ModelState GetModelState(OrderModel orderModel)
+        {
+            if (orderModel.Deleted) return ModelState.Deleted;
+            if (orderModel.Dirty && orderModel.RecordVersion == 0) return ModelState.Added;
+            if (orderModel.Dirty && orderModel.RecordVersion > 0) return ModelState.Modified;
+
+            return ModelState.Unchanged;
+        }
+
+        private void ValidateConcurrency(OrderModel orderModel, ModelState modelState)
+        {
+            OrderModel storedOrderModel = Find(orderModel.OrderId);
+
+            bool valid = true;
+
+            if (modelState == ModelState.Added && storedOrderModel != null) valid = false;
+            if (modelState == ModelState.Modified && storedOrderModel.RecordVersion != orderModel.RecordVersion) valid = false;
+            if (modelState == ModelState.Deleted && storedOrderModel.RecordVersion != orderModel.RecordVersion) valid = false;
+
+            if (!valid) throw new Exception("concurrency exception.");
+        }
+
+        private void AdjustWhenSave(OrderModel orderModel, ModelState modelState)
+        {
+            if (modelState == ModelState.Unchanged) return;
+
+            VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
+
+            vOrderModel
+                .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
+                .Set(m => m.Dirty, (m, p) => false);
+        }
+
+        private void Save(OrderModel orderModel, ModelState modelState)
+        {
+            if (modelState == ModelState.Deleted)
+            {
+                Delete(orderModel);
+            }
+            else if (modelState == ModelState.Added)
+            {
+                Insert(orderModel);
+            }
+            else if (modelState == ModelState.Modified)
+            {
+                Update(orderModel);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        private void AddDomainEvents(OrderModel orderModel, ModelState modelState)
+        {
+            if (modelState == ModelState.Unchanged) return;
+            else DomainEventList.Add(orderModel);
         }
 
         private void AddParams(IDbCommand command, IEnumerable<VirtualProperty> virtualProperties)

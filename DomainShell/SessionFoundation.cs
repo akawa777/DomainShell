@@ -187,16 +187,29 @@ namespace DomainShell
 
         public void Complete()
         {   
-            DomainEventPublisher.PublishInTran();                     
-            Commit();
-            _completed = true;
-            DomainEventPublisher.PublishOutTran();
+            try
+            {
+                DomainEventPublisher.PublishInTran();                     
+                Commit();
+                _completed = true;
+                DomainEventPublisher.PublishOutTran();
+            }
+            finally
+            {
+                DomainModelTracker.Revoke();
+            }
         }
 
         public void Dispose()
         {
-            Dispose(_completed);
-            _completed = false;
+            try
+            {
+                Dispose(_completed);
+            }
+            finally
+            {
+                _completed = false;
+            }
         }
     }
 }

@@ -5,6 +5,33 @@ using DomainShell;
 
 namespace DomainShell.Test
 {
+    public interface IAggregateRoot : IDomainEventAuthor
+    {
+        string LastUserId { get; set; }
+
+        int RecordVersion { get; }
+
+        bool Dirty { get; }
+
+        bool Deleted { get; }
+    }
+
+    public enum ModelState
+    {
+        Added,
+        Deleted,
+        Modified,
+        Unchanged
+    }
+
+    //public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
+    //{
+    //    TAggregateRoot GetStored(TAggregateRoot aggregate);
+    //    void Insert(TAggregateRoot aggregate);
+    //    void Update(TAggregateRoot aggregate);
+    //    void Delete(TAggregateRoot aggregate);
+    //}
+
     public interface IOrderRepository
     {
         OrderModel Find(string orderId, bool throwError = false);
