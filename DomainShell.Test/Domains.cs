@@ -64,7 +64,7 @@ namespace DomainShell.Test
 
             Pay(creditCardService, creditCardCode);
 
-            SubscribeCompletedEvent();
+            AddCompletedEvents();
         }
 
         public void SendCompletedMail(IMailService mailService)
@@ -93,7 +93,7 @@ namespace DomainShell.Test
             }
         }
 
-        private void SubscribeCompletedEvent()
+        private void AddCompletedEvents()
         {
             _events.Add(new OrderCompletedEvent { OrderId = OrderId });
             _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });
