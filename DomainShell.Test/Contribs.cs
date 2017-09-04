@@ -83,14 +83,75 @@ namespace DomainShell.Test
         }
     }
 
+    public interface IConnection : IDisposable
+    {
+        IDbCommand CreateCommand();
+    }
+
+    public class Connection : IConnection
+    {
+        public Connection(IDbConnection connection)
+        {
+            _connection = connection;
+
+        }
+
+        private IDbConnection _connection;
+        private IDbTransaction _transaction;
+
+        public void Open()
+        {
+            _connection.Open();
+        }
+
+        public void Close()
+        {
+            _connection.Close();
+        }
+
+        public void BeginTran()
+        {
+            _transaction = _connection.BeginTransaction();
+        }
+
+        public void Commit()
+        {
+            _transaction.Commit();
+        }
+
+        public void Rollback()
+        {
+            _transaction.Rollback();
+        }
+
+        public void DisposeTran()
+        {
+            _transaction.Dispose();
+            _transaction = null;
+        }
+
+        public void Dispose()
+        {
+            _connection.Dispose();
+        }
+
+        public IDbCommand CreateCommand()
+        {
+            IDbCommand command = _connection.CreateCommand();
+            command.Transaction = _transaction;
+
+            return command;
+        }        
+    }
+
     public class SessionFoundation : SessionFoundationBase
     {
-        public SessionFoundation(IDbConnection connection)
+        public SessionFoundation(Connection connection)
         {
             _connection = connection;
         }
 
-        private IDbConnection _connection;
+        private Connection _connection;
 
         protected override OpenScopeBase OpenScopeBase()
         {
@@ -105,52 +166,46 @@ namespace DomainShell.Test
 
     public class OpenScope : OpenScopeBase
     {
-        public OpenScope(IDbConnection connection)
+        public OpenScope(Connection connection)
         {
             _connection = connection;
         }
 
-        private IDbConnection _connection;
+        private Connection _connection;
 
         public override void Open()
         {            
-           // _connection.Open();
+            _connection.Open();
         }
 
         protected override void Close()
         {
-            //_connection.Close();
-        }
-
-        public override void Dispose()
-        {
-            //_connection.Dispose();
+            _connection.Close();
         }
     }
 
     public class TranScope : TranScopeBase
     {
-        public TranScope(IDbConnection connection)
+        public TranScope(Connection connection)
         {
             _connection = connection;
         }
 
-        private IDbConnection _connection;
-        //private IDbTransaction _transaction;
+        private Connection _connection;        
         
         public override void BeginTran()
-        {            
-            //_transaction = _connection.BeginTransaction();
+        {
+            _connection.BeginTran();
         }
 
         protected override void Commit()
-        {            
-            //_transaction.Commit();
+        {
+            _connection.Commit();
         }
 
         protected override void Dispose(bool completed)
         {
-            //_transaction.Dispose();
+            _connection.DisposeTran();
         }
     }
 }

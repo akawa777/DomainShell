@@ -8,12 +8,12 @@ namespace DomainShell.Test
 {
     public class OrderRepository : IOrderRepository
     {
-        public OrderRepository(IDbConnection connection)
+        public OrderRepository(IConnection connection)
         {
             _connection = connection;
         }
 
-        private IDbConnection _connection; 
+        private IConnection _connection; 
 
         private enum ModelState
         {
@@ -25,7 +25,7 @@ namespace DomainShell.Test
 
         public OrderModel Find(string orderId, bool throwError = false)
         {  
-            IDataReader reader = Read(command =>
+            var readSet = Read(command =>
             {
                 List<string> whereSqls = new List<string>();               
                 List<string> orderSqls = new List<string>();               
@@ -36,7 +36,7 @@ namespace DomainShell.Test
                 return (whereSqls, orderSqls);
             });
 
-            OrderModel orderModel = Map(reader).FirstOrDefault();
+            OrderModel orderModel = Map(readSet).FirstOrDefault();
 
             if (throwError && orderModel == null) throw new Exception("order not found.");
 
@@ -45,10 +45,10 @@ namespace DomainShell.Test
 
         public OrderModel GetLastByUser(string userId)
         {
-            IDataReader reader = Read(command =>
+            var readSet = Read(command =>
             {
-                List<string> whereSqls = new List<string>();               
-                List<string> orderSqls = new List<string>();               
+                List<string> whereSqls = new List<string>();
+                List<string> orderSqls = new List<string>();
 
                 SetWhereByLastUser(userId, command, whereSqls);
                 SetOrderByOrderId(orderSqls, "desc");
@@ -56,7 +56,7 @@ namespace DomainShell.Test
                 return (whereSqls, orderSqls);
             });
 
-            OrderModel orderModel = Map(reader).FirstOrDefault();
+            OrderModel orderModel = Map(readSet).FirstOrDefault();
 
             return orderModel;
         }
@@ -165,7 +165,7 @@ namespace DomainShell.Test
             orderSqls.Add(orderSql);
         }
 
-        private IDataReader Read(Func<IDbCommand, (IEnumerable<string> whereSql, IEnumerable<string> orderSqls)> createFilter, string andOr = "and")
+        private (IDataReader reader, IDbCommand command) Read(Func<IDbCommand, (IEnumerable<string> whereSql, IEnumerable<string> orderSqls)> createFilter, string andOr = "and")
         {
             IDbCommand command = _connection.CreateCommand();
 
@@ -179,26 +179,36 @@ namespace DomainShell.Test
 
             command.CommandText = sql;
 
-            return command.ExecuteReader();
+            return (command.ExecuteReader(), command);
         }
 
-        private IEnumerable<OrderModel> Map(IDataReader reader)
+        private IEnumerable<OrderModel> Map((IDataReader reader, IDbCommand command) readSet)
         {
-            while(reader.Read())
+            try
             {
-                var vOrderModel = new VirtualObject<OrderModel>();
+                IDataReader reader = readSet.reader;
 
-                vOrderModel
-                    .Set(m => m.OrderId, (m, p) => reader[p.Name])
-                    .Set(m => m.ProductName, (m, p) => reader[p.Name])
-                    .Set(m => m.Price, (m, p) => reader[p.Name])
-                    .Set(m => m.PayId, (m, p) => reader[p.Name])
-                    .Set(m => m.LastUserId, (m, p) => reader[p.Name])
-                    .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
+                while (reader.Read())
+                {
+                    var vOrderModel = new VirtualObject<OrderModel>();
 
-                DomainModelMarker.Mark(vOrderModel.Material);
+                    vOrderModel
+                        .Set(m => m.OrderId, (m, p) => reader[p.Name])
+                        .Set(m => m.ProductName, (m, p) => reader[p.Name])
+                        .Set(m => m.Price, (m, p) => reader[p.Name])
+                        .Set(m => m.PayId, (m, p) => reader[p.Name])
+                        .Set(m => m.LastUserId, (m, p) => reader[p.Name])
+                        .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                yield return vOrderModel.Material;
+                    DomainModelMarker.Mark(vOrderModel.Material);
+
+                    yield return vOrderModel.Material;
+                }
+            }
+            finally
+            {
+                readSet.reader.Dispose();
+                readSet.command.Dispose();
             }
         }
 

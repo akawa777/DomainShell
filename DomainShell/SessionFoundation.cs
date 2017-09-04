@@ -169,7 +169,10 @@ namespace DomainShell
 
         protected abstract void Close();
 
-        public abstract void Dispose();
+        public void Dispose()
+        {
+            Close();
+        }
     }
 
     public abstract class TranScopeBase : ITranScope

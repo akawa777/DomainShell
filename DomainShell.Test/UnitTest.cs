@@ -14,6 +14,8 @@ namespace DomainShell.Test
         [TestMethod]
         public void TestMethod()
         {
+            Bootstrap.StartUp(Bootstrap.DatabaseType.SqlServer);
+
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
                 OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
