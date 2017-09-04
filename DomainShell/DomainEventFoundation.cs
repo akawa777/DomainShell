@@ -7,128 +7,176 @@ using System.Threading.Tasks;
 
 namespace DomainShell
 {
+    public static class DomainEventList
+    {
+        private static Func<IDomainEventList> _getDomainEventList;
+
+        public static void Startup(Func<IDomainEventList> getDomainEventList)
+        {
+            _getDomainEventList = getDomainEventList;
+        }
+
+        public static void Add(IDomainEvent[] domainEvents)
+        {
+            IDomainEventList domainEventList = _getDomainEventList();
+            domainEventList.Add(domainEvents);
+        }
+
+        public static void Add(IDomainEventAuthor domainEventAuthor)
+        {
+            IDomainEventList domainEventList = _getDomainEventList();
+            domainEventList.Add(domainEventAuthor);
+        }
+    }
+    
     public static class DomainEventPublisher
     {
         private static Func<IDomainEventPublisher> _getDomainEventPublisher;
 
         public static void Startup(Func<IDomainEventPublisher> getDomainEventPublisher)
-        {
+        {            
             _getDomainEventPublisher = getDomainEventPublisher;
         }
 
-        public static void Publish(IDomainEventAuthor domainEventAuthor)
+        public static void PublishInTran()
         {
             IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
-            domainEventPublisher.Publish(domainEventAuthor);
+            
+            domainEventPublisher.PublishInTran();
+        }
+
+        public static void PublishOutTran()
+        {
+            IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
+            
+            domainEventPublisher.PublishOutTran();
+        }
+
+        public static void PublishByException(Exception exception)
+        {
+            IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
+            
+            domainEventPublisher.PublishByException(exception);
         }
     }
 
-    public static class DomainAsyncEventPublisher
+    public abstract class DomainEventFoundationBase : IDomainEventList, IDomainEventPublisher
     {
-        private static Func<IDomainAsyncEventPublisher> _getDomainAsyncEventPublisher;
+        List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
 
-        public static void Startup(Func<IDomainAsyncEventPublisher> getDomainAsyncEventPublisher)
+        public  void Add(IDomainEvent[] domainEvents)
         {
-            _getDomainAsyncEventPublisher = getDomainAsyncEventPublisher;
+            _domainEvents.AddRange(domainEvents);
         }
 
-        public static void Publish()
+        public  void Add(IDomainEventAuthor domainEventAuthor)
         {
-            IDomainAsyncEventPublisher domainAsyncEventPublisher = _getDomainAsyncEventPublisher();
-            domainAsyncEventPublisher.Publish();
-        }
-    }
-
-    public static class DomainExceptionEventPublisher
-    {
-        private static Func<IDomainExceptionEventPublisher> _getDomainExceptionEventPublisher;
-
-        public static void Startup(Func<IDomainExceptionEventPublisher> getDomainExceptionEventPublisher)
-        {
-            _getDomainExceptionEventPublisher = getDomainExceptionEventPublisher;
-        }
-
-        public static void Publish(Exception exception)
-        {
-            IDomainExceptionEventPublisher domainExceptionEventPublisher = _getDomainExceptionEventPublisher();
-            domainExceptionEventPublisher.Publish(exception);
-        }
-    }
-
-    public abstract class DomainEventFoundationBase : IDomainEventPublisher, IDomainAsyncEventPublisher, IDomainExceptionEventPublisher
-    {
-        private List<IDomainAsyncEvent> _domainAsyncEvents = new List<IDomainAsyncEvent>();        
-        private List<IDomainExceptionEvent> _domainExceptionEvents = new List<IDomainExceptionEvent>();
-
-        public void Publish(IDomainEventAuthor domainEventAuthor)
-        {
-            var eventSet = GetEvents(domainEventAuthor);
-
-            SubscribeAsyncEvents(eventSet.asyncEvents);
-            SubscribeExceptionEvents(eventSet.exceptionEvents);
-            HandleEvents(SyncEventScope, eventSet.syncEvents);                       
-        }       
-
-        public void Publish()
-        {
-            IDomainAsyncEvent[] events = _domainAsyncEvents.ToArray();
-            _domainAsyncEvents.Clear(); 
-
-            IDomainEvent[] syncEvents = events.Where(x => !x.Async).ToArray();
-            IDomainEvent[] asyncEvents = events.Where(x => x.Async).ToArray();
-
-            HandleEvents(SyncEventScope, syncEvents);      
-            HandleEvents(SyncEventScope, asyncEvents, async: true);      
-        } 
-
-        public void Publish(Exception exception)
-        {
-            IDomainExceptionEvent[] events = _domainExceptionEvents.ToArray();
-            _domainExceptionEvents.Clear();
-
-            HandleEvents(ExceptionEventScope, events, async: false, exception: exception);
-        }
-
-        private static (IDomainEvent[] syncEvents, IDomainAsyncEvent[] asyncEvents, IDomainExceptionEvent[] exceptionEvents) GetEvents(IDomainEventAuthor domainEventAuthor)
-        {
-            IDomainEvent[] events = domainEventAuthor.GetEvents().ToArray();
+            IDomainEvent[] domainEvents = domainEventAuthor.GetEvents().ToArray();
             domainEventAuthor.ClearEvents();
 
-            Func<IDomainEvent, bool> isSyncEvent = e =>
+            Add(domainEvents);
+        }
+
+        public IEnumerable<IDomainEvent> GetInTranEvents()
+        {
+            Func<IDomainEvent, bool> isSatisfy = e =>
             {
                 if (e is IDomainExceptionEvent) return false;
-                if (e is IDomainAsyncEvent) return false;
+                if (e is IDomainOutTranEvent) return false;
                 else return true;
             };
 
-            Func<IDomainEvent, bool> isAsyncEvent = e =>
+            return _domainEvents.Where(isSatisfy);
+        }
+
+        public IEnumerable<IDomainEvent> GetOutTranEvents()
+        {
+            Func<IDomainEvent, bool> isSatisfy = e =>
             {
                 if (e is IDomainExceptionEvent) return false;
-                if (!(e is IDomainAsyncEvent)) return false;
-                else return true;
+                if (e is IDomainOutTranEvent outTranEvent && !outTranEvent.Async)  return true;
+                else return false;
             };
 
-            Func<IDomainEvent, bool> isExceptionEvent = e =>
+            return _domainEvents.Where(isSatisfy);
+        }
+
+        public IEnumerable<IDomainEvent> GetOutTranAsyncEvents()
+        {
+            Func<IDomainEvent, bool> isSatisfy = e =>
             {
-                return e is IDomainExceptionEvent;
+                if (e is IDomainExceptionEvent) return false;
+                if (e is IDomainOutTranEvent outTranEvent && outTranEvent.Async)  return true;
+                else return false;
             };
 
-            IDomainEvent[] syncEvents = events.Where(isSyncEvent).ToArray();
-            IDomainAsyncEvent[] asyncEvents = events.Where(isAsyncEvent).ToArray().Select(x => x as IDomainAsyncEvent).ToArray();
-            IDomainExceptionEvent[] exceptionEvents = events.Where(isExceptionEvent).Select(x => x as IDomainExceptionEvent).ToArray();
-
-            return (syncEvents, asyncEvents, exceptionEvents);
+            return _domainEvents.Where(isSatisfy);
         }
 
-        private void SubscribeAsyncEvents(IDomainAsyncEvent[] domainAsyncEvents)
+        public IEnumerable<IDomainEvent> GetExceptionEvents()
         {
-            _domainAsyncEvents.AddRange(domainAsyncEvents);
+            Func<IDomainEvent, bool> isSatisfy = e =>
+            {
+                if (e is IDomainExceptionEvent) return true;
+                else return false;
+            };
+
+            return _domainEvents.Where(isSatisfy);
         }
 
-        private void SubscribeExceptionEvents(IDomainExceptionEvent[] domainExceptionEvents)
+        public void Remove(params IDomainEvent[] domainEvents)
         {
-            _domainExceptionEvents.AddRange(domainExceptionEvents);
+            foreach (IDomainEvent domainEvent in domainEvents)
+            {
+                _domainEvents.Remove(domainEvent);
+            }
         }
+
+        public void PublishInTran()
+        {            
+            IDomainEvent[] domainEvents = GetInTranEvents().ToArray();
+            Remove(domainEvents);
+            
+            HandleEvents(InTranEventScope, domainEvents);                       
+        }       
+
+        public void PublishOutTran()
+        {            
+            IDomainEvent[] domainEvents = GetOutTranEvents().ToArray();
+            Remove(domainEvents);
+
+            IDomainEvent[] domainAsyncEvents = GetOutTranAsyncEvents().ToArray();
+            Remove(domainAsyncEvents);            
+            
+            HandleEvents(OutTranEventScope, domainEvents);      
+            HandleEvents(OutTranEventScope, domainAsyncEvents, async: true);      
+        } 
+
+        public void PublishByException(Exception exception)
+        {            
+            IDomainEvent[] domainEvents = GetExceptionEvents().ToArray();
+            Remove(domainEvents);
+            
+
+            Dictionary<IDomainEvent, IDomainEvent> domainEventMap = new Dictionary<IDomainEvent, IDomainEvent>();
+
+            foreach (IDomainEvent domainEvent in domainEvents)
+            {
+                domainEventMap[domainEvent] = domainEvent;
+            }
+
+            foreach (IDomainEventAuthor auter in DomainModelTracker.Get<IDomainEventAuthor>())
+            {
+                foreach (IDomainEvent domainEvent in auter.GetEvents().Where(x => x is IDomainExceptionEvent))
+                {
+                    domainEventMap[domainEvent] = domainEvent;
+                }
+
+                auter.ClearEvents();
+            }
+
+            HandleEvents(ExceptionEventScope, domainEventMap.Values.ToArray(), async: false, exception: exception);
+        } 
 
         private void HandleEvents(Func<IDomainEventScope> getScope, IDomainEvent[] domainEvents, bool async = false,  Exception exception = null)
         {
@@ -156,8 +204,8 @@ namespace DomainShell
             method.Invoke(handler, new object[] { domainEvent });
         }   
 
-        protected abstract IDomainEventScope SyncEventScope();
-        protected abstract IDomainEventScope AsyncEventScope();
+        protected abstract IDomainEventScope InTranEventScope();
+        protected abstract IDomainEventScope OutTranEventScope();
         protected abstract IDomainEventScope ExceptionEventScope();
     }
 }

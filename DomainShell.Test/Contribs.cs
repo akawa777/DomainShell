@@ -17,25 +17,25 @@ namespace DomainShell.Test
 
         private Container _container;
 
-        protected override IDomainEventScope AsyncEventScope()
+        protected override IDomainEventScope InTranEventScope()
         {
-            return new AsyncEventScope(_container);
+            return new InTranEventScope(_container);
+        }
+
+        protected override IDomainEventScope OutTranEventScope()
+        {
+            return new OutTranEventScope(_container);
         }
 
         protected override IDomainEventScope ExceptionEventScope()
         {
             return new ExceptionEventScope(_container);
-        }
-
-        protected override IDomainEventScope SyncEventScope()
-        {
-            return new SyncEventScope(_container);
-        }
+        }        
     }
 
-    public class SyncEventScope : IDomainEventScope
+    public class InTranEventScope : IDomainEventScope
     {
-        public SyncEventScope(Container container)
+        public InTranEventScope(Container container)
         {
             _container = container;
         }
@@ -53,9 +53,9 @@ namespace DomainShell.Test
         }
     }
 
-    public class AsyncEventScope : IDomainEventScope
+    public class OutTranEventScope : IDomainEventScope
     {
-        public AsyncEventScope(Container container)
+        public OutTranEventScope(Container container)
         {
             _container = container;
             _scope = ThreadScopedLifestyle.BeginScope(_container);
@@ -75,7 +75,7 @@ namespace DomainShell.Test
         }
     }
 
-    public class ExceptionEventScope : AsyncEventScope
+    public class ExceptionEventScope : OutTranEventScope
     {
         public ExceptionEventScope(Container container) : base(container)
         {

@@ -47,18 +47,18 @@ namespace DomainShell.Test
         private static void LaunchContainer()
         {
             Container container = new Container();        
-            container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();             
-            
+            container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
+
+            container.Register<IDomainModelMarker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainEventList, DomainEventFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
+
+
             IDbConnection connection = new SqliteConnection(GetConnectionString());
             connection.Open();
 
-            container.Register<IDbConnection>(() => connection, Lifestyle.Singleton);
-
-            
-            container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainAsyncEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainExceptionEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
-
+            container.Register<IDbConnection>(() => connection, Lifestyle.Singleton);            
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
 
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);
@@ -75,9 +75,10 @@ namespace DomainShell.Test
 
             container.Verify();
 
-            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
-            DomainAsyncEventPublisher.Startup(container.GetInstance<IDomainAsyncEventPublisher>);
-            DomainExceptionEventPublisher.Startup(container.GetInstance<IDomainExceptionEventPublisher>);
+            DomainModelMarker.Startup(container.GetInstance<IDomainModelMarker>);
+            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);
+            DomainEventList.Startup(container.GetInstance<IDomainEventList>);
+            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);            
             Session.Startup(container.GetInstance<ISession>);            
 
             Container = container;

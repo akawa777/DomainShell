@@ -12,7 +12,7 @@ namespace DomainShell
         
     }
 
-    public interface IDomainAsyncEvent : IDomainEvent
+    public interface IDomainOutTranEvent : IDomainEvent
     {
         bool Async { get; set; }
     }
@@ -39,18 +39,21 @@ namespace DomainShell
         void ClearEvents();
     }
 
+    public interface IDomainEventList
+    {
+        void Add(IDomainEvent[] domainEvents);
+        void Add(IDomainEventAuthor domainEventAuthor);
+        IEnumerable<IDomainEvent> GetInTranEvents();
+        IEnumerable<IDomainEvent> GetOutTranEvents();
+        IEnumerable<IDomainEvent> GetOutTranAsyncEvents();
+        IEnumerable<IDomainEvent> GetExceptionEvents();
+        void Remove(params IDomainEvent[] domainEvents);
+    }
+
     public interface IDomainEventPublisher
-    {
-        void Publish(IDomainEventAuthor domainEventAuthor);
-    }
-
-    public interface IDomainAsyncEventPublisher
-    {
-        void Publish();
-    }
-
-    public interface IDomainExceptionEventPublisher
-    {
-        void Publish(Exception exception);
+    {        
+        void PublishInTran();
+        void PublishOutTran();
+        void PublishByException(Exception exception);
     }
 }

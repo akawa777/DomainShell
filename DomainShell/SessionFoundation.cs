@@ -106,58 +106,57 @@ namespace DomainShell
 
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
+        private object _lockOpen = new object();
+        private object _lockTran = new object();
 
         public IOpenScope Open()
         {
-            if (_openScope == null)
+            lock (_lockOpen)
             {
-                IOpenScope openScope = OpenScopeBase();
+                if (_openScope == null)
+                {
+                    DomainModelTracker.Revoke();
 
-                if (openScope is OpenScopeBase scope)
-                {
-                    _openScope = new OpenScope(scope, () => _openScope = null);
+                    OpenScopeBase openScope = OpenScopeBase();
+
+                    _openScope = new OpenScope(openScope, () =>
+                    {
+                        _openScope = null;
+                    });
+
+                    return _openScope;
                 }
-                else
-                {
-                    _openScope = openScope;
-                }
-                
-                return _openScope;
+
+                return new OpenScope();
             }
-
-            return new OpenScope();
         }
 
         public ITranScope Tran()
         {
-            IOpenScope openScope = Open();
-
-            if (_tranScope == null)
+            lock (_lockTran)
             {
-                ITranScope tranScope = TranScopeBase();
+                IOpenScope openScope = Open();
 
-                if (tranScope is TranScopeBase scope)
+                if (_tranScope == null)
                 {
-                    _tranScope = new TranScope(scope, () =>
+                    TranScopeBase tranScope = TranScopeBase();
+
+                    _tranScope = new TranScope(tranScope, () =>
                     {
                         _tranScope = null;
-                        if (openScope is OpenScopeBase) openScope.Dispose();
+                        openScope.Dispose();
                     });
-                }
-                else
-                {
-                    _tranScope = tranScope;
+
+                    return _tranScope;
                 }
 
-                return _tranScope;
+                return new TranScope();
             }
-
-            return new TranScope();
         }
 
         public void OnException(Exception exception)
         {
-            DomainExceptionEventPublisher.Publish(exception);
+            DomainEventPublisher.PublishByException(exception);
         }
 
         protected abstract OpenScopeBase OpenScopeBase();
@@ -184,10 +183,11 @@ namespace DomainShell
         protected abstract void Dispose(bool completed);
 
         public void Complete()
-        {            
+        {   
+            DomainEventPublisher.PublishInTran();                     
             Commit();
             _completed = true;
-            DomainAsyncEventPublisher.Publish();
+            DomainEventPublisher.PublishOutTran();
         }
 
         public void Dispose()

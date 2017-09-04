@@ -16,3 +16,12 @@ C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0
 C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.AssemblyInfo.cs
 C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.dll
 C:\Users\Akira\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.pdb
+E:\Documents\GitHub\DomainShell\DomainShell\bin\Debug\netstandard2.0\DomainShell.deps.json
+E:\Documents\GitHub\DomainShell\DomainShell\bin\Debug\netstandard2.0\DomainShell.dll
+E:\Documents\GitHub\DomainShell\DomainShell\bin\Debug\netstandard2.0\DomainShell.pdb
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.csprojResolveAssemblyReference.cache
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.csproj.CoreCompileInputs.cache
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.AssemblyInfoInputs.cache
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.AssemblyInfo.cs
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.dll
+E:\Documents\GitHub\DomainShell\DomainShell\obj\Debug\netstandard2.0\DomainShell.pdb

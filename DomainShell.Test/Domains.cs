@@ -11,6 +11,9 @@ namespace DomainShell.Test
         {
             OrderModel orderModel = new OrderModel();                        
             orderModel.Dirty = true;
+
+            DomainModelMarker.Mark(orderModel);
+
             return orderModel;
         }
 
@@ -92,12 +95,12 @@ namespace DomainShell.Test
 
         private void SubscribeCompletedEvent()
         {
-            _events.Add(new OrderCompletedEvent { Async = false, OrderId = OrderId });
+            _events.Add(new OrderCompletedEvent { OrderId = OrderId });
             _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });
         }
     }
 
-    public class OrderCompletedEvent : IDomainAsyncEvent
+    public class OrderCompletedEvent : IDomainOutTranEvent
     {           
         public bool Async { get; set; }
         public string OrderId { get; set; }

@@ -63,16 +63,16 @@ namespace DomainShell.Test
 
         public void Save(OrderModel orderModel)
         {
-            ModelState modelState = GetModelState(orderModel);
+            ModelState modelState = GetModelState(orderModel);            
 
             ValidateConcurrency(orderModel, modelState);
 
-            AdjustWhenSave(orderModel);
+            AdjustWhenSave(orderModel, modelState);
 
             Save(orderModel, modelState);
 
-            PublishDomainEvent(orderModel, modelState);
-        }
+            AddDomainEvents(orderModel, modelState);
+        }        
 
         private ModelState GetModelState(OrderModel orderModel)
         {
@@ -83,19 +83,23 @@ namespace DomainShell.Test
             return ModelState.Unchanged;
         }
 
-        private bool ValidateConcurrency(OrderModel orderModel, ModelState modelState)
+        private void ValidateConcurrency(OrderModel orderModel, ModelState modelState)
         {
             OrderModel storedOrderModel = Find(orderModel.OrderId);
 
-            if (modelState == ModelState.Added && storedOrderModel != null) return false;
-            if (modelState == ModelState.Modified && storedOrderModel.RecordVersion != orderModel.RecordVersion) return false;
-            if (modelState == ModelState.Deleted && storedOrderModel.RecordVersion != orderModel.RecordVersion) return false;            
+            bool valid = true;
 
-            return true;
+            if (modelState == ModelState.Added && storedOrderModel != null) valid = false;
+            if (modelState == ModelState.Modified && storedOrderModel.RecordVersion != orderModel.RecordVersion) valid = false;
+            if (modelState == ModelState.Deleted && storedOrderModel.RecordVersion != orderModel.RecordVersion) valid = false;            
+
+            if (!valid) throw new Exception("concurrency exception.");
         }
 
-        private void AdjustWhenSave(OrderModel orderModel)
+        private void AdjustWhenSave(OrderModel orderModel, ModelState modelState)
         {
+            if (modelState == ModelState.Unchanged) return;
+
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
 
             vOrderModel
@@ -123,10 +127,10 @@ namespace DomainShell.Test
             }
         }
 
-        private void PublishDomainEvent(OrderModel orderModel, ModelState modelState)
+        private void AddDomainEvents(OrderModel orderModel, ModelState modelState)
         {
             if (modelState == ModelState.Unchanged) return;
-            else DomainEventPublisher.Publish(orderModel);
+            else DomainEventList.Add(orderModel);
         }
 
         private void SetWhereByOrderId(string orderId, IDbCommand command, List<string> whereSqls)
@@ -191,6 +195,8 @@ namespace DomainShell.Test
                     .Set(m => m.PayId, (m, p) => reader[p.Name])
                     .Set(m => m.LastUserId, (m, p) => reader[p.Name])
                     .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
+
+                DomainModelMarker.Mark(vOrderModel.Material);
 
                 yield return vOrderModel.Material;
             }

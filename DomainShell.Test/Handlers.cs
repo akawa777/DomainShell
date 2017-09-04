@@ -38,6 +38,8 @@ namespace DomainShell.Test
 
         public void Handle(OrderCompletedExceptionEvent domainEvent)
         {
+            Console.WriteLine($"{nameof(OrderCompletedEventHandler)} {nameof(Handle)} {nameof(OrderCompletedExceptionEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
             try
             {
                 using(var tran = Session.Tran())
