@@ -69,7 +69,22 @@ namespace DomainShell
 
     public abstract class DomainEventFoundationBase : IDomainEventList, IDomainEventPublisher
     {
-        List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+        private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+        
+        private IDomainEvent[] GetDomainEvents()
+        {
+            
+            foreach (IDomainEventAuthor auter in DomainModelTracker.Get<IDomainEventAuthor>())
+            {
+                foreach (IDomainEvent domainEvent in auter.GetEvents())
+                {
+                    _domainEvents.Add(domainEvent);
+                }                    
+                auter.ClearEvents();
+            }               
+            
+            return _domainEvents.ToArray();
+        }
 
         public  void Add(IDomainEvent[] domainEvents)
         {
@@ -93,7 +108,7 @@ namespace DomainShell
                 else return true;
             };
 
-            return _domainEvents.Where(isSatisfy);
+            return GetDomainEvents().Where(isSatisfy);
         }
 
         public IEnumerable<IDomainEvent> GetOutTranEvents()
@@ -105,7 +120,7 @@ namespace DomainShell
                 else return false;
             };
 
-            return _domainEvents.Where(isSatisfy);
+            return GetDomainEvents().Where(isSatisfy);
         }
 
         public IEnumerable<IDomainEvent> GetOutTranAsyncEvents()
@@ -117,7 +132,7 @@ namespace DomainShell
                 else return false;
             };
 
-            return _domainEvents.Where(isSatisfy);
+            return GetDomainEvents().Where(isSatisfy);
         }
 
         public IEnumerable<IDomainEvent> GetExceptionEvents()
@@ -128,7 +143,7 @@ namespace DomainShell
                 else return false;
             };
 
-            return _domainEvents.Where(isSatisfy);
+            return GetDomainEvents().Where(isSatisfy);
         }
 
         public void Remove(params IDomainEvent[] domainEvents)
@@ -169,24 +184,24 @@ namespace DomainShell
             IDomainEvent[] domainEvents = GetExceptionEvents().ToArray();
             Remove(domainEvents);
             
-            Dictionary<IDomainEvent, IDomainEvent> domainEventMap = new Dictionary<IDomainEvent, IDomainEvent>();
+            // Dictionary<IDomainEvent, IDomainEvent> domainEventMap = new Dictionary<IDomainEvent, IDomainEvent>();
 
-            foreach (IDomainEvent domainEvent in domainEvents)
-            {
-                domainEventMap[domainEvent] = domainEvent;
-            }
+            // foreach (IDomainEvent domainEvent in domainEvents)
+            // {
+            //     domainEventMap[domainEvent] = domainEvent;
+            // }
 
-            foreach (IDomainEventAuthor auter in DomainModelTracker.Get<IDomainEventAuthor>())
-            {
-                foreach (IDomainEvent domainEvent in auter.GetEvents().Where(x => x is IDomainExceptionEvent))
-                {
-                    domainEventMap[domainEvent] = domainEvent;
-                }
+            // foreach (IDomainEventAuthor auter in DomainModelTracker.Get<IDomainEventAuthor>())
+            // {
+            //     foreach (IDomainEvent domainEvent in auter.GetEvents().Where(x => x is IDomainExceptionEvent))
+            //     {
+            //         domainEventMap[domainEvent] = domainEvent;
+            //     }
 
-                auter.ClearEvents();
-            }
+            //     auter.ClearEvents();
+            // }
 
-            HandleEvents(ExceptionEventScope, domainEventMap.Values.ToArray(), async: false, exception: exception);
+            HandleEvents(ExceptionEventScope, domainEvents, async: false, exception: exception);
         }
 
         public void Revoke()

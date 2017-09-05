@@ -310,8 +310,6 @@ namespace DomainShell.Test
             AdjustWhenSave(model, modelState);
 
             Save(model, modelState);
-
-            AddDomainEvents(model, modelState);
         }
 
         private ModelState GetModelState(TAggregateRoot model)
@@ -345,12 +343,6 @@ namespace DomainShell.Test
             vModel
                 .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
                 .Set(m => m.Dirty, (m, p) => Dirty.False());
-        }
-
-        private void AddDomainEvents(TAggregateRoot model, ModelState modelState)
-        {
-            if (modelState == ModelState.Unchanged) return;
-            else DomainEventList.Add(model);
         }
 
         protected abstract TAggregateRoot Find(TAggregateRoot model);

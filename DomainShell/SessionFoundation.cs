@@ -160,17 +160,10 @@ namespace DomainShell
 
         public void OnException(Exception exception)
         {
-            try
-            {
-                DomainEventPublisher.PublishByException(exception);
-            }
-            finally
-            {
-                DomainEventPublisher.Revoke();
-            }
+            DomainEventPublisher.PublishByException(exception);
         }
 
-        protected abstract OpenScopeBase OpenScopeBase();
+        protected abstract OpenScope OpenScopeBase();
         protected abstract TranScopeBase TranScopeBase();
         protected abstract InTranScopeBase InTranScopeBase();
     }   
@@ -195,16 +188,9 @@ namespace DomainShell
 
         public void Complete()
         {
-            try
-            {
-                BeginCommit();
-                DomainEventPublisher.PublishInTran();
-                _completed = true;
-            }
-            finally
-            {
-                DomainModelTracker.Revoke();
-            }
+            BeginCommit();
+            DomainEventPublisher.PublishInTran();
+            _completed = true;
         }
 
         public void Dispose()
@@ -234,19 +220,11 @@ namespace DomainShell
 
         public void Complete()
         {   
-            try
-            {
-                BeginCommit();
-                DomainEventPublisher.PublishInTran();                     
-                Commit();
-                _completed = true;
-                DomainEventPublisher.PublishOutTran();
-                DomainEventPublisher.Revoke();
-            }
-            finally
-            {
-                DomainModelTracker.Revoke();
-            }
+            BeginCommit();
+            DomainEventPublisher.PublishInTran();                     
+            Commit();
+            _completed = true;
+            DomainEventPublisher.PublishOutTran();            
         }
 
         public void Dispose()
