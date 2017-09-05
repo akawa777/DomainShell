@@ -136,23 +136,41 @@ namespace DomainShell
                     propertyName.ToString()));
             }
 
-            PropertyInfo propertyInfo =
-                _material.GetType()
-                .GetProperty(
-                    propertyName, System.Reflection.BindingFlags.Instance 
-                    | System.Reflection.BindingFlags.GetProperty 
-                    | System.Reflection.BindingFlags.Public 
-                    | System.Reflection.BindingFlags.NonPublic);
+            PropertyInfo propertyInfo = GetWritePropertyInfo(_material.GetType(), propertyName);
 
-            if (!(propertyInfo != null && propertyInfo.CanWrite))
-            {  
+            if (propertyInfo == null)
+            {
                 throw new ArgumentException(string.Format(
                     "Expression '{0}' refers to a field, not a property or can not write.",
-                    propertyName.ToString()));    
+                    propertyName.ToString()));
             }
 
             return propertyInfo;
         }
+
+        private PropertyInfo GetWritePropertyInfo(Type type,  string propertyName)
+        {
+            PropertyInfo propertyInfo =
+                type
+                .GetProperty(
+                    propertyName, System.Reflection.BindingFlags.Instance
+                    | System.Reflection.BindingFlags.GetProperty
+                    | System.Reflection.BindingFlags.Public
+                    | System.Reflection.BindingFlags.NonPublic);
+
+            if (propertyInfo != null && !propertyInfo.CanWrite && type.BaseType != typeof(object))
+            {
+                return GetWritePropertyInfo(type.BaseType, propertyName);
+            }
+
+            if (propertyInfo != null && propertyInfo.CanWrite)
+            {
+                return propertyInfo;
+            }
+
+            return null;
+        }
+
 
         private string GetPropertyName<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda)
         {

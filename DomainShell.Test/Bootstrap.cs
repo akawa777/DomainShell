@@ -56,28 +56,34 @@ namespace DomainShell.Test
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
             container.Register<UnitOfWork>(Lifestyle.Scoped);
 
-            container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);
+            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImple>(Lifestyle.Scoped);
+            container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
+
+            container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);            
             container.Register<IWriteRepository<OrderModel>, OrderRepository>(Lifestyle.Scoped);
+            container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
+            container.Register<IWriteRepository<OrderCanceledModel>, OrderCanceledRepository>(Lifestyle.Scoped);
 
             container.Register<IOrderValidator, OrderValidator>(Lifestyle.Scoped);
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
             container.Register<IMailService, MailService>(Lifestyle.Scoped);
 
-            container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCompletedOutTranEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
             container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
-            container.Register<OrderQueryApp>(Lifestyle.Scoped);
-
-            container.Verify();
+            container.Register<OrderQueryApp>(Lifestyle.Scoped);            
 
             GenerationOrder.Startup(container.GetInstance<IGenerationOrder>);
+            DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);
             DomainModelMarker.Startup(container.GetInstance<IDomainModelMarker>);
             DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);
             DomainEventList.Startup(container.GetInstance<IDomainEventList>);
             DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
             Session.Startup(container.GetInstance<ISession>);
 
+            container.Verify();
             Container = container;
         }
     }
@@ -148,6 +154,18 @@ namespace DomainShell.Test
 
             command.ExecuteNonQuery();
 
+            command.CommandText = @"
+                create table OrderFormCanceled (
+                    OrderId integer primary key,                    
+                    ProductName text,
+                    Price numeric,
+                    PayId text,
+                    LastUserId text,
+                    RecordVersion int
+                )";
+
+            command.ExecuteNonQuery();
+
             connection.Close();
         }
     }
@@ -190,6 +208,18 @@ namespace DomainShell.Test
 
             command.CommandText = @"
                 create table OrderForm (
+                    OrderId int identity primary key,
+                    ProductName nvarchar(100),
+                    Price decimal,
+                    PayId nvarchar(100),
+                    LastUserId nvarchar(100),
+                    RecordVersion int
+                )";
+
+            command.ExecuteNonQuery();
+
+            command.CommandText = @"            
+                create table OrderFormCanceled (
                     OrderId int identity primary key,
                     ProductName nvarchar(100),
                     Price decimal,

@@ -33,6 +33,14 @@ namespace DomainShell.Test
                 commandApp.Complete(order, "xxx");
 
                 order = queryApp.Find(order.OrderId);
+
+                int orderId = order.OrderId;
+
+                commandApp.Cancel(order, "xxx");
+
+                order = queryApp.Find(orderId);
+
+                order = queryApp.GetCanceledByOrderId(orderId);
             }
         }
 

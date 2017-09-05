@@ -58,6 +58,13 @@ namespace DomainShell
             
             domainEventPublisher.PublishByException(exception);
         }
+
+        public static void Revoke()
+        {
+            IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
+
+            domainEventPublisher.Revoke();
+        }
     }
 
     public abstract class DomainEventFoundationBase : IDomainEventList, IDomainEventPublisher
@@ -132,6 +139,11 @@ namespace DomainShell
             }
         }
 
+        public void Clear()
+        {
+            _domainEvents.Clear();
+        }
+
         public void PublishInTran()
         {            
             IDomainEvent[] domainEvents = GetInTranEvents().ToArray();
@@ -175,7 +187,12 @@ namespace DomainShell
             }
 
             HandleEvents(ExceptionEventScope, domainEventMap.Values.ToArray(), async: false, exception: exception);
-        } 
+        }
+
+        public void Revoke()
+        {
+            Clear();
+        }
 
         private void HandleEvents(Func<IDomainEventScope> getScope, IDomainEvent[] domainEvents, bool async = false,  Exception exception = null)
         {

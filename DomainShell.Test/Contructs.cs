@@ -31,14 +31,20 @@ namespace DomainShell.Test
 
     public interface IOrderRepository
     {
-        OrderModel Find(string orderId, bool throwError = false);
+        OrderModel Find(int orderId, bool throwError = false);
         OrderModel GetLastByUser(string userId);        
+    }
+
+    public interface IOrderCanceledRepository
+    {
+        OrderCanceledModel Find(int orderId, bool throwError = false);
     }
 
     public interface IOrderValidator
     {
         void ValidateWhenRegister(OrderModel orderModel);
         void ValidateWhenComplete(OrderModel orderModel);
+        void ValidateWhenCancel(OrderModel orderModel);
     }
 
     public interface ICreditCardService

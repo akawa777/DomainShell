@@ -7,18 +7,22 @@ namespace DomainShell.Test
 {
     public class OrderCommandApp
     {
-        public OrderCommandApp(IOrderRepository orderRepository, IWriteRepository<OrderModel> writeRepository, IOrderValidator orderValidator, ICreditCardService creditCardService)
+        public OrderCommandApp(
+            IOrderRepository orderRepository, 
+            IWriteRepository<OrderModel> writeRepository, 
+            IOrderValidator orderValidator, 
+            ICreditCardService creditCardService)
         {            
             _orderRepository = orderRepository;
             _writeRepository = writeRepository;
             _orderValidator = orderValidator;
-            _creditCardService = creditCardService;
+            _creditCardService = creditCardService;            
         }
 
         private IOrderRepository _orderRepository;
         private IWriteRepository<OrderModel> _writeRepository;
         private IOrderValidator _orderValidator;
-        private ICreditCardService _creditCardService;
+        private ICreditCardService _creditCardService;        
 
         public void Register(OrderDto orderDto)
         {
@@ -28,7 +32,7 @@ namespace DomainShell.Test
                 {
                     OrderModel orderModel;
 
-                    if (string.IsNullOrEmpty(orderDto.OrderId)) orderModel = OrderModel.NewOrder();
+                    if (orderDto.OrderId < 1) orderModel = OrderModel.NewOrder();
                     else orderModel = _orderRepository.Find(orderDto.OrderId, true);
 
                     Map(orderDto, orderModel);
@@ -68,6 +72,27 @@ namespace DomainShell.Test
             }
         }
 
+        public void Cancel(OrderDto orderDto, string reason)
+        {
+            try
+            {
+                using (var tran = Session.Tran())
+                {
+                    OrderModel orderModel = _orderRepository.Find(orderDto.OrderId, true);
+                    Map(orderDto, orderModel);
+
+                    orderModel.Cancel(_orderValidator);
+
+                    tran.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
+
         private void Map(OrderDto dto, OrderModel model)
         {
             model.ProductName = dto.ProductName;         
@@ -78,14 +103,16 @@ namespace DomainShell.Test
 
     public class OrderQueryApp
     {
-        public OrderQueryApp(IOrderRepository orderRepository)
+        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository)
         {            
             _orderRepository = orderRepository;
-        }
+            _orderCanceledRepository = orderCanceledRepository;
+    }
         
-        private IOrderRepository _orderRepository;           
+        private IOrderRepository _orderRepository;
+        private IOrderCanceledRepository _orderCanceledRepository;
 
-        public OrderDto Find(string orderId)
+        public OrderDto Find(int orderId)
         {
             try
             {
@@ -121,7 +148,40 @@ namespace DomainShell.Test
             }
         }
 
+        public OrderDto GetCanceledByOrderId(int orderId)
+        {
+            try
+            {
+                using (Session.Open())
+                {
+                    OrderCanceledModel orderCanceledModel = _orderCanceledRepository.Find(orderId);
+
+                    return Map(orderCanceledModel);
+                }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
+
         private OrderDto Map(OrderModel model)
+        {
+            if (model == null) return null;
+
+            OrderDto dto = new OrderDto();
+            dto.OrderId = model.OrderId;
+            dto.ProductName = model.ProductName;
+            dto.Price = model.Price;
+            dto.PayId = model.PayId;
+            dto.LastUserId = model.LastUserId;
+            dto.RecordVersion = model.RecordVersion;
+
+            return dto;
+        }
+
+        private OrderDto Map(OrderCanceledModel model)
         {
             if (model == null) return null;
 
@@ -139,7 +199,7 @@ namespace DomainShell.Test
 
     public class OrderDto
     {
-        public string OrderId { get; set; }
+        public int OrderId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public string PayId { get; set; }

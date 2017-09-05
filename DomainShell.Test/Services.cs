@@ -16,6 +16,11 @@ namespace DomainShell.Test
         {
             Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenComplete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
+
+        public void ValidateWhenCancel(OrderModel orderModel)
+        {
+            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenCancel)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+        }
     }
 
     public class CreditCardService : ICreditCardService

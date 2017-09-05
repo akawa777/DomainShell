@@ -48,6 +48,7 @@ namespace DomainShell
         IEnumerable<IDomainEvent> GetOutTranAsyncEvents();
         IEnumerable<IDomainEvent> GetExceptionEvents();
         void Remove(params IDomainEvent[] domainEvents);
+        void Clear();
     }
 
     public interface IDomainEventPublisher
@@ -55,5 +56,6 @@ namespace DomainShell
         void PublishInTran();
         void PublishOutTran();
         void PublishByException(Exception exception);
+        void Revoke();
     }
 }

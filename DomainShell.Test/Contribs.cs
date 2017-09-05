@@ -165,6 +165,11 @@ namespace DomainShell.Test
         {
             return new TranScope(_connection, _container);
         }
+
+        protected override InTranScopeBase InTranScopeBase()
+        {
+            return new InTranScope(_container);
+        }
     }
 
     public class OpenScope : OpenScopeBase
@@ -220,6 +225,27 @@ namespace DomainShell.Test
         }
     }
 
+    public class InTranScope : InTranScopeBase
+    {
+        public InTranScope(Container container)
+        {            
+            _container = container;
+        }
+
+        private Container _container;
+
+        protected override void BeginCommit()
+        {
+            UnitOfWork unitOfWork = _container.GetInstance<UnitOfWork>();
+            unitOfWork.Save();
+        }
+
+        protected override void Dispose(bool completed)
+        {
+            
+        }
+    }
+
     public class UnitOfWork : UnitOfWorkFoundationBase<IAggregateRoot>
     {
         public UnitOfWork(Container container)
@@ -246,10 +272,88 @@ namespace DomainShell.Test
         
         protected override void Save(IAggregateRoot domainModel)
         {
-            Type writeRepositoryType = typeof(IWriteRepository<>).MakeGenericType(domainModel.GetType());
+            Type domainModelType;
+
+            if (domainModel is IDomainModelProxy proxy) domainModelType = proxy.GetImplementType();
+            else domainModelType = domainModel.GetType();
+
+            Type writeRepositoryType = typeof(IWriteRepository<>).MakeGenericType(domainModelType);
             object writeRepository = _container.GetInstance(writeRepositoryType);
-            MethodInfo method = writeRepositoryType.GetMethod("Save", new Type[] { domainModel.GetType() });
+            MethodInfo method = writeRepositoryType.GetMethod("Save", new Type[] { domainModelType });
             method.Invoke(writeRepository, new object[] { domainModel });
         }        
+    }
+
+    public class DomainModelProxyFactoryImple : IDomainModelProxyFactory
+    {
+        public DomainModelProxyFactoryImple(Container container)
+        {
+            _container = container;
+        }
+
+        private Container _container;
+
+        public T Create<T>() where T : class
+        {
+            return _container.GetInstance<T>();
+        }
+    }
+
+    public abstract class WriteRepository<TAggregateRoot> : IWriteRepository<TAggregateRoot> where TAggregateRoot : class, IAggregateRoot
+    {
+        public void Save(TAggregateRoot model)
+        {
+            ModelState modelState = GetModelState(model);
+
+            ValidateConcurrency(model, modelState);
+
+            AdjustWhenSave(model, modelState);
+
+            Save(model, modelState);
+
+            AddDomainEvents(model, modelState);
+        }
+
+        private ModelState GetModelState(TAggregateRoot model)
+        {
+            if (model.Dirty.Is && model.Deleted.Is && model.RecordVersion > 0) return ModelState.Deleted;
+            if (model.Dirty.Is && model.RecordVersion == 0) return ModelState.Added;
+            if (model.Dirty.Is && model.RecordVersion > 0) return ModelState.Modified;
+
+            return ModelState.Unchanged;
+        }
+
+        private void ValidateConcurrency(TAggregateRoot model, ModelState modelState)
+        {
+            TAggregateRoot storedModel = Find(model);
+
+            bool valid = true;
+
+            if (modelState == ModelState.Added && storedModel != null) valid = false;
+            if (modelState == ModelState.Modified && storedModel.RecordVersion != model.RecordVersion) valid = false;
+            if (modelState == ModelState.Deleted && storedModel.RecordVersion != model.RecordVersion) valid = false;
+
+            if (!valid) throw new Exception("concurrency exception.");
+        }
+
+        private void AdjustWhenSave(TAggregateRoot model, ModelState modelState)
+        {
+            if (modelState == ModelState.Unchanged) return;
+
+            VirtualObject<TAggregateRoot> vModel = new VirtualObject<TAggregateRoot>(model);
+
+            vModel
+                .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
+                .Set(m => m.Dirty, (m, p) => Dirty.False());
+        }
+
+        private void AddDomainEvents(TAggregateRoot model, ModelState modelState)
+        {
+            if (modelState == ModelState.Unchanged) return;
+            else DomainEventList.Add(model);
+        }
+
+        protected abstract TAggregateRoot Find(TAggregateRoot model);
+        protected abstract void Save(TAggregateRoot model, ModelState modelState);
     }
 }

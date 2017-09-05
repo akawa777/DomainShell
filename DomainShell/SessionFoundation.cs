@@ -88,7 +88,10 @@ namespace DomainShell
 
             public void Complete()
             {
-                if (_tranScope != null) _tranScope.Complete();
+                if (_tranScope != null)
+                {
+                    _tranScope.Complete();
+                }
             }
 
             public void Dispose()
@@ -116,6 +119,7 @@ namespace DomainShell
                 if (_openScope == null)
                 {
                     DomainModelTracker.Revoke();
+                    DomainEventPublisher.Revoke();
 
                     OpenScopeBase openScope = OpenScopeBase();
 
@@ -150,17 +154,25 @@ namespace DomainShell
                     return _tranScope;
                 }
 
-                return new TranScope();
+                return InTranScopeBase();
             }
         }
 
         public void OnException(Exception exception)
         {
-            DomainEventPublisher.PublishByException(exception);
+            try
+            {
+                DomainEventPublisher.PublishByException(exception);
+            }
+            finally
+            {
+                DomainEventPublisher.Revoke();
+            }
         }
 
         protected abstract OpenScopeBase OpenScopeBase();
         protected abstract TranScopeBase TranScopeBase();
+        protected abstract InTranScopeBase InTranScopeBase();
     }   
 
     public abstract class OpenScopeBase : IOpenScope
@@ -172,6 +184,39 @@ namespace DomainShell
         public void Dispose()
         {
             Close();
+        }
+    }
+
+    public abstract class InTranScopeBase : ITranScope
+    {
+        private bool _completed = false;
+        protected abstract void BeginCommit();
+        protected abstract void Dispose(bool completed);
+
+        public void Complete()
+        {
+            try
+            {
+                BeginCommit();
+                DomainEventPublisher.PublishInTran();
+                _completed = true;
+            }
+            finally
+            {
+                DomainModelTracker.Revoke();
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                Dispose(_completed);
+            }
+            finally
+            {
+                _completed = false;
+            }
         }
     }
 
@@ -196,6 +241,7 @@ namespace DomainShell
                 Commit();
                 _completed = true;
                 DomainEventPublisher.PublishOutTran();
+                DomainEventPublisher.Revoke();
             }
             finally
             {
