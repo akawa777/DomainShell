@@ -9,14 +9,16 @@ namespace DomainShell.Test
     {
         public static OrderModel NewOrder()
         {
-            OrderModel orderModel = new OrderModel();                        
-            orderModel.Dirty = true;
+            OrderModel orderModel = new OrderModel();            
             
             return orderModel;
         }
 
         protected OrderModel()
         {
+            Dirty = Dirty.False();
+            Deleted = Deleted.False();
+
             DomainModelMarker.Mark(this);
         }
 
@@ -32,9 +34,9 @@ namespace DomainShell.Test
 
         public int RecordVersion { get; private set; }
 
-        public bool Dirty { get; private set; }
+        public Dirty Dirty { get; private set; }
 
-        public bool Deleted { get; private set; }
+        public Deleted Deleted { get; private set; }
 
         private List<IDomainEvent> _events = new List<IDomainEvent>();
         
@@ -52,14 +54,14 @@ namespace DomainShell.Test
         {
             orderValidator.ValidateWhenRegister(this);
 
-            Dirty = true;
+            Dirty = Dirty.True();
         }
 
         public void Complete(IOrderValidator orderValidator, ICreditCardService creditCardService, string creditCardCode)
         {
             orderValidator.ValidateWhenComplete(this);
 
-            Dirty = true;
+            Dirty = Dirty.True();
 
             Pay(creditCardService, creditCardCode);
 
@@ -73,7 +75,7 @@ namespace DomainShell.Test
 
         public void CancelCompleted(ICreditCardService creditCardService)
         {
-            Dirty = true;
+            Dirty = Dirty.True();
 
             CancelPay(creditCardService);
         }

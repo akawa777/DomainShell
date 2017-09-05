@@ -7,14 +7,16 @@ namespace DomainShell.Test
 {
     public class OrderCommandApp
     {
-        public OrderCommandApp(IOrderRepository orderRepository, IOrderValidator orderValidator, ICreditCardService creditCardService)
+        public OrderCommandApp(IOrderRepository orderRepository, IWriteRepository<OrderModel> writeRepository, IOrderValidator orderValidator, ICreditCardService creditCardService)
         {            
             _orderRepository = orderRepository;
+            _writeRepository = writeRepository;
             _orderValidator = orderValidator;
             _creditCardService = creditCardService;
         }
 
-        private IOrderRepository _orderRepository;      
+        private IOrderRepository _orderRepository;
+        private IWriteRepository<OrderModel> _writeRepository;
         private IOrderValidator _orderValidator;
         private ICreditCardService _creditCardService;
 
@@ -32,8 +34,6 @@ namespace DomainShell.Test
                     Map(orderDto, orderModel);
 
                     orderModel.Register(_orderValidator);
-
-                    _orderRepository.Save(orderModel);
 
                     tran.Complete();
                 }
@@ -56,7 +56,7 @@ namespace DomainShell.Test
 
                     orderModel.Complete(_orderValidator, _creditCardService, creditCardCode);
 
-                    _orderRepository.Save(orderModel);
+                    _writeRepository.Save(orderModel);
 
                     tran.Complete();
                 }

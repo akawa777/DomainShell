@@ -181,6 +181,8 @@ namespace DomainShell
 
         public abstract void BeginTran();
 
+        protected abstract void BeginCommit();
+
         protected abstract void Commit();
 
         protected abstract void Dispose(bool completed);
@@ -189,6 +191,7 @@ namespace DomainShell
         {   
             try
             {
+                BeginCommit();
                 DomainEventPublisher.PublishInTran();                     
                 Commit();
                 _completed = true;

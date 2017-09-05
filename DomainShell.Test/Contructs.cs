@@ -11,9 +11,9 @@ namespace DomainShell.Test
 
         int RecordVersion { get; }
 
-        bool Dirty { get; }
+        Dirty Dirty { get; }
 
-        bool Deleted { get; }
+        Deleted Deleted { get; }
     }
 
     public enum ModelState
@@ -23,20 +23,16 @@ namespace DomainShell.Test
         Modified,
         Unchanged
     }
-
-    //public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
-    //{
-    //    TAggregateRoot GetStored(TAggregateRoot aggregate);
-    //    void Insert(TAggregateRoot aggregate);
-    //    void Update(TAggregateRoot aggregate);
-    //    void Delete(TAggregateRoot aggregate);
-    //}
+    
+    public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
+    {
+       void Save(TAggregateRoot aggregate);
+    }
 
     public interface IOrderRepository
     {
         OrderModel Find(string orderId, bool throwError = false);
-        OrderModel GetLastByUser(string userId);
-        void Save(OrderModel orderModel);
+        OrderModel GetLastByUser(string userId);        
     }
 
     public interface IOrderValidator

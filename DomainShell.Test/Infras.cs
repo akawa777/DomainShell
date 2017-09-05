@@ -6,7 +6,7 @@ using System.Data;
 
 namespace DomainShell.Test
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository : IOrderRepository, IWriteRepository<OrderModel>
     {
         public OrderRepository(IConnection connection)
         {
@@ -162,9 +162,9 @@ namespace DomainShell.Test
 
         private ModelState GetModelState(OrderModel orderModel)
         {
-            if (orderModel.Deleted) return ModelState.Deleted;
-            if (orderModel.Dirty && orderModel.RecordVersion == 0) return ModelState.Added;
-            if (orderModel.Dirty && orderModel.RecordVersion > 0) return ModelState.Modified;
+            if (orderModel.Dirty.Is && orderModel.Deleted.Is && orderModel.RecordVersion > 0) return ModelState.Deleted;
+            if (orderModel.Dirty.Is && orderModel.RecordVersion == 0) return ModelState.Added;
+            if (orderModel.Dirty.Is && orderModel.RecordVersion > 0) return ModelState.Modified;
 
             return ModelState.Unchanged;
         }
@@ -190,7 +190,7 @@ namespace DomainShell.Test
 
             vOrderModel
                 .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
-                .Set(m => m.Dirty, (m, p) => false);
+                .Set(m => m.Dirty, (m, p) => Dirty.False());
         }
 
         private void Save(OrderModel orderModel, ModelState modelState)

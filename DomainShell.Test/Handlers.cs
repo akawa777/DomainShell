@@ -46,9 +46,7 @@ namespace DomainShell.Test
                 {
                     OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
 
-                    orderModel.CancelCompleted(_creditCardService);
-
-                    _orderRepository.Save(orderModel);
+                    orderModel.CancelCompleted(_creditCardService);                    
 
                     tran.Complete();
                 }

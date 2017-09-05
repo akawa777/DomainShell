@@ -43,6 +43,7 @@ namespace DomainShell.Test
             Container container = new Container();
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
 
+            container.Register<IGenerationOrder, GenerationOrderFoundation>(Lifestyle.Scoped);
             container.Register<IDomainModelMarker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
             container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
             container.Register<IDomainEventList, DomainEventFoundation>(Lifestyle.Scoped);
@@ -53,9 +54,10 @@ namespace DomainShell.Test
             container.Register<Connection>(Lifestyle.Scoped);
 
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
+            container.Register<UnitOfWork>(Lifestyle.Scoped);
 
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);
-            //container.Register<IWriteRepository<OrderModel>, OrderRepository>(Lifestyle.Scoped);
+            container.Register<IWriteRepository<OrderModel>, OrderRepository>(Lifestyle.Scoped);
 
             container.Register<IOrderValidator, OrderValidator>(Lifestyle.Scoped);
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
@@ -69,6 +71,7 @@ namespace DomainShell.Test
 
             container.Verify();
 
+            GenerationOrder.Startup(container.GetInstance<IGenerationOrder>);
             DomainModelMarker.Startup(container.GetInstance<IDomainModelMarker>);
             DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);
             DomainEventList.Startup(container.GetInstance<IDomainEventList>);

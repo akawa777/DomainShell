@@ -5,6 +5,7 @@ using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
 using System.Data;
+using System.Reflection;
 
 namespace DomainShell.Test
 {
@@ -202,6 +203,12 @@ namespace DomainShell.Test
             _connection.BeginTran();
         }
 
+        protected override void BeginCommit()
+        {
+            UnitOfWork unitOfWork = _container.GetInstance<UnitOfWork>();
+            unitOfWork.Save();
+        }
+
         protected override void Commit()
         {            
             _connection.Commit();
@@ -211,5 +218,38 @@ namespace DomainShell.Test
         {
             _connection.DisposeTran();
         }
+    }
+
+    public class UnitOfWork : UnitOfWorkFoundationBase<IAggregateRoot>
+    {
+        public UnitOfWork(Container container)
+        {
+            _container = container;
+        }
+
+        private Container _container;
+        
+        protected override Dirty GetDirty(IAggregateRoot domainModel)
+        {
+            return domainModel.Dirty;
+        }
+
+        protected override Deleted GetDeleted(IAggregateRoot domainModel)
+        {
+            return domainModel.Deleted;
+        }
+        
+        protected override IAggregateRoot[] GetTargetDomainModels()
+        {
+            return DomainModelTracker.GetAll().Where(x => x is IAggregateRoot).Select(x => x as IAggregateRoot).ToArray();
+        }
+        
+        protected override void Save(IAggregateRoot domainModel)
+        {
+            Type writeRepositoryType = typeof(IWriteRepository<>).MakeGenericType(domainModel.GetType());
+            object writeRepository = _container.GetInstance(writeRepositoryType);
+            MethodInfo method = writeRepositoryType.GetMethod("Save", new Type[] { domainModel.GetType() });
+            method.Invoke(writeRepository, new object[] { domainModel });
+        }        
     }
 }
