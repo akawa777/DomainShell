@@ -104,7 +104,7 @@ namespace DomainShell
                     {
                         try
                         {
-                            connection.Dispose();
+                            connection.Close();
                         }
                         finally
                         {

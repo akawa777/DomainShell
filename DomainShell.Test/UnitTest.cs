@@ -27,13 +27,27 @@ namespace DomainShell.Test
                 order.Price = 999;
                 order.LastUserId = "xxx";
 
+                OrderDto order2 = new OrderDto();
+                order2.ProductName = "yyy";
+                order2.Price = 999;
+                order2.LastUserId = "yyy";
+
+                OrderDto order3 = new OrderDto();
+                order3.ProductName = "yyy";
+                order3.Price = 999;
+                order3.LastUserId = "yyy";
+
                 commandApp.Register(order);
+                commandApp.Register(order2);
+                commandApp.Register(order3);
 
                 order = queryApp.GetLastByUser("xxx");     
 
                 commandApp.Complete(order, "xxx");
 
                 order = queryApp.Find(order.OrderId);
+
+                OrderSummaryDto[] orders = queryApp.GetOrderSummary();
 
                 int orderId = order.OrderId;
 

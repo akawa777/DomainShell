@@ -530,4 +530,44 @@ namespace DomainShell.Test.Infras
             return orderCanceledModel;
         }
     }
+
+    public class OrderSummaryReader : IOrderSummaryReader
+    {
+        public OrderSummaryReader(ICurrentConnection connection)
+        {
+            _connection = connection;
+        }
+
+        private ICurrentConnection _connection;
+
+        public IEnumerable<OrderSummaryValue> GetSummary()
+        {
+            using (IDbCommand command = _connection.CreateCommand())
+            {
+                string sql = $@"
+                    select ProductName, sum(Price) TotalPrice, count(OrderId) TotalOrderNo from OrderForm                
+                    group by ProductName
+                    order by ProductName
+                    
+                ";
+
+                command.CommandText = sql;
+
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {                        
+                        var vOrderSummaryValue = new VirtualObject<OrderSummaryValue>();
+
+                        vOrderSummaryValue
+                            .Set(m => m.ProductName, (m, p) => reader[p.Name])
+                            .Set(m => m.TotalPrice, (m, p) => reader[p.Name])
+                            .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name]);
+
+                        yield return vOrderSummaryValue.Material;
+                    }
+                }
+            }
+        }
+    }
 }

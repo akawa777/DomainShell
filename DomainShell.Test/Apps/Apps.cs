@@ -17,13 +17,14 @@ namespace DomainShell.Test.Apps
             _orderRepository = orderRepository;
             _writeRepository = writeRepository;
             _orderValidator = orderValidator;
-            _creditCardService = creditCardService;            
+            _creditCardService = creditCardService;
         }
 
         private IOrderRepository _orderRepository;
         private IWriteRepository<OrderModel> _writeRepository;
         private IOrderValidator _orderValidator;
-        private ICreditCardService _creditCardService;        
+        private ICreditCardService _creditCardService;
+        private IOrderSummaryReader _orderSummaryReader;
 
         public void Register(OrderDto orderDto)
         {
@@ -104,14 +105,16 @@ namespace DomainShell.Test.Apps
 
     public class OrderQueryApp
     {
-        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository)
+        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository, IOrderSummaryReader orderSummaryReader)
         {            
             _orderRepository = orderRepository;
             _orderCanceledRepository = orderCanceledRepository;
-    }
+            _orderSummaryReader = orderSummaryReader;
+        }
         
         private IOrderRepository _orderRepository;
         private IOrderCanceledRepository _orderCanceledRepository;
+        private IOrderSummaryReader _orderSummaryReader;
 
         public OrderDto Find(int orderId)
         {
@@ -167,6 +170,24 @@ namespace DomainShell.Test.Apps
             }
         }
 
+        public OrderSummaryDto[] GetOrderSummary()
+        {
+            try
+            {
+                using (Session.Open())
+                {
+                    IEnumerable<OrderSummaryValue> orderSummaryValues = _orderSummaryReader.GetSummary();
+
+                    return orderSummaryValues.Select(x => Map(x)).ToArray();
+                }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
+
         private OrderDto Map(OrderModel model)
         {
             if (model == null) return null;
@@ -196,6 +217,18 @@ namespace DomainShell.Test.Apps
 
             return dto;
         }
+
+        private OrderSummaryDto Map(OrderSummaryValue value)
+        {
+            if (value == null) return null;
+
+            OrderSummaryDto dto = new OrderSummaryDto();            
+            dto.ProductName = value.ProductName;
+            dto.TotalPrice = value.TotalPrice;
+            dto.TotalOrderNo= value.TotalOrderNo;
+
+            return dto;
+        }
     }
 
     public class OrderDto
@@ -206,5 +239,14 @@ namespace DomainShell.Test.Apps
         public string PayId { get; set; }
         public string LastUserId { get; set; }
         public int RecordVersion { get; set; }        
+    }
+
+    public class OrderSummaryDto
+    {
+        public string ProductName { get; set; }
+
+        public decimal TotalPrice { get; set; }
+
+        public decimal TotalOrderNo { get; set; }
     }
 }

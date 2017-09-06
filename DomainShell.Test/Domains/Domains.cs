@@ -192,4 +192,18 @@ namespace DomainShell.Test.Domains
         public Exception Exception { get; set; }
         public int OrderId { get; set; }
     }
+
+    public class OrderSummaryValue
+    {
+        protected OrderSummaryValue()
+        {
+
+        }
+
+        public string ProductName { get; private set; }
+
+        public decimal TotalPrice { get; private set; }
+
+        public decimal TotalOrderNo { get; private set; }
+    }
 }

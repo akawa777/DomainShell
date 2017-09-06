@@ -64,6 +64,7 @@ namespace DomainShell.Test
             container.Register<IWriteRepository<OrderModel>, OrderRepository>(Lifestyle.Scoped);
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
             container.Register<IWriteRepository<OrderCanceledModel>, OrderCanceledRepository>(Lifestyle.Scoped);
+            container.Register<IOrderSummaryReader, OrderSummaryReader>(Lifestyle.Scoped);
 
             container.Register<IOrderValidator, OrderValidator>(Lifestyle.Scoped);
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
@@ -194,7 +195,9 @@ namespace DomainShell.Test
 
             var command = connection.CreateCommand();
 
-            command.CommandText = "drop table OrderForm";
+            command.CommandText = @"
+                drop table OrderForm
+                drop table OrderFormCanceled";
 
             try
             {

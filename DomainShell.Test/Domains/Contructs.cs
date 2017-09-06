@@ -46,6 +46,11 @@ namespace DomainShell.Test.Domains
         OrderCanceledModel Find(int orderId, bool throwError = false);
     }
 
+    public interface IOrderSummaryReader
+    {
+        IEnumerable<OrderSummaryValue> GetSummary();
+    }
+
     public interface IOrderValidator
     {
         void ValidateWhenRegister(OrderModel orderModel);
