@@ -17,7 +17,6 @@ namespace DomainShell.Test
         protected OrderModel()
         {
             Dirty = Dirty.False();
-            Deleted = Deleted.False();
 
             DomainModelMarker.Mark(this);
         }
@@ -36,7 +35,7 @@ namespace DomainShell.Test
 
         public Dirty Dirty { get; private set; }
 
-        public Deleted Deleted { get; private set; }
+        public bool Deleted { get; private set; }
 
         private List<IDomainEvent> _events = new List<IDomainEvent>();
         
@@ -63,7 +62,7 @@ namespace DomainShell.Test
 
             Dirty = Dirty.True(this);
 
-            Deleted = Deleted.True();
+            Deleted = true;
 
             AddCanceledEvents();
         }
@@ -131,7 +130,6 @@ namespace DomainShell.Test
         protected OrderCanceledModel()
         {
             Dirty = Dirty.False();
-            Deleted = Deleted.False();
 
             DomainModelMarker.Mark(this);
         }
@@ -150,7 +148,7 @@ namespace DomainShell.Test
 
         public Dirty Dirty { get; private set; }
 
-        public Deleted Deleted { get; private set; }
+        public bool Deleted { get; private set; }
 
         private List<IDomainEvent> _events = new List<IDomainEvent>();
 

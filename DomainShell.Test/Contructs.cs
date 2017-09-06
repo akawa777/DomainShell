@@ -2,9 +2,15 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
+using System.Data;
 
 namespace DomainShell.Test
 {
+    public interface IConnection : IDisposable
+    {
+        IDbCommand CreateCommand();
+    }
+
     public interface IAggregateRoot : IDomainEventAuthor
     {
         string LastUserId { get; set; }
@@ -13,7 +19,7 @@ namespace DomainShell.Test
 
         Dirty Dirty { get; }
 
-        Deleted Deleted { get; }
+        bool Deleted { get; }
     }
 
     public enum ModelState

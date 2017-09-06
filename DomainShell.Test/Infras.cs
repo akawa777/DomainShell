@@ -6,6 +6,87 @@ using System.Data;
 
 namespace DomainShell.Test
 {
+    public abstract class WriteRepository<TAggregateRoot> : IWriteRepository<TAggregateRoot> where TAggregateRoot : class, IAggregateRoot
+    {
+        public void Save(TAggregateRoot model)
+        {
+            ValidateIlligalModifify(model);
+
+            ModelState modelState = GetModelState(model);
+
+            ValidateConcurrency(model, modelState);
+
+            AdjustWhenSave(model, modelState);
+
+            Save(model, modelState);
+        }
+
+        private void ValidateIlligalModifify(TAggregateRoot model)
+        {
+            if (DomainModelTracker.Modified(model)) throw new Exception("domain model is modified.");
+        }
+
+        private ModelState GetModelState(TAggregateRoot model)
+        {
+            if (!model.Dirty.Is) return ModelState.Unchanged;
+            if (model.Dirty.Is && model.Deleted) return ModelState.Deleted;
+            if (model.Dirty.Is && model.RecordVersion == 0) return ModelState.Added;
+            else return ModelState.Modified;
+        }
+
+        private void ValidateConcurrency(TAggregateRoot model, ModelState modelState)
+        {
+            TAggregateRoot storedModel = Find(model);
+
+            bool valid = true;
+
+            if (modelState == ModelState.Added && storedModel != null) valid = false;
+            if (modelState == ModelState.Modified && storedModel.RecordVersion != model.RecordVersion) valid = false;
+            if (modelState == ModelState.Deleted && storedModel.RecordVersion != model.RecordVersion) valid = false;
+
+            if (!valid) throw new Exception("concurrency exception.");
+        }
+
+        private void AdjustWhenSave(TAggregateRoot model, ModelState modelState)
+        {
+            if (modelState == ModelState.Unchanged) return;
+
+            VirtualObject<TAggregateRoot> vModel = new VirtualObject<TAggregateRoot>(model);
+
+            vModel
+                .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
+                .Set(m => m.Dirty, (m, p) => Dirty.False());
+        }
+
+        protected abstract TAggregateRoot Find(TAggregateRoot model);
+
+        protected void Save(TAggregateRoot model, ModelState modelState)
+        {
+            if (modelState == ModelState.Deleted)
+            {
+                Delete(model);
+            }
+            else if (modelState == ModelState.Added)
+            {
+                Insert(model);
+            }
+            else if (modelState == ModelState.Modified)
+            {
+                Update(model);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        protected abstract void Insert(TAggregateRoot model);
+
+        protected abstract void Update(TAggregateRoot model);
+
+        protected abstract void Delete(TAggregateRoot model);
+    }
+
     public class OrderRepository : WriteRepository<OrderModel>, IOrderRepository
     {
         public OrderRepository(IConnection connection)
@@ -164,7 +245,7 @@ namespace DomainShell.Test
             command.Parameters.Add(sqlParam);
         }
 
-        private void Insert(OrderModel orderModel)
+        protected override void Insert(OrderModel orderModel)
         {
             IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderModel);
 
@@ -184,7 +265,7 @@ namespace DomainShell.Test
             }
         }
 
-        private void Update(OrderModel orderModel)
+        protected override void Update(OrderModel orderModel)
         {
             IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderModel);
 
@@ -205,7 +286,7 @@ namespace DomainShell.Test
             }
         }
 
-        private void Delete(OrderModel orderModel)
+        protected override void Delete(OrderModel orderModel)
         {
             string sql = $@"
                 delete from OrderForm                 
@@ -224,26 +305,6 @@ namespace DomainShell.Test
         protected override OrderModel Find(OrderModel model)
         {
             return Find(model.OrderId);
-        }
-
-        protected override void Save(OrderModel model, ModelState modelState)
-        {
-            if (modelState == ModelState.Deleted)
-            {
-                Delete(model);
-            }
-            else if (modelState == ModelState.Added)
-            {
-                Insert(model);
-            }
-            else if (modelState == ModelState.Modified)
-            {
-                Update(model);
-            }
-            else
-            {
-                return;
-            }
         }
     }    
 
@@ -393,7 +454,7 @@ namespace DomainShell.Test
             command.Parameters.Add(sqlParam);
         }
 
-        private void Insert(OrderCanceledModel orderCanceledModel)
+        protected override void Insert(OrderCanceledModel orderCanceledModel)
         {
             IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderCanceledModel);
 
@@ -413,7 +474,7 @@ namespace DomainShell.Test
             }
         }
 
-        private void Update(OrderCanceledModel orderCanceledModel)
+        protected override void Update(OrderCanceledModel orderCanceledModel)
         {
             IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderCanceledModel);
 
@@ -434,7 +495,7 @@ namespace DomainShell.Test
             }
         }
 
-        private void Delete(OrderCanceledModel orderCanceledModel)
+        protected override void Delete(OrderCanceledModel orderCanceledModel)
         {
             string sql = $@"
                 delete from OrderFormCanceled                 
@@ -466,26 +527,6 @@ namespace DomainShell.Test
             OrderCanceledModel orderCanceledModel = Map(readSet).FirstOrDefault();
 
             return orderCanceledModel;
-        }
-
-        protected override void Save(OrderCanceledModel model, ModelState modelState)
-        {
-            if (modelState == ModelState.Deleted)
-            {
-                Delete(model);
-            }
-            else if (modelState == ModelState.Added)
-            {
-                Insert(model);
-            }
-            else if (modelState == ModelState.Modified)
-            {
-                Update(model);
-            }
-            else
-            {
-                return;
-            }
         }
     }
 }

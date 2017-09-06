@@ -9,6 +9,34 @@ using System.Reflection;
 
 namespace DomainShell.Test
 {
+    public class DomainModelProxyFactoryImple : IDomainModelProxyFactory
+    {
+        public DomainModelProxyFactoryImple(Container container)
+        {
+            _container = container;
+        }
+
+        private Container _container;
+
+        public T Create<T>() where T : class
+        {
+            return _container.GetInstance<T>();
+        }
+    }
+
+    public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
+    {
+        protected override object GetStamp(object domainModel)
+        {
+            if (domainModel is IAggregateRoot model)
+            {
+                return model.RecordVersion;
+            }
+
+            return null;
+        }
+    }
+
     public class DomainEventFoundation : DomainEventFoundationBase
     {
         public DomainEventFoundation(Container container)
@@ -17,19 +45,6 @@ namespace DomainShell.Test
         }
 
         private Container _container;
-
-        protected override IDomainEventAuthor[] GetTargetDomainEventAuthors()
-        {
-            List<IDomainEventAuthor> list = new List<IDomainEventAuthor>();
-
-            foreach (TrackPack trackPack in DomainModelTracker.GetAll().Where(x => x.Model is IAggregateRoot))
-            {
-                IAggregateRoot model = trackPack.Model as IAggregateRoot;
-                list.Add(model);
-            }
-
-            return list.ToArray();
-        }
 
         protected override IDomainEventScope InTranEventScope()
         {
@@ -96,11 +111,7 @@ namespace DomainShell.Test
             
         }
     }
-
-    public interface IConnection : IDisposable
-    {
-        IDbCommand CreateCommand();
-    }
+    
 
     public class Connection : IConnection
     {
@@ -259,7 +270,7 @@ namespace DomainShell.Test
         }
     }
 
-    public class UnitOfWork : UnitOfWorkFoundationBase<IAggregateRoot>
+    public class UnitOfWork
     {
         public UnitOfWork(Container container)
         {
@@ -267,23 +278,46 @@ namespace DomainShell.Test
         }
 
         private Container _container;
-        
-        protected override Dirty GetDirty(IAggregateRoot domainModel)
+
+        public void Save()
         {
-            return domainModel.Dirty;
+            IAggregateRoot[] domainModels = GetTargetDomainModels();
+
+            foreach (IAggregateRoot domainModel in domainModels)
+            {
+                Save(domainModel);
+            }
         }
 
-        protected override Deleted GetDeleted(IAggregateRoot domainModel)
+        private IAggregateRoot[] GetTargetDomainModels()
         {
-            return domainModel.Deleted;
+            IAggregateRoot[] deletedModels = GetDeletedDomainModels();
+            IAggregateRoot[] modifiedModels = GetModifiedDomainModels();
+
+            return deletedModels.Concat(modifiedModels).ToArray();
         }
-        
-        protected override IAggregateRoot[] GetTargetDomainModels()
+
+        private IAggregateRoot[] GetDeletedDomainModels()
         {
-            return DomainModelTracker.GetAll().Where(x => x.Model is IAggregateRoot).Select(x => x.Model as IAggregateRoot).ToArray();
+            Func<TrackPack, bool> deleted = x =>
+            {
+                return x.Model is IAggregateRoot model && model.Dirty.Is && model.Deleted;
+            };
+
+            return DomainModelTracker.GetAll().Where(deleted).Select(x => x.Model as IAggregateRoot).ToArray();
         }
-        
-        protected override void Save(IAggregateRoot domainModel)
+
+        private IAggregateRoot[] GetModifiedDomainModels()
+        {
+            Func<TrackPack, bool> modified = x =>
+            {
+                return x.Model is IAggregateRoot model && model.Dirty.Is && !model.Deleted;
+            };
+
+            return DomainModelTracker.GetAll().Where(modified).Select(x => x.Model as IAggregateRoot).ToArray();
+        }
+
+        private void Save(IAggregateRoot domainModel)
         {
             Type domainModelType;
 
@@ -295,90 +329,5 @@ namespace DomainShell.Test
             MethodInfo method = writeRepositoryType.GetMethod("Save", new Type[] { domainModelType });
             method.Invoke(writeRepository, new object[] { domainModel });
         }        
-    }
-
-    public class DomainModelProxyFactoryImple : IDomainModelProxyFactory
-    {
-        public DomainModelProxyFactoryImple(Container container)
-        {
-            _container = container;
-        }
-
-        private Container _container;
-
-        public T Create<T>() where T : class
-        {
-            return _container.GetInstance<T>();
-        }
-    }
-
-    public abstract class WriteRepository<TAggregateRoot> : IWriteRepository<TAggregateRoot> where TAggregateRoot : class, IAggregateRoot
-    {
-        public void Save(TAggregateRoot model)
-        {
-            ValidateIlligalModifify(model);
-
-            ModelState modelState = GetModelState(model);
-
-            ValidateConcurrency(model, modelState);
-
-            AdjustWhenSave(model, modelState);
-
-            Save(model, modelState);
-        }
-
-        private void ValidateIlligalModifify(TAggregateRoot model)
-        {
-            if (DomainModelTracker.Modified(model)) throw new Exception("domain model is modified.");
-        }
-
-        private ModelState GetModelState(TAggregateRoot model)
-        {
-            if (model.Dirty.Is && model.Deleted.Is && model.RecordVersion > 0) return ModelState.Deleted;
-            if (model.Dirty.Is && model.RecordVersion == 0) return ModelState.Added;
-            if (model.Dirty.Is && model.RecordVersion > 0) return ModelState.Modified;
-
-            return ModelState.Unchanged;
-        }
-
-        private void ValidateConcurrency(TAggregateRoot model, ModelState modelState)
-        {
-            TAggregateRoot storedModel = Find(model);
-
-            bool valid = true;
-
-            if (modelState == ModelState.Added && storedModel != null) valid = false;
-            if (modelState == ModelState.Modified && storedModel.RecordVersion != model.RecordVersion) valid = false;
-            if (modelState == ModelState.Deleted && storedModel.RecordVersion != model.RecordVersion) valid = false;
-
-            if (!valid) throw new Exception("concurrency exception.");
-        }
-
-        private void AdjustWhenSave(TAggregateRoot model, ModelState modelState)
-        {
-            if (modelState == ModelState.Unchanged) return;
-
-            VirtualObject<TAggregateRoot> vModel = new VirtualObject<TAggregateRoot>(model);
-
-            vModel
-                .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
-                .Set(m => m.Dirty, (m, p) => Dirty.False());
-        }
-
-        protected abstract TAggregateRoot Find(TAggregateRoot model);
-        protected abstract void Save(TAggregateRoot model, ModelState modelState);
-    }
-
-    public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
-    {
-        protected override object GetStamp(object domainModel)
-        {
-            if (domainModel is IAggregateRoot model)
-            {
-                return model.RecordVersion;
-            }
-
-            return null;
-        }
-    }
+    }    
 }

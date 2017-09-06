@@ -42,11 +42,9 @@ namespace DomainShell.Test
         {
             Container container = new Container();
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
-
-            container.Register<IGenerationOrder, GenerationOrderFoundation>(Lifestyle.Scoped);
+            
             container.Register<IDomainModelMarker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainEventList, DomainEventFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);            
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
 
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);
@@ -74,12 +72,10 @@ namespace DomainShell.Test
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);            
-
-            GenerationOrder.Startup(container.GetInstance<IGenerationOrder>);
+            
             DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);
             DomainModelMarker.Startup(container.GetInstance<IDomainModelMarker>);
-            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);
-            DomainEventList.Startup(container.GetInstance<IDomainEventList>);
+            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);            
             DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
             Session.Startup(container.GetInstance<ISession>);
 

@@ -39,18 +39,6 @@ namespace DomainShell
         void ClearEvents();
     }
 
-    public interface IDomainEventList
-    {
-        void Add(IDomainEvent[] domainEvents);
-        void Add(IDomainEventAuthor domainEventAuthor);
-        IEnumerable<IDomainEvent> GetInTranEvents();
-        IEnumerable<IDomainEvent> GetOutTranEvents();
-        IEnumerable<IDomainEvent> GetOutTranAsyncEvents();
-        IEnumerable<IDomainEvent> GetExceptionEvents();
-        void Remove(params IDomainEvent[] domainEvents);
-        void Clear();
-    }
-
     public interface IDomainEventPublisher
     {        
         void PublishInTran();

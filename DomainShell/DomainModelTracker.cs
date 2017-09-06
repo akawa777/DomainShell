@@ -8,6 +8,27 @@ using Newtonsoft.Json;
 
 namespace DomainShell
 {
+    public class TrackPack
+    {
+        public TrackPack(object model, object stamp)
+        {
+            Model = model;
+            Graph = JsonConvert.SerializeObject(model);
+            Stamp = stamp;
+        }
+
+        public object Model { get; private set; }
+        public string Graph { get; private set; }
+        public object Stamp { get; private set; }
+
+        public bool Modified(object model)
+        {
+            string graph = JsonConvert.SerializeObject(model);
+
+            return Model.GetType() == model.GetType() && Graph == graph;
+        }
+    }
+
     public interface IDomainModelMarker
     {
         void Mark(object domainModel);
@@ -68,27 +89,7 @@ namespace DomainShell
             return domainModelTracker.Modified(domainModel);
         }
     }
-
-    public class TrackPack
-    {
-        public TrackPack(object model, object stamp)
-        {
-            Model = model;
-            Graph = JsonConvert.SerializeObject(model);
-            Stamp = stamp;
-        }
-
-        public object Model { get; private set; }
-        public string Graph { get; private set; }
-        public object Stamp { get; private set; }
-
-        public bool Modified(object model)
-        {
-            string graph = JsonConvert.SerializeObject(model);
-
-            return Model.GetType() == model.GetType() && Graph == graph;
-        }
-    }
+    
 
     public abstract class DomainModelTrackerFoundationBase : IDomainModelMarker, IDomainModelTracker
     {
