@@ -43,26 +43,24 @@ namespace DomainShell
         int No { get;}
     }
     
-    public sealed class Dirty : IGenerationOrderGetter
+    public sealed class Dirty
     {
         private Dirty(bool isDirty)
         {
-            Is = isDirty;
-            _no = GenerationOrder.GetNew();
+            Is = isDirty;            
         }
-        
-        private int _no = 0;
 
-        int IGenerationOrderGetter.No
+        private Dirty(bool isDirty, object domainModel)
         {
-            get { return _no; }
+            Is = isDirty;
+            DomainModelMarker.Mark(domainModel);
         }
 
         public bool Is { get; private set; }
 
-        public static Dirty True()
+        public static Dirty True<T>(T domainModel) where T : class
         {
-            return new Dirty(true);
+            return new Dirty(true, domainModel);
         }
 
         public static Dirty False()

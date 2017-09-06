@@ -4,19 +4,21 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DomainShell
 {
     public interface IDomainModelMarker
     {
-        void Mark<T>(T domainModel) where T : class;
+        void Mark(object domainModel);
     }
 
     public interface IDomainModelTracker : IDomainModelMarker
     {
-        IEnumerable<T> Get<T>() where T : class;
-        IEnumerable<object> GetAll();
+        TrackPack Get(object domainModel);
+        IEnumerable<TrackPack> GetAll();
         void Revoke();
+        bool Modified(object domainModel);
     }
 
     public static class DomainModelMarker
@@ -28,7 +30,7 @@ namespace DomainShell
             _getDomainModelMarker = getDomainModelMarker;
         }
 
-        public static void Mark<T>(T domainModel) where T : class
+        public static void Mark(object domainModel)
         {
             IDomainModelMarker domainModelMarker = _getDomainModelMarker();
             
@@ -45,14 +47,7 @@ namespace DomainShell
             _getDomainModelTracker = getDomainModelTracker;
         }
 
-        public static IEnumerable<T> Get<T>() where T : class
-        {
-            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
-
-            return domainModelTracker.Get<T>();
-        }
-
-        public static IEnumerable<object> GetAll()
+        public static IEnumerable<TrackPack> GetAll()
         {
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
 
@@ -65,31 +60,84 @@ namespace DomainShell
 
             domainModelTracker.Revoke();
         }
+
+        public static bool Modified(object domainModel)
+        {
+            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
+
+            return domainModelTracker.Modified(domainModel);
+        }
     }
 
-    public class DomainModelTrackerFoundation : IDomainModelMarker, IDomainModelTracker
+    public class TrackPack
     {
-        Dictionary<object, object> _list = new Dictionary<object, object>();
-
-        public IEnumerable<T> Get<T>() where T : class
+        public TrackPack(object model, object stamp)
         {
-            return _list.Where(x => x.Value is T).Select(x => x.Value as T);
+            Model = model;
+            Graph = JsonConvert.SerializeObject(model);
+            Stamp = stamp;
         }
 
-        public IEnumerable<object> GetAll()
+        public object Model { get; private set; }
+        public string Graph { get; private set; }
+        public object Stamp { get; private set; }
+
+        public bool Modified(object model)
+        {
+            string graph = JsonConvert.SerializeObject(model);
+
+            return Model.GetType() == model.GetType() && Graph == graph;
+        }
+    }
+
+    public abstract class DomainModelTrackerFoundationBase : IDomainModelMarker, IDomainModelTracker
+    {
+        private Dictionary<object, TrackPack> _list = new Dictionary<object, TrackPack>();
+        private object _lock = new object();
+
+        public TrackPack Get(object domainModel)
+        {
+            TrackPack trackPack;
+
+            if (!_list.TryGetValue(domainModel, out trackPack))
+            {
+                return null;
+            }
+
+            return trackPack;
+        }
+
+        public IEnumerable<TrackPack> GetAll()
         {
             return _list.Values;
         }
 
-        public void Mark<T>(T domainModel) where T : class
+        public void Mark(object domainModel)
         {
-            _list[domainModel] = domainModel;
+            lock (_lock)
+            {
+                object stamp = GetStamp(domainModel);
+                _list[domainModel] = new TrackPack(domainModel, stamp);
+            }
         }
 
         public void Revoke()
         {
             _list.Clear();
         }
-    }
 
+        public bool Modified(object domainModel)
+        {
+            TrackPack trackPack;
+
+            if (!_list.TryGetValue(domainModel, out trackPack))
+            {
+                return false;
+            }
+
+            return trackPack.Modified(domainModel);
+        }
+
+        protected abstract object GetStamp(object domainModel);
+    }
 }

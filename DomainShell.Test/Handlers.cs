@@ -20,6 +20,8 @@ namespace DomainShell.Test
 
         public void Handle(OrderCompletedOutTranEvent domainEvent)
         {
+            Console.WriteLine($"{nameof(OrderCompletedEventHandler)} {nameof(Handle)} {nameof(OrderCompletedOutTranEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
             try
             {
                 using(Session.Open())
@@ -60,6 +62,8 @@ namespace DomainShell.Test
 
         public void Handle(OrderCanceledEvent domainEvent)
         {
+            Console.WriteLine($"{nameof(OrderCompletedEventHandler)} {nameof(Handle)} {nameof(OrderCanceledEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
             try
             {
                 using (var tran = Session.Tran())

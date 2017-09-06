@@ -18,6 +18,19 @@ namespace DomainShell.Test
 
         private Container _container;
 
+        protected override IDomainEventAuthor[] GetTargetDomainEventAuthors()
+        {
+            List<IDomainEventAuthor> list = new List<IDomainEventAuthor>();
+
+            foreach (TrackPack trackPack in DomainModelTracker.GetAll().Where(x => x.Model is IAggregateRoot))
+            {
+                IAggregateRoot model = trackPack.Model as IAggregateRoot;
+                list.Add(model);
+            }
+
+            return list.ToArray();
+        }
+
         protected override IDomainEventScope InTranEventScope()
         {
             return new InTranEventScope(_container);
@@ -267,7 +280,7 @@ namespace DomainShell.Test
         
         protected override IAggregateRoot[] GetTargetDomainModels()
         {
-            return DomainModelTracker.GetAll().Where(x => x is IAggregateRoot).Select(x => x as IAggregateRoot).ToArray();
+            return DomainModelTracker.GetAll().Where(x => x.Model is IAggregateRoot).Select(x => x.Model as IAggregateRoot).ToArray();
         }
         
         protected override void Save(IAggregateRoot domainModel)
@@ -303,6 +316,8 @@ namespace DomainShell.Test
     {
         public void Save(TAggregateRoot model)
         {
+            ValidateIlligalModifify(model);
+
             ModelState modelState = GetModelState(model);
 
             ValidateConcurrency(model, modelState);
@@ -310,6 +325,11 @@ namespace DomainShell.Test
             AdjustWhenSave(model, modelState);
 
             Save(model, modelState);
+        }
+
+        private void ValidateIlligalModifify(TAggregateRoot model)
+        {
+            if (DomainModelTracker.Modified(model)) throw new Exception("domain model is modified.");
         }
 
         private ModelState GetModelState(TAggregateRoot model)
@@ -347,5 +367,18 @@ namespace DomainShell.Test
 
         protected abstract TAggregateRoot Find(TAggregateRoot model);
         protected abstract void Save(TAggregateRoot model, ModelState modelState);
+    }
+
+    public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
+    {
+        protected override object GetStamp(object domainModel)
+        {
+            if (domainModel is IAggregateRoot model)
+            {
+                return model.RecordVersion;
+            }
+
+            return null;
+        }
     }
 }

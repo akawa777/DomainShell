@@ -54,14 +54,14 @@ namespace DomainShell.Test
         {
             orderValidator.ValidateWhenRegister(this);
 
-            Dirty = Dirty.True();
+            Dirty = Dirty.True(this);
         }
 
         public void Cancel(IOrderValidator orderValidator)
         {
             orderValidator.ValidateWhenCancel(this);
 
-            Dirty = Dirty.True();
+            Dirty = Dirty.True(this);
 
             Deleted = Deleted.True();
 
@@ -72,7 +72,7 @@ namespace DomainShell.Test
         {
             orderValidator.ValidateWhenComplete(this);
 
-            Dirty = Dirty.True();
+            Dirty = Dirty.True(this);
 
             Pay(creditCardService, creditCardCode);
 
@@ -86,7 +86,7 @@ namespace DomainShell.Test
 
         public void CancelCompleted(ICreditCardService creditCardService)
         {
-            Dirty = Dirty.True();
+            Dirty = Dirty.True(this);
 
             CancelPay(creditCardService);
         }
@@ -166,7 +166,7 @@ namespace DomainShell.Test
 
         public void Save()
         {
-            Dirty = Dirty.True();
+            Dirty = Dirty.True(this);
         }        
     }
 

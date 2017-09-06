@@ -21,27 +21,32 @@ namespace DomainShell
         private TDomainModel[] GetOrderedDomainModels()
         {
             TDomainModel[] domainModels = GetTargetDomainModels();
+            List<TDomainModel> deletedModels = new List<TDomainModel>();
+            List<TDomainModel> modifiedModels = new List<TDomainModel>();
+
             Dictionary<TDomainModel, (int no, bool deleted)> domainModelMap = new Dictionary<TDomainModel, (int no, bool deleted)>();
 
             foreach (TDomainModel domainModel in domainModels)
             {
+                Dirty dirty = GetDirty(domainModel);
+
+                if (dirty == null || !dirty.Is)
+                {
+                    continue;
+                }
+
                 Deleted deleted = GetDeleted(domainModel);
 
                 if (deleted != null && deleted.Is)
                 {
-                    domainModelMap[domainModel] = ((deleted as IGenerationOrderGetter).No, true);
+                    deletedModels.Add(domainModel);
                     continue;
                 }
 
-                Dirty dirty = GetDirty(domainModel);
-
-                if (dirty != null && dirty.Is)
-                {
-                    domainModelMap[domainModel] = ((dirty as IGenerationOrderGetter).No, false);
-                }
+                modifiedModels.Add(domainModel);
             }
 
-            return domainModelMap.OrderBy(x => x.Value.no).Select(x => x.Key).ToArray();
+            return deletedModels.Concat(modifiedModels).ToArray();
         }
 
         protected abstract Dirty GetDirty(TDomainModel domainModel);

@@ -163,7 +163,7 @@ namespace DomainShell
             DomainEventPublisher.PublishByException(exception);
         }
 
-        protected abstract OpenScope OpenScopeBase();
+        protected abstract OpenScopeBase OpenScopeBase();
         protected abstract TranScopeBase TranScopeBase();
         protected abstract InTranScopeBase InTranScopeBase();
     }   

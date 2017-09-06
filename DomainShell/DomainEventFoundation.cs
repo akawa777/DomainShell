@@ -72,19 +72,21 @@ namespace DomainShell
         private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
         
         private IDomainEvent[] GetDomainEvents()
-        {
-            
-            foreach (IDomainEventAuthor auter in DomainModelTracker.Get<IDomainEventAuthor>())
-            {
-                foreach (IDomainEvent domainEvent in auter.GetEvents())
+        {            
+            foreach (IDomainEventAuthor author in GetTargetDomainEventAuthors())
+            { 
+                foreach (IDomainEvent domainEvent in author.GetEvents())
                 {
                     _domainEvents.Add(domainEvent);
-                }                    
-                auter.ClearEvents();
+                }
+
+                author.ClearEvents();
             }               
             
             return _domainEvents.ToArray();
         }
+
+        protected abstract IDomainEventAuthor[] GetTargetDomainEventAuthors();
 
         public  void Add(IDomainEvent[] domainEvents)
         {
