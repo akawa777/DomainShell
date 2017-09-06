@@ -7,7 +7,7 @@ using SimpleInjector.Lifestyles;
 using System.Data;
 using System.Reflection;
 
-namespace DomainShell.Test
+namespace DomainShell.Test.Domains
 {
     public class DomainModelProxyFactoryImple : IDomainModelProxyFactory
     {

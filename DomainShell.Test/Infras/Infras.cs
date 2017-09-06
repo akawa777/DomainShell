@@ -3,8 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 using System.Data;
+using DomainShell.Test.Domains;
 
-namespace DomainShell.Test
+namespace DomainShell.Test.Infras
 {
     public abstract class WriteRepository<TAggregateRoot> : IWriteRepository<TAggregateRoot> where TAggregateRoot : class, IAggregateRoot
     {

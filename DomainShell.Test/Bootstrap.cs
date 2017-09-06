@@ -8,6 +8,9 @@ using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using DomainShell.Test.Apps;
+using DomainShell.Test.Domains;
+using DomainShell.Test.Infras;
 
 namespace DomainShell.Test
 {

@@ -2,8 +2,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
+using DomainShell.Test.Domains;
 
-namespace DomainShell.Test
+namespace DomainShell.Test.Apps
 {
     public class OrderCommandApp
     {

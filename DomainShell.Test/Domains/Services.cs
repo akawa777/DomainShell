@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 
-namespace DomainShell.Test
+namespace DomainShell.Test.Domains
 {
     public class OrderValidator : IOrderValidator
     {

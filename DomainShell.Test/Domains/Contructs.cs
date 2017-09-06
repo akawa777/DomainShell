@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Data;
 
-namespace DomainShell.Test
+namespace DomainShell.Test.Domains
 {
     public interface IConnection : IDisposable
     {
