@@ -57,7 +57,7 @@ namespace DomainShell.Test
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
             container.Register<UnitOfWork>(Lifestyle.Scoped);
 
-            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImple>(Lifestyle.Scoped);
+            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
             container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
 
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);            

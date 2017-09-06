@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace DomainShell.Test.Domains
 {
-    public class DomainModelProxyFactoryImple : IDomainModelProxyFactory
+    public class DomainModelProxyFactoryImpl : IDomainModelProxyFactory
     {
-        public DomainModelProxyFactoryImple(Container container)
+        public DomainModelProxyFactoryImpl(Container container)
         {
             _container = container;
         }
