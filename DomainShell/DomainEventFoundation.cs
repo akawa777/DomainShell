@@ -193,8 +193,10 @@ namespace DomainShell
 
         private IDomainEventAuthor[] GetTargetDomainEventAuthors()
         {
-            return DomainModelTracker.GetAll().Where(x => x.Model is IDomainEventAuthor).Select(x => x.Model as IDomainEventAuthor).ToArray();
+            return DomainModelTracker.GetAll().Where(x => x.Model is IDomainEventAuthor && CanPublish(x.Model as IDomainEventAuthor)).Select(x => x.Model as IDomainEventAuthor).ToArray();
         }
+
+        protected abstract bool CanPublish(IDomainEventAuthor author);
 
         protected abstract IDomainEventScope InTranEventScope();
         protected abstract IDomainEventScope OutTranEventScope();

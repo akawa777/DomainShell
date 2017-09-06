@@ -59,7 +59,12 @@ namespace DomainShell.Test.Domains
         protected override IDomainEventScope ExceptionEventScope()
         {
             return new ExceptionEventScope(_container);
-        }        
+        }
+
+        protected override bool CanPublish(IDomainEventAuthor author)
+        {
+            return true;
+        }
     }
 
     public class InTranEventScope : IDomainEventScope
