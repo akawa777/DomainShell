@@ -51,8 +51,8 @@ namespace DomainShell.Test
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
 
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);
-            container.Register<IConnection, Connection>(Lifestyle.Scoped);
-            container.Register<Connection>(Lifestyle.Scoped);
+            container.Register<IConnection, CurrentConnection>(Lifestyle.Scoped);
+            container.Register<ICurrentConnection, CurrentConnection>(Lifestyle.Scoped);
 
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
             container.Register<UnitOfWork>(Lifestyle.Scoped);

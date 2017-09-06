@@ -117,7 +117,7 @@ namespace DomainShell
         {
             lock (_lock)
             {
-                object stamp = GetStamp(domainModel);
+                object stamp = CreateStamp(domainModel);
                 _list[domainModel] = new TrackPack(domainModel, stamp);
             }
         }
@@ -139,6 +139,6 @@ namespace DomainShell
             return trackPack.Modified(domainModel);
         }
 
-        protected abstract object GetStamp(object domainModel);
+        protected abstract object CreateStamp(object domainModel);
     }
 }

@@ -26,7 +26,7 @@ namespace DomainShell.Test.Domains
 
     public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
     {
-        protected override object GetStamp(object domainModel)
+        protected override object CreateStamp(object domainModel)
         {
             if (domainModel is IAggregateRoot model)
             {
@@ -113,16 +113,17 @@ namespace DomainShell.Test.Domains
     }
     
 
-    public class Connection : IConnection
+    public class CurrentConnection : IConnection, ICurrentConnection
     {
-        public Connection(IDbConnection connection)
+        public CurrentConnection(IDbConnection connection, UnitOfWork unitOfWork)
         {
             _connection = connection;
-
+            _unitOfWork = unitOfWork;
         }
 
         private IDbConnection _connection;
         private IDbTransaction _transaction;
+        private UnitOfWork _unitOfWork;
 
         public void Open()
         {
@@ -139,6 +140,11 @@ namespace DomainShell.Test.Domains
             _transaction = _connection.BeginTransaction();
         }
 
+        public void BeginCommit()
+        {            
+            _unitOfWork.Save();
+        }
+
         public void Commit()
         {
             _transaction.Commit();
@@ -149,7 +155,7 @@ namespace DomainShell.Test.Domains
             _transaction.Rollback();
         }
 
-        public void DisposeTran()
+        public void DisposeTran(bool completed)
         {
             _transaction.Dispose();
             _transaction = null;
@@ -171,102 +177,18 @@ namespace DomainShell.Test.Domains
 
     public class SessionFoundation : SessionFoundationBase
     {
-        public SessionFoundation(Connection connection, Container container)
+        public SessionFoundation(IConnection connection)
         {
-            _connection = connection;
-            _container = container;
-        }
 
-        private Connection _connection;
-        private Container _container;
-
-        protected override OpenScopeBase OpenScopeBase()
-        {
-            return new OpenScope(_connection);
-        }
-
-        protected override TranScopeBase TranScopeBase()
-        {
-            return new TranScope(_connection, _container);
-        }
-
-        protected override InTranScopeBase InTranScopeBase()
-        {
-            return new InTranScope(_container);
-        }
-    }
-
-    public class OpenScope : OpenScopeBase
-    {
-        public OpenScope(Connection connection)
-        {
             _connection = connection;
         }
 
-        private Connection _connection;
-
-        public override void Open()
-        {            
-            _connection.Open();
-        }
-
-        protected override void Close()
-        {
-            _connection.Close();
-        }
-    }
-
-    public class TranScope : TranScopeBase
-    {
-        public TranScope(Connection connection, Container container)
-        {
-            _connection = connection;
-            _container =  container;
-        }
-
-        private Connection _connection;        
-        private Container _container;
+        private IConnection _connection;
         
-        public override void BeginTran()
+
+        protected override IConnection GetConnection()
         {
-            _connection.BeginTran();
-        }
-
-        protected override void BeginCommit()
-        {
-            UnitOfWork unitOfWork = _container.GetInstance<UnitOfWork>();
-            unitOfWork.Save();
-        }
-
-        protected override void Commit()
-        {            
-            _connection.Commit();
-        }
-
-        protected override void Dispose(bool completed)
-        {
-            _connection.DisposeTran();
-        }
-    }
-
-    public class InTranScope : InTranScopeBase
-    {
-        public InTranScope(Container container)
-        {            
-            _container = container;
-        }
-
-        private Container _container;
-
-        protected override void BeginCommit()
-        {
-            UnitOfWork unitOfWork = _container.GetInstance<UnitOfWork>();
-            unitOfWork.Save();
-        }
-
-        protected override void Dispose(bool completed)
-        {
-            
+            return _connection;
         }
     }
 

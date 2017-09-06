@@ -90,12 +90,12 @@ namespace DomainShell.Test.Infras
 
     public class OrderRepository : WriteRepository<OrderModel>, IOrderRepository
     {
-        public OrderRepository(IConnection connection)
+        public OrderRepository(ICurrentConnection connection)
         {
             _connection = connection;
         }
 
-        private IConnection _connection;         
+        private ICurrentConnection _connection;         
 
         public OrderModel Find(int orderId, bool throwError = false)
         {  
@@ -331,12 +331,12 @@ namespace DomainShell.Test.Infras
 
     public class OrderCanceledRepository : WriteRepository<OrderCanceledModel>, IOrderCanceledRepository
     {
-        public OrderCanceledRepository(IConnection connection)
+        public OrderCanceledRepository(ICurrentConnection connection)
         {
-            _connection = connection;
+            _connection = connection;            
         }
 
-        private IConnection _connection;
+        private ICurrentConnection _connection;
 
         public OrderCanceledModel Find(int orderId, bool throwError = false)
         {

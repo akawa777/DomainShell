@@ -39,70 +39,46 @@ namespace DomainShell
     {
         private class OpenScope : IOpenScope
         {
-            public OpenScope()
+            public OpenScope(Action dispose)
             {
-                
-            }
-
-            public OpenScope(OpenScopeBase openScope, Action dispose)
-            {
-                _openScope = openScope;
                 _dispose = dispose;
-
-                _openScope.Open();
             }
 
-            private OpenScopeBase _openScope = null;
             private Action _dispose = () => {};
 
             public void Dispose()
-            {
-                try
-                {
-                    if(_openScope != null) _openScope.Dispose();                    
-                }
-                finally
-                {
-                    _dispose();
-                }
+            {   
+                _dispose();
             }
         }
 
         private class TranScope : ITranScope
         {
-            public TranScope()
-            {
-                
-            }
-
-            public TranScope(TranScopeBase openScope, Action dispose)
-            {
-                _tranScope = openScope;
+            public TranScope(Action complete, Action<bool> dispose)
+            {                
+                _complete = complete;
                 _dispose = dispose;
-
-                _tranScope.BeginTran();
             }
 
-            private TranScopeBase _tranScope = null;
-            private Action _dispose = () => {};
+            private Action _complete = () => {};
+            private Action<bool> _dispose = x => {};
+            private bool _completed = false;
 
             public void Complete()
-            {
-                if (_tranScope != null)
-                {
-                    _tranScope.Complete();
-                }
+            {                   
+                _complete();
+                _completed = true;
             }
 
             public void Dispose()
             {
                 try
                 {
-                    if(_tranScope != null) _tranScope.Dispose();                    
+                    _dispose(_completed);
                 }
                 finally
                 {
-                    _dispose();
+                    _completed = false;
                 }
             }
         }
@@ -121,17 +97,25 @@ namespace DomainShell
                     DomainModelTracker.Revoke();
                     DomainEventPublisher.Revoke();
 
-                    OpenScopeBase openScope = OpenScopeBase();
+                    IConnection connection = GetConnection();
+                    connection.Open();
 
-                    _openScope = new OpenScope(openScope, () =>
+                    _openScope = new OpenScope(() =>
                     {
-                        _openScope = null;
+                        try
+                        {
+                            connection.Dispose();
+                        }
+                        finally
+                        {
+                            _openScope = null;
+                        }
                     });
 
                     return _openScope;
                 }
 
-                return new OpenScope();
+                return new OpenScope(() => { });
             }
         }
 
@@ -141,20 +125,42 @@ namespace DomainShell
             {
                 IOpenScope openScope = Open();
 
+                IConnection connection = GetConnection();                
+
                 if (_tranScope == null)
                 {
-                    TranScopeBase tranScope = TranScopeBase();
+                    connection.BeginTran();
 
-                    _tranScope = new TranScope(tranScope, () =>
+                    _tranScope = new TranScope(() =>
                     {
-                        _tranScope = null;
-                        openScope.Dispose();
+                        connection.BeginCommit();
+                        DomainEventPublisher.PublishInTran();
+                        connection.Commit();                        
+                        DomainEventPublisher.PublishOutTran();
+
+                    },
+                    x =>
+                    {
+                        try
+                        {
+                            connection.DisposeTran(x);
+                        }
+                        finally
+                        {
+                            _tranScope = null;
+                            openScope.Dispose();
+                        }
                     });
 
                     return _tranScope;
                 }
 
-                return InTranScopeBase();
+                return new TranScope(() =>
+                {
+                    connection.BeginCommit();
+                    DomainEventPublisher.PublishInTran();  
+                },
+                x => { });
             }
         }
 
@@ -163,80 +169,6 @@ namespace DomainShell
             DomainEventPublisher.PublishByException(exception);
         }
 
-        protected abstract OpenScopeBase OpenScopeBase();
-        protected abstract TranScopeBase TranScopeBase();
-        protected abstract InTranScopeBase InTranScopeBase();
+        protected abstract IConnection GetConnection();
     }   
-
-    public abstract class OpenScopeBase : IOpenScope
-    {
-        public abstract void Open();
-
-        protected abstract void Close();
-
-        public void Dispose()
-        {
-            Close();
-        }
-    }
-
-    public abstract class InTranScopeBase : ITranScope
-    {
-        private bool _completed = false;
-        protected abstract void BeginCommit();
-        protected abstract void Dispose(bool completed);
-
-        public void Complete()
-        {
-            BeginCommit();
-            DomainEventPublisher.PublishInTran();
-            _completed = true;
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                Dispose(_completed);
-            }
-            finally
-            {
-                _completed = false;
-            }
-        }
-    }
-
-    public abstract class TranScopeBase : ITranScope
-    {
-        private bool _completed = false;        
-
-        public abstract void BeginTran();
-
-        protected abstract void BeginCommit();
-
-        protected abstract void Commit();
-
-        protected abstract void Dispose(bool completed);
-
-        public void Complete()
-        {   
-            BeginCommit();
-            DomainEventPublisher.PublishInTran();                     
-            Commit();
-            _completed = true;
-            DomainEventPublisher.PublishOutTran();            
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                Dispose(_completed);
-            }
-            finally
-            {
-                _completed = false;
-            }
-        }
-    }
 }
