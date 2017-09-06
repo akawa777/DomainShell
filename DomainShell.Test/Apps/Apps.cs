@@ -178,7 +178,7 @@ namespace DomainShell.Test.Apps
                 {
                     IEnumerable<OrderSummaryValue> orderSummaryValues = _orderSummaryReader.GetSummary();
 
-                    return orderSummaryValues.Select(x => Map(x)).ToArray();
+                    return orderSummaryValues.Select(Map).ToArray();
                 }
             }
             catch (Exception e)
