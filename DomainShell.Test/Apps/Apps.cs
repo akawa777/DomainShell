@@ -244,9 +244,7 @@ namespace DomainShell.Test.Apps
     public class OrderSummaryDto
     {
         public string ProductName { get; set; }
-
         public decimal TotalPrice { get; set; }
-
         public decimal TotalOrderNo { get; set; }
     }
 }

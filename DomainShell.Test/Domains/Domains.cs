@@ -201,9 +201,7 @@ namespace DomainShell.Test.Domains
         }
 
         public string ProductName { get; private set; }
-
         public decimal TotalPrice { get; private set; }
-
         public decimal TotalOrderNo { get; private set; }
     }
 }
