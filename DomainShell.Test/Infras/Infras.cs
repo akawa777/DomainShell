@@ -261,7 +261,7 @@ namespace DomainShell.Test.Infras
                     var vUserValue = new VirtualObject<UserValue>();
 
                     vUserValue
-                        .Set(m => m.UserId, (m, p) => reader["LastUserId"]);
+                        .Set(m => m.UserId, (m, p) => reader[$"Last{p.Name}"]);
 
                     var orderModel = DomainModelProxyFactory.Create<OrderModel>();
                     var vOrderModel = new VirtualObject<OrderModel>(orderModel);
@@ -293,7 +293,7 @@ namespace DomainShell.Test.Infras
             yield return vOrderModel.GetProperty(m => m.Price);
             yield return vOrderModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
             yield return vOrderModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
-            yield return vOrderModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => "LastUserId");
+            yield return vOrderModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => $"Last{p.Name}");
             yield return vOrderModel.GetProperty(m => m.RecordVersion);              
         }
         
@@ -477,7 +477,7 @@ namespace DomainShell.Test.Infras
                     var vUserValue = new VirtualObject<UserValue>();
 
                     vUserValue
-                        .Set(m => m.UserId, (m, p) => reader["LastUserId"]);
+                        .Set(m => m.UserId, (m, p) => reader[$"Last{p.Name}"]);
 
                     var vOrderCanceledModel = new VirtualObject<OrderCanceledModel>();
 
@@ -509,7 +509,7 @@ namespace DomainShell.Test.Infras
             yield return vOrderCanceledModel.GetProperty(m => m.Price);
             yield return vOrderCanceledModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
             yield return vOrderCanceledModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
-            yield return vOrderCanceledModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => "LastUserId");
+            yield return vOrderCanceledModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => $"Last{p.Name}");
             yield return vOrderCanceledModel.GetProperty(m => m.RecordVersion);
         }
 
@@ -626,8 +626,7 @@ namespace DomainShell.Test.Infras
                 string sql = $@"
                     select ProductName, sum(Price) TotalPrice, count(OrderId) TotalOrderNo from OrderForm                
                     group by ProductName
-                    order by ProductName
-                    
+                    order by ProductName                    
                 ";
 
                 command.CommandText = sql;
