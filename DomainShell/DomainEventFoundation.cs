@@ -48,6 +48,7 @@ namespace DomainShell
     public abstract class DomainEventFoundationBase : IDomainEventPublisher
     {
         private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+        private object _lock = new object();
 
         public void PublishInTran()
         {            
@@ -110,17 +111,20 @@ namespace DomainShell
 
         private IDomainEvent[] GetDomainEvents()
         {
-            foreach (IDomainEventAuthor author in GetTargetDomainEventAuthors())
+            lock (_lock)
             {
-                foreach (IDomainEvent domainEvent in author.GetEvents())
+                foreach (IDomainEventAuthor author in GetTargetDomainEventAuthors())
                 {
-                    _domainEvents.Add(domainEvent);
+                    foreach (IDomainEvent domainEvent in author.GetEvents())
+                    {
+                        _domainEvents.Add(domainEvent);
+                    }
+
+                    author.ClearEvents();
                 }
 
-                author.ClearEvents();
+                return _domainEvents.ToArray();
             }
-
-            return _domainEvents.ToArray();
         }
 
         private void Add(IDomainEvent[] domainEvents)

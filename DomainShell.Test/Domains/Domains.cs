@@ -5,6 +5,56 @@ using DomainShell;
 
 namespace DomainShell.Test.Domains
 {
+    public class UserModel : IAggregateRoot
+    {
+        protected UserModel()
+        {
+            Dirty = Dirty.False();
+        }
+
+        public string UserId { get; private set; }
+
+        public string UserName { get; set; }
+
+        public int RecordVersion { get; private set; }
+
+        public Dirty Dirty { get; private set; }
+
+        public bool Deleted { get; private set; }
+
+        private List<IDomainEvent> _events = new List<IDomainEvent>();
+
+        public IEnumerable<IDomainEvent> GetEvents()
+        {
+            return _events;
+        }
+
+        public void ClearEvents()
+        {
+            _events.Clear();
+        }
+    }
+
+    public class UserValue
+    {
+        protected UserValue()
+        {
+
+        }
+
+        public static UserValue Create(UserModel userModel)
+        {
+            if (userModel == null && userModel.RecordVersion == 0) throw new ArgumentException("userModel is invalid.");
+
+            UserValue userValue = new UserValue();
+            userValue.UserId = userModel.UserId;
+
+            return userValue;
+        }
+
+        public string UserId { get; private set; }
+    }
+
     public class OrderModel : IAggregateRoot
     {
         public static OrderModel NewOrder()
@@ -17,8 +67,6 @@ namespace DomainShell.Test.Domains
         protected OrderModel()
         {
             Dirty = Dirty.False();
-
-            DomainModelMarker.Mark(this);
         }
 
         public int OrderId { get; private set; }               
@@ -27,9 +75,11 @@ namespace DomainShell.Test.Domains
 
         public decimal Price { get; set; }
 
+        public string CreditCardCode { get; private set; }
+
         public string PayId { get; private set; }
 
-        public string LastUserId { get; set; }
+        public UserValue LastUser { get; set; }
 
         public int RecordVersion { get; private set; }
 
@@ -69,11 +119,13 @@ namespace DomainShell.Test.Domains
 
         public virtual void Complete(IOrderValidator orderValidator, ICreditCardService creditCardService, string creditCardCode)
         {
-            orderValidator.ValidateWhenComplete(this);
+            orderValidator.ValidateWhenComplete(this, creditCardCode);
 
-            Dirty = Dirty.True(this);
+            CreditCardCode = creditCardCode;
 
-            Pay(creditCardService, creditCardCode);
+            Dirty = Dirty.True(this);            
+
+            Pay(creditCardService);
 
             AddCompletedEvents();
         }
@@ -90,9 +142,9 @@ namespace DomainShell.Test.Domains
             CancelPay(creditCardService);
         }
 
-        private void Pay(ICreditCardService creditCardService, string creditCardCode)
+        private void Pay(ICreditCardService creditCardService)
         {
-            PayId = creditCardService.Pay(creditCardCode, Price);
+            PayId = creditCardService.Pay(CreditCardCode, Price);
         }
 
         private void CancelPay(ICreditCardService creditCardService)
@@ -106,7 +158,7 @@ namespace DomainShell.Test.Domains
 
         private void AddCanceledEvents()
         {
-            _events.Add(new OrderCanceledEvent { OrderId = OrderId, ProductName = ProductName, Price = Price, PayId = PayId, LastUserId = LastUserId });            
+            _events.Add(new OrderCanceledEvent { OrderId = OrderId, ProductName = ProductName, Price = Price, PayId = PayId, LastUser = LastUser });            
         }
 
         private void AddCompletedEvents()
@@ -130,8 +182,6 @@ namespace DomainShell.Test.Domains
         protected OrderCanceledModel()
         {
             Dirty = Dirty.False();
-
-            DomainModelMarker.Mark(this);
         }
 
         public int OrderId { get; private set; }
@@ -140,9 +190,11 @@ namespace DomainShell.Test.Domains
 
         public decimal Price { get; set; }
 
+        public string CreditCardCode { get; private set; }
+
         public string PayId { get; set; }
 
-        public string LastUserId { get; set; }
+        public UserValue LastUser { get; set; }
 
         public int RecordVersion { get; private set; }
 
@@ -178,7 +230,7 @@ namespace DomainShell.Test.Domains
 
         public string PayId { get; set; }
 
-        public string LastUserId { get; set; }
+        public UserValue LastUser { get; set; }
     }
 
     public class OrderCompletedOutTranEvent : IDomainOutTranEvent

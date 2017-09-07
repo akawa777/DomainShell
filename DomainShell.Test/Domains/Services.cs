@@ -10,16 +10,25 @@ namespace DomainShell.Test.Domains
         public void ValidateWhenRegister(OrderModel orderModel)
         {
             Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegister)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            if (string.IsNullOrEmpty(orderModel.ProductName)) throw new Exception("ProductName is required.");
+            if (orderModel.LastUser == null) throw new Exception("LastUser is required.");
         }
 
-        public void ValidateWhenComplete(OrderModel orderModel)
+        public void ValidateWhenComplete(OrderModel orderModel, string creditCardCode)
         {
             Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenComplete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            ValidateWhenRegister(orderModel);
+            if (!string.IsNullOrEmpty(orderModel.PayId)) throw new Exception("already paid.");
+            if (string.IsNullOrEmpty(creditCardCode)) throw new Exception("creditCardCode is required.");            
         }
 
         public void ValidateWhenCancel(OrderModel orderModel)
         {
             Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenCancel)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            if (!string.IsNullOrEmpty(orderModel.PayId)) throw new Exception("already paid.");            
         }
     }
 

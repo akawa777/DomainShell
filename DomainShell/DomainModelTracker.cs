@@ -5,21 +5,23 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Collections;
+using System.Collections.Specialized;
 
 namespace DomainShell
 {
     public class TrackPack
     {
-        public TrackPack(object model, object stamp)
+        public TrackPack(object model, object tag)
         {
             Model = model;
             Graph = JsonConvert.SerializeObject(model);
-            Stamp = stamp;
+            Tag = tag;
         }
 
         public object Model { get; private set; }
         public string Graph { get; private set; }
-        public object Stamp { get; private set; }
+        public object Tag { get; private set; }
 
         public bool Modified(object model)
         {
@@ -93,52 +95,64 @@ namespace DomainShell
 
     public abstract class DomainModelTrackerFoundationBase : IDomainModelMarker, IDomainModelTracker
     {
-        private Dictionary<object, TrackPack> _list = new Dictionary<object, TrackPack>();
+        private OrderedDictionary _list = new OrderedDictionary();
         private object _lock = new object();
 
         public TrackPack Get(object domainModel)
         {
-            TrackPack trackPack;
-
-            if (!_list.TryGetValue(domainModel, out trackPack))
+            lock (_lock)
             {
-                return null;
-            }
+                if (!_list.Contains(domainModel))
+                {
+                    throw new ArgumentException("domainModel is not marked.");
+                }
 
-            return trackPack;
+                return _list[domainModel] as TrackPack;
+            }
         }
 
         public IEnumerable<TrackPack> GetAll()
         {
-            return _list.Values;
+            lock (_lock)
+            {
+                foreach (DictionaryEntry entry in _list)
+                {
+                    yield return entry.Value as TrackPack;
+                }
+            }
         }
 
         public void Mark(object domainModel)
         {
             lock (_lock)
             {
-                object stamp = CreateStamp(domainModel);
-                _list[domainModel] = new TrackPack(domainModel, stamp);
+                if (_list.Contains(domainModel))
+                {
+                    _list.Remove(domainModel);
+                }
+
+                _list[domainModel] = new TrackPack(domainModel, CreateTag(domainModel));
             }
         }
 
         public void Revoke()
         {
-            _list.Clear();
+            lock (_lock)
+            {
+                _list.Clear();
+            }
         }
 
         public bool Modified(object domainModel)
         {
-            TrackPack trackPack;
-
-            if (!_list.TryGetValue(domainModel, out trackPack))
+            lock (_lock)
             {
-                return false;
-            }
+                TrackPack trackPack = Get(domainModel);
 
-            return trackPack.Modified(domainModel);
+                return trackPack.Modified(domainModel);
+            }
         }
 
-        protected abstract object CreateStamp(object domainModel);
+        protected abstract object CreateTag(object domainModel);
     }
 }

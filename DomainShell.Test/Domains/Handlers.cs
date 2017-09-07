@@ -5,9 +5,12 @@ using DomainShell;
 
 namespace DomainShell.Test.Domains
 {
-    public class OrderCompletedEventHandler : IDomainEventHandler<OrderCompletedOutTranEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>
+    public class OrderEventHandler : IDomainEventHandler<OrderCompletedOutTranEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>
     {
-        public OrderCompletedEventHandler(IOrderRepository orderRepository, ICreditCardService creditCardService, IMailService mailService)
+        public OrderEventHandler(
+            IOrderRepository orderRepository, 
+            ICreditCardService creditCardService, 
+            IMailService mailService)
         {            
             _orderRepository = orderRepository;
             _creditCardService = creditCardService;
@@ -17,10 +20,11 @@ namespace DomainShell.Test.Domains
         private IOrderRepository _orderRepository;      
         private ICreditCardService  _creditCardService;
         private IMailService _mailService;
+        private IUserRepository _userRepository;
 
         public void Handle(OrderCompletedOutTranEvent domainEvent)
         {
-            Console.WriteLine($"{nameof(OrderCompletedEventHandler)} {nameof(Handle)} {nameof(OrderCompletedOutTranEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderCompletedOutTranEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
             try
             {
@@ -40,7 +44,7 @@ namespace DomainShell.Test.Domains
 
         public void Handle(OrderCompletedExceptionEvent domainEvent)
         {
-            Console.WriteLine($"{nameof(OrderCompletedEventHandler)} {nameof(Handle)} {nameof(OrderCompletedExceptionEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderCompletedExceptionEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
             try
             {
@@ -62,7 +66,7 @@ namespace DomainShell.Test.Domains
 
         public void Handle(OrderCanceledEvent domainEvent)
         {
-            Console.WriteLine($"{nameof(OrderCompletedEventHandler)} {nameof(Handle)} {nameof(OrderCanceledEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderCanceledEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
             try
             {
@@ -89,7 +93,7 @@ namespace DomainShell.Test.Domains
             model.ProductName = domainEvent.ProductName;
             model.Price = domainEvent.Price;
             model.PayId = domainEvent.PayId;
-            model.LastUserId = domainEvent.LastUserId;
+            model.LastUser = domainEvent.LastUser;
         }
     }
 }

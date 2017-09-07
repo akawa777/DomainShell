@@ -13,8 +13,6 @@ namespace DomainShell.Test.Domains
 
     public interface IAggregateRoot : IDomainEventAuthor
     {
-        string LastUserId { get; set; }
-
         int RecordVersion { get; }
 
         Dirty Dirty { get; }
@@ -33,6 +31,11 @@ namespace DomainShell.Test.Domains
     public interface IWriteRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
     {
        void Save(TAggregateRoot aggregate);
+    }
+
+    public interface IUserRepository
+    {
+        UserModel Find(string userId, bool throwError = false);
     }
 
     public interface IOrderRepository
@@ -54,7 +57,7 @@ namespace DomainShell.Test.Domains
     public interface IOrderValidator
     {
         void ValidateWhenRegister(OrderModel orderModel);
-        void ValidateWhenComplete(OrderModel orderModel);
+        void ValidateWhenComplete(OrderModel orderModel, string creditCardCord);
         void ValidateWhenCancel(OrderModel orderModel);
     }
 

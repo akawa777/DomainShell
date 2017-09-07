@@ -26,13 +26,8 @@ namespace DomainShell.Test.Domains
 
     public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
     {
-        protected override object CreateStamp(object domainModel)
+        protected override object CreateTag(object domainModel)
         {
-            if (domainModel is IAggregateRoot model)
-            {
-                return model.RecordVersion;
-            }
-
             return null;
         }
     }
@@ -208,40 +203,22 @@ namespace DomainShell.Test.Domains
 
         public void Save()
         {
-            IAggregateRoot[] domainModels = GetTargetDomainModels();
+            IAggregateRoot[] domainModels = GetDomainModels();
+            Save(domainModels);
+        }
 
+        private IAggregateRoot[] GetDomainModels()
+        {
+            Func<TrackPack, bool> filter = x => x.Model is IAggregateRoot model && model.Dirty.Is;
+            return DomainModelTracker.GetAll().Where(filter).Select(x => x.Model as IAggregateRoot).ToArray();
+        }
+
+        private void Save(IAggregateRoot[] domainModels)
+        {
             foreach (IAggregateRoot domainModel in domainModels)
             {
                 Save(domainModel);
             }
-        }
-
-        private IAggregateRoot[] GetTargetDomainModels()
-        {
-            IAggregateRoot[] deletedModels = GetDeletedDomainModels();
-            IAggregateRoot[] modifiedModels = GetModifiedDomainModels();
-
-            return deletedModels.Concat(modifiedModels).ToArray();
-        }
-
-        private IAggregateRoot[] GetDeletedDomainModels()
-        {
-            Func<TrackPack, bool> deleted = x =>
-            {
-                return x.Model is IAggregateRoot model && model.Dirty.Is && model.Deleted;
-            };
-
-            return DomainModelTracker.GetAll().Where(deleted).Select(x => x.Model as IAggregateRoot).ToArray();
-        }
-
-        private IAggregateRoot[] GetModifiedDomainModels()
-        {
-            Func<TrackPack, bool> modified = x =>
-            {
-                return x.Model is IAggregateRoot model && model.Dirty.Is && !model.Deleted;
-            };
-
-            return DomainModelTracker.GetAll().Where(modified).Select(x => x.Model as IAggregateRoot).ToArray();
         }
 
         private void Save(IAggregateRoot domainModel)

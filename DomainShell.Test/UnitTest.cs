@@ -15,7 +15,7 @@ namespace DomainShell.Test
         [TestMethod]
         public void TestMethod()
         {
-            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
+            Bootstrap.StartUp(Bootstrap.DatabaseType.SqlServer);
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
@@ -30,7 +30,7 @@ namespace DomainShell.Test
                 OrderDto order2 = new OrderDto();
                 order2.ProductName = "yyy";
                 order2.Price = 999;
-                order2.LastUserId = "yyy";
+                order2.LastUserId = "xxx";
 
                 OrderDto order3 = new OrderDto();
                 order3.ProductName = "yyy";
@@ -49,13 +49,11 @@ namespace DomainShell.Test
 
                 OrderSummaryDto[] orders = queryApp.GetOrderSummary();
 
-                int orderId = order.OrderId;
+                order = queryApp.GetLastByUser("yyy");
 
-                commandApp.Cancel(order, "xxx");
+                commandApp.Cancel(order);                
 
-                order = queryApp.Find(orderId);
-
-                order = queryApp.GetCanceledByOrderId(orderId);
+                order = queryApp.GetCanceledByOrderId(order.OrderId);
             }
         }
 

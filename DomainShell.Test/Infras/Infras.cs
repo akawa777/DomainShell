@@ -11,7 +11,7 @@ namespace DomainShell.Test.Infras
     {
         public void Save(TAggregateRoot model)
         {
-            ValidateIlligalModifify(model);
+            ValidateOfInvalidModify(model);
 
             ModelState modelState = GetModelState(model);
 
@@ -22,9 +22,9 @@ namespace DomainShell.Test.Infras
             Save(model, modelState);
         }
 
-        private void ValidateIlligalModifify(TAggregateRoot model)
+        private void ValidateOfInvalidModify(TAggregateRoot model)
         {
-            if (DomainModelTracker.Modified(model)) throw new Exception("domain model is modified.");
+            if (DomainModelTracker.Modified(model)) throw new Exception("model is invalid becouse of modified.");
         }
 
         private ModelState GetModelState(TAggregateRoot model)
@@ -86,6 +86,72 @@ namespace DomainShell.Test.Infras
         protected abstract void Update(TAggregateRoot model);
 
         protected abstract void Delete(TAggregateRoot model);
+    }
+
+    public class UserRepository : IUserRepository
+    {
+        public UserRepository(ICurrentConnection connection)
+        {
+            _connection = connection;
+        }
+
+        private ICurrentConnection _connection;
+
+        public UserModel Find(string userId, bool throwError = false)
+        {
+            var readSet = Read(userId);
+
+            UserModel userModel = Map(readSet).FirstOrDefault();
+
+            if (throwError && userModel == null) throw new Exception("user not found.");
+
+            return userModel;
+        }
+
+        private (IDataReader reader, IDbCommand command) Read(string userId)
+        {
+            IDbCommand command = _connection.CreateCommand();
+
+            string sql = $@"
+                select * from LoginUser
+                where UserId = @userId
+            ";
+
+            command.CommandText = sql;
+
+            var sqlParam = command.CreateParameter();
+            sqlParam.ParameterName = $"@{nameof(userId)}";
+            sqlParam.Value = userId == null ? DBNull.Value : userId as object;
+
+            command.Parameters.Add(sqlParam);
+
+            return (command.ExecuteReader(), command);
+        }
+
+        private IEnumerable<UserModel> Map((IDataReader reader, IDbCommand command) readSet)
+        {
+            try
+            {
+                IDataReader reader = readSet.reader;
+
+                while (reader.Read())
+                {
+                    var vUserModel = new VirtualObject<UserModel>();
+
+                    vUserModel
+                        .Set(m => m.UserId, (m, p) => reader[p.Name])
+                        .Set(m => m.UserName, (m, p) => reader[p.Name])
+                        .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
+
+                    yield return vUserModel.Material;
+                }
+            }
+            finally
+            {
+                readSet.reader.Dispose();
+                readSet.command.Dispose();
+            }
+        }
     }
 
     public class OrderRepository : WriteRepository<OrderModel>, IOrderRepository
@@ -192,6 +258,11 @@ namespace DomainShell.Test.Infras
 
                 while (reader.Read())
                 {
+                    var vUserValue = new VirtualObject<UserValue>();
+
+                    vUserValue
+                        .Set(m => m.UserId, (m, p) => reader["LastUserId"]);
+
                     var orderModel = DomainModelProxyFactory.Create<OrderModel>();
                     var vOrderModel = new VirtualObject<OrderModel>(orderModel);
 
@@ -199,8 +270,9 @@ namespace DomainShell.Test.Infras
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
+                        .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
                         .Set(m => m.PayId, (m, p) => reader[p.Name])
-                        .Set(m => m.LastUserId, (m, p) => reader[p.Name])
+                        .Set(m => m.LastUser, (m, p) => vUserValue.Material)
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
                     yield return vOrderModel.Material;
@@ -213,15 +285,15 @@ namespace DomainShell.Test.Infras
             }
         }
 
-        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderModel orderModel, bool includePrimaryKey = false)
+        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderModel orderModel)
         {
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
-
-            if (includePrimaryKey) vOrderModel.GetProperty(m => m.OrderId);
+            
             yield return vOrderModel.GetProperty(m => m.ProductName);
             yield return vOrderModel.GetProperty(m => m.Price);
-            yield return vOrderModel.GetProperty(m => m.PayId, (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
-            yield return vOrderModel.GetProperty(m => m.LastUserId);
+            yield return vOrderModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
+            yield return vOrderModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
+            yield return vOrderModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => "LastUserId");
             yield return vOrderModel.GetProperty(m => m.RecordVersion);              
         }
         
@@ -401,15 +473,21 @@ namespace DomainShell.Test.Infras
                 IDataReader reader = readSet.reader;
 
                 while (reader.Read())
-                {                    
+                {
+                    var vUserValue = new VirtualObject<UserValue>();
+
+                    vUserValue
+                        .Set(m => m.UserId, (m, p) => reader["LastUserId"]);
+
                     var vOrderCanceledModel = new VirtualObject<OrderCanceledModel>();
 
                     vOrderCanceledModel
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
+                        .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
                         .Set(m => m.PayId, (m, p) => reader[p.Name])
-                        .Set(m => m.LastUserId, (m, p) => reader[p.Name])
+                        .Set(m => m.LastUser, (m, p) => vUserValue.Material)
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
                     yield return vOrderCanceledModel.Material;
@@ -422,15 +500,16 @@ namespace DomainShell.Test.Infras
             }
         }
 
-        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderCanceledModel orderCanceledModel, bool includePrimaryKey = false)
+        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderCanceledModel orderCanceledModel)
         {
             VirtualObject<OrderCanceledModel> vOrderCanceledModel = new VirtualObject<OrderCanceledModel>(orderCanceledModel);
 
-            if (includePrimaryKey) vOrderCanceledModel.GetProperty(m => m.OrderId);
+            yield return vOrderCanceledModel.GetProperty(m => m.OrderId);
             yield return vOrderCanceledModel.GetProperty(m => m.ProductName);
             yield return vOrderCanceledModel.GetProperty(m => m.Price);
-            yield return vOrderCanceledModel.GetProperty(m => m.PayId, (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
-            yield return vOrderCanceledModel.GetProperty(m => m.LastUserId);
+            yield return vOrderCanceledModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
+            yield return vOrderCanceledModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
+            yield return vOrderCanceledModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => "LastUserId");
             yield return vOrderCanceledModel.GetProperty(m => m.RecordVersion);
         }
 

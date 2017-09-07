@@ -12,22 +12,26 @@ namespace DomainShell.Test.Apps
             IOrderRepository orderRepository, 
             IWriteRepository<OrderModel> writeRepository, 
             IOrderValidator orderValidator, 
-            ICreditCardService creditCardService)
+            ICreditCardService creditCardService,
+            IUserRepository userRepository)
         {            
             _orderRepository = orderRepository;
             _writeRepository = writeRepository;
             _orderValidator = orderValidator;
             _creditCardService = creditCardService;
+            _userRepository = userRepository;
         }
 
         private IOrderRepository _orderRepository;
         private IWriteRepository<OrderModel> _writeRepository;
         private IOrderValidator _orderValidator;
         private ICreditCardService _creditCardService;
-        private IOrderSummaryReader _orderSummaryReader;
+        private IUserRepository _userRepository;
 
         public void Register(OrderDto orderDto)
         {
+            if (orderDto == null) throw new Exception("orderDto is required.");
+
             try
             {
                 using(var tran = Session.Tran())
@@ -53,6 +57,8 @@ namespace DomainShell.Test.Apps
 
         public void Complete(OrderDto orderDto, string creditCardCode)
         {
+            if (orderDto == null) throw new Exception("orderDto is required.");
+
             try
             {
                 using(var tran = Session.Tran())
@@ -74,8 +80,10 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public void Cancel(OrderDto orderDto, string reason)
+        public void Cancel(OrderDto orderDto)
         {
+            if (orderDto == null) throw new Exception("orderDto is required.");
+
             try
             {
                 using (var tran = Session.Tran())
@@ -99,7 +107,7 @@ namespace DomainShell.Test.Apps
         {
             model.ProductName = dto.ProductName;         
             model.Price = dto.Price;
-            model.LastUserId = dto.LastUserId;
+            model.LastUser = UserValue.Create(_userRepository.Find(dto.LastUserId, true));
         }
     }
 
@@ -196,8 +204,9 @@ namespace DomainShell.Test.Apps
             dto.OrderId = model.OrderId;
             dto.ProductName = model.ProductName;
             dto.Price = model.Price;
+            dto.CreditCardCode = model.CreditCardCode;
             dto.PayId = model.PayId;
-            dto.LastUserId = model.LastUserId;
+            dto.LastUserId = model.LastUser.UserId;
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
@@ -211,8 +220,9 @@ namespace DomainShell.Test.Apps
             dto.OrderId = model.OrderId;
             dto.ProductName = model.ProductName;
             dto.Price = model.Price;
+            dto.CreditCardCode = model.CreditCardCode;
             dto.PayId = model.PayId;
-            dto.LastUserId = model.LastUserId;
+            dto.LastUserId = model.LastUser.UserId;
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
@@ -236,6 +246,7 @@ namespace DomainShell.Test.Apps
         public int OrderId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
+        public string CreditCardCode { get; set; }
         public string PayId { get; set; }
         public string LastUserId { get; set; }
         public int RecordVersion { get; set; }        

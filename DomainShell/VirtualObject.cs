@@ -17,16 +17,18 @@ namespace DomainShell
     {
         private class InternalVirtualProperty : VirtualProperty
         {
-            public InternalVirtualProperty(PropertyInfo property, Func<object> getValue)
+            public InternalVirtualProperty(PropertyInfo property, Func<string> getName, Func<object> getValue)
             {
+                _getName = getName;
                 _getValue = getValue;
                 _property = property;
             }
 
+            private Func<string> _getName;
             private Func<object> _getValue;
             private PropertyInfo _property;
 
-            public override string Name { get { return Property.Name; } }
+            public override string Name { get { return _getName(); } }
             public override object Value { get { return _getValue(); } }
             public override PropertyInfo Property { get { return _property; } }
         }
@@ -48,16 +50,15 @@ namespace DomainShell
             get { return _material; }
         }
 
-        public VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue = null)
+        public VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, string> getName = null, Func < TMaterial, PropertyInfo, object> getValue = null )
         {            
             string propertyName = GetPropertyName(propertyLambda);
             PropertyInfo property = GetPropertyInfo(propertyName);
 
-            if (getValue == null) getValue = (m, p) => property.GetValue(_material);            
+            if (getName == null) getName = (m, p) => property.Name;
+            if (getValue == null) getValue = (m, p) => property.GetValue(_material);  
 
-            Func<object> get = () => getValue(Material, property);
-
-            return new InternalVirtualProperty(property, get);
+            return new InternalVirtualProperty(property, () => getName(Material, property), () => getValue(Material, property));
         }
 
         public VirtualObject<TProperty> Get<TProperty>(string propertyName) where TProperty : class

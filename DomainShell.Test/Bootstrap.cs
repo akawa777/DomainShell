@@ -60,6 +60,7 @@ namespace DomainShell.Test
             container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
             container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
 
+            container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);            
             container.Register<IWriteRepository<OrderModel>, OrderRepository>(Lifestyle.Scoped);
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
@@ -70,9 +71,9 @@ namespace DomainShell.Test
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
             container.Register<IMailService, MailService>(Lifestyle.Scoped);
 
-            container.Register<IDomainEventHandler<OrderCompletedOutTranEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderCompletedEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCompletedOutTranEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);            
@@ -147,22 +148,30 @@ namespace DomainShell.Test
                     OrderId integer primary key,
                     ProductName text,
                     Price numeric,
+                    CreditCardCode text,
                     PayId text,
                     LastUserId text,
                     RecordVersion int
-                )";
+                );
 
-            command.ExecuteNonQuery();
-
-            command.CommandText = @"
                 create table OrderFormCanceled (
-                    OrderId integer primary key,                    
+                    OrderId int primary key,                    
                     ProductName text,
                     Price numeric,
+                    CreditCardCode text,
                     PayId text,
                     LastUserId text,
                     RecordVersion int
-                )";
+                );
+
+                create table LoginUser (
+                    UserId text primary key,                    
+                    UserName text,
+                    RecordVersion int
+                );
+
+                insert into LoginUser values('xxx', 'xxx', 1);
+                insert into LoginUser values('yyy', 'yyy', 1);";
 
             command.ExecuteNonQuery();
 
@@ -196,8 +205,9 @@ namespace DomainShell.Test
             var command = connection.CreateCommand();
 
             command.CommandText = @"
-                drop table OrderForm
-                drop table OrderFormCanceled";
+                drop table OrderForm;
+                drop table OrderFormCanceled;
+                drop table LoginUser;";
 
             try
             {
@@ -213,24 +223,32 @@ namespace DomainShell.Test
                     OrderId int identity primary key,
                     ProductName nvarchar(100),
                     Price decimal,
+                    CreditCardCode nvarchar(100),
                     PayId nvarchar(100),
                     LastUserId nvarchar(100),
                     RecordVersion int
-                )";
+                );
 
-            command.ExecuteNonQuery();
-
-            command.CommandText = @"            
                 create table OrderFormCanceled (
-                    OrderId int identity primary key,
+                    OrderId int primary key,
                     ProductName nvarchar(100),
                     Price decimal,
+                    CreditCardCode nvarchar(100),
                     PayId nvarchar(100),
                     LastUserId nvarchar(100),
                     RecordVersion int
-                )";
+                );
 
-            command.ExecuteNonQuery();
+                create table LoginUser(
+                    UserId nvarchar(100) primary key,
+                    UserName nvarchar(100),
+                    RecordVersion int
+                );
+
+                insert into LoginUser values('xxx', 'xxx', 1);
+                insert into LoginUser values('yyy', 'yyy', 1);";
+
+            command.ExecuteNonQuery();            
 
             connection.Close();
         }
