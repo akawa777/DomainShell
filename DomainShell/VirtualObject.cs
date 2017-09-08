@@ -50,7 +50,7 @@ namespace DomainShell
             get { return _material; }
         }
 
-        public VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, string> getName = null, Func < TMaterial, PropertyInfo, object> getValue = null )
+        public virtual VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, string> getName = null, Func < TMaterial, PropertyInfo, object> getValue = null )
         {            
             string propertyName = GetPropertyName(propertyLambda);
             PropertyInfo property = GetPropertyInfo(propertyName);
@@ -61,7 +61,7 @@ namespace DomainShell
             return new InternalVirtualProperty(property, () => getName(Material, property), () => getValue(Material, property));
         }
 
-        public VirtualObject<TProperty> Get<TProperty>(string propertyName) where TProperty : class
+        public virtual VirtualObject<TProperty> Get<TProperty>(string propertyName) where TProperty : class
         {
             System.Reflection.PropertyInfo property = GetPropertyInfo(propertyName);
 
@@ -70,7 +70,7 @@ namespace DomainShell
             return new VirtualObject<TProperty>(propertyMaterial);
         }
 
-        public IEnumerable<VirtualObject<TProperty>> List<TProperty>(string propertyName) where TProperty : class
+        public virtual IEnumerable<VirtualObject<TProperty>> List<TProperty>(string propertyName) where TProperty : class
         {
             PropertyInfo property = GetPropertyInfo(propertyName);
 
@@ -79,21 +79,21 @@ namespace DomainShell
             return propertyMaterial.Select(x => new VirtualObject<TProperty>(x));
         }
 
-        public VirtualObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda) where TProperty : class
+        public virtual VirtualObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda) where TProperty : class
         {
             string propertyName = GetPropertyName(propertyLambda);
 
             return Get<TProperty>(propertyName);
         }        
 
-        public IEnumerable<VirtualObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> propertyLambda) where TProperty : class
+        public virtual IEnumerable<VirtualObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> propertyLambda) where TProperty : class
         {
             string propertyName = GetPropertyName(propertyLambda);
 
             return List<TProperty>(propertyName);
         }
 
-        public VirtualObject<TMaterial> Set(string propertyName, Func<TMaterial, PropertyInfo, object> getValue)
+        public virtual VirtualObject<TMaterial> Set(string propertyName, Func<TMaterial, PropertyInfo, object> getValue)
         {
             if (getValue == null)
             {
@@ -121,7 +121,7 @@ namespace DomainShell
             return new VirtualObject<TMaterial>(_material);
         }
 
-        public VirtualObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue)
+        public virtual VirtualObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue)
         {
             string propertyName = GetPropertyName(propertyLambda);
 

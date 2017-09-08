@@ -38,13 +38,13 @@ namespace DomainShell.Test.Domains
         UserModel Find(string userId, bool throwError = false);
     }
 
-    public interface IOrderRepository
+    public interface IOrderRepository : IWriteRepository<OrderModel>
     {
         OrderModel Find(int orderId, bool throwError = false);
         OrderModel GetLastByUser(string userId);        
     }
 
-    public interface IOrderCanceledRepository
+    public interface IOrderCanceledRepository : IWriteRepository<OrderCanceledModel> 
     {
         OrderCanceledModel Find(int orderId, bool throwError = false);
     }

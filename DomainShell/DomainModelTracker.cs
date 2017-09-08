@@ -15,33 +15,23 @@ namespace DomainShell
         public TrackPack(object model, object tag)
         {
             Model = model;
-            Graph = JsonConvert.SerializeObject(model);
             Tag = tag;
         }
 
-        public object Model { get; private set; }
-        public string Graph { get; private set; }
+        public object Model { get; private set; }        
         public object Tag { get; private set; }
-
-        public bool Modified(object model)
-        {
-            string graph = JsonConvert.SerializeObject(model);
-
-            return Model.GetType() == model.GetType() && Graph == graph;
-        }
     }
 
     public interface IDomainModelMarker
     {
-        void Mark(object domainModel);
+        void Mark<T>(T domainModel) where T : class;
     }
 
     public interface IDomainModelTracker : IDomainModelMarker
     {
-        TrackPack Get(object domainModel);
+        TrackPack Get<T>(T domainModel) where T : class;
         IEnumerable<TrackPack> GetAll();
         void Revoke();
-        bool Modified(object domainModel);
     }
 
     public static class DomainModelMarker
@@ -83,13 +73,6 @@ namespace DomainShell
 
             domainModelTracker.Revoke();
         }
-
-        public static bool Modified(object domainModel)
-        {
-            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
-
-            return domainModelTracker.Modified(domainModel);
-        }
     }
     
 
@@ -98,7 +81,7 @@ namespace DomainShell
         private OrderedDictionary _list = new OrderedDictionary();
         private object _lock = new object();
 
-        public TrackPack Get(object domainModel)
+        public virtual TrackPack Get<T>(T domainModel) where T : class
         {
             lock (_lock)
             {
@@ -111,7 +94,7 @@ namespace DomainShell
             }
         }
 
-        public IEnumerable<TrackPack> GetAll()
+        public virtual IEnumerable<TrackPack> GetAll()
         {
             lock (_lock)
             {
@@ -122,7 +105,7 @@ namespace DomainShell
             }
         }
 
-        public void Mark(object domainModel)
+        public virtual void Mark<T>(T domainModel) where T : class
         {
             lock (_lock)
             {
@@ -135,7 +118,7 @@ namespace DomainShell
             }
         }
 
-        public void Revoke()
+        public virtual void Revoke()
         {
             lock (_lock)
             {
@@ -143,16 +126,6 @@ namespace DomainShell
             }
         }
 
-        public bool Modified(object domainModel)
-        {
-            lock (_lock)
-            {
-                TrackPack trackPack = Get(domainModel);
-
-                return trackPack.Modified(domainModel);
-            }
-        }
-
-        protected abstract object CreateTag(object domainModel);
+        protected abstract object CreateTag<T>(T domainModel) where T : class;
     }
 }

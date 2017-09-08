@@ -10,17 +10,19 @@ namespace DomainShell.Test.Domains
         public OrderEventHandler(
             IOrderRepository orderRepository, 
             ICreditCardService creditCardService, 
-            IMailService mailService)
+            IMailService mailService,
+            IOrderCanceledRepository orderCanceledRepository)
         {            
             _orderRepository = orderRepository;
             _creditCardService = creditCardService;
             _mailService = mailService;
+            _orderCanceledRepository = orderCanceledRepository;
         }
         
         private IOrderRepository _orderRepository;      
         private ICreditCardService  _creditCardService;
         private IMailService _mailService;
-        private IUserRepository _userRepository;
+        private IOrderCanceledRepository _orderCanceledRepository;
 
         public void Handle(OrderCompletedOutTranEvent domainEvent)
         {
@@ -52,7 +54,9 @@ namespace DomainShell.Test.Domains
                 {
                     OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
 
-                    orderModel.CancelCompleted(_creditCardService);                    
+                    orderModel.CancelCompleted(_creditCardService);
+
+                    _orderRepository.Save(orderModel);
 
                     tran.Complete();
                 }
@@ -76,7 +80,9 @@ namespace DomainShell.Test.Domains
 
                     Map(domainEvent, orderCanceledModel);
 
-                    orderCanceledModel.Save();
+                    orderCanceledModel.Register();
+
+                    _orderCanceledRepository.Save(orderCanceledModel);
 
                     tran.Complete();
                 }

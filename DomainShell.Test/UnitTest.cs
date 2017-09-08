@@ -15,7 +15,7 @@ namespace DomainShell.Test
         [TestMethod]
         public void TestMethod()
         {
-            Bootstrap.StartUp(Bootstrap.DatabaseType.SqlServer);
+            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {

@@ -50,7 +50,7 @@ namespace DomainShell
         private List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
         private object _lock = new object();
 
-        public void PublishInTran()
+        public virtual void PublishInTran()
         {            
             IDomainEvent[] domainEvents = GetInTranEvents().ToArray();
             Remove(domainEvents);
@@ -58,7 +58,7 @@ namespace DomainShell
             HandleEvents(InTranEventScope, domainEvents);                       
         }       
 
-        public void PublishOutTran()
+        public virtual void PublishOutTran()
         {            
             IDomainEvent[] domainEvents = GetOutTranEvents().ToArray();
             Remove(domainEvents);
@@ -70,7 +70,7 @@ namespace DomainShell
             HandleEvents(OutTranEventScope, domainAsyncEvents, async: true);      
         } 
 
-        public void PublishByException(Exception exception)
+        public virtual void PublishByException(Exception exception)
         {            
             IDomainEvent[] domainEvents = GetExceptionEvents().ToArray();
             Remove(domainEvents);
@@ -78,7 +78,7 @@ namespace DomainShell
             HandleEvents(ExceptionEventScope, domainEvents, async: false, exception: exception);
         }
 
-        public void Revoke()
+        public virtual void Revoke()
         {
             _domainEvents.Clear();
         }
@@ -195,12 +195,10 @@ namespace DomainShell
             }
         }
 
-        private IDomainEventAuthor[] GetTargetDomainEventAuthors()
+        protected virtual IDomainEventAuthor[] GetTargetDomainEventAuthors()
         {
-            return DomainModelTracker.GetAll().Where(x => x.Model is IDomainEventAuthor && CanPublish(x.Model as IDomainEventAuthor)).Select(x => x.Model as IDomainEventAuthor).ToArray();
+            return DomainModelTracker.GetAll().Where(x => x.Model is IDomainEventAuthor).Select(x => x.Model as IDomainEventAuthor).ToArray();
         }
-
-        protected abstract bool CanPublish(IDomainEventAuthor author);
 
         protected abstract IDomainEventScope InTranEventScope();
         protected abstract IDomainEventScope OutTranEventScope();

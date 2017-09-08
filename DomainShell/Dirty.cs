@@ -1,30 +1,46 @@
 using System;
+using Newtonsoft.Json;
 
 namespace DomainShell
 {    
     public sealed class Dirty
     {
-        private Dirty(bool isDirty)
-        {
-            Is = isDirty;            
+        private Dirty()
+        {   
         }
 
-        private Dirty(bool isDirty, object domainModel)
+        private Dirty(object domainModel)
         {
-            Is = isDirty;
+            _domainModel = domainModel;
+            _graph = GetCurrentGraph();
+            
             DomainModelMarker.Mark(domainModel);
         }
 
-        public bool Is { get; private set; }
-
-        public static Dirty True<T>(T domainModel) where T : class
+        private object _domainModel;
+        private string _graph;
+        
+        private string GetCurrentGraph()
         {
-            return new Dirty(true, domainModel);
+            return JsonConvert.SerializeObject(_domainModel);
+        }
+        
+        public bool Is()
+        {
+            if (string.IsNullOrEmpty(_graph)) return false;
+            if (_graph == GetCurrentGraph()) return true;
+
+            throw new Exception("there was invalid modified.");
+        }        
+
+        public static Dirty Seal<T>(T domainModel) where T : class
+        {
+            return new Dirty(domainModel);
         }
 
-        public static Dirty False()
+        public static Dirty Clear()
         {
-            return new Dirty(false);
+            return new Dirty();
         }
     }
 }

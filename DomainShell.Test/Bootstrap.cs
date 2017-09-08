@@ -54,8 +54,7 @@ namespace DomainShell.Test
             container.Register<IConnection, CurrentConnection>(Lifestyle.Scoped);
             container.Register<ICurrentConnection, CurrentConnection>(Lifestyle.Scoped);
 
-            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
-            container.Register<UnitOfWork>(Lifestyle.Scoped);
+            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);            
 
             container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
             container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);

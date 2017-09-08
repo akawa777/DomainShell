@@ -88,7 +88,7 @@ namespace DomainShell
         private object _lockOpen = new object();
         private object _lockTran = new object();
 
-        public IOpenScope Open()
+        public virtual IOpenScope Open()
         {
             lock (_lockOpen)
             {
@@ -119,7 +119,7 @@ namespace DomainShell
             }
         }
 
-        public ITranScope Tran()
+        public virtual ITranScope Tran()
         {
             lock (_lockTran)
             {
@@ -164,7 +164,7 @@ namespace DomainShell
             }
         }
 
-        public void OnException(Exception exception)
+        public virtual void OnException(Exception exception)
         {
             DomainEventPublisher.PublishByException(exception);
         }

@@ -11,8 +11,6 @@ namespace DomainShell.Test.Infras
     {
         public void Save(TAggregateRoot model)
         {
-            ValidateOfInvalidModify(model);
-
             ModelState modelState = GetModelState(model);
 
             ValidateConcurrency(model, modelState);
@@ -22,16 +20,12 @@ namespace DomainShell.Test.Infras
             Save(model, modelState);
         }
 
-        private void ValidateOfInvalidModify(TAggregateRoot model)
-        {
-            if (DomainModelTracker.Modified(model)) throw new Exception("model is invalid becouse of modified.");
-        }
-
         private ModelState GetModelState(TAggregateRoot model)
         {
-            if (!model.Dirty.Is) return ModelState.Unchanged;
-            if (model.Dirty.Is && model.Deleted) return ModelState.Deleted;
-            if (model.Dirty.Is && model.RecordVersion == 0) return ModelState.Added;
+            if (model.Dirty == null) throw new ArgumentException("not init Dirty");
+            if (!model.Dirty.Is()) return ModelState.Unchanged;
+            if (model.Dirty.Is() && model.Deleted) return ModelState.Deleted;
+            if (model.Dirty.Is() && model.RecordVersion == 0) return ModelState.Added;
             else return ModelState.Modified;
         }
 
@@ -56,7 +50,7 @@ namespace DomainShell.Test.Infras
 
             vModel
                 .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
-                .Set(m => m.Dirty, (m, p) => Dirty.False());
+                .Set(m => m.Dirty, (m, p) => Dirty.Clear());
         }
 
         protected abstract TAggregateRoot Find(TAggregateRoot model);

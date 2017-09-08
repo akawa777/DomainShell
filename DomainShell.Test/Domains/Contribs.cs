@@ -26,7 +26,7 @@ namespace DomainShell.Test.Domains
 
     public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
     {
-        protected override object CreateTag(object domainModel)
+        protected override object CreateTag<T>(T domainModel)
         {
             return null;
         }
@@ -54,11 +54,6 @@ namespace DomainShell.Test.Domains
         protected override IDomainEventScope ExceptionEventScope()
         {
             return new ExceptionEventScope(_container);
-        }
-
-        protected override bool CanPublish(IDomainEventAuthor author)
-        {
-            return true;
         }
     }
 
@@ -115,15 +110,13 @@ namespace DomainShell.Test.Domains
 
     public class CurrentConnection : IConnection, ICurrentConnection
     {
-        public CurrentConnection(IDbConnection connection, UnitOfWork unitOfWork)
+        public CurrentConnection(IDbConnection connection)
         {
             _connection = connection;
-            _unitOfWork = unitOfWork;
         }
 
         private IDbConnection _connection;
         private IDbTransaction _transaction;
-        private UnitOfWork _unitOfWork;
 
         public void Open()
         {
@@ -142,7 +135,7 @@ namespace DomainShell.Test.Domains
 
         public void BeginCommit()
         {            
-            _unitOfWork.Save();
+            
         }
 
         public void Commit()
@@ -190,48 +183,5 @@ namespace DomainShell.Test.Domains
         {
             return _connection;
         }
-    }
-
-    public class UnitOfWork
-    {
-        public UnitOfWork(Container container)
-        {
-            _container = container;
-        }
-
-        private Container _container;
-
-        public void Save()
-        {
-            IAggregateRoot[] domainModels = GetDomainModels();
-            Save(domainModels);
-        }
-
-        private IAggregateRoot[] GetDomainModels()
-        {
-            Func<TrackPack, bool> filter = x => x.Model is IAggregateRoot model && model.Dirty.Is;
-            return DomainModelTracker.GetAll().Where(filter).Select(x => x.Model as IAggregateRoot).ToArray();
-        }
-
-        private void Save(IAggregateRoot[] domainModels)
-        {
-            foreach (IAggregateRoot domainModel in domainModels)
-            {
-                Save(domainModel);
-            }
-        }
-
-        private void Save(IAggregateRoot domainModel)
-        {
-            Type domainModelType;
-
-            if (domainModel is IDomainModelProxy proxy) domainModelType = proxy.GetImplementType();
-            else domainModelType = domainModel.GetType();
-
-            Type writeRepositoryType = typeof(IWriteRepository<>).MakeGenericType(domainModelType);
-            object writeRepository = _container.GetInstance(writeRepositoryType);
-            MethodInfo method = writeRepositoryType.GetMethod("Save", new Type[] { domainModelType });
-            method.Invoke(writeRepository, new object[] { domainModel });
-        }        
-    }    
+    } 
 }

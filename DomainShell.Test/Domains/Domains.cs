@@ -9,7 +9,7 @@ namespace DomainShell.Test.Domains
     {
         protected UserModel()
         {
-            Dirty = Dirty.False();
+            Dirty = Dirty.Clear();
         }
 
         public string UserId { get; private set; }
@@ -66,7 +66,7 @@ namespace DomainShell.Test.Domains
 
         protected OrderModel()
         {
-            Dirty = Dirty.False();
+            Dirty = Dirty.Clear();
         }
 
         public int OrderId { get; private set; }               
@@ -103,31 +103,31 @@ namespace DomainShell.Test.Domains
         {
             orderValidator.ValidateWhenRegister(this);
 
-            Dirty = Dirty.True(this);
+            Dirty = Dirty.Seal(this);
         }
 
         public void Cancel(IOrderValidator orderValidator)
         {
-            orderValidator.ValidateWhenCancel(this);
-
-            Dirty = Dirty.True(this);
+            orderValidator.ValidateWhenCancel(this);            
 
             Deleted = true;
 
             AddCanceledEvents();
+
+            Dirty = Dirty.Seal(this);
         }
 
         public virtual void Complete(IOrderValidator orderValidator, ICreditCardService creditCardService, string creditCardCode)
         {
             orderValidator.ValidateWhenComplete(this, creditCardCode);
 
-            CreditCardCode = creditCardCode;
-
-            Dirty = Dirty.True(this);            
+            CreditCardCode = creditCardCode;            
 
             Pay(creditCardService);
 
             AddCompletedEvents();
+
+            Dirty = Dirty.Seal(this);
         }
 
         public void SendCompletedMail(IMailService mailService)
@@ -137,9 +137,9 @@ namespace DomainShell.Test.Domains
 
         public void CancelCompleted(ICreditCardService creditCardService)
         {
-            Dirty = Dirty.True(this);
-
             CancelPay(creditCardService);
+
+            Dirty = Dirty.Seal(this);
         }
 
         private void Pay(ICreditCardService creditCardService)
@@ -181,7 +181,7 @@ namespace DomainShell.Test.Domains
 
         protected OrderCanceledModel()
         {
-            Dirty = Dirty.False();
+            Dirty = Dirty.Clear();
         }
 
         public int OrderId { get; private set; }
@@ -214,9 +214,9 @@ namespace DomainShell.Test.Domains
             _events.Clear();
         }
 
-        public void Save()
+        public void Register()
         {
-            Dirty = Dirty.True(this);
+            Dirty = Dirty.Seal(this);
         }        
     }
 
