@@ -22,15 +22,16 @@ namespace DomainShell
         
         private string GetCurrentGraph()
         {
-            return JsonConvert.SerializeObject(_domainModel);
+            return JsonConvert.SerializeObject(_domainModel, Formatting.Indented);            
         }
         
         public bool Is()
         {
+            string currentGraph = GetCurrentGraph();
             if (string.IsNullOrEmpty(_graph)) return false;
-            if (_graph == GetCurrentGraph()) return true;
+            if (_graph == currentGraph) return true;
 
-            throw new Exception("there was invalid modified.");
+            throw new Exception($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_graph}\"{Environment.NewLine}current{Environment.NewLine}\"{currentGraph}\"");
         }        
 
         public static Dirty Seal<T>(T domainModel) where T : class

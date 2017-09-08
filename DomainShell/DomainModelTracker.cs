@@ -73,8 +73,7 @@ namespace DomainShell
 
             domainModelTracker.Revoke();
         }
-    }
-    
+    }    
 
     public abstract class DomainModelTrackerFoundationBase : IDomainModelMarker, IDomainModelTracker
     {

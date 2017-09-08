@@ -137,7 +137,6 @@ namespace DomainShell
                         DomainEventPublisher.PublishInTran();
                         connection.Commit();                        
                         DomainEventPublisher.PublishOutTran();
-
                     },
                     x =>
                     {
