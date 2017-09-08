@@ -44,7 +44,7 @@ namespace DomainShell.Test.Domains
 
         public static UserValue Create(UserModel userModel)
         {
-            if (userModel == null && userModel.RecordVersion == 0) throw new ArgumentException("userModel is invalid.");
+            if (userModel == null || userModel.RecordVersion == 0 || userModel.Dirty.Is()) throw new ArgumentException("userModel is invalid.");
 
             UserValue userValue = new UserValue();
             userValue.UserId = userModel.UserId;

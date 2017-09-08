@@ -92,6 +92,8 @@ namespace DomainShell.Test.Apps
 
                     orderModel.Cancel(_orderValidator);
 
+                    _orderRepository.Save(orderModel);
+
                     tran.Complete();
                 }
             }
