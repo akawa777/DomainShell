@@ -43,7 +43,7 @@ namespace DomainShell
     {        
         void PublishInTran();
         void PublishOutTran();
-        void PublishByException(Exception exception);
+        void PublishOnException(Exception exception);
         void Revoke();
     }
 }

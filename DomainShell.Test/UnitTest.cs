@@ -47,7 +47,7 @@ namespace DomainShell.Test
 
                 order = queryApp.Find(order.OrderId);
 
-                OrderSummaryDto[] orders = queryApp.GetOrderSummary();
+                OrderSummaryDto[] orderSummaries = queryApp.GetOrderSummary();
 
                 order = queryApp.GetLastByUser("yyy");
 

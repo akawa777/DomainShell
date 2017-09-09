@@ -30,11 +30,11 @@ namespace DomainShell
             domainEventPublisher.PublishOutTran();
         }
 
-        public static void PublishByException(Exception exception)
+        public static void PublishOnException(Exception exception)
         {
             IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
             
-            domainEventPublisher.PublishByException(exception);
+            domainEventPublisher.PublishOnException(exception);
         }
 
         public static void Revoke()
@@ -70,7 +70,7 @@ namespace DomainShell
             HandleEvents(OutTranEventScope, domainAsyncEvents, async: true);      
         } 
 
-        public virtual void PublishByException(Exception exception)
+        public virtual void PublishOnException(Exception exception)
         {            
             IDomainEvent[] domainEvents = GetExceptionEvents().ToArray();
             Remove(domainEvents);

@@ -35,54 +35,54 @@ namespace DomainShell
         }
     }
 
+    internal class OpenScope : IOpenScope
+    {
+        public OpenScope(Action dispose)
+        {
+            _dispose = dispose;
+        }
+
+        private Action _dispose = () => {};
+
+        public void Dispose()
+        {   
+            _dispose();
+        }
+    }
+
+    internal class TranScope : ITranScope
+    {
+        public TranScope(Action complete, Action<bool> dispose)
+        {                
+            _complete = complete;
+            _dispose = dispose;
+        }
+
+        private Action _complete = () => {};
+        private Action<bool> _dispose = x => {};
+        private bool _completed = false;
+
+        public void Complete()
+        {                   
+            _complete();
+            _completed = true;
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                _dispose(_completed);
+            }
+            finally
+            {
+                _completed = false;
+            }
+        }
+    }
+
     public abstract class SessionFoundationBase : ISession
     {
-        private class OpenScope : IOpenScope
-        {
-            public OpenScope(Action dispose)
-            {
-                _dispose = dispose;
-            }
-
-            private Action _dispose = () => {};
-
-            public void Dispose()
-            {   
-                _dispose();
-            }
-        }
-
-        private class TranScope : ITranScope
-        {
-            public TranScope(Action complete, Action<bool> dispose)
-            {                
-                _complete = complete;
-                _dispose = dispose;
-            }
-
-            private Action _complete = () => {};
-            private Action<bool> _dispose = x => {};
-            private bool _completed = false;
-
-            public void Complete()
-            {                   
-                _complete();
-                _completed = true;
-            }
-
-            public void Dispose()
-            {
-                try
-                {
-                    _dispose(_completed);
-                }
-                finally
-                {
-                    _completed = false;
-                }
-            }
-        }
-
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
@@ -102,13 +102,16 @@ namespace DomainShell
 
                     _openScope = new OpenScope(() =>
                     {
-                        try
+                        lock (_lockOpen)
                         {
-                            connection.Close();
-                        }
-                        finally
-                        {
-                            _openScope = null;
+                            try
+                            {
+                                connection.Close();
+                            }
+                            finally
+                            {
+                                _openScope = null;
+                            }
                         }
                     });
 
@@ -133,21 +136,27 @@ namespace DomainShell
 
                     _tranScope = new TranScope(() =>
                     {
-                        connection.BeginCommit();
-                        DomainEventPublisher.PublishInTran();
-                        connection.Commit();                        
-                        DomainEventPublisher.PublishOutTran();
+                        lock (_lockTran)
+                        {
+                            connection.BeginCommit();
+                            DomainEventPublisher.PublishInTran();
+                            connection.Commit();                        
+                            DomainEventPublisher.PublishOutTran();
+                        }
                     },
                     x =>
                     {
-                        try
+                        lock (_lockTran)
                         {
-                            connection.DisposeTran(x);
-                        }
-                        finally
-                        {
-                            _tranScope = null;
-                            openScope.Dispose();
+                            try
+                            {
+                                connection.DisposeTran(x);
+                            }
+                            finally
+                            {
+                                _tranScope = null;
+                                openScope.Dispose();
+                            }
                         }
                     });
 
@@ -165,7 +174,7 @@ namespace DomainShell
 
         public virtual void OnException(Exception exception)
         {
-            DomainEventPublisher.PublishByException(exception);
+            DomainEventPublisher.PublishOnException(exception);
         }
 
         protected abstract IConnection GetConnection();

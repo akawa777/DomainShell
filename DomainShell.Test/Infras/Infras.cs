@@ -22,7 +22,7 @@ namespace DomainShell.Test.Infras
 
         private ModelState GetModelState(TAggregateRoot model)
         {
-            if (model.Dirty == null) throw new ArgumentException("not init Dirty");
+            if (model.Dirty == null) throw new ArgumentException("not Initialized Dirty");
             if (!model.Dirty.Is()) return ModelState.Unchanged;
             if (model.Dirty.Is() && model.Deleted) return ModelState.Deleted;
             if (model.Dirty.Is() && model.RecordVersion == 0) return ModelState.Added;

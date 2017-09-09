@@ -28,7 +28,7 @@ namespace DomainShell
         public bool Is()
         {
             string currentGraph = GetCurrentGraph();
-            if (string.IsNullOrEmpty(_graph)) return false;
+            if (_domainModel == null) return false;
             if (_graph == currentGraph) return true;
 
             throw new Exception($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_graph}\"{Environment.NewLine}current{Environment.NewLine}\"{currentGraph}\"");
