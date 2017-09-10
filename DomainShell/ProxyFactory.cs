@@ -5,6 +5,11 @@ using System.Reflection;
 
 namespace DomainShell
 {
+    public interface IDomainModelProxy
+    {
+        Type GetImplementType();
+    }
+    
     public interface IDomainModelProxyFactory
     {
         T Create<T>() where T : class;
@@ -14,9 +19,9 @@ namespace DomainShell
     {
         private static Func<IDomainModelProxyFactory> _getDomainModelProxyFactory;
 
-        public static void Startup(Func<IDomainModelProxyFactory> getDomainModelProxyFactory)
+        public static void Startup(Func<IDomainModelProxyFactory> getDomainModelProxyFactoryByCurrentThread)
         {
-            _getDomainModelProxyFactory = getDomainModelProxyFactory;
+            _getDomainModelProxyFactory = getDomainModelProxyFactoryByCurrentThread;
         }
 
         public static T Create<T>() where T : class
@@ -24,11 +29,5 @@ namespace DomainShell
             IDomainModelProxyFactory domainModelProxyFactory = _getDomainModelProxyFactory();
             return domainModelProxyFactory.Create<T>();
         }
-    }
-
-
-    public interface IDomainModelProxy
-    {
-        Type GetImplementType();
     }
 }

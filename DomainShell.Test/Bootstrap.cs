@@ -45,25 +45,28 @@ namespace DomainShell.Test
         {
             Container container = new Container();
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
-            
-            container.Register<IDomainModelMarker, DomainModelTrackerFoundation>(Lifestyle.Scoped);
+
+            // start up for DomainShell >>
+            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
             container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);            
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
-
-            container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);
             container.Register<IConnection, CurrentConnection>(Lifestyle.Scoped);
+            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped); 
+
+            DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);            
+            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);            
+            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
+            Session.Startup(container.GetInstance<ISession>);   
+            // <<
+                        
+            container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
             container.Register<ICurrentConnection, CurrentConnection>(Lifestyle.Scoped);
 
-            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);            
-
-            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
             container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
-            container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);            
-            container.Register<IWriteRepository<OrderModel>, OrderRepository>(Lifestyle.Scoped);
+            container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped); 
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
-            container.Register<IWriteRepository<OrderCanceledModel>, OrderCanceledRepository>(Lifestyle.Scoped);
             container.Register<IOrderSummaryReader, OrderSummaryReader>(Lifestyle.Scoped);
 
             container.Register<IOrderValidator, OrderValidator>(Lifestyle.Scoped);
@@ -75,14 +78,8 @@ namespace DomainShell.Test
             container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
-            container.Register<OrderQueryApp>(Lifestyle.Scoped);            
+            container.Register<OrderQueryApp>(Lifestyle.Scoped);                      
             
-            DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);
-            DomainModelMarker.Startup(container.GetInstance<IDomainModelMarker>);
-            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);            
-            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
-            Session.Startup(container.GetInstance<ISession>);
-
             container.Verify();
             Container = container;
         }

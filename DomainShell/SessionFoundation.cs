@@ -11,9 +11,9 @@ namespace DomainShell
     {
         private static Func<ISession> _getSession;
 
-        public static void Startup(Func<ISession> getSession)
+        public static void Startup(Func<ISession> getSessionByCurrentThread)
         {
-            _getSession = getSession;
+            _getSession = getSessionByCurrentThread;
         }
 
         public static IOpenScope Open()

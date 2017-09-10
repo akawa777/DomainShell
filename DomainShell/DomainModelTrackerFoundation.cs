@@ -10,30 +10,27 @@ using System.Collections.Specialized;
 
 namespace DomainShell
 {
-    public static class DomainModelMarker
-    {
-        private static Func<IDomainModelMarker> _getDomainModelMarker;
-
-        public static void Startup(Func<IDomainModelMarker> getDomainModelMarker)
-        {            
-            _getDomainModelMarker = getDomainModelMarker;
-        }
-
-        public static void Mark(object domainModel)
-        {
-            IDomainModelMarker domainModelMarker = _getDomainModelMarker();
-            
-            domainModelMarker.Mark(domainModel);
-        }
-    }
-
     public static class DomainModelTracker
     {
         private static Func<IDomainModelTracker> _getDomainModelTracker;
 
-        public static void Startup(Func<IDomainModelTracker> getDomainModelTracker)
+        public static void Startup(Func<IDomainModelTracker> getDomainModelTrackerByCurrentThread)
         {
-            _getDomainModelTracker = getDomainModelTracker;
+            _getDomainModelTracker = getDomainModelTrackerByCurrentThread;
+        }
+
+        public static void Mark(object domainModel)
+        {
+            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
+            
+            domainModelTracker.Mark(domainModel);
+        }
+
+        public static TrackPack Get<T>(T domainModel) where T : class
+        {
+            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
+            
+            return domainModelTracker.Get(domainModel);
         }
 
         public static IEnumerable<TrackPack> GetAll()
@@ -51,7 +48,7 @@ namespace DomainShell
         }
     }    
 
-    public abstract class DomainModelTrackerFoundationBase : IDomainModelMarker, IDomainModelTracker
+    public abstract class DomainModelTrackerFoundationBase : IDomainModelTracker
     {
         private OrderedDictionary _list = new OrderedDictionary();
         private object _lock = new object();

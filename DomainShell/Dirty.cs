@@ -14,7 +14,7 @@ namespace DomainShell
             _domainModel = domainModel;
             _graph = GetCurrentGraph();
             
-            DomainModelMarker.Mark(domainModel);
+            DomainModelTracker.Mark(domainModel);
         }
 
         private object _domainModel;

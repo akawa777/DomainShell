@@ -11,9 +11,9 @@ namespace DomainShell
     {
         private static Func<IDomainEventPublisher> _getDomainEventPublisher;
 
-        public static void Startup(Func<IDomainEventPublisher> getDomainEventPublisher)
+        public static void Startup(Func<IDomainEventPublisher> getDomainEventPublisherByCurrentThread)
         {            
-            _getDomainEventPublisher = getDomainEventPublisher;
+            _getDomainEventPublisher = getDomainEventPublisherByCurrentThread;
         }
 
         public static void PublishInTran()

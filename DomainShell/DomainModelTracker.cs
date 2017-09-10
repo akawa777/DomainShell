@@ -22,13 +22,9 @@ namespace DomainShell
         public object Tag { get; private set; }
     }
 
-    public interface IDomainModelMarker
+    public interface IDomainModelTracker
     {
         void Mark<T>(T domainModel) where T : class;
-    }
-
-    public interface IDomainModelTracker : IDomainModelMarker
-    {
         TrackPack Get<T>(T domainModel) where T : class;
         IEnumerable<TrackPack> GetAll();
         void Revoke();
