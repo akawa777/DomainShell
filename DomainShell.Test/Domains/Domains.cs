@@ -21,18 +21,6 @@ namespace DomainShell.Test.Domains
         public Dirty Dirty { get; private set; }
 
         public bool Deleted { get; private set; }
-
-        private List<IDomainEvent> _events = new List<IDomainEvent>();
-
-        public IEnumerable<IDomainEvent> GetEvents()
-        {
-            return _events;
-        }
-
-        public void ClearEvents()
-        {
-            _events.Clear();
-        }
     }
 
     public class UserValue
@@ -55,7 +43,7 @@ namespace DomainShell.Test.Domains
         public string UserId { get; private set; }
     }
 
-    public class OrderModel : IAggregateRoot
+    public class OrderModel : IAggregateRoot, IDomainEventAuthor
     {
         public static OrderModel NewOrder()
         {
@@ -201,18 +189,6 @@ namespace DomainShell.Test.Domains
         public Dirty Dirty { get; private set; }
 
         public bool Deleted { get; private set; }
-
-        private List<IDomainEvent> _events = new List<IDomainEvent>();
-
-        public IEnumerable<IDomainEvent> GetEvents()
-        {
-            return _events;
-        }
-
-        public void ClearEvents()
-        {
-            _events.Clear();
-        }
 
         public void Register()
         {

@@ -6,12 +6,12 @@ using System.Data;
 
 namespace DomainShell.Test.Domains
 {
-    public interface ICurrentConnection
+    public interface IConnection
     {
         IDbCommand CreateCommand();
     }
 
-    public interface IAggregateRoot : IDomainEventAuthor
+    public interface IAggregateRoot
     {
         int RecordVersion { get; }
 

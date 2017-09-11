@@ -49,8 +49,7 @@ namespace DomainShell.Test
             // start up for DomainShell >>
             container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
             container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);            
-            container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);
-            container.Register<IConnection, CurrentConnection>(Lifestyle.Scoped);
+            container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);            
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped); 
 
             DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);            
@@ -60,7 +59,7 @@ namespace DomainShell.Test
             // <<
                         
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
-            container.Register<ICurrentConnection, CurrentConnection>(Lifestyle.Scoped);
+            container.Register<IConnection, Connection>(Lifestyle.Scoped);            
 
             container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
 

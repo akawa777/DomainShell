@@ -106,11 +106,25 @@ namespace DomainShell.Test.Domains
             
         }
     }
-    
 
-    public class CurrentConnection : IConnection, ICurrentConnection
+    public class Connection : IConnection
     {
-        public CurrentConnection(IDbConnection connection)
+        public Connection(IDbConnection connection)
+        {
+            _connection = connection;
+        }
+
+        private IDbConnection _connection;
+
+        public IDbCommand CreateCommand()
+        {
+            return _connection.CreateCommand();
+        }
+    }
+
+    public class SessionFoundation : SessionFoundationBase
+    {
+        public SessionFoundation(IDbConnection connection)
         {
             _connection = connection;
         }
@@ -118,43 +132,38 @@ namespace DomainShell.Test.Domains
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
-        public void Open()
+        public override void BeginOpen()
         {
             _connection.Open();
         }
 
-        public void Close()
+        public override void Close()
         {
             _connection.Close();
         }
 
-        public void BeginTran()
+        public override void BeginTran()
         {
             _transaction = _connection.BeginTransaction();
         }
 
-        public void BeginCommit()
-        {            
-            
-        }
-
-        public void Commit()
+        public override void Commit()
         {
             _transaction.Commit();
         }
 
-        public void Rollback()
+        public override void Rollback()
         {
             _transaction.Rollback();
         }
 
-        public void DisposeTran(bool completed)
+        public override void DisposeTran(bool completed)
         {
             _transaction.Dispose();
             _transaction = null;
         }
 
-        public void Dispose()
+        public override void DisposeOpen()
         {
             _connection.Dispose();
         }
@@ -165,23 +174,6 @@ namespace DomainShell.Test.Domains
             command.Transaction = _transaction;
 
             return command;
-        }        
-    }
-
-    public class SessionFoundation : SessionFoundationBase
-    {
-        public SessionFoundation(IConnection connection)
-        {
-
-            _connection = connection;
-        }
-
-        private IConnection _connection;
-        
-
-        protected override IConnection GetConnection()
-        {
-            return _connection;
         }
     } 
 }

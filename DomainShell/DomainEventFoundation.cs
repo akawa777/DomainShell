@@ -11,13 +11,23 @@ namespace DomainShell
     {
         private static Func<IDomainEventPublisher> _getDomainEventPublisher;
 
-        public static void Startup(Func<IDomainEventPublisher> getDomainEventPublisherByCurrentThread)
+        public static void Startup(Func<IDomainEventPublisher> getDomainEventPublisherPerThread)
         {            
-            _getDomainEventPublisher = getDomainEventPublisherByCurrentThread;
+            _getDomainEventPublisher = getDomainEventPublisherPerThread;
+        }
+
+        private static void Validate()
+        {
+            if (_getDomainEventPublisher == null)
+            {
+                throw new InvalidOperationException("StratUp not runninng.");
+            }
         }
 
         public static void PublishInTran()
         {
+            Validate();
+
             IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
             
             domainEventPublisher.PublishInTran();
@@ -25,6 +35,8 @@ namespace DomainShell
 
         public static void PublishOutTran()
         {
+            Validate();
+
             IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
             
             domainEventPublisher.PublishOutTran();
@@ -32,6 +44,8 @@ namespace DomainShell
 
         public static void PublishOnException(Exception exception)
         {
+            Validate();
+
             IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
             
             domainEventPublisher.PublishOnException(exception);
@@ -39,6 +53,8 @@ namespace DomainShell
 
         public static void Revoke()
         {
+            Validate();
+
             IDomainEventPublisher domainEventPublisher = _getDomainEventPublisher();
 
             domainEventPublisher.Revoke();

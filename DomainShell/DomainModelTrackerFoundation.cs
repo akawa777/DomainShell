@@ -14,13 +14,23 @@ namespace DomainShell
     {
         private static Func<IDomainModelTracker> _getDomainModelTracker;
 
-        public static void Startup(Func<IDomainModelTracker> getDomainModelTrackerByCurrentThread)
+        public static void Startup(Func<IDomainModelTracker> getDomainModelTrackerPerThread)
         {
-            _getDomainModelTracker = getDomainModelTrackerByCurrentThread;
+            _getDomainModelTracker = getDomainModelTrackerPerThread;
+        }
+
+        private static void Validate()
+        {
+            if (_getDomainModelTracker == null)
+            {
+                throw new InvalidOperationException("StratUp not runninng.");
+            }
         }
 
         public static void Mark(object domainModel)
         {
+            Validate();
+
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
             
             domainModelTracker.Mark(domainModel);
@@ -28,6 +38,8 @@ namespace DomainShell
 
         public static TrackPack Get<T>(T domainModel) where T : class
         {
+            Validate();
+
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
             
             return domainModelTracker.Get(domainModel);
@@ -35,6 +47,8 @@ namespace DomainShell
 
         public static IEnumerable<TrackPack> GetAll()
         {
+            Validate();
+
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
 
             return domainModelTracker.GetAll();
@@ -42,6 +56,8 @@ namespace DomainShell
 
         public static void Revoke()
         {
+            Validate();
+
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
 
             domainModelTracker.Revoke();

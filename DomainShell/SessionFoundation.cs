@@ -11,25 +11,39 @@ namespace DomainShell
     {
         private static Func<ISession> _getSession;
 
-        public static void Startup(Func<ISession> getSessionByCurrentThread)
+        public static void Startup(Func<ISession> getSessionPerThread)
         {
-            _getSession = getSessionByCurrentThread;
+            _getSession = getSessionPerThread;
+        }
+
+        private static void Validate()
+        {
+            if (_getSession == null)
+            {
+                throw new InvalidOperationException("StratUp not runninng.");
+            }
         }
 
         public static IOpenScope Open()
         {
+            Validate();
+
             ISession session = _getSession();
             return session.Open();
         }
 
         public static ITranScope Tran()
         {
+            Validate();
+
             ISession session = _getSession();
             return session.Tran();
         }
 
         public static void OnException(Exception exception)
         {
+            Validate();
+
             ISession session = _getSession();
             session.OnException(exception);
         }
@@ -81,7 +95,7 @@ namespace DomainShell
         }
     }
 
-    public abstract class SessionFoundationBase : ISession
+    public abstract class SessionFoundationBase : ISession, IDisposable
     {
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
@@ -97,8 +111,7 @@ namespace DomainShell
                     DomainModelTracker.Revoke();
                     DomainEventPublisher.Revoke();
 
-                    IConnection connection = GetConnection();
-                    connection.Open();
+                    BeginOpen();
 
                     _openScope = new OpenScope(() =>
                     {
@@ -106,7 +119,7 @@ namespace DomainShell
                         {
                             try
                             {
-                                connection.Close();
+                                Close();
                             }
                             finally
                             {
@@ -128,20 +141,18 @@ namespace DomainShell
             {
                 IOpenScope openScope = Open();
 
-                IConnection connection = GetConnection();                
-
                 if (_tranScope == null)
                 {
-                    connection.BeginTran();
+                    BeginTran();
 
                     _tranScope = new TranScope(() =>
                     {
                         lock (_lockTran)
                         {
-                            connection.BeginCommit();
-                            DomainEventPublisher.PublishInTran();
-                            connection.Commit();                        
-                            DomainEventPublisher.PublishOutTran();
+                            BeginCommit();
+                            PublishDomainEventInTran();
+                            Commit();
+                            PublishDomainEventOutTran();
                         }
                     },
                     x =>
@@ -150,7 +161,7 @@ namespace DomainShell
                         {
                             try
                             {
-                                connection.DisposeTran(x);
+                                DisposeTran(x);
                             }
                             finally
                             {
@@ -165,18 +176,49 @@ namespace DomainShell
 
                 return new TranScope(() =>
                 {
-                    connection.BeginCommit();
-                    DomainEventPublisher.PublishInTran();  
+                    BeginCommit();
+                    PublishDomainEventInTran();
                 },
                 x => { });
             }
         }
 
+        public virtual void Dispose()
+        {
+            DisposeOpen();
+        }
+
         public virtual void OnException(Exception exception)
+        {   
+            PublishDomainEventOnException(exception);
+        }
+
+        public abstract void BeginOpen();        
+        public abstract void BeginTran();
+        public abstract void Commit();
+        public abstract void Rollback();
+        public abstract void DisposeTran(bool completed);
+        public abstract void Close();
+        public abstract void DisposeOpen();
+
+        protected virtual void BeginCommit()
+        {
+
+        }
+
+        protected virtual void PublishDomainEventInTran()
+        {
+            DomainEventPublisher.PublishInTran();
+        }
+
+        protected virtual void PublishDomainEventOutTran()
+        {
+            DomainEventPublisher.PublishOutTran();
+        }
+
+        protected virtual void PublishDomainEventOnException(Exception exception)
         {
             DomainEventPublisher.PublishOnException(exception);
         }
-
-        protected abstract IConnection GetConnection();
     }   
 }

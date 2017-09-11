@@ -23,16 +23,4 @@ namespace DomainShell
     {
         void Complete();
     }
-
-    public interface IConnection
-    {
-        void Open();
-        void Close();
-        void BeginTran();
-        void BeginCommit();
-        void Commit();
-        void Rollback();
-        void DisposeTran(bool completed);
-        void Dispose();
-    }
 }

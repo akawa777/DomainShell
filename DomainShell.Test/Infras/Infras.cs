@@ -84,12 +84,12 @@ namespace DomainShell.Test.Infras
 
     public class UserRepository : IUserRepository
     {
-        public UserRepository(ICurrentConnection connection)
+        public UserRepository(IConnection connection)
         {
             _connection = connection;
         }
 
-        private ICurrentConnection _connection;
+        private IConnection _connection;
 
         public UserModel Find(string userId, bool throwError = false)
         {
@@ -150,12 +150,12 @@ namespace DomainShell.Test.Infras
 
     public class OrderRepository : WriteRepository<OrderModel>, IOrderRepository
     {
-        public OrderRepository(ICurrentConnection connection)
+        public OrderRepository(IConnection connection)
         {
             _connection = connection;
         }
 
-        private ICurrentConnection _connection;         
+        private IConnection _connection;         
 
         public OrderModel Find(int orderId, bool throwError = false)
         {  
@@ -397,12 +397,12 @@ namespace DomainShell.Test.Infras
 
     public class OrderCanceledRepository : WriteRepository<OrderCanceledModel>, IOrderCanceledRepository
     {
-        public OrderCanceledRepository(ICurrentConnection connection)
+        public OrderCanceledRepository(IConnection connection)
         {
             _connection = connection;            
         }
 
-        private ICurrentConnection _connection;
+        private IConnection _connection;
 
         public OrderCanceledModel Find(int orderId, bool throwError = false)
         {
@@ -606,12 +606,12 @@ namespace DomainShell.Test.Infras
 
     public class OrderSummaryReader : IOrderSummaryReader
     {
-        public OrderSummaryReader(ICurrentConnection connection)
+        public OrderSummaryReader(IConnection connection)
         {
             _connection = connection;
         }
 
-        private ICurrentConnection _connection;
+        private IConnection _connection;
 
         public IEnumerable<OrderSummaryValue> GetSummary()
         {
