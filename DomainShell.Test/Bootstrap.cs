@@ -47,7 +47,7 @@ namespace DomainShell.Test
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
 
             // start up for DomainShell >>
-            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryImpl>(Lifestyle.Scoped);
+            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryFoundation>(Lifestyle.Scoped);
             container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);            
             container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);            
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped); 

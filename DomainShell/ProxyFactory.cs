@@ -14,30 +14,4 @@ namespace DomainShell
     {
         T Create<T>() where T : class;
     }
-
-    public static class DomainModelProxyFactory
-    {
-        private static Func<IDomainModelProxyFactory> _getDomainModelProxyFactory;
-
-        public static void Startup(Func<IDomainModelProxyFactory> getDomainModelProxyFactoryPerThread)
-        {            
-            _getDomainModelProxyFactory = getDomainModelProxyFactoryPerThread;
-        }
-
-        private static void Validate()
-        {
-            if (_getDomainModelProxyFactory == null)
-            {
-                throw new InvalidOperationException("StratUp not runninng.");
-            }
-        }
-
-        public static T Create<T>() where T : class
-        {
-            Validate();
-
-            IDomainModelProxyFactory domainModelProxyFactory = _getDomainModelProxyFactory();
-            return domainModelProxyFactory.Create<T>();
-        }
-    }
 }

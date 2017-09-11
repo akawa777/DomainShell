@@ -9,16 +9,16 @@ using System.Reflection;
 
 namespace DomainShell.Test.Domains
 {
-    public class DomainModelProxyFactoryImpl : IDomainModelProxyFactory
+    public class DomainModelProxyFactoryFoundation : DomainModelProxyFactoryFoundationBase
     {
-        public DomainModelProxyFactoryImpl(Container container)
+        public DomainModelProxyFactoryFoundation(Container container)
         {
             _container = container;
         }
 
         private Container _container;
 
-        public T Create<T>() where T : class
+        protected override T CreateProxy<T>()
         {
             return _container.GetInstance<T>();
         }
