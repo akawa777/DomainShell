@@ -12,26 +12,26 @@ namespace DomainShell
         private Dirty(object domainModel)
         {
             _domainModel = domainModel;
-            _graph = GetCurrentGraph();
+            _serializedData = SerializeData();
             
             DomainModelTracker.Mark(domainModel);
         }
 
         private object _domainModel;
-        private string _graph;
+        private string _serializedData;
         
-        private string GetCurrentGraph()
+        private string SerializeData()
         {
             return JsonConvert.SerializeObject(_domainModel, Formatting.Indented);            
         }
         
         public bool Is()
         {
-            string currentGraph = GetCurrentGraph();
+            string serializedData = SerializeData();
             if (_domainModel == null) return false;
-            if (_graph == currentGraph) return true;
+            if (_serializedData == serializedData) return true;
 
-            throw new Exception($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_graph}\"{Environment.NewLine}current{Environment.NewLine}\"{currentGraph}\"");
+            throw new Exception($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_serializedData}\"{Environment.NewLine}current{Environment.NewLine}\"{serializedData}\"");
         }        
 
         public static Dirty Seal<T>(T domainModel) where T : class
