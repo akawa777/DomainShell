@@ -132,48 +132,40 @@ namespace DomainShell.Test.Domains
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
-        public override void BeginOpen()
+        protected override void BeginOpen()
         {
             _connection.Open();
         }
-
-        public override void Close()
-        {
-            _connection.Close();
-        }
-
-        public override void BeginTran()
+        protected override void BeginTran()
         {
             _transaction = _connection.BeginTransaction();
         }
 
-        public override void Commit()
+        protected override void Save()
         {
-            _transaction.Commit();
+
         }
 
-        public override void Rollback()
+        protected override void EndTran(bool completed)
         {
-            _transaction.Rollback();
+            if (completed)
+            {
+                _transaction.Commit();                
+            }
+            else
+            {
+                _transaction.Rollback();
+            }
+        }
+        protected override void EndOpen()
+        {
+            _connection.Close();
         }
 
-        public override void DisposeTran(bool completed)
+        public override void Dispose()
         {
-            _transaction.Dispose();
-            _transaction = null;
-        }
-
-        public override void DisposeOpen()
-        {
+            if (_transaction != null) _transaction.Dispose();            
             _connection.Dispose();
         }
-
-        public IDbCommand CreateCommand()
-        {
-            IDbCommand command = _connection.CreateCommand();
-            command.Transaction = _transaction;
-
-            return command;
-        }
-    } 
+    }
 }

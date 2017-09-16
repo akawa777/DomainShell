@@ -9,7 +9,7 @@ namespace DomainShell.Test.Domains
     {
         protected UserModel()
         {
-            Dirty = Dirty.Clear();
+            
         }
 
         public string UserId { get; private set; }
@@ -54,7 +54,7 @@ namespace DomainShell.Test.Domains
 
         protected OrderModel()
         {
-            Dirty = Dirty.Clear();
+            
         }
 
         public int OrderId { get; private set; }               
@@ -166,10 +166,9 @@ namespace DomainShell.Test.Domains
             return orderCanceledModel;
         }
 
-
         protected OrderCanceledModel()
         {
-            Dirty = Dirty.Clear();
+            
         }
 
         public int OrderId { get; private set; }

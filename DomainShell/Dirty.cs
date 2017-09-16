@@ -3,16 +3,12 @@ using Newtonsoft.Json;
 
 namespace DomainShell
 {    
-    public sealed class Dirty
+    public struct Dirty
     {
-        private Dirty()
-        {   
-        }
-
         private Dirty(object domainModel)
         {
             _domainModel = domainModel;
-            _serializedData = SerializeData();
+            _serializedData = SerializeData(_domainModel);
             
             DomainModelTracker.Mark(domainModel);
         }
@@ -20,15 +16,16 @@ namespace DomainShell
         private object _domainModel;
         private string _serializedData;
         
-        private string SerializeData()
+        private static string SerializeData(object domainMpdel)
         {
-            return JsonConvert.SerializeObject(_domainModel, Formatting.Indented);            
+            return JsonConvert.SerializeObject(domainMpdel, Formatting.Indented);            
         }
         
         public bool Is()
         {
-            string serializedData = SerializeData();
             if (_domainModel == null) return false;
+
+            string serializedData = SerializeData(_domainModel);
             if (_serializedData == serializedData) return true;
 
             throw new Exception($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_serializedData}\"{Environment.NewLine}current{Environment.NewLine}\"{serializedData}\"");

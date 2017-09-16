@@ -66,19 +66,16 @@ namespace DomainShell
 
     internal class TranScope : ITranScope
     {
-        public TranScope(Action complete, Action<bool> dispose)
-        {                
-            _complete = complete;
+        public TranScope(Action<bool> dispose)
+        {   
             _dispose = dispose;
         }
 
-        private Action _complete = () => {};
         private Action<bool> _dispose = x => {};
         private bool _completed = false;
 
         public void Complete()
-        {                   
-            _complete();
+        {   
             _completed = true;
         }
 
@@ -119,7 +116,7 @@ namespace DomainShell
                         {
                             try
                             {
-                                Close();
+                                EndOpen();
                             }
                             finally
                             {
@@ -145,23 +142,24 @@ namespace DomainShell
                 {
                     BeginTran();
 
-                    _tranScope = new TranScope(() =>
-                    {
-                        lock (_lockTran)
-                        {
-                            BeginCommit();
-                            PublishDomainEventInTran();
-                            Commit();
-                            PublishDomainEventOutTran();
-                        }
-                    },
-                    x =>
+                    _tranScope = new TranScope(
+                    completed =>
                     {
                         lock (_lockTran)
                         {
                             try
                             {
-                                DisposeTran(x);
+                                if (completed)
+                                {
+                                    Save();
+                                    PublishDomainEventInTran();
+                                    EndTran(completed);
+                                    PublishDomainEventOutTran();                                    
+                                }
+                                else
+                                {
+                                    EndTran(completed);
+                                }
                             }
                             finally
                             {
@@ -174,18 +172,16 @@ namespace DomainShell
                     return _tranScope;
                 }
 
-                return new TranScope(() =>
+                return new TranScope(
+                completed => 
                 {
-                    BeginCommit();
-                    PublishDomainEventInTran();
-                },
-                x => { });
+                    if (completed)
+                    {
+                        Save();
+                        PublishDomainEventInTran();
+                    }
+                });
             }
-        }
-
-        public virtual void Dispose()
-        {
-            DisposeOpen();
         }
 
         public virtual void OnException(Exception exception)
@@ -193,19 +189,12 @@ namespace DomainShell
             PublishDomainEventOnException(exception);
         }
 
-        public abstract void BeginOpen();        
-        public abstract void BeginTran();
-        public abstract void Commit();
-        public abstract void Rollback();
-        public abstract void DisposeTran(bool completed);
-        public abstract void Close();
-        public abstract void DisposeOpen();
-
-        protected virtual void BeginCommit()
-        {
-
-        }
-
+        protected abstract void BeginOpen();        
+        protected abstract void BeginTran();
+        protected abstract void Save();
+        protected abstract void EndTran(bool completed);
+        protected abstract void EndOpen();
+        public abstract void Dispose();
         protected virtual void PublishDomainEventInTran()
         {
             DomainEventPublisher.PublishInTran();

@@ -40,7 +40,7 @@ namespace DomainShell.Test.Apps
 
                     Map(orderDto, orderModel);
 
-                    orderModel.Register(_orderValidator);
+                    orderModel.Register(_orderValidator);                    
 
                     _orderRepository.Save(orderModel);
 
@@ -93,8 +93,6 @@ namespace DomainShell.Test.Apps
                     orderModel.Cancel(_orderValidator);
 
                     _orderRepository.Save(orderModel);
-
-                    tran.Complete();
                 }
             }
             catch (Exception e)
