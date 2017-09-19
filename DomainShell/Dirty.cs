@@ -5,12 +5,20 @@ namespace DomainShell
 {    
     public struct Dirty
     {
-        private Dirty(object domainModel)
+        private Dirty(object domainModel, bool isClear = false)
         {
-            _domainModel = domainModel;
-            _serializedData = SerializeData(_domainModel);
-            
-            DomainModelTracker.Mark(domainModel);
+            if (isClear)
+            {
+                _domainModel = null;
+                _serializedData = null;
+            }
+            else
+            {
+                _domainModel = domainModel;
+                _serializedData = SerializeData(_domainModel);
+
+                DomainModelTracker.Mark(domainModel);
+            }
         }
 
         private object _domainModel;
@@ -36,9 +44,9 @@ namespace DomainShell
             return new Dirty(domainModel);
         }
 
-        public static Dirty Clear()
+        public static Dirty Clear<T>(T domainModel) where T : class
         {
-            return new Dirty();
+            return new Dirty(domainModel, isClear: true);
         }
     }
 }

@@ -72,7 +72,7 @@ namespace DomainShell.Test
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
             container.Register<IMailService, MailService>(Lifestyle.Scoped);
 
-            container.Register<IDomainEventHandler<OrderCompletedOutTranEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderEventHandler>(Lifestyle.Scoped);
             container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
             container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
 

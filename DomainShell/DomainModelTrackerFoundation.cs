@@ -54,13 +54,22 @@ namespace DomainShell
             return domainModelTracker.GetAll();
         }
 
-        public static void Revoke()
+        public static void Revoke<T>(T domainModel) where T : class
         {
             Validate();
 
             IDomainModelTracker domainModelTracker = _getDomainModelTracker();
 
-            domainModelTracker.Revoke();
+            domainModelTracker.Revoke(domainModel);
+        }
+
+        public static void RevokeAll()
+        {
+            Validate();
+
+            IDomainModelTracker domainModelTracker = _getDomainModelTracker();
+
+            domainModelTracker.RevokeAll();
         }
     }    
 
@@ -106,7 +115,20 @@ namespace DomainShell
             }
         }
 
-        public virtual void Revoke()
+        public virtual void Revoke<T>(T domainModel) where T : class
+        {
+            lock (_lock)
+            {
+                if (!_list.Contains(domainModel))
+                {
+                    throw new ArgumentException("domainModel is not marked.");
+                }
+
+                _list.Remove(domainModel);
+            }
+        }
+
+        public virtual void RevokeAll()
         {
             lock (_lock)
             {

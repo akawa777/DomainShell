@@ -105,7 +105,7 @@ namespace DomainShell
             {
                 if (_openScope == null)
                 {
-                    DomainModelTracker.Revoke();
+                    DomainModelTracker.RevokeAll();
                     DomainEventPublisher.Revoke();
 
                     BeginOpen();
@@ -195,6 +195,7 @@ namespace DomainShell
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
         public abstract void Dispose();
+
         protected virtual void PublishDomainEventInTran()
         {
             DomainEventPublisher.PublishInTran();

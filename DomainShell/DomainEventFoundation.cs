@@ -107,7 +107,12 @@ namespace DomainShell
                 {
                     foreach (IDomainEvent domainEvent in domainEvents)
                     {
-                        if (domainEvent is IDomainExceptionEvent exceptionEvent) exceptionEvent.Exception = exception;
+                        if (domainEvent.Mode.Format == DomainEventFormat.AtException && exception != null)
+                        {
+                            FieldInfo field = domainEvent.Mode.GetType().GetField("_exception", BindingFlags.Instance | BindingFlags.NonPublic);
+                            field.SetValue(domainEvent.Mode, exception);
+                        }
+
                         HandleEvent(scope, domainEvent);
                     }
                 }
@@ -160,9 +165,7 @@ namespace DomainShell
         {
             Func<IDomainEvent, bool> isSatisfy = e =>
             {
-                if (e is IDomainExceptionEvent) return false;
-                if (e is IDomainOutTranEvent) return false;
-                else return true;
+                return e.Mode.Format == DomainEventFormat.InTran;
             };
 
             return GetDomainEvents().Where(isSatisfy);
@@ -172,9 +175,7 @@ namespace DomainShell
         {
             Func<IDomainEvent, bool> isSatisfy = e =>
             {
-                if (e is IDomainExceptionEvent) return false;
-                if (e is IDomainOutTranEvent outTranEvent && !outTranEvent.Async) return true;
-                else return false;
+                return e.Mode.Format == DomainEventFormat.OutTran;
             };
 
             return GetDomainEvents().Where(isSatisfy);
@@ -184,9 +185,7 @@ namespace DomainShell
         {
             Func<IDomainEvent, bool> isSatisfy = e =>
             {
-                if (e is IDomainExceptionEvent) return false;
-                if (e is IDomainOutTranEvent outTranEvent && outTranEvent.Async) return true;
-                else return false;
+                return e.Mode.Format == DomainEventFormat.ByAsync;
             };
 
             return GetDomainEvents().Where(isSatisfy);
@@ -196,8 +195,7 @@ namespace DomainShell
         {
             Func<IDomainEvent, bool> isSatisfy = e =>
             {
-                if (e is IDomainExceptionEvent) return true;
-                else return false;
+                return e.Mode.Format == DomainEventFormat.AtException;
             };
 
             return GetDomainEvents().Where(isSatisfy);

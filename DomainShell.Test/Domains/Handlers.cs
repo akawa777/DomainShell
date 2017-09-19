@@ -5,7 +5,7 @@ using DomainShell;
 
 namespace DomainShell.Test.Domains
 {
-    public class OrderEventHandler : IDomainEventHandler<OrderCompletedOutTranEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>
+    public class OrderEventHandler : IDomainEventHandler<OrderCompletedEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>
     {
         public OrderEventHandler(
             IOrderRepository orderRepository, 
@@ -24,9 +24,9 @@ namespace DomainShell.Test.Domains
         private IMailService _mailService;
         private IOrderCanceledRepository _orderCanceledRepository;
 
-        public void Handle(OrderCompletedOutTranEvent domainEvent)
+        public void Handle(OrderCompletedEvent domainEvent)
         {
-            Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderCompletedOutTranEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderCompletedEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
             try
             {
@@ -47,6 +47,7 @@ namespace DomainShell.Test.Domains
         public void Handle(OrderCompletedExceptionEvent domainEvent)
         {
             Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderCompletedExceptionEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"exception {domainEvent.Mode.GetException().Message}");
 
             try
             {

@@ -27,6 +27,7 @@ namespace DomainShell
         void Mark<T>(T domainModel) where T : class;
         TrackPack Get<T>(T domainModel) where T : class;
         IEnumerable<TrackPack> GetAll();
-        void Revoke();
+        void Revoke<T>(T domainModel) where T : class;
+        void RevokeAll();
     }
 }

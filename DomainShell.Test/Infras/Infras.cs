@@ -49,7 +49,7 @@ namespace DomainShell.Test.Infras
 
             vModel
                 .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
-                .Set(m => m.Dirty, (m, p) => Dirty.Clear());
+                .Set(m => m.Dirty, (m, p) => Dirty.Clear(m));
         }
 
         protected abstract TAggregateRoot Find(TAggregateRoot model);

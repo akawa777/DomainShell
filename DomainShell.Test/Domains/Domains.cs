@@ -151,7 +151,7 @@ namespace DomainShell.Test.Domains
 
         private void AddCompletedEvents()
         {
-            _events.Add(new OrderCompletedOutTranEvent { OrderId = OrderId });
+            _events.Add(new OrderCompletedEvent { OrderId = OrderId });
             _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });            
         }
     }
@@ -197,26 +197,26 @@ namespace DomainShell.Test.Domains
 
     public class OrderCanceledEvent : IDomainEvent
     {
-        public int OrderId { get; set; }
+        public DomainEventMode Mode => DomainEventMode.InTran();
 
+        public int OrderId { get; set; }
         public string ProductName { get; set; }
-
         public decimal Price { get; set; }
-
         public string PayId { get; set; }
-
-        public UserValue LastUser { get; set; }
+        public UserValue LastUser { get; set; }        
     }
 
-    public class OrderCompletedOutTranEvent : IDomainOutTranEvent
-    {           
-        public bool Async { get; set; }
+    public class OrderCompletedEvent : IDomainEvent
+    {
+        public DomainEventMode Mode => DomainEventMode.OutTran();
+
         public int OrderId { get; set; }
     }
 
-    public class OrderCompletedExceptionEvent : IDomainExceptionEvent
-    {   
-        public Exception Exception { get; set; }
+    public class OrderCompletedExceptionEvent : IDomainEvent
+    {
+        public DomainEventMode Mode => DomainEventMode.AtException();
+
         public int OrderId { get; set; }
     }
 
