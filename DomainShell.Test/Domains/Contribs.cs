@@ -74,8 +74,7 @@ namespace DomainShell.Test.Domains
             {
                 _scope.Dispose();
                 _scope = null;
-            }
-            
+            }            
         }
     }
 

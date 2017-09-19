@@ -6940,9 +6940,6 @@
   },
   "project": {
     "version": "1.0.0",
-    "restoreSettings": {
-      "hideWarningsAndErrors": true
-    },
     "restore": {
       "projectUniqueName": "E:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "projectName": "DomainShell.Test",
@@ -6983,26 +6980,15 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
-          "MSTest.TestFramework": {
+          "Microsoft.NETCore.App": {
+            "suppressParent": "All",
             "target": "Package",
-            "version": "1.1.18"
+            "version": "2.0.0",
+            "autoReferenced": true
           },
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",
             "version": "2.0.0"
-          },
-          "SimpleInjector": {
-            "target": "Package",
-            "version": "4.0.8"
-          },
-          "MSTest.TestAdapter": {
-            "target": "Package",
-            "version": "1.1.18"
-          },
-          "Microsoft.NETCore.App": {
-            "target": "Package",
-            "version": "2.0.0",
-            "autoReferenced": true
           },
           "Microsoft.EntityFrameworkCore.SQLite": {
             "target": "Package",
@@ -7015,6 +7001,18 @@
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
             "version": "15.3.0-preview-20170628-02"
+          },
+          "MSTest.TestAdapter": {
+            "target": "Package",
+            "version": "1.1.18"
+          },
+          "MSTest.TestFramework": {
+            "target": "Package",
+            "version": "1.1.18"
+          },
+          "SimpleInjector": {
+            "target": "Package",
+            "version": "4.0.8"
           }
         },
         "imports": [
