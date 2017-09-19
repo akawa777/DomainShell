@@ -91,7 +91,7 @@ namespace DomainShell
             IDomainEvent[] domainEvents = GetExceptionEvents().ToArray();
             Remove(domainEvents);
 
-            HandleEvents(ExceptionEventScope, domainEvents, async: false, exception: exception);
+            HandleEvents(OutTranEventScope, domainEvents, async: false, exception: exception);
         }
 
         public virtual void Revoke()
@@ -215,7 +215,6 @@ namespace DomainShell
         }
 
         protected abstract IDomainEventScope InTranEventScope();
-        protected abstract IDomainEventScope OutTranEventScope();
-        protected abstract IDomainEventScope ExceptionEventScope();
+        protected abstract IDomainEventScope OutTranEventScope();        
     }
 }

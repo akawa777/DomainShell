@@ -43,28 +43,25 @@ namespace DomainShell.Test.Domains
 
         protected override IDomainEventScope InTranEventScope()
         {
-            return new InTranEventScope(_container);
+            return new DomainEventScope(_container);
         }
 
         protected override IDomainEventScope OutTranEventScope()
         {
-            return new OutTranEventScope(_container);
-        }
-
-        protected override IDomainEventScope ExceptionEventScope()
-        {
-            return new ExceptionEventScope(_container);
+            return new DomainEventScope(_container, isOutTran: true);
         }
     }
 
-    public class InTranEventScope : IDomainEventScope
+    public class DomainEventScope : IDomainEventScope
     {
-        public InTranEventScope(Container container)
+        public DomainEventScope(Container container, bool isOutTran = false)
         {
             _container = container;
+            if (isOutTran) _scope = ThreadScopedLifestyle.BeginScope(_container);
         }
 
         private Container _container;
+        private Scope _scope;
 
         public IDomainEventHandler<TDomainEvent> GetHandler<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
@@ -73,36 +70,11 @@ namespace DomainShell.Test.Domains
 
         public void Dispose()
         {
-
-        }
-    }
-
-    public class OutTranEventScope : IDomainEventScope
-    {
-        public OutTranEventScope(Container container)
-        {
-            _container = container;
-            _scope = ThreadScopedLifestyle.BeginScope(_container);
-        }
-
-        private Container _container;
-        private Scope _scope; 
-
-        public IDomainEventHandler<TDomainEvent> GetHandler<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
-        {
-            return _container.GetInstance<IDomainEventHandler<TDomainEvent>>();
-        }
-
-        public void Dispose()
-        {
-            _scope.Dispose();
-        }
-    }
-
-    public class ExceptionEventScope : OutTranEventScope
-    {
-        public ExceptionEventScope(Container container) : base(container)
-        {
+            if (_scope != null)
+            {
+                _scope.Dispose();
+                _scope = null;
+            }
             
         }
     }
