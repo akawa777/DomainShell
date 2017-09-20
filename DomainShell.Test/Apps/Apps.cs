@@ -112,16 +112,16 @@ namespace DomainShell.Test.Apps
 
     public class OrderQueryApp
     {
-        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository, IOrderSummaryReader orderSummaryReader)
+        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository, IOrderSummaryRepository orderSummaryRepository)
         {            
             _orderRepository = orderRepository;
             _orderCanceledRepository = orderCanceledRepository;
-            _orderSummaryReader = orderSummaryReader;
+            _orderSummaryRepository = orderSummaryRepository;
         }
         
         private IOrderRepository _orderRepository;
         private IOrderCanceledRepository _orderCanceledRepository;
-        private IOrderSummaryReader _orderSummaryReader;
+        private IOrderSummaryRepository _orderSummaryRepository;
 
         public OrderDto Find(int orderId)
         {
@@ -183,7 +183,7 @@ namespace DomainShell.Test.Apps
             {
                 using (Session.Open())
                 {
-                    OrderSummaryValue orderSummaryValue = _orderSummaryReader.GetSummaryByUserId(userId);
+                    OrderSummaryValue orderSummaryValue = _orderSummaryRepository.GetSummaryByUserId(userId);
 
                     return Map(orderSummaryValue);
                 }

@@ -66,7 +66,7 @@ namespace DomainShell.Test
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped); 
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
-            container.Register<IOrderSummaryReader, OrderSummaryReader>(Lifestyle.Scoped);
+            container.Register<IOrderSummaryRepository, OrderSummaryRepository>(Lifestyle.Scoped);
 
             container.Register<IOrderValidator, OrderValidator>(Lifestyle.Scoped);
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);

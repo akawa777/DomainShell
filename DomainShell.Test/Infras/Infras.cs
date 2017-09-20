@@ -603,9 +603,9 @@ namespace DomainShell.Test.Infras
         }
     }
 
-    public class OrderSummaryReader : IOrderSummaryReader
+    public class OrderSummaryRepository : IOrderSummaryRepository
     {
-        public OrderSummaryReader(IConnection connection)
+        public OrderSummaryRepository(IConnection connection)
         {
             _connection = connection;
         }

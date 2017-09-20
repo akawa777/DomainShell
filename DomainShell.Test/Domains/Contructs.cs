@@ -49,7 +49,7 @@ namespace DomainShell.Test.Domains
         OrderCanceledModel Find(int orderId, bool throwError = false);
     }
 
-    public interface IOrderSummaryReader
+    public interface IOrderSummaryRepository
     {        
         OrderSummaryValue GetSummaryByUserId(string userId);
     }

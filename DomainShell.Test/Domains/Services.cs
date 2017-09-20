@@ -7,12 +7,12 @@ namespace DomainShell.Test.Domains
 {
     public class OrderValidator : IOrderValidator
     {   
-        public OrderValidator(IOrderSummaryReader orderSummaryReader)
+        public OrderValidator(IOrderSummaryRepository orderSummaryRepository)
         {
-            _orderSummaryReader = orderSummaryReader;
+            _orderSummaryRepository = orderSummaryRepository;
         }
 
-        private IOrderSummaryReader _orderSummaryReader;        
+        private IOrderSummaryRepository _orderSummaryRepository;        
 
         public void ValidateWhenRegister(OrderModel orderModel)
         {
@@ -25,7 +25,7 @@ namespace DomainShell.Test.Domains
 
         private bool IsOverBudgetAmount(OrderModel orderModel)
         {   
-            OrderSummaryValue orderSummaryValue = _orderSummaryReader.GetSummaryByUserId(orderModel.User.UserId);
+            OrderSummaryValue orderSummaryValue = _orderSummaryRepository.GetSummaryByUserId(orderModel.User.UserId);
 
             return orderSummaryValue.IsOverBuget;
         }
