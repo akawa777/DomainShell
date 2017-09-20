@@ -100,7 +100,7 @@ namespace DomainShell.Test.Domains
             model.ProductName = domainEvent.ProductName;
             model.Price = domainEvent.Price;
             model.PayId = domainEvent.PayId;
-            model.LastUser = domainEvent.LastUser;
+            model.User = domainEvent.User;
         }
     }
 }

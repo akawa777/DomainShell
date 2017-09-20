@@ -265,7 +265,7 @@ namespace DomainShell.Test.Infras
                         .Set(m => m.Price, (m, p) => reader[p.Name])
                         .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
                         .Set(m => m.PayId, (m, p) => reader[p.Name])
-                        .Set(m => m.LastUser, (m, p) => vUserValue.Material)
+                        .Set(m => m.User, (m, p) => vUserValue.Material)
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
                     yield return vOrderModel.Material;
@@ -286,7 +286,7 @@ namespace DomainShell.Test.Infras
             yield return vOrderModel.GetProperty(m => m.Price);
             yield return vOrderModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
             yield return vOrderModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
-            yield return vOrderModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => $"Last{p.Name}");
+            yield return vOrderModel.Get(x => x.User).GetProperty(m => m.UserId, getName: (m, p) => $"{p.Name}");
             yield return vOrderModel.GetProperty(m => m.RecordVersion);              
         }
         
@@ -470,7 +470,7 @@ namespace DomainShell.Test.Infras
                     var vUserValue = new VirtualObject<UserValue>();
 
                     vUserValue
-                        .Set(m => m.UserId, (m, p) => reader[$"Last{p.Name}"]);
+                        .Set(m => m.UserId, (m, p) => reader[$"{p.Name}"]);
 
                     var vOrderCanceledModel = new VirtualObject<OrderCanceledModel>();
 
@@ -480,7 +480,7 @@ namespace DomainShell.Test.Infras
                         .Set(m => m.Price, (m, p) => reader[p.Name])
                         .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
                         .Set(m => m.PayId, (m, p) => reader[p.Name])
-                        .Set(m => m.LastUser, (m, p) => vUserValue.Material)
+                        .Set(m => m.User, (m, p) => vUserValue.Material)
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
                     yield return vOrderCanceledModel.Material;
@@ -502,7 +502,7 @@ namespace DomainShell.Test.Infras
             yield return vOrderCanceledModel.GetProperty(m => m.Price);
             yield return vOrderCanceledModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
             yield return vOrderCanceledModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);
-            yield return vOrderCanceledModel.Get(x => x.LastUser).GetProperty(m => m.UserId, getName: (m, p) => $"Last{p.Name}");
+            yield return vOrderCanceledModel.Get(x => x.User).GetProperty(m => m.UserId, getName: (m, p) => $"{p.Name}");
             yield return vOrderCanceledModel.GetProperty(m => m.RecordVersion);
         }
 
@@ -612,32 +612,48 @@ namespace DomainShell.Test.Infras
 
         private IConnection _connection;
 
-        public IEnumerable<OrderSummaryValue> GetSummary()
+        public OrderSummaryValue GetSummaryByUserId(string userId)
         {
             using (IDbCommand command = _connection.CreateCommand())
             {
                 string sql = $@"
-                    select ProductName, sum(Price) TotalPrice, count(OrderId) TotalOrderNo from OrderForm                
-                    group by ProductName
-                    order by ProductName                    
+                    select 
+                        UserId, BudgetAmount, sum(Price) TotalPrice, count(OrderId) TotalOrderNo 
+                    from 
+                        OrderBudget ob
+                    left join 
+                        OrderForm of
+                    on 
+                        ob.UserId = of.LastUserId                    
+                    where 
+                        LastUserId = @userId
+                    group by 
+                        LastUserId
+                    order by 
+                        LastUserId
                 ";
 
                 command.CommandText = sql;
+
+                IDbDataParameter sqlParam = command.CreateParameter();
+                sqlParam.ParameterName = $"@{userId}";
+                sqlParam.Value = userId;
+
+                var vOrderSummaryValue = new VirtualObject<OrderSummaryValue>();
 
                 using (IDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {                        
-                        var vOrderSummaryValue = new VirtualObject<OrderSummaryValue>();
-
                         vOrderSummaryValue
-                            .Set(m => m.ProductName, (m, p) => reader[p.Name])
+                            .Set(m => m.UserId, (m, p) => reader[p.Name])
+                            .Set(m => m.BudgetAmount, (m, p) => reader[p.Name])
                             .Set(m => m.TotalPrice, (m, p) => reader[p.Name])
                             .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name]);
-
-                        yield return vOrderSummaryValue.Material;
                     }
                 }
+
+                return vOrderSummaryValue.Material;
             }
         }
     }

@@ -50,8 +50,8 @@ namespace DomainShell.Test.Domains
     }
 
     public interface IOrderSummaryReader
-    {
-        IEnumerable<OrderSummaryValue> GetSummary();
+    {        
+        OrderSummaryValue GetSummaryByUserId(string userId);
     }
 
     public interface IOrderValidator

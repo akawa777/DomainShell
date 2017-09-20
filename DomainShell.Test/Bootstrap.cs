@@ -141,21 +141,21 @@ namespace DomainShell.Test
             command.CommandText = @"
                 create table OrderForm (
                     OrderId integer primary key,
+                    UserId text,
                     ProductName text,
                     Price numeric,
                     CreditCardCode text,
-                    PayId text,
-                    LastUserId text,
+                    PayId text,                    
                     RecordVersion int
                 );
 
                 create table OrderFormCanceled (
                     OrderId int primary key,                    
+                    UserId text,
                     ProductName text,
                     Price numeric,
                     CreditCardCode text,
-                    PayId text,
-                    LastUserId text,
+                    PayId text,                    
                     RecordVersion int
                 );
 
@@ -165,8 +165,17 @@ namespace DomainShell.Test
                     RecordVersion int
                 );
 
+                create table OrderBudget (
+                    UserId text primary key,                    
+                    BudgetAmount numeric
+                );
+
                 insert into LoginUser values('xxx', 'xxx', 1);
-                insert into LoginUser values('yyy', 'yyy', 1);";
+                insert into LoginUser values('yyy', 'yyy', 1);
+
+                insert into OrderBudget values('xxx', 99999);
+                insert into OrderBudget values('yyy', 99999);
+            ";
 
             command.ExecuteNonQuery();
 
@@ -216,21 +225,21 @@ namespace DomainShell.Test
             command.CommandText = @"
                 create table OrderForm (
                     OrderId int identity primary key,
+                    UserId nvarchar(100),
                     ProductName nvarchar(100),
                     Price decimal,
                     CreditCardCode nvarchar(100),
-                    PayId nvarchar(100),
-                    LastUserId nvarchar(100),
+                    PayId nvarchar(100),                    
                     RecordVersion int
                 );
 
                 create table OrderFormCanceled (
                     OrderId int primary key,
+                    UserId nvarchar(100),
                     ProductName nvarchar(100),
                     Price decimal,
                     CreditCardCode nvarchar(100),
-                    PayId nvarchar(100),
-                    LastUserId nvarchar(100),
+                    PayId nvarchar(100),                    
                     RecordVersion int
                 );
 
@@ -240,8 +249,17 @@ namespace DomainShell.Test
                     RecordVersion int
                 );
 
+                create table OrderBudget (
+                    UserId nvarchar(100) primary key,
+                    BudgetAmount decimal
+                );
+
                 insert into LoginUser values('xxx', 'xxx', 1);
-                insert into LoginUser values('yyy', 'yyy', 1);";
+                insert into LoginUser values('yyy', 'yyy', 1);
+
+                insert into OrderBudget values('xxx', 99999);
+                insert into OrderBudget values('yyy', 99999);
+            ";
 
             command.ExecuteNonQuery();            
 

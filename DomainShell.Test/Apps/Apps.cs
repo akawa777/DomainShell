@@ -106,7 +106,7 @@ namespace DomainShell.Test.Apps
         {
             model.ProductName = dto.ProductName;         
             model.Price = dto.Price;
-            model.LastUser = UserValue.Create(_userRepository.Find(dto.LastUserId, true));
+            model.User = UserValue.Create(_userRepository.Find(dto.UserId, true));
         }
     }
 
@@ -177,15 +177,15 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public OrderSummaryDto[] GetOrderSummary()
+        public OrderSummaryDto GetSummaryByUserId(string userId)
         {
             try
             {
                 using (Session.Open())
                 {
-                    IEnumerable<OrderSummaryValue> orderSummaryValues = _orderSummaryReader.GetSummary();
+                    OrderSummaryValue orderSummaryValue = _orderSummaryReader.GetSummaryByUserId(userId);
 
-                    return orderSummaryValues.Select(Map).ToArray();
+                    return Map(orderSummaryValue);
                 }
             }
             catch (Exception e)
@@ -205,7 +205,7 @@ namespace DomainShell.Test.Apps
             dto.Price = model.Price;
             dto.CreditCardCode = model.CreditCardCode;
             dto.PayId = model.PayId;
-            dto.LastUserId = model.LastUser.UserId;
+            dto.UserId = model.User.UserId;
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
@@ -221,7 +221,7 @@ namespace DomainShell.Test.Apps
             dto.Price = model.Price;
             dto.CreditCardCode = model.CreditCardCode;
             dto.PayId = model.PayId;
-            dto.LastUserId = model.LastUser.UserId;
+            dto.UserId = model.User.UserId;
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
@@ -232,7 +232,7 @@ namespace DomainShell.Test.Apps
             if (value == null) return null;
 
             OrderSummaryDto dto = new OrderSummaryDto();            
-            dto.ProductName = value.ProductName;
+            dto.UserId = value.UserId;
             dto.TotalPrice = value.TotalPrice;
             dto.TotalOrderNo= value.TotalOrderNo;
 
@@ -247,13 +247,13 @@ namespace DomainShell.Test.Apps
         public decimal Price { get; set; }
         public string CreditCardCode { get; set; }
         public string PayId { get; set; }
-        public string LastUserId { get; set; }
+        public string UserId { get; set; }
         public int RecordVersion { get; set; }        
     }
 
     public class OrderSummaryDto
     {
-        public string ProductName { get; set; }
+        public string UserId { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal TotalOrderNo { get; set; }
     }

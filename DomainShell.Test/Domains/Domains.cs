@@ -57,7 +57,9 @@ namespace DomainShell.Test.Domains
             
         }
 
-        public int OrderId { get; private set; }               
+        public int OrderId { get; private set; }
+
+        public UserValue User { get; set; }
 
         public string ProductName { get; set; }
 
@@ -65,9 +67,7 @@ namespace DomainShell.Test.Domains
 
         public string CreditCardCode { get; private set; }
 
-        public string PayId { get; private set; }
-
-        public UserValue LastUser { get; set; }
+        public string PayId { get; private set; }        
 
         public int RecordVersion { get; private set; }
 
@@ -146,7 +146,7 @@ namespace DomainShell.Test.Domains
 
         private void AddCanceledEvents()
         {
-            _events.Add(new OrderCanceledEvent { OrderId = OrderId, ProductName = ProductName, Price = Price, PayId = PayId, LastUser = LastUser });            
+            _events.Add(new OrderCanceledEvent { OrderId = OrderId, ProductName = ProductName, Price = Price, PayId = PayId, User = User });            
         }
 
         private void AddCompletedEvents()
@@ -173,6 +173,8 @@ namespace DomainShell.Test.Domains
 
         public int OrderId { get; private set; }
 
+        public UserValue User { get; set; }
+
         public string ProductName { get; set; }
 
         public decimal Price { get; set; }
@@ -180,8 +182,6 @@ namespace DomainShell.Test.Domains
         public string CreditCardCode { get; private set; }
 
         public string PayId { get; set; }
-
-        public UserValue LastUser { get; set; }
 
         public int RecordVersion { get; private set; }
 
@@ -200,10 +200,10 @@ namespace DomainShell.Test.Domains
         public DomainEventMode Mode => DomainEventMode.InTran();
 
         public int OrderId { get; set; }
+        public UserValue User { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
-        public string PayId { get; set; }
-        public UserValue LastUser { get; set; }        
+        public string PayId { get; set; }        
     }
 
     public class OrderCompletedEvent : IDomainEvent
@@ -227,8 +227,10 @@ namespace DomainShell.Test.Domains
 
         }
 
-        public string ProductName { get; private set; }
+        public string UserId { get; private set; }
+        public decimal BudgetAmount { get; private set; }
         public decimal TotalPrice { get; private set; }
         public decimal TotalOrderNo { get; private set; }
+        public bool IsOverBuget => BudgetAmount < TotalPrice;
     }
 }

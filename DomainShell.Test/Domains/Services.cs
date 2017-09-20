@@ -6,13 +6,28 @@ using DomainShell;
 namespace DomainShell.Test.Domains
 {
     public class OrderValidator : IOrderValidator
-    {
+    {   
+        public OrderValidator(IOrderSummaryReader orderSummaryReader)
+        {
+            _orderSummaryReader = orderSummaryReader;
+        }
+
+        private IOrderSummaryReader _orderSummaryReader;        
+
         public void ValidateWhenRegister(OrderModel orderModel)
         {
             Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegister)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
             if (string.IsNullOrEmpty(orderModel.ProductName)) throw new Exception("ProductName is required.");
-            if (orderModel.LastUser == null) throw new Exception("LastUser is required.");
+            if (orderModel.User == null) throw new Exception("User is required.");
+            if (IsOverBudgetAmount(orderModel)) throw new Exception("BudgetAmount is over.");
+        }
+
+        private bool IsOverBudgetAmount(OrderModel orderModel)
+        {   
+            OrderSummaryValue orderSummaryValue = _orderSummaryReader.GetSummaryByUserId(orderModel.User.UserId);
+
+            return orderSummaryValue.IsOverBuget;
         }
 
         public void ValidateWhenComplete(OrderModel orderModel, string creditCardCode)
