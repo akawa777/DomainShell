@@ -10,18 +10,18 @@ namespace DomainShell.Test.Apps
     {
         public OrderCommandApp(
             IOrderRepository orderRepository,
-            IOrderValidator orderValidator, 
+            IOrderBudgetCheckService orderBudgetCheckService,
             ICreditCardService creditCardService,
             IUserRepository userRepository)
         {            
             _orderRepository = orderRepository;
-            _orderValidator = orderValidator;
+            _orderBudgetCheckService = orderBudgetCheckService;
             _creditCardService = creditCardService;
             _userRepository = userRepository;
         }
 
         private IOrderRepository _orderRepository;
-        private IOrderValidator _orderValidator;
+        private IOrderBudgetCheckService _orderBudgetCheckService;
         private ICreditCardService _creditCardService;
         private IUserRepository _userRepository;
 
@@ -40,7 +40,7 @@ namespace DomainShell.Test.Apps
 
                     Map(orderDto, orderModel);
 
-                    orderModel.Register(_orderValidator);                    
+                    orderModel.Register(_orderBudgetCheckService);                    
 
                     _orderRepository.Save(orderModel);
 
@@ -65,7 +65,7 @@ namespace DomainShell.Test.Apps
                     OrderModel orderModel = _orderRepository.Find(orderDto.OrderId, true);
                     Map(orderDto, orderModel);
 
-                    orderModel.Complete(_orderValidator, _creditCardService, creditCardCode);
+                    orderModel.Complete(_creditCardService, creditCardCode);
 
                     _orderRepository.Save(orderModel);
 
@@ -90,9 +90,11 @@ namespace DomainShell.Test.Apps
                     OrderModel orderModel = _orderRepository.Find(orderDto.OrderId, true);
                     Map(orderDto, orderModel);
 
-                    orderModel.Cancel(_orderValidator);
+                    orderModel.Cancel();
 
                     _orderRepository.Save(orderModel);
+
+                    tran.Complete();
                 }
             }
             catch (Exception e)
@@ -183,9 +185,9 @@ namespace DomainShell.Test.Apps
             {
                 using (Session.Open())
                 {
-                    OrderSummaryValue orderSummaryValue = _orderSummaryRepository.GetSummaryByUserId(userId);
+                    OrderSummaryModel orderSummaryModel = _orderSummaryRepository.GetByUserId(userId);
 
-                    return Map(orderSummaryValue);
+                    return Map(orderSummaryModel);
                 }
             }
             catch (Exception e)
@@ -227,14 +229,14 @@ namespace DomainShell.Test.Apps
             return dto;
         }
 
-        private OrderSummaryDto Map(OrderSummaryValue value)
+        private OrderSummaryDto Map(OrderSummaryModel model)
         {
-            if (value == null) return null;
+            if (model == null) return null;
 
             OrderSummaryDto dto = new OrderSummaryDto();            
-            dto.UserId = value.UserId;
-            dto.TotalPrice = value.TotalPrice;
-            dto.TotalOrderNo= value.TotalOrderNo;
+            dto.UserId = model.UserId;
+            dto.TotalPrice = model.TotalPrice;
+            dto.TotalOrderNo= model.TotalOrderNo;
 
             return dto;
         }

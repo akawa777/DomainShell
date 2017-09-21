@@ -5,45 +5,24 @@ using DomainShell;
 
 namespace DomainShell.Test.Domains
 {
-    public class OrderValidator : IOrderValidator
+    public class OrderBudgetCheckService : IOrderBudgetCheckService
     {   
-        public OrderValidator(IOrderSummaryRepository orderSummaryRepository)
+        public OrderBudgetCheckService(IOrderSummaryRepository orderSummaryRepository)
         {
             _orderSummaryRepository = orderSummaryRepository;
         }
 
-        private IOrderSummaryRepository _orderSummaryRepository;        
+        private IOrderSummaryRepository _orderSummaryRepository; 
 
-        public void ValidateWhenRegister(OrderModel orderModel)
+        public bool IsOverBudget(OrderModel orderModel)
         {
-            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenRegister)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"{nameof(OrderBudgetCheckService)} {nameof(IsOverBudget)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
-            if (string.IsNullOrEmpty(orderModel.ProductName)) throw new Exception("ProductName is required.");
-            if (orderModel.User == null) throw new Exception("User is required.");
-            if (IsOverBudgetAmount(orderModel)) throw new Exception("BudgetAmount is over.");
-        }
+            OrderSummaryModel orderSummaryModel = _orderSummaryRepository.GetByUserId(orderModel.User.UserId, excludeOrderId: orderModel.OrderId);
 
-        private bool IsOverBudgetAmount(OrderModel orderModel)
-        {   
-            OrderSummaryValue orderSummaryValue = _orderSummaryRepository.GetSummaryByUserId(orderModel.User.UserId);
+            orderSummaryModel.IncreaseTotalPrice(orderModel.Price);
 
-            return orderSummaryValue.IsOverBuget;
-        }
-
-        public void ValidateWhenComplete(OrderModel orderModel, string creditCardCode)
-        {
-            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenComplete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-
-            ValidateWhenRegister(orderModel);
-            if (!string.IsNullOrEmpty(orderModel.PayId)) throw new Exception("already paid.");
-            if (string.IsNullOrEmpty(creditCardCode)) throw new Exception("creditCardCode is required.");            
-        }
-
-        public void ValidateWhenCancel(OrderModel orderModel)
-        {
-            Console.WriteLine($"{nameof(OrderValidator)} {nameof(ValidateWhenCancel)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-
-            if (!string.IsNullOrEmpty(orderModel.PayId)) throw new Exception("already paid.");            
+            return orderSummaryModel.IsOverBudget;
         }
     }
 

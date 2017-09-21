@@ -183,7 +183,7 @@ namespace DomainShell.Test.Infras
                 List<string> whereSqls = new List<string>();
                 List<string> orderSqls = new List<string>();
 
-                SetWhereByLastUser(userId, command, whereSqls);
+                SetWhereByUser(userId, command, whereSqls);
                 SetOrderByOrderId(orderSqls, "desc");
 
                 return (whereSqls, orderSqls);
@@ -207,9 +207,9 @@ namespace DomainShell.Test.Infras
             command.Parameters.Add(sqlParam);
         }
 
-        private void SetWhereByLastUser(string userId, IDbCommand command, List<string> whereSqls)
+        private void SetWhereByUser(string userId, IDbCommand command, List<string> whereSqls)
         {
-            string whereSql = $"LastUserId = @{nameof(userId)}";
+            string whereSql = $"UserId = @{nameof(userId)}";
             whereSqls.Add(whereSql);
 
             IDataParameter sqlParam = command.CreateParameter();
@@ -254,7 +254,7 @@ namespace DomainShell.Test.Infras
                     var vUserValue = new VirtualObject<UserValue>();
 
                     vUserValue
-                        .Set(m => m.UserId, (m, p) => reader[$"Last{p.Name}"]);
+                        .Set(m => m.UserId, (m, p) => reader[p.Name]);
 
                     var orderModel = DomainModelProxyFactory.Create<OrderModel>();
                     var vOrderModel = new VirtualObject<OrderModel>(orderModel);
@@ -376,11 +376,11 @@ namespace DomainShell.Test.Infras
 
     public class OrderModelProxy : OrderModel, IDomainModelProxy
     {
-        public override void Complete(IOrderValidator orderValidator, ICreditCardService creditCardService, string creditCardCode)
+        public override void Complete(ICreditCardService creditCardService, string creditCardCode)
         {
             OutputLog($"{nameof(OrderModelProxy)} {nameof(Complete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
             
-            base.Complete(orderValidator, creditCardService, creditCardCode);
+            base.Complete(creditCardService, creditCardCode);
         }
 
         public Type GetImplementType()
@@ -612,48 +612,57 @@ namespace DomainShell.Test.Infras
 
         private IConnection _connection;
 
-        public OrderSummaryValue GetSummaryByUserId(string userId)
+        public OrderSummaryModel GetByUserId(string userId, int excludeOrderId = 0)
         {
             using (IDbCommand command = _connection.CreateCommand())
             {
                 string sql = $@"
                     select 
-                        UserId, BudgetAmount, sum(Price) TotalPrice, count(OrderId) TotalOrderNo 
+                        ob.UserId, ob.BudgetAmount, sum(of.Price) TotalPrice, count(of.OrderId) TotalOrderNo 
                     from 
                         OrderBudget ob
                     left join 
                         OrderForm of
                     on 
-                        ob.UserId = of.LastUserId                    
+                        ob.UserId = of.UserId                    
+                        {(excludeOrderId > 0 ? $"and of.OrderId != @{nameof(excludeOrderId)}" : "")}
                     where 
-                        LastUserId = @userId
+                        ob.UserId = @{nameof(userId)}
                     group by 
-                        LastUserId
+                        ob.UserId
                     order by 
-                        LastUserId
+                        ob.UserId
                 ";
 
                 command.CommandText = sql;
 
                 IDbDataParameter sqlParam = command.CreateParameter();
-                sqlParam.ParameterName = $"@{userId}";
+                sqlParam.ParameterName = $"@{nameof(userId)}";
                 sqlParam.Value = userId;
 
-                var vOrderSummaryValue = new VirtualObject<OrderSummaryValue>();
+                command.Parameters.Add(sqlParam);
+
+                sqlParam = command.CreateParameter();
+                sqlParam.ParameterName = $"@{nameof(excludeOrderId)}";
+                sqlParam.Value = excludeOrderId;
+
+                command.Parameters.Add(sqlParam);
+
+                var vOrderSummaryModel = new VirtualObject<OrderSummaryModel>();
 
                 using (IDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {                        
-                        vOrderSummaryValue
+                        vOrderSummaryModel
                             .Set(m => m.UserId, (m, p) => reader[p.Name])
                             .Set(m => m.BudgetAmount, (m, p) => reader[p.Name])
-                            .Set(m => m.TotalPrice, (m, p) => reader[p.Name])
-                            .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name]);
+                            .Set(m => m.TotalPrice, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name])
+                            .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name]);
                     }
                 }
 
-                return vOrderSummaryValue.Material;
+                return vOrderSummaryModel.Material;
             }
         }
     }

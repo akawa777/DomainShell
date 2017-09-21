@@ -68,7 +68,7 @@ namespace DomainShell.Test
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
             container.Register<IOrderSummaryRepository, OrderSummaryRepository>(Lifestyle.Scoped);
 
-            container.Register<IOrderValidator, OrderValidator>(Lifestyle.Scoped);
+            container.Register<IOrderBudgetCheckService, OrderBudgetCheckService>(Lifestyle.Scoped);
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
             container.Register<IMailService, MailService>(Lifestyle.Scoped);
 
@@ -149,9 +149,17 @@ namespace DomainShell.Test
                     RecordVersion int
                 );
 
+                create table OrderFormItem (
+                    OrderId integer primary key,
+                    OrderItemNo,                    
+                    ProductId text,
+                    Price numeric,
+                    RecordVersion int
+                );
+
                 create table OrderFormCanceled (
                     OrderId int primary key,                    
-                    UserId text,
+                    UserId text,                    
                     ProductName text,
                     Price numeric,
                     CreditCardCode text,
@@ -170,11 +178,11 @@ namespace DomainShell.Test
                     BudgetAmount numeric
                 );
 
-                insert into LoginUser values('xxx', 'xxx', 1);
-                insert into LoginUser values('yyy', 'yyy', 1);
+                insert into LoginUser values('user1', 'user1', 1);
+                insert into LoginUser values('user2', 'user2', 1);
 
-                insert into OrderBudget values('xxx', 99999);
-                insert into OrderBudget values('yyy', 99999);
+                insert into OrderBudget values('user1', 99999);
+                insert into OrderBudget values('user2', 99999);
             ";
 
             command.ExecuteNonQuery();
@@ -211,7 +219,9 @@ namespace DomainShell.Test
             command.CommandText = @"
                 drop table OrderForm;
                 drop table OrderFormCanceled;
-                drop table LoginUser;";
+                drop table LoginUser;
+                drop table OrderBudget;
+            ";
 
             try
             {
@@ -254,11 +264,11 @@ namespace DomainShell.Test
                     BudgetAmount decimal
                 );
 
-                insert into LoginUser values('xxx', 'xxx', 1);
-                insert into LoginUser values('yyy', 'yyy', 1);
+                insert into LoginUser values('user1', 'user1', 1);
+                insert into LoginUser values('user2', 'user2', 1);
 
-                insert into OrderBudget values('xxx', 99999);
-                insert into OrderBudget values('yyy', 99999);
+                insert into OrderBudget values('user1', 99999);
+                insert into OrderBudget values('user2', 99999);
             ";
 
             command.ExecuteNonQuery();            

@@ -2625,15 +2625,12 @@
   },
   "project": {
     "version": "1.0.0",
-    "restoreSettings": {
-      "hideWarningsAndErrors": true
-    },
     "restore": {
-      "projectUniqueName": "E:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
+      "projectUniqueName": "e:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
       "projectName": "DomainShell",
-      "projectPath": "E:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
+      "projectPath": "e:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj",
       "packagesPath": "C:\\Users\\a-kawamoto.GK\\.nuget\\packages\\",
-      "outputPath": "E:\\Documents\\GitHub\\DomainShell\\DomainShell\\obj\\",
+      "outputPath": "e:\\Documents\\GitHub\\DomainShell\\DomainShell\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

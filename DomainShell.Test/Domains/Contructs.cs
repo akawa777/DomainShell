@@ -51,14 +51,7 @@ namespace DomainShell.Test.Domains
 
     public interface IOrderSummaryRepository
     {        
-        OrderSummaryValue GetSummaryByUserId(string userId);
-    }
-
-    public interface IOrderValidator
-    {
-        void ValidateWhenRegister(OrderModel orderModel);
-        void ValidateWhenComplete(OrderModel orderModel, string creditCardCord);
-        void ValidateWhenCancel(OrderModel orderModel);
+        OrderSummaryModel GetByUserId(string userId, int excludeOrderId = 0);
     }
 
     public interface ICreditCardService
@@ -70,5 +63,10 @@ namespace DomainShell.Test.Domains
     public interface IMailService
     {
         void Send(string emailAddress, string title, string contents);
+    }
+
+    public interface IOrderBudgetCheckService
+    {
+        bool IsOverBudget(OrderModel orderModel);
     }
 }

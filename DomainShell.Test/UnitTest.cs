@@ -23,33 +23,33 @@ namespace DomainShell.Test
                 OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
 
                 OrderDto order = new OrderDto();
-                order.ProductName = "xxx";
+                order.ProductName = "product1";
                 order.Price = 999;
-                order.UserId = "xxx";
+                order.UserId = "user1";
 
                 OrderDto order2 = new OrderDto();
-                order2.ProductName = "yyy";
+                order2.ProductName = "product2";
                 order2.Price = 999;
-                order2.UserId = "xxx";
+                order2.UserId = "user1";
 
                 OrderDto order3 = new OrderDto();
-                order3.ProductName = "yyy";
+                order3.ProductName = "product1";
                 order3.Price = 999;
-                order3.UserId = "yyy";
+                order3.UserId = "user2";
 
                 commandApp.Register(order);
                 commandApp.Register(order2);
                 commandApp.Register(order3);
 
-                order = queryApp.GetLastByUser("xxx");     
+                order = queryApp.GetLastByUser("user1");     
 
-                commandApp.Complete(order, "xxx");
+                commandApp.Complete(order, "user1");
 
                 order = queryApp.Find(order.OrderId);
 
                 OrderSummaryDto orderSummary = queryApp.GetSummaryByUserId(order.UserId);
 
-                order = queryApp.GetLastByUser("yyy");
+                order = queryApp.GetLastByUser("user2");
 
                 commandApp.Cancel(order);                
 

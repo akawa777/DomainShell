@@ -6941,11 +6941,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
+      "projectUniqueName": "e:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "projectName": "DomainShell.Test",
-      "projectPath": "E:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
+      "projectPath": "e:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\DomainShell.Test.csproj",
       "packagesPath": "C:\\Users\\a-kawamoto.GK\\.nuget\\packages\\",
-      "outputPath": "E:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\obj\\",
+      "outputPath": "e:\\Documents\\GitHub\\DomainShell\\DomainShell.Test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -6965,8 +6965,8 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "E:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj": {
-              "projectPath": "E:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj"
+            "e:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj": {
+              "projectPath": "e:\\Documents\\GitHub\\DomainShell\\DomainShell\\DomainShell.csproj"
             }
           }
         }

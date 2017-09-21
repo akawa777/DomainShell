@@ -87,16 +87,16 @@ namespace DomainShell.Test.Domains
             _events.Clear();
         }
 
-        public void Register(IOrderValidator orderValidator)
+        public void Register(IOrderBudgetCheckService orderBudgetCheckService)
         {
-            orderValidator.ValidateWhenRegister(this);
+            ValidateWhenRegister(orderBudgetCheckService);
 
             Dirty = Dirty.Seal(this);
         }
 
-        public void Cancel(IOrderValidator orderValidator)
+        public void Cancel()
         {
-            orderValidator.ValidateWhenCancel(this);            
+            ValidateWhenCancel();
 
             Deleted = true;
 
@@ -105,9 +105,9 @@ namespace DomainShell.Test.Domains
             Dirty = Dirty.Seal(this);
         }
 
-        public virtual void Complete(IOrderValidator orderValidator, ICreditCardService creditCardService, string creditCardCode)
+        public virtual void Complete(ICreditCardService creditCardService, string creditCardCode)
         {
-            orderValidator.ValidateWhenComplete(this, creditCardCode);
+            ValidateWhenComplete(creditCardCode);
 
             CreditCardCode = creditCardCode;            
 
@@ -125,6 +125,8 @@ namespace DomainShell.Test.Domains
 
         public void CancelCompleted(ICreditCardService creditCardService)
         {
+            ValidateWhenCancelCompleted();
+
             CancelPay(creditCardService);
 
             Dirty = Dirty.Seal(this);
@@ -153,6 +155,29 @@ namespace DomainShell.Test.Domains
         {
             _events.Add(new OrderCompletedEvent { OrderId = OrderId });
             _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });            
+        }
+
+        private void ValidateWhenRegister(IOrderBudgetCheckService orderBudgetCheckService)
+        {
+            if (string.IsNullOrEmpty(ProductName)) throw new Exception("ProductName is required.");
+            if (User == null) throw new Exception("User is required.");
+            if (orderBudgetCheckService.IsOverBudget(this)) throw new Exception("BudgetAmount is over.");
+        }
+
+        private void ValidateWhenComplete(string creditCardCode)
+        {            
+            if (!string.IsNullOrEmpty(PayId)) throw new Exception("already paid.");
+            if (string.IsNullOrEmpty(creditCardCode)) throw new Exception("creditCardCode is required.");            
+        }
+
+        private void ValidateWhenCancel()
+        {
+            if (!string.IsNullOrEmpty(PayId)) throw new Exception("already paid.");            
+        }
+
+        private void ValidateWhenCancelCompleted()
+        {
+            if (string.IsNullOrEmpty(PayId)) throw new Exception("payment is not completed.");            
         }
     }
 
@@ -220,9 +245,9 @@ namespace DomainShell.Test.Domains
         public int OrderId { get; set; }
     }
 
-    public class OrderSummaryValue
+    public class OrderSummaryModel
     {
-        protected OrderSummaryValue()
+        protected OrderSummaryModel()
         {
 
         }
@@ -231,6 +256,16 @@ namespace DomainShell.Test.Domains
         public decimal BudgetAmount { get; private set; }
         public decimal TotalPrice { get; private set; }
         public decimal TotalOrderNo { get; private set; }
-        public bool IsOverBuget => BudgetAmount < TotalPrice;
+        public bool IsOverBudget => BudgetAmount < TotalPrice;
+
+        public void DecreaseTotalPrice(decimal price)
+        {
+            TotalPrice = TotalPrice - price;
+        }
+
+        public void IncreaseTotalPrice(decimal price)
+        {
+            TotalPrice = TotalPrice + price;
+        }
     }
 }
