@@ -3,6 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 using DomainShell.Test.Domains;
+using DomainShell.Test.Domains.User;
+using DomainShell.Test.Domains.Order;
 
 namespace DomainShell.Test.Apps
 {

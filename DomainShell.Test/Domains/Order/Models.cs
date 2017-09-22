@@ -2,47 +2,10 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
+using DomainShell.Test.Domains.User;
 
-namespace DomainShell.Test.Domains
+namespace DomainShell.Test.Domains.Order
 {
-    public class UserModel : IAggregateRoot
-    {
-        protected UserModel()
-        {
-            
-        }
-
-        public string UserId { get; private set; }
-
-        public string UserName { get; set; }
-
-        public int RecordVersion { get; private set; }
-
-        public Dirty Dirty { get; private set; }
-
-        public bool Deleted { get; private set; }
-    }
-
-    public class UserValue
-    {
-        protected UserValue()
-        {
-
-        }
-
-        public static UserValue Create(UserModel userModel)
-        {
-            if (userModel == null || userModel.RecordVersion == 0 || userModel.Dirty.Is()) throw new ArgumentException("userModel is invalid.");
-
-            UserValue userValue = new UserValue();
-            userValue.UserId = userModel.UserId;
-
-            return userValue;
-        }
-
-        public string UserId { get; private set; }
-    }
-
     public class OrderModel : IAggregateRoot, IDomainEventAuthor
     {
         public static OrderModel NewOrder()
@@ -146,7 +109,7 @@ namespace DomainShell.Test.Domains
         }
 
         private void ValidateWhenRegister(IOrderBudgetCheckService orderBudgetCheckService)
-        {
+        {            
             if (string.IsNullOrEmpty(ProductName)) throw new Exception("ProductName is required.");
             if (User == null) throw new Exception("User is required.");
             if (OrderDate == null) throw new Exception("OrderDate is required.");
@@ -189,11 +152,13 @@ namespace DomainShell.Test.Domains
 
         public UserValue User { get; set; }
 
+        public DateTime? OrderDate { get; set; }
+
         public string ProductName { get; set; }
 
         public decimal Price { get; set; }
 
-        public string CreditCardCode { get; private set; }
+        public string CreditCardCode { get; set; }
 
         public string PayId { get; set; }
 
@@ -205,8 +170,17 @@ namespace DomainShell.Test.Domains
 
         public void Register()
         {
+            ValidateWhenRegister();
             Dirty = Dirty.Seal(this);
-        }        
+        }
+
+        private void ValidateWhenRegister()
+        {
+            if (OrderId <= 0) throw new Exception("OrderId is invalid.");
+            if (string.IsNullOrEmpty(ProductName)) throw new Exception("ProductName is required.");
+            if (User == null) throw new Exception("User is required.");
+            if (OrderDate == null) throw new Exception("OrderDate is required.");            
+        }
     }
 
     public class OrderCanceledEvent : IDomainEvent
@@ -215,6 +189,7 @@ namespace DomainShell.Test.Domains
 
         public int OrderId { get; set; }
         public UserValue User { get; set; }
+        public DateTime OrderDate { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public string PayId { get; set; }        

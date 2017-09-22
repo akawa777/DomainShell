@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 
-namespace DomainShell.Test.Domains
+namespace DomainShell.Test.Domains.Order
 {
     public class OrderBudgetCheckService : IOrderBudgetCheckService
     {   

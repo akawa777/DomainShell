@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 
-namespace DomainShell.Test.Domains
+namespace DomainShell.Test.Domains.Order
 {
     public class OrderEventHandler : IDomainEventHandler<OrderCompletedEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>
     {
@@ -97,10 +97,11 @@ namespace DomainShell.Test.Domains
 
         private void Map(OrderCanceledEvent domainEvent, OrderCanceledModel model)
         {
+            model.User = domainEvent.User;
+            model.OrderDate = domainEvent.OrderDate;
             model.ProductName = domainEvent.ProductName;
             model.Price = domainEvent.Price;
-            model.PayId = domainEvent.PayId;
-            model.User = domainEvent.User;
+            model.PayId = domainEvent.PayId;            
         }
     }
 }

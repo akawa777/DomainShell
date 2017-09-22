@@ -10,7 +10,10 @@ using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using DomainShell.Test.Apps;
 using DomainShell.Test.Domains;
-using DomainShell.Test.Infras;
+using DomainShell.Test.Domains.User;
+using DomainShell.Test.Domains.Order;
+using DomainShell.Test.Infras.User;
+using DomainShell.Test.Infras.Order;
 
 namespace DomainShell.Test
 {
@@ -150,17 +153,10 @@ namespace DomainShell.Test
                     RecordVersion int
                 );
 
-                create table OrderFormItem (
-                    OrderId integer primary key,
-                    OrderItemNo,                    
-                    ProductId text,
-                    Price numeric,
-                    RecordVersion int
-                );
-
                 create table OrderFormCanceled (
                     OrderId int primary key,                    
-                    UserId text,                    
+                    UserId text,       
+                    OrderDate text,
                     ProductName text,
                     Price numeric,
                     CreditCardCode text,
@@ -248,6 +244,7 @@ namespace DomainShell.Test
                 create table OrderFormCanceled (
                     OrderId int primary key,
                     UserId nvarchar(100),
+                    OrderDate nvarchar(8),
                     ProductName nvarchar(100),
                     Price decimal,
                     CreditCardCode nvarchar(100),
