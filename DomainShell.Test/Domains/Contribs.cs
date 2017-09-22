@@ -78,22 +78,7 @@ namespace DomainShell.Test.Domains
         }
     }
 
-    public class Connection : IConnection
-    {
-        public Connection(IDbConnection connection)
-        {
-            _connection = connection;
-        }
-
-        private IDbConnection _connection;
-
-        public IDbCommand CreateCommand()
-        {
-            return _connection.CreateCommand();
-        }
-    }
-
-    public class SessionFoundation : SessionFoundationBase
+    public class SessionFoundation : SessionFoundationBase, IConnection
     {
         public SessionFoundation(IDbConnection connection)
         {
@@ -102,6 +87,7 @@ namespace DomainShell.Test.Domains
 
         private IDbConnection _connection;
         private IDbTransaction _transaction;
+
 
         protected override void BeginOpen()
         {
@@ -130,13 +116,24 @@ namespace DomainShell.Test.Domains
         }
         protected override void EndOpen()
         {
+            if (_transaction != null) _transaction.Dispose();
+            _transaction = null;
+
             _connection.Close();
         }
 
         public override void Dispose()
-        {
-            if (_transaction != null) _transaction.Dispose();            
+        {                      
             _connection.Dispose();
+        }
+
+        public IDbCommand CreateCommand()
+        {
+            IDbCommand command = _connection.CreateCommand();
+
+            if (_transaction != null) command.Transaction = _transaction;
+
+            return command;
         }
     }
 }

@@ -261,6 +261,7 @@ namespace DomainShell.Test.Infras
 
                     vOrderModel
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
+                        .Set(m => m.OrderDate, (m, p) => DateTime.ParseExact(reader[p.Name].ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture))
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
                         .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
@@ -282,6 +283,7 @@ namespace DomainShell.Test.Infras
         {
             VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
             
+            yield return vOrderModel.GetProperty(m => m.OrderDate, getValue: (m, p) => m.OrderDate.Value.ToString("yyyyMMdd"));
             yield return vOrderModel.GetProperty(m => m.ProductName);
             yield return vOrderModel.GetProperty(m => m.Price);
             yield return vOrderModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
@@ -603,35 +605,40 @@ namespace DomainShell.Test.Infras
         }
     }
 
-    public class OrderSummaryRepository : IOrderSummaryRepository
+    public class MonthlyOrderRepository : IMonthlyOrderRepository
     {
-        public OrderSummaryRepository(IConnection connection)
+        public MonthlyOrderRepository(IConnection connection)
         {
             _connection = connection;
         }
 
         private IConnection _connection;
 
-        public OrderSummaryModel GetByUserId(string userId, int excludeOrderId = 0)
+        public MonthlyOrderModel GetMonthlyByUserId(string userId, DateTime orderDate, int excludeOrderId = 0)
         {
+            string yearMonth = orderDate.Year.ToString() + orderDate.Month.ToString().PadLeft(2, '0');
+
             using (IDbCommand command = _connection.CreateCommand())
             {
                 string sql = $@"
                     select 
-                        ob.UserId, ob.BudgetAmount, sum(of.Price) TotalPrice, count(of.OrderId) TotalOrderNo 
+                        Budget, TotalPrice, TotalOrderNo
                     from 
-                        OrderBudget ob
+                        MonthlyOrderBudget
                     left join 
-                        OrderForm of
+                        (
+                            select UserId, sum(Price) TotalPrice, count(OrderId) TotalOrderNo from OrderForm
+                            where 
+                                UserId = @{nameof(userId)}                        
+                                and OrderDate like @{nameof(yearMonth)} + '%'
+                                {(excludeOrderId <= 0 ? "" : $"and OrderId != @{nameof(excludeOrderId)}")}
+                            group by
+								UserId
+                        ) OrderForm                            
                     on 
-                        ob.UserId = of.UserId                    
-                        {(excludeOrderId > 0 ? $"and of.OrderId != @{nameof(excludeOrderId)}" : "")}
+                        MonthlyOrderBudget.UserId = OrderForm.UserId                                            
                     where 
-                        ob.UserId = @{nameof(userId)}
-                    group by 
-                        ob.UserId
-                    order by 
-                        ob.UserId
+                        MonthlyOrderBudget.UserId = @{nameof(userId)}
                 ";
 
                 command.CommandText = sql;
@@ -643,26 +650,36 @@ namespace DomainShell.Test.Infras
                 command.Parameters.Add(sqlParam);
 
                 sqlParam = command.CreateParameter();
+                sqlParam.ParameterName = $"@{nameof(yearMonth)}";
+                sqlParam.Value = yearMonth;
+
+                command.Parameters.Add(sqlParam);
+
+                sqlParam = command.CreateParameter();
                 sqlParam.ParameterName = $"@{nameof(excludeOrderId)}";
                 sqlParam.Value = excludeOrderId;
 
                 command.Parameters.Add(sqlParam);
 
-                var vOrderSummaryModel = new VirtualObject<OrderSummaryModel>();
+                var vMonthlyOrderModel = new VirtualObject<MonthlyOrderModel>();
+
+                vMonthlyOrderModel
+                    .Set(m => m.UserId, (m, p) => userId)
+                    .Set(m => m.Year, (m, p) => orderDate.Year)
+                    .Set(m => m.Month, (m, p) => orderDate.Month);
 
                 using (IDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {                        
-                        vOrderSummaryModel
-                            .Set(m => m.UserId, (m, p) => reader[p.Name])
-                            .Set(m => m.BudgetAmount, (m, p) => reader[p.Name])
+                        vMonthlyOrderModel                                                        
+                            .Set(m => m.Budget, (m, p) => reader[p.Name])
                             .Set(m => m.TotalPrice, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name])
                             .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name]);
                     }
-                }
+                }               
 
-                return vOrderSummaryModel.Material;
+                return vMonthlyOrderModel.Material;
             }
         }
     }

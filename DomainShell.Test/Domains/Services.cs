@@ -7,28 +7,26 @@ namespace DomainShell.Test.Domains
 {
     public class OrderBudgetCheckService : IOrderBudgetCheckService
     {   
-        public OrderBudgetCheckService(IOrderSummaryRepository orderSummaryRepository)
+        public OrderBudgetCheckService(IMonthlyOrderRepository monthlyOrderRepository)
         {
-            _orderSummaryRepository = orderSummaryRepository;
+            _monthlyOrderRepository = monthlyOrderRepository;
         }
 
-        private IOrderSummaryRepository _orderSummaryRepository; 
+        private IMonthlyOrderRepository _monthlyOrderRepository; 
 
         public bool IsOverBudget(OrderModel orderModel)
         {
             Console.WriteLine($"{nameof(OrderBudgetCheckService)} {nameof(IsOverBudget)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            
+            MonthlyOrderModel monthlyOrderModel = _monthlyOrderRepository.GetMonthlyByUserId(orderModel.User.UserId, orderModel.OrderDate.Value, excludeOrderId: orderModel.OrderId);
 
-            OrderSummaryModel orderSummaryModel = _orderSummaryRepository.GetByUserId(orderModel.User.UserId, excludeOrderId: orderModel.OrderId);
-
-            orderSummaryModel.IncreaseTotalPrice(orderModel.Price);
-
-            return orderSummaryModel.IsOverBudget;
+            return monthlyOrderModel.IsOverBudgetByIncludingPrice(orderModel.Price);
         }
     }
 
     public class CreditCardService : ICreditCardService
     {
-        public string Pay(string creditCardCord, decimal price)
+        public string Pay(OrderModel orderModel)
         {            
             Console.WriteLine($"{nameof(CreditCardService)} {nameof(Pay)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
 
@@ -37,7 +35,7 @@ namespace DomainShell.Test.Domains
             return payId;
         }
 
-        public void Cancel(string payId)
+        public void Cancel(OrderModel orderModel)
         {
             Console.WriteLine($"{nameof(CreditCardService)} {nameof(Cancel)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }
@@ -45,7 +43,7 @@ namespace DomainShell.Test.Domains
 
     public class MailService : IMailService
     {
-        public void Send(string emailAddress, string title, string contents)
+        public void Send(OrderModel orderModel)
         {
             Console.WriteLine($"{nameof(MailService)} {nameof(Send)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
         }

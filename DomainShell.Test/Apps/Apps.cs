@@ -106,24 +106,23 @@ namespace DomainShell.Test.Apps
 
         private void Map(OrderDto dto, OrderModel model)
         {
-            model.ProductName = dto.ProductName;         
-            model.Price = dto.Price;
             model.User = UserValue.Create(_userRepository.Find(dto.UserId, true));
+            model.OrderDate = DateTime.ParseExact(dto.OrderDate, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+            model.ProductName = dto.ProductName;         
+            model.Price = dto.Price;            
         }
     }
 
     public class OrderQueryApp
     {
-        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository, IOrderSummaryRepository orderSummaryRepository)
+        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository)
         {            
             _orderRepository = orderRepository;
             _orderCanceledRepository = orderCanceledRepository;
-            _orderSummaryRepository = orderSummaryRepository;
         }
         
         private IOrderRepository _orderRepository;
         private IOrderCanceledRepository _orderCanceledRepository;
-        private IOrderSummaryRepository _orderSummaryRepository;
 
         public OrderDto Find(int orderId)
         {
@@ -179,35 +178,18 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public OrderSummaryDto GetSummaryByUserId(string userId)
-        {
-            try
-            {
-                using (Session.Open())
-                {
-                    OrderSummaryModel orderSummaryModel = _orderSummaryRepository.GetByUserId(userId);
-
-                    return Map(orderSummaryModel);
-                }
-            }
-            catch (Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-
         private OrderDto Map(OrderModel model)
         {
             if (model == null) return null;
 
             OrderDto dto = new OrderDto();
             dto.OrderId = model.OrderId;
+            dto.UserId = model.User.UserId;
+            dto.OrderDate = model.OrderDate.Value.ToString("yyyyMMdd");
             dto.ProductName = model.ProductName;
             dto.Price = model.Price;
             dto.CreditCardCode = model.CreditCardCode;
-            dto.PayId = model.PayId;
-            dto.UserId = model.User.UserId;
+            dto.PayId = model.PayId;            
             dto.RecordVersion = model.RecordVersion;
 
             return dto;
@@ -228,35 +210,17 @@ namespace DomainShell.Test.Apps
 
             return dto;
         }
-
-        private OrderSummaryDto Map(OrderSummaryModel model)
-        {
-            if (model == null) return null;
-
-            OrderSummaryDto dto = new OrderSummaryDto();            
-            dto.UserId = model.UserId;
-            dto.TotalPrice = model.TotalPrice;
-            dto.TotalOrderNo= model.TotalOrderNo;
-
-            return dto;
-        }
     }
 
     public class OrderDto
     {
         public int OrderId { get; set; }
+        public string UserId { get; set; }
+        public string OrderDate { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public string CreditCardCode { get; set; }
-        public string PayId { get; set; }
-        public string UserId { get; set; }
+        public string PayId { get; set; }        
         public int RecordVersion { get; set; }        
-    }
-
-    public class OrderSummaryDto
-    {
-        public string UserId { get; set; }
-        public decimal TotalPrice { get; set; }
-        public decimal TotalOrderNo { get; set; }
     }
 }

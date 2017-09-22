@@ -59,14 +59,14 @@ namespace DomainShell.Test
             // <<
                         
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
-            container.Register<IConnection, Connection>(Lifestyle.Scoped);            
+            container.Register<IConnection, SessionFoundation>(Lifestyle.Scoped);            
 
             container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped); 
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
-            container.Register<IOrderSummaryRepository, OrderSummaryRepository>(Lifestyle.Scoped);
+            container.Register<IMonthlyOrderRepository, MonthlyOrderRepository>(Lifestyle.Scoped);
 
             container.Register<IOrderBudgetCheckService, OrderBudgetCheckService>(Lifestyle.Scoped);
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
@@ -142,6 +142,7 @@ namespace DomainShell.Test
                 create table OrderForm (
                     OrderId integer primary key,
                     UserId text,
+                    OrderDate text,
                     ProductName text,
                     Price numeric,
                     CreditCardCode text,
@@ -173,16 +174,16 @@ namespace DomainShell.Test
                     RecordVersion int
                 );
 
-                create table OrderBudget (
+                create table MonthlyOrderBudget (
                     UserId text primary key,                    
-                    BudgetAmount numeric
+                    Budget numeric
                 );
 
                 insert into LoginUser values('user1', 'user1', 1);
                 insert into LoginUser values('user2', 'user2', 1);
 
-                insert into OrderBudget values('user1', 99999);
-                insert into OrderBudget values('user2', 99999);
+                insert into MonthlyOrderBudget values('user1', 99999);
+                insert into MonthlyOrderBudget values('user2', 99999);
             ";
 
             command.ExecuteNonQuery();
@@ -220,7 +221,7 @@ namespace DomainShell.Test
                 drop table OrderForm;
                 drop table OrderFormCanceled;
                 drop table LoginUser;
-                drop table OrderBudget;
+                drop table MonthlyOrderBudget;
             ";
 
             try
@@ -236,6 +237,7 @@ namespace DomainShell.Test
                 create table OrderForm (
                     OrderId int identity primary key,
                     UserId nvarchar(100),
+                    OrderDate nvarchar(8),
                     ProductName nvarchar(100),
                     Price decimal,
                     CreditCardCode nvarchar(100),
@@ -259,16 +261,16 @@ namespace DomainShell.Test
                     RecordVersion int
                 );
 
-                create table OrderBudget (
+                create table MonthlyOrderBudget (
                     UserId nvarchar(100) primary key,
-                    BudgetAmount decimal
+                    Budget decimal
                 );
 
                 insert into LoginUser values('user1', 'user1', 1);
                 insert into LoginUser values('user2', 'user2', 1);
 
-                insert into OrderBudget values('user1', 99999);
-                insert into OrderBudget values('user2', 99999);
+                insert into MonthlyOrderBudget values('user1', 99999);
+                insert into MonthlyOrderBudget values('user2', 99999);
             ";
 
             command.ExecuteNonQuery();            

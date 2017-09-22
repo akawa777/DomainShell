@@ -49,20 +49,20 @@ namespace DomainShell.Test.Domains
         OrderCanceledModel Find(int orderId, bool throwError = false);
     }
 
-    public interface IOrderSummaryRepository
+    public interface IMonthlyOrderRepository
     {        
-        OrderSummaryModel GetByUserId(string userId, int excludeOrderId = 0);
+        MonthlyOrderModel GetMonthlyByUserId(string userId, DateTime orderDate, int excludeOrderId = 0);        
     }
 
     public interface ICreditCardService
     {
-        string Pay(string creditCardCord, decimal price);
-        void Cancel(string payId);
+        string Pay(OrderModel orderModel);
+        void Cancel(OrderModel orderModel);
     }
 
     public interface IMailService
     {
-        void Send(string emailAddress, string title, string contents);
+        void Send(OrderModel orderModel);
     }
 
     public interface IOrderBudgetCheckService

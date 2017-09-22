@@ -61,6 +61,8 @@ namespace DomainShell.Test.Domains
 
         public UserValue User { get; set; }
 
+        public DateTime? OrderDate { get; set; }
+
         public string ProductName { get; set; }
 
         public decimal Price { get; set; }
@@ -107,11 +109,11 @@ namespace DomainShell.Test.Domains
 
         public virtual void Complete(ICreditCardService creditCardService, string creditCardCode)
         {
-            ValidateWhenComplete(creditCardCode);
-
             CreditCardCode = creditCardCode;            
 
-            Pay(creditCardService);
+            ValidateWhenComplete();            
+
+            creditCardService.Pay(this);
 
             AddCompletedEvents();
 
@@ -120,32 +122,18 @@ namespace DomainShell.Test.Domains
 
         public void SendCompletedMail(IMailService mailService)
         {
-            mailService.Send("xxx", "xxx", "xxx");
+            mailService.Send(this);
         }
 
         public void CancelCompleted(ICreditCardService creditCardService)
         {
             ValidateWhenCancelCompleted();
 
-            CancelPay(creditCardService);
+            creditCardService.Cancel(this);
 
             Dirty = Dirty.Seal(this);
         }
-
-        private void Pay(ICreditCardService creditCardService)
-        {
-            PayId = creditCardService.Pay(CreditCardCode, Price);
-        }
-
-        private void CancelPay(ICreditCardService creditCardService)
-        {
-            if (!string.IsNullOrEmpty(PayId))
-            {
-                creditCardService.Cancel(PayId);
-                PayId = null;
-            }
-        }
-
+        
         private void AddCanceledEvents()
         {
             _events.Add(new OrderCanceledEvent { OrderId = OrderId, ProductName = ProductName, Price = Price, PayId = PayId, User = User });            
@@ -161,13 +149,14 @@ namespace DomainShell.Test.Domains
         {
             if (string.IsNullOrEmpty(ProductName)) throw new Exception("ProductName is required.");
             if (User == null) throw new Exception("User is required.");
+            if (OrderDate == null) throw new Exception("OrderDate is required.");
             if (orderBudgetCheckService.IsOverBudget(this)) throw new Exception("BudgetAmount is over.");
         }
 
-        private void ValidateWhenComplete(string creditCardCode)
+        private void ValidateWhenComplete()
         {            
             if (!string.IsNullOrEmpty(PayId)) throw new Exception("already paid.");
-            if (string.IsNullOrEmpty(creditCardCode)) throw new Exception("creditCardCode is required.");            
+            if (string.IsNullOrEmpty(CreditCardCode)) throw new Exception("creditCardCode is required.");            
         }
 
         private void ValidateWhenCancel()
@@ -245,27 +234,19 @@ namespace DomainShell.Test.Domains
         public int OrderId { get; set; }
     }
 
-    public class OrderSummaryModel
+    public class MonthlyOrderModel
     {
-        protected OrderSummaryModel()
+        protected MonthlyOrderModel()
         {
 
         }
 
         public string UserId { get; private set; }
-        public decimal BudgetAmount { get; private set; }
+        public int Year { get; private set; }
+        public int Month { get; private set; }
+        public decimal Budget { get; private set; }
         public decimal TotalPrice { get; private set; }
         public decimal TotalOrderNo { get; private set; }
-        public bool IsOverBudget => BudgetAmount < TotalPrice;
-
-        public void DecreaseTotalPrice(decimal price)
-        {
-            TotalPrice = TotalPrice - price;
-        }
-
-        public void IncreaseTotalPrice(decimal price)
-        {
-            TotalPrice = TotalPrice + price;
-        }
+        public bool IsOverBudgetByIncludingPrice(decimal price) => Budget < TotalPrice + price;
     }
 }
