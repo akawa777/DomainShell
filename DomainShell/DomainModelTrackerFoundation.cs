@@ -108,7 +108,7 @@ namespace DomainShell
             {
                 if (_list.Contains(domainModel))
                 {
-                    _list.Remove(domainModel);
+                    return;
                 }
 
                 _list[domainModel] = new TrackPack(domainModel, CreateTag(domainModel));
