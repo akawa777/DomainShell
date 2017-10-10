@@ -28,7 +28,7 @@ namespace FreestyleOrm.Core
 
             foreach (var column in row.Columns)
             {
-                if (column.StartsWith(row.IncludePrefix))
+                if (row.StartWithPrefix(column))
                 {
                     columnWithPrefixList.Add(column);
                     continue;
@@ -56,8 +56,23 @@ namespace FreestyleOrm.Core
             if (entity == null) return;
 
             List<object> relationEntities = new List<object>();
+
             SetRelationEntitis(entity, rootEntityNode, relationEntities);
-            relationEntities.Add(entity);
+
+            if (entity != rootEntityNode.Entity)
+            {
+                Dictionary<string, PropertyInfo> map = entity.GetType().GetPropertyMap(BindingFlags.GetProperty, PropertyTypeFilters.OnlyClass);
+
+                foreach (var entry in map)
+                {
+                    if (entry.Value.PropertyType.IsList()) continue;
+
+                    relationEntities.Add(entry.Value.Get(entity));
+                }
+
+                relationEntities.Add(entity);
+            }
+
             SetRow(relationEntities, row);
         }
 

@@ -44,7 +44,6 @@ namespace FreestyleOrm.Core
             using (var reader = _databaseAccessor.CreateFetchReader(_queryOptions))
             {
                 TRootEntity rootEntity = null;
-
                 Row prevRow = null;
 
                 while (reader.Read())
@@ -53,12 +52,17 @@ namespace FreestyleOrm.Core
 
                     Row currentRow = Row.CreateReadRow(reader, rootMapOptions);
 
-                    if (rootMapOptions == null || currentRow.CanCreate(prevRow))
+                    List<string> uniqueKeys = new List<string>();
+
+                    if (rootMapOptions == null || currentRow.CanCreate(prevRow, uniqueKeys))
                     {
                         if (rootEntity != null) yield return rootEntity;
 
-                        rootEntity = currentRow.CreateSettedEntity() as TRootEntity;
+                        rootEntity = null;
+                        rootEntity = rootMapOptions.GetEntity(currentRow, rootEntity) as TRootEntity;                        
                     }
+
+                    uniqueKeys.AddRange(currentRow.UniqueKeys);
 
                     if (rootMapOptions == null) continue;
 
@@ -66,18 +70,28 @@ namespace FreestyleOrm.Core
                     {
                         currentRow.SetMapOptions(mapOptions);
 
-                        if (!currentRow.CanCreate(prevRow)) continue;                        
-                        
+                        if (!currentRow.CanCreate(prevRow, uniqueKeys))
+                        {
+                            uniqueKeys.AddRange(currentRow.UniqueKeys);
+
+                            continue;
+                        }
+
+                        uniqueKeys.AddRange(currentRow.UniqueKeys);
+
                         object parentEntity = rootEntity;
                         PropertyInfo property = null;
 
                         foreach (var section in mapOptions.ExpressionSections)
                         {
-                            if (property != null && !property.PropertyType.IsList()) parentEntity = property.Get(parentEntity);
+                            if (property != null && !property.PropertyType.IsList())
+                            {
+                                parentEntity = property.Get(parentEntity);
+                            }
                             if (property != null && property.PropertyType.IsList())
                             {
-                                dynamic list = property.Get(parentEntity);
-                                parentEntity = list.Last();
+                                var list = property.Get(parentEntity) as IEnumerable;                                
+                                foreach (var item in list) parentEntity = item;
                             }
 
                             Dictionary<string, PropertyInfo> propertyMap = parentEntity.GetType().GetPropertyMap(BindingFlags.GetProperty | BindingFlags.SetProperty, PropertyTypeFilters.OnlyClass);
@@ -107,7 +121,7 @@ namespace FreestyleOrm.Core
                                 property.Set(parentEntity, list);
                             }
 
-                            object entity = currentRow.CreateSettedEntity();
+                            object entity = mapOptions.GetEntity(currentRow, rootEntity);
 
                             if (property.PropertyType.IsArray)
                             {
@@ -120,10 +134,10 @@ namespace FreestyleOrm.Core
                                 property.Set(parentEntity, newArray);
                             }
                             else if (property.PropertyType == typeof(IEnumerable<>).MakeGenericType(mapOptions.EntityType))
-                            {
-                                dynamic dynamicList = (list as dynamic).ToList();
-                                dynamic dynamicEntity = entity;
-                                dynamicList.Add(dynamicEntity);
+                            {                                
+                                dynamic dynamicList = typeof(List<>).MakeGenericType(mapOptions.EntityType).Create();
+                                dynamicList.AddRange(list as dynamic);
+                                dynamicList.Add(entity as dynamic);
 
                                 property.Set(parentEntity, dynamicList as object);
                             }
@@ -136,7 +150,7 @@ namespace FreestyleOrm.Core
                         }
                         else
                         {
-                            object entity = currentRow.CreateSettedEntity();
+                            object entity = mapOptions.GetEntity(currentRow, rootEntity);
                             property.Set(parentEntity, entity);
                         }
                     }
@@ -144,7 +158,7 @@ namespace FreestyleOrm.Core
                     prevRow = currentRow;
                 }
 
-                yield return rootEntity;
+                if (rootEntity != null) yield return rootEntity;
 
                 reader.Close();
             }
@@ -269,10 +283,13 @@ namespace FreestyleOrm.Core
             Map<TRootEntity> map = new Map<TRootEntity>(_queryDefine);
             _setMap(map);
 
+            if (map.RootMapOptions.Refer == Refer.Read) throw new InvalidOperationException($"{typeof(TRootEntity).Name} is Refer.Read.");
+
             using (var reader = _databaseAccessor.CreateTableReader(_queryOptions, map.RootMapOptions, out string[] primaryKeys))
             {
                 Row row = Row.CreateWriteRow(reader, map.RootMapOptions, primaryKeys, rootEntity);
-                row.SetRow(rootEntity, new RootEntityNode { Entity = rootEntity });
+                map.RootMapOptions.SetRow(rootEntity, new RootEntityNode { Entity = rootEntity }, row);
+                
                 rows.Add(row);
 
                 reader.Close();
@@ -280,6 +297,8 @@ namespace FreestyleOrm.Core
 
             foreach (var mapOptions in map.MapOptionsListWithoutRoot)
             {
+                if (mapOptions.Refer == Refer.Read) continue;
+
                 object parentEntity = rootEntity;
                 PropertyInfo property = null;
                 RootEntityNode rootEntityNode = new RootEntityNode { Entity = rootEntity };
@@ -287,16 +306,22 @@ namespace FreestyleOrm.Core
 
                 foreach (var section in mapOptions.ExpressionSections)
                 {
-                    if (property != null && !property.PropertyType.IsList()) parentEntity = property.Get(parentEntity);
-                    if (property != null && property.PropertyType.IsList())
+                    if (property != null && !property.PropertyType.IsList())
                     {
-                        dynamic list = property.Get(parentEntity);
-                        parentEntity = list.Last();                        
-                    }
+                        if (property.PropertyType.IsList())
+                        {
+                            dynamic list = property.Get(parentEntity);
+                            parentEntity = list.Last();
+                        }
+                        else
+                        {
+                            parentEntity = property.Get(parentEntity);
+                        }
 
-                    EntityNode entityNode = new EntityNode { Entity = parentEntity };
-                    parentEntityNode.Child = entityNode;
-                    parentEntityNode = entityNode;
+                        EntityNode entityNode = new EntityNode { Entity = parentEntity };
+                        parentEntityNode.Child = entityNode;
+                        parentEntityNode = entityNode;
+                    }
 
                     Dictionary<string, PropertyInfo> propertyMap = parentEntity.GetType().GetPropertyMap(BindingFlags.GetProperty | BindingFlags.SetProperty, PropertyTypeFilters.OnlyClass);
 
@@ -313,7 +338,7 @@ namespace FreestyleOrm.Core
                         foreach (object entity in list as IEnumerable)
                         {
                             Row row = Row.CreateWriteRow(reader, mapOptions, primaryKeys, entity);
-                            row.SetRow(entity, rootEntityNode);
+                            mapOptions.SetRow(entity, rootEntityNode, row);
                             rows.Add(row);
                         }
 
@@ -328,7 +353,7 @@ namespace FreestyleOrm.Core
                     using (var reader = _databaseAccessor.CreateTableReader(_queryOptions, mapOptions, out string[] primaryKeys))
                     {
                         Row row = Row.CreateWriteRow(reader, mapOptions, primaryKeys, entity);
-                        row.SetRow(entity, rootEntityNode);
+                        mapOptions.SetRow(entity, rootEntityNode, row);
                         rows.Add(row);
 
                         reader.Close();

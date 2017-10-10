@@ -52,12 +52,12 @@ namespace FreestyleOrm.Core
     {
         public MapOptions(IQueryDefine queryDefine, Expression<Func<TRootEntity, TEntity>> target)
         {            
-            _mapOptions = new MapOptions(queryDefine, typeof(TRootEntity), typeof(TEntity), target.GetEntityPath(out PropertyInfo property), property, false);
+            _mapOptions = new MapOptions(queryDefine, typeof(TRootEntity), typeof(TEntity), target.GetExpressionPath(out PropertyInfo property), property, false);
         }
 
         public MapOptions(IQueryDefine queryDefine, Expression<Func<TRootEntity, IEnumerable<TEntity>>> target)
         {
-            _mapOptions = new MapOptions(queryDefine, typeof(TRootEntity), typeof(TEntity), target.GetEntityPath(out PropertyInfo property), property, true);
+            _mapOptions = new MapOptions(queryDefine, typeof(TRootEntity), typeof(TEntity), target.GetExpressionPath(out PropertyInfo property), property, true);
         }
 
         private MapOptions _mapOptions;
@@ -71,9 +71,9 @@ namespace FreestyleOrm.Core
             return this;
         }
 
-        public IMapOptions<TRootEntity, TEntity> CreateEntity(Func<TEntity> createEntity)
+        public IMapOptions<TRootEntity, TEntity> GetEntity(Func<IRow, TRootEntity, TEntity> getEntity)
         {
-            _mapOptions.CreateEntity = () => createEntity();
+            _mapOptions.GetEntity = (row, rootEntity) => getEntity(row, rootEntity as TRootEntity);
 
             return this;
         }
@@ -99,16 +99,9 @@ namespace FreestyleOrm.Core
             return this;
         }
 
-        public IMapOptions<TRootEntity, TEntity> SetEntity(Action<IRow, TEntity> setEntity)
-        {
-            _mapOptions.SetEntity = (row, entity) => setEntity(row, (TEntity)entity);
-
-            return this;
-        }
-
         public IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, IRootEntityNode, IRow> setRow)
         {
-            _mapOptions.SetRow = (entity, rootNode, row) => setRow((TEntity)entity, rootNode, row);
+            _mapOptions.SetRow = (entity, rootNode, row) => setRow(entity as TEntity, rootNode, row);
 
             return this;
         }
@@ -123,7 +116,7 @@ namespace FreestyleOrm.Core
         public IMapOptions<TRootEntity, TEntity> RelationId<TRelationEntity>(string relationIdColumn, Expression<Func<TRootEntity, TRelationEntity>> relationEntity) where TRelationEntity : class
         {
             _mapOptions.RelationIdColumn = relationIdColumn;
-            _mapOptions.RelationEntityPath = relationEntity.GetEntityPath();
+            _mapOptions.RelationEntityPath = relationEntity.GetExpressionPath();
 
             return this;
         }

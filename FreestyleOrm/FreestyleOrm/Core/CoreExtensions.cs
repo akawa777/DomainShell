@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Collections.ObjectModel;
 
 namespace FreestyleOrm.Core
 {
@@ -20,32 +21,56 @@ namespace FreestyleOrm.Core
             try
             {
                 convertedValue = Convert.ChangeType(value, property.PropertyType);
+                property.SetValue(obj, convertedValue);
             }
             catch
             {
-                return;
-            }
+                try
+                {
+                    property.SetValue(obj, value);
+                }
+                catch
+                {
 
-            property.SetValue(obj, value);
+                }
+            }            
         }
 
         public static bool IsList(this Type type)
-        {   
+        {
+            return IsList(type, out Type elementType);
+        }
+
+        public static bool IsList(this Type type, out Type elementType)
+        {
+            elementType = null;
+
             if (type == typeof(string)) return false;
 
-            if (type.IsArray) return true;
+            if (type.IsArray)
+            {
+                elementType = type.GetElementType();
+                return true;
+            }
 
             foreach (var interfaceType in type.GetInterfaces())
             {
+                if (!interfaceType.IsGenericType) continue;
+
                 var defineType = interfaceType.GetGenericTypeDefinition();
 
-                if (defineType != null && (defineType == typeof(IList<>) || defineType == typeof(ICollection<>)))
-                {                    
+                if (defineType != null && (defineType == typeof(List<>) || defineType == typeof(Collection<>)))
+                {
+                    elementType = interfaceType.GetGenericArguments()[0];
                     return true;
                 }
             }
 
-            if (type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) return true;
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                elementType = type.GetGenericArguments()[0];
+                return true;
+            }
 
             return false;
         }
@@ -78,16 +103,16 @@ namespace FreestyleOrm.Core
             return Activator.CreateInstance(type, true);
         }
 
-        public static string GetEntityPath<TRoot, TTarget>(this Expression<Func<TRoot, TTarget>> expression) where TRoot : class
+        public static string GetExpressionPath<TRoot, TTarget>(this Expression<Func<TRoot, TTarget>> expression) where TRoot : class
         {
-            return GetEntityPath(expression, out PropertyInfo property);
+            return GetExpressionPath(expression, out PropertyInfo property);
         }
 
-        public static string GetEntityPath<TRoot, TTarget>(this Expression<Func<TRoot, TTarget>> expression, out PropertyInfo property) where TRoot : class
+        public static string GetExpressionPath<TRoot, TTarget>(this Expression<Func<TRoot, TTarget>> expression, out PropertyInfo property) where TRoot : class
         {
             property = null;
 
-            string[] sections = expression.ToString().Split('.');
+            string[] sections = expression.Body.ToString().Split('.');
             List<string> path = new List<string>();
 
             Dictionary<string, PropertyInfo> propertyMap = typeof(TRoot).GetPropertyMap(BindingFlags.Public, PropertyTypeFilters.All);
@@ -103,7 +128,19 @@ namespace FreestyleOrm.Core
                 if (propertyMap.TryGetValue(targetSection, out property))
                 {
                     path.Add(targetSection);
-                    propertyMap = property.PropertyType.GetPropertyMap(BindingFlags.Public, PropertyTypeFilters.All);
+
+                    Type type;
+
+                    if (property.PropertyType.IsList(out Type elementType))
+                    {
+                        type = elementType;
+                    }
+                    else
+                    {
+                        type = property.PropertyType;
+                    }
+
+                    propertyMap = type.GetPropertyMap(BindingFlags.Public, PropertyTypeFilters.All);
                 }
             }
 

@@ -1,106 +1,423 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FreestyleOrm;
 using System.Collections.Generic;
 using System.Data;
 using Microsoft.Data.Sqlite;
+using System.Data.SqlClient;
 using System.Linq;
+
 
 namespace FreeStyleOrm.Tests
 {
     [TestClass]
     public class UnitTest
     {
-        [TestMethod]
-        public void TestMethodByManual()
+        protected virtual bool ShouldManualQuery => true;
+        protected virtual int PurchaseOrderNo => 10;        
+        private IDbConnection _connection;
+        private IDbTransaction _transaction;
+
+        private string _sql = @"
+			select
+                PurchaseOrder.*,
+
+                CustomerName,
+                Customer.RecordVersion Customer_RecordVersion,
+
+                PurchaseItemNo,
+                Number,
+                PurchaseItem.RecordVersion PurchaseItems_RecordVersion,
+
+                PurchaseItem.ProductId,
+                ProductName,
+                Product.RecordVersion Product_RecordVersion
+            from
+                PurchaseOrder            
+            left join
+                Customer
+            on
+                PurchaseOrder.CustomerId = Customer.CustomerId
+            left join
+                PurchaseItem
+            on
+                PurchaseOrder.PurchaseOrderId = PurchaseItem.PurchaseOrderId
+            left join
+                Product
+            on
+                PurchaseItem.ProductId = Product.ProductId
+            {{where}}
+            order by
+                PurchaseOrder.PurchaseOrderId,
+                PurchaseItem.PurchaseItemNo
+        ";
+
+        [TestInitialize]
+        public void Init()
         {
-            IDbConnection connection = null;
+            _connection = CreateConnection();
+            _connection.Open();
+            _transaction = _connection.BeginTransaction();
 
-            IQuery<PurchaseOrder> query = connection.Query<PurchaseOrder>(
-                @"
-                    select
-                        po.*,
+            CreateTable(_connection);
+            InsertCustomers(CreateCustomers(10));
+            InsertProducts(CreateProducts(10));
+            InsertPurchaseOrders(CreatePurchaseOrders(PurchaseOrderNo, 10, 10, 10));
+        }
 
-                        c.CustomerName,
-                        c.RecordVersion c_RecordVersion
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _transaction.Commit();
+            _transaction.Dispose();
+            _connection.Close();
+            _connection.Dispose();
+        }
 
-                        pi.PurchaseItemNo,
-                        pi.RecordVersion pi_RecordVersion
 
-                        p.ProductName,
-                        p.RecordVersion p_RecordVersion
-                    from
-                        PurchaseOrder po
-                    left join
-                        Customer c
-                    on
-                        po.CustomerId = c.CustomerId
-                    left join
-                        PurdfhaeItem pi
-                    on
-                        po.PurchaseOrderId = pi.PurchaseOrderId
-                    left join
-                        Product p
-                    on
-                        po.ProductId = p.ProductId
-                    order by
-                        po.PurchaseOrderId,
-                        pi.PurchaseItemNo
-                ");
+        [TestMethod]
+        public void Test_Init()
+        {
+
+        }
+
+        [TestMethod]
+        public void Test_Fetch()
+        {
+            var query = CreatePurchaseOrderQueryByManual();
+
+            query
+                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId <= @PurchaseOrderId")
+                .Parametes(p => p["@PurchaseOrderId"] = PurchaseOrderNo);
+
+            var ordersByManual = query.Fetch().ToList();
+
+            query = CreatePurchaseOrderQueryByAuto();
+
+            query
+                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId <= @PurchaseOrderId")
+                .Parametes(p => p["@PurchaseOrderId"] = PurchaseOrderNo);
+
+            var ordersByAuto = query.Fetch().ToList();
+
+            Assert.AreEqual(PurchaseOrderNo, ordersByManual.Count);
+            for (int i = 0; i < ordersByManual.Count; i++) AssertEqualPurchaseOrder(ordersByManual[i], ordersByAuto[i], false);
+        }
+
+        [TestMethod]
+        public void Test_Update()
+        {
+            var query = CreatePurchaseOrderQuery();
+
+            query
+                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId = @PurchaseOrderId")
+                .Parametes(p => p["@PurchaseOrderId"] = 1);
+
+            var order = query.Fetch().Single();
+
+            EditPurchaseOrder(order);
+
+            query.Update(order);
+
+            var updatedOrder = query.Fetch().Single();
+
+            AssertEqualPurchaseOrder(order, updatedOrder, true);
+        }
+
+        [TestMethod]
+        public void Test_Delete()
+        {
+            var query = CreatePurchaseOrderQuery();
+
+            query
+                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId = @PurchaseOrderId")
+                .Parametes(p => p["@PurchaseOrderId"] = 1);
+
+            var order = query.Fetch().Single();
+
+            query.Delete(order);
+
+            var count = query.Fetch().Count();
+
+            Assert.AreEqual(0, count);
+        }
+
+        private void EditPurchaseOrder(PurchaseOrder order)
+        {
+            order.Title += "_update";
+            order.Customer = Customer.Create(10);            
+
+            foreach (var item in order.PurchaseItems)
+            {
+                item.Number *= 10;
+                item.Product = Product.Create(10);                
+            }
+
+            var newItem = PurchaseItem.Create(order.GetNewItemNo());
+            var firstItem = order.PurchaseItems.First();
+
+            newItem.Number = firstItem.Number;
+            newItem.Product = firstItem.Product;
+
+            order.AddItem(newItem);
+            order.RemoveItem(firstItem);
+        }
+
+        private void AssertEqualPurchaseOrder(PurchaseOrder srcOrder, PurchaseOrder destOrder, bool updated)
+        {
+            Assert.AreEqual(false, string.IsNullOrEmpty(destOrder.Title));
+            Assert.AreEqual(srcOrder.Title, destOrder.Title);
+
+            Assert.AreEqual(srcOrder.Customer.CustomerId, destOrder.Customer.CustomerId);
+            Assert.AreEqual(false, string.IsNullOrEmpty(destOrder.Customer.CustomerName));
+
+            if (updated) Assert.AreEqual(srcOrder.RecordVersion + 1, destOrder.RecordVersion);
+            else Assert.AreEqual(srcOrder.RecordVersion, destOrder.RecordVersion);
+
+            foreach (var srcItem in srcOrder.PurchaseItems)
+            {
+                var destItem = destOrder.PurchaseItems.Single(x => x.PurchaseItemNo == srcItem.PurchaseItemNo);
+
+                Assert.AreEqual(srcItem.PurchaseItemNo, destItem.PurchaseItemNo);
+                Assert.AreEqual(srcItem.Number, destItem.Number);
+                Assert.AreEqual(srcItem.Product.ProductId, destItem.Product.ProductId);
+                Assert.AreEqual(false, string.IsNullOrEmpty(destItem.Product.ProductName));
+
+                if (updated) Assert.AreEqual(srcItem.RecordVersion + 1, destItem.RecordVersion);
+                else Assert.AreEqual(srcItem.RecordVersion, destItem.RecordVersion);
+            }
+        }
+
+        private IDbConnection CreateConnection()
+        {
+            return new SqlConnection(@"Data Source=akawawin8\sqlserver2016;Initial Catalog=cplan_demo;Integrated Security=True");
+        }
+
+        public void CreateTable(IDbConnection connection)
+        {
+            var command = connection.CreateCommand();
+            command.Transaction = _transaction;
+
+            try
+            {
+                command.CommandText = GetDropTableSql();
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+
+            }
+
+            command.CommandText = GetCreateTableSql();
+            command.ExecuteNonQuery();
+        }
+
+        private string GetDropTableSql()
+        {
+            return @"
+                drop table PurchaseOrder;
+                drop table Customer;
+                drop table PurchaseItem;
+                drop table Product;
+            ";
+        }
+
+        private string GetCreateTableSql()
+        {
+            return @"
+				CREATE TABLE [dbo].[Customer](
+	                [CustomerId] [int] NOT NULL,
+	                [CustomerName] [nvarchar](100) NULL,
+	                [RecordVersion] [int] NULL,
+                PRIMARY KEY CLUSTERED 
+                (
+	                [CustomerId] ASC
+                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                ) ON [PRIMARY]
+
+                CREATE TABLE [dbo].[Product](
+	                [ProductId] [int] NOT NULL,
+	                [ProductName] [nvarchar](100) NULL,
+	                [RecordVersion] [int] NULL,
+                PRIMARY KEY CLUSTERED 
+                (
+	                [ProductId] ASC
+                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                ) ON [PRIMARY]
+
+                CREATE TABLE [dbo].[PurchaseOrder](
+	                [PurchaseOrderId] [int] IDENTITY(1,1) NOT NULL,
+	                [Title] [nvarchar](100) NULL,
+	                [CustomerId] [int] NULL,
+	                [RecordVersion] [int] NULL,
+                PRIMARY KEY CLUSTERED 
+                (
+	                [PurchaseOrderId] ASC
+                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                ) ON [PRIMARY]
+
+                CREATE TABLE [dbo].[PurchaseItem](
+	                [PurchaseOrderId] [int] NOT NULL,
+	                [PurchaseItemNo] [int] NOT NULL,
+	                [ProductId] [int] NULL,
+	                [Number] [int] NULL,
+	                [RecordVersion] [int] NULL,
+                PRIMARY KEY CLUSTERED 
+                (
+	                [PurchaseOrderId] ASC,
+	                [PurchaseItemNo] ASC
+                )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                ) ON [PRIMARY]
+            ";
+        }
+
+        private void InsertCustomers(IEnumerable<Customer> models)
+        {
+            var query = _connection
+                .Query<Customer>("select * from Customer")
+                .Map(m => m.To().UniqueKeys("CustomerId").Refer(Refer.Write).OptimisticLock("RecordVersion", x => x.RecordVersion + 1))
+                .Transaction(_transaction);
+
+            foreach (var model in models) query.Insert(model);
+        }
+
+        private void InsertProducts(IEnumerable<Product> models)
+        {
+            var query = _connection
+                .Query<Product>("select * from Product")
+                .Map(m => m.To().UniqueKeys("ProductId").Refer(Refer.Write).OptimisticLock("RecordVersion", x => x.RecordVersion + 1))
+                .Transaction(_transaction);
+
+            foreach (var model in models) query.Insert(model);
+        }
+
+        private void InsertPurchaseOrders(IEnumerable<PurchaseOrder> models)
+        {
+            var query = CreatePurchaseOrderQuery().Formats(f => f["where"] = string.Empty);                
+
+            foreach (var model in models) query.Insert(model);
+        }
+
+        private IEnumerable<Customer> CreateCustomers(int number)
+        {
+            for (int i = 0; i < number; i++)
+            {
+                Customer customer = Customer.Create(i + 1);
+
+                customer.CustomerName = $"{nameof(customer.CustomerName)}_{customer.CustomerId}";
+
+                yield return customer;
+            }
+        }
+
+        private IEnumerable<Product> CreateProducts(int number)
+        {
+            for (int i = 0; i < number; i++)
+            {
+                Product product = Product.Create(i + 1);
+
+                product.ProductName = $"{nameof(product.ProductName)}_{product.ProductId}";
+
+                yield return product;
+            }
+        }
+
+        private IEnumerable<PurchaseOrder> CreatePurchaseOrders(int number, int maxItemNumber, int maxCutomerId, int maxProductId)
+        {
+            for (int i = 0; i < number; i++)
+            {
+                PurchaseOrder order = PurchaseOrder.Create(0, 0);
+
+                order.Title = $"{nameof(order.Title)}_{i + 1}";
+                order.Customer = Customer.Create((i % maxCutomerId) + 1);
+
+                for (int ii = 0; ii < maxItemNumber; ii++)
+                {
+                    var orderItem = PurchaseItem.Create(order.GetNewItemNo());
+                    orderItem.Product = Product.Create((ii % maxProductId) + 1);
+                    orderItem.Number = orderItem.PurchaseItemNo;
+
+                    order.AddItem(orderItem);
+                }
+
+                yield return order;
+            }
+        }
+
+        private IQuery<PurchaseOrder> CreatePurchaseOrderQuery()
+        {
+            if (ShouldManualQuery) return CreatePurchaseOrderQueryByManual();
+            else return CreatePurchaseOrderQueryByAuto();
+        }
+
+        private IQuery<PurchaseOrder> CreatePurchaseOrderQueryByManual()
+        {
+            IQuery<PurchaseOrder> query = _connection.Query<PurchaseOrder>(_sql);
 
             query.Map(m =>
             {
                 m.To()
-                    .UniqueKeys("PurchaseOrderId")            
-                    .CreateEntity(() => new PurchaseOrder())
-                    .FormatPropertyName(column => column)                    
+                    .UniqueKeys("PurchaseOrderId")
+                    .FormatPropertyName(x => x)
                     .Refer(Refer.Write)
-                    .SetEntity((row, entity) =>
-                    {                        
-                        entity.PurchaseOrderId = (int)row[nameof(entity.PurchaseOrderId)];
+                    .GetEntity((row, rootEntity) =>
+                    {
+                        PurchaseOrder entity = PurchaseOrder.Create((int)row[nameof(entity.PurchaseOrderId)], (int)row[nameof(entity.RecordVersion)]);
+                        entity.Title = (string)row[nameof(entity.Title)];
+
+                        return entity;
                     })
                     .SetRow((entity, rootNode, row) =>
                     {
                         row[nameof(entity.PurchaseOrderId)] = entity.PurchaseOrderId;
+                        row[nameof(entity.Title)] = entity.Title;
+                        row[nameof(entity.Customer.CustomerId)] = entity.Customer.CustomerId;
+                        row[nameof(entity.RecordVersion)] = entity.RecordVersion;
                     })
                     .Table("PurchaseOrder")
                     .AutoId(true)
-                    .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);                    
-
-                m.ToOne(rootEntity => rootEntity.Customer)
-                    .UniqueKeys("CustomerId")
-                    .IncludePrefix("c");
-
-                m.ToMany(rootEntity => rootEntity.PurchaseItems)
-                    .UniqueKeys("PurchaseOrderId, PurchaseItemNo")
-                    .CreateEntity(() => new PurchaseItem())
-                    .FormatPropertyName(column => column)
-                    .IncludePrefix("pi")
-                    .Refer(Refer.Write)
-                    .SetEntity((row, entity) =>
-                    {
-                        entity.PurchaseItemNo = (int)row[nameof(entity.PurchaseItemNo)];
-                    })
-                    .SetRow((entity, rootNode, row) =>
-                    {
-                        PurchaseOrder order = (PurchaseOrder)rootNode.Entity;
-
-                        row[nameof(order.PurchaseOrderId)] = order.PurchaseOrderId;
-                        row[nameof(entity.PurchaseItemNo)] = entity.PurchaseItemNo;
-                    })
-                    .Table("PurdfhaeItem")
-                    .RelationId("PurchaseOrderId", x => x)
                     .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);
 
-                m.ToOne(rootEntity => rootEntity.PurchaseItems.First())
-                    .UniqueKeys("ProductId")
-                    .IncludePrefix("pi");
-            });
-        }
-   
-        [TestMethod]
-        public void TestMethodByAuto()
+                m.ToOne(x => x.Customer)
+                    .UniqueKeys("CustomerId");
+
+                m.ToMany(x => x.PurchaseItems)
+                    .UniqueKeys("PurchaseOrderId, PurchaseItemNo")
+                    .FormatPropertyName(x => x)
+                    .IncludePrefix("PurchaseItems_")
+                    .Refer(Refer.Write)
+                    .GetEntity((row, rootEntity) =>
+                    {
+                        PurchaseItem entity = PurchaseItem.Create((int)row[nameof(entity.PurchaseItemNo)], (int)row[$"PurchaseItems_{nameof(entity.RecordVersion)}"]);
+                        entity.Number = (int)row[nameof(entity.Number)];
+
+                        return entity;
+                    })
+                    .SetRow((entity, rootEntityNode, row) =>
+                    {
+                        var root = rootEntityNode.Entity as PurchaseOrder;
+
+                        row[nameof(root.PurchaseOrderId)] = root.PurchaseOrderId;
+                        row[nameof(entity.PurchaseItemNo)] = entity.PurchaseItemNo;
+                        row[nameof(entity.Product.ProductId)] = entity.Product.ProductId;
+                        row[nameof(entity.Number)] = entity.Number;
+                        row[nameof(entity.RecordVersion)] = entity.RecordVersion;
+                    })
+                    .Table("PurchaseItem")
+                    .RelationId("PurchaseOrderId", x => x)
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion + 1);
+
+                m.ToOne(x => x.PurchaseItems.First().Product)
+                    .UniqueKeys("ProductId");
+            })
+            .Transaction(_transaction); 
+
+            return query;
+        }   
+        
+        public IQuery<PurchaseOrder> CreatePurchaseOrderQueryByAuto()
         {
-            IQuery<PurchaseOrder> query = null;
+            IQuery<PurchaseOrder> query = _connection.Query<PurchaseOrder>(_sql);
 
             query.Map(m =>
             {
@@ -108,52 +425,159 @@ namespace FreeStyleOrm.Tests
                     .UniqueKeys("PurchaseOrderId")
                     .Refer(Refer.Write)
                     .AutoId(true)
-                    .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion + 1);
 
-                m.ToOne(rootEntity => rootEntity.Customer)
-                    .UniqueKeys("CustomerId")
-                    .IncludePrefix("c");
+                m.ToOne(x => x.Customer)
+                    .UniqueKeys("CustomerId");
 
-                m.ToMany(rootEntity => rootEntity.PurchaseItems)
+                m.ToMany(x => x.PurchaseItems)
                     .UniqueKeys("PurchaseOrderId, PurchaseItemNo")
-                    .IncludePrefix("pi")
                     .Refer(Refer.Write)
                     .RelationId("PurchaseOrderId", x => x)
-                    .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion + 1);
 
-                m.ToOne(rootEntity => rootEntity.PurchaseItems.First())
-                    .UniqueKeys("ProductId")
-                    .IncludePrefix("pi");
-            });
-        }
+                m.ToOne(x => x.PurchaseItems.First().Product)
+                    .UniqueKeys("ProductId");
+            })
+            .Transaction(_transaction);
 
-        public class PurchaseOrder
-        {
-            public int PurchaseOrderId { get; set; }
-            public Customer Customer { get; set; }
-            public IEnumerable<PurchaseItem> PurchaseItems { get; set; }
-            public int RecordVersion { get; set; }
+            return query;
         }
 
         public class Customer
         {
-            public int CustomerId { get; set; }
-            public string CustomerName { get; set; }
-            public int RecordVersion { get; set; }
-        }
+            protected Customer()
+            {
 
-        public class PurchaseItem
-        {
-            public int PurchaseItemNo { get; set;}
-            public Product Product { get; set; }
-            public int RecordVersion { get; set; }
+            }
+
+            public static Customer Create()
+            {
+                return new Customer();
+            }
+
+            public static Customer Create(int customerId, int recordVersion = 0)
+            {
+                return new Customer() { CustomerId = customerId, RecordVersion = recordVersion };
+            }
+
+            public int CustomerId { get; private set; }
+
+            public string CustomerName { get; set; }
+
+            public int RecordVersion { get; private set; }
         }
 
         public class Product
         {
-            public int ProductId { get; set; }
+            protected Product()
+            {
+
+            }
+
+            public static Product Create()
+            {
+                return new Product();
+            }
+
+            public static Product Create(int productId, int recordVersion = 0)
+            {
+                return new Product() { ProductId = productId, RecordVersion = recordVersion };
+            }
+
+            public int ProductId { get; private set; }
+
             public string ProductName { get; set; }
-            public int RecordVersion { get; set; }
+
+            public int RecordVersion { get; private set; }
+        }
+
+        public partial class PurchaseOrder
+        {
+            protected PurchaseOrder()
+            {
+
+            }
+
+            public static PurchaseOrder Create(int purchaseOrderId, int recordVersion = 0)
+            {
+                PurchaseOrder order = new PurchaseOrder
+                {
+                    PurchaseOrderId = purchaseOrderId,
+                    RecordVersion = recordVersion
+                };
+
+                return order;
+            }
+
+            public int PurchaseOrderId { get; set; }
+
+            public Customer Customer { get; set; }
+
+            public string Title { get; set; }
+
+            private List<PurchaseItem> _purchaseItemList = new List<PurchaseItem>();
+
+            public IEnumerable<PurchaseItem> PurchaseItems
+            {
+                get
+                {
+                    return _purchaseItemList;
+                }
+                private set
+                {
+                    _purchaseItemList = value.ToList();
+                }
+            }
+
+            public int RecordVersion { get; private set; }
+
+            public int GetNewItemNo()
+            {
+                if (_purchaseItemList.Count == 0) return 1;
+                return _purchaseItemList.Max(x => x.PurchaseItemNo) + 1;
+            }
+
+            public void AddItem(PurchaseItem purchaseItem)
+            {
+                if (_purchaseItemList.Any(x => x.PurchaseItemNo == purchaseItem.PurchaseItemNo))
+                {
+                    throw new ArgumentException("PurchaseItemNo is invalid.");
+                }
+
+                _purchaseItemList.Add(purchaseItem);
+            }
+
+            public void RemoveItem(PurchaseItem purchaseItem)
+            {
+                if (!_purchaseItemList.Any(x => x == purchaseItem))
+                {
+                    throw new ArgumentException("purchaseItem is invalid.");
+                }
+
+                _purchaseItemList.Remove(purchaseItem);
+            }
+        }
+
+        public class PurchaseItem
+        {
+            protected PurchaseItem()
+            {
+
+            }
+
+            public static PurchaseItem Create(int no, int recordVersion = 0)
+            {
+                return new PurchaseItem { PurchaseItemNo = no, RecordVersion = recordVersion };
+            }
+
+            public int PurchaseItemNo { get; private set; }
+
+            public Product Product { get; set; }
+
+            public int Number { get; set; }
+
+            public int RecordVersion { get; private set; }
         }
 
     }

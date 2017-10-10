@@ -20,9 +20,7 @@ namespace FreestyleOrm.Core
 
         protected Row(IDataRecord dataRecord, MapOptions mapOptions, bool noSetValue, string[] primaryKeys, object entity)
         {
-            SetMapOptions(mapOptions);
-
-            List<string> realNamesWithPrefix = new List<string>();
+            SetMapOptions(mapOptions);            
 
             for (int i = 0; i < dataRecord.FieldCount; i++)
             {
@@ -37,14 +35,24 @@ namespace FreestyleOrm.Core
             PrimaryKeys = primaryKeys;
             _entity = entity;
         }
-
-        private OrderedDictionary _fieldMap = new OrderedDictionary();
+        
         private Dictionary<string, object> _valueMap = new Dictionary<string, object>();
         private List<string> _columns = new List<string>();
         private MapOptions _mapOptions;
         private object _entity;
 
-        private bool StartWithPrefix(string column) => column.StartsWith(_mapOptions.IncludePrefix);
+        public bool StartWithPrefix(string column) => string.IsNullOrEmpty(_mapOptions.IncludePrefix) ? false : column.StartsWith(_mapOptions.IncludePrefix);
+
+        public bool IsRowVersionColumn(string column)
+        {
+            if (string.IsNullOrEmpty(RowVersionColumn)) return false;
+            return RowVersionColumn == column;
+        }
+
+        public bool IsPrimaryKey(string column)
+        {
+            return PrimaryKeys.Any(x => x == column);
+        }
 
         private string GetRealName(string column)
         {
@@ -69,23 +77,14 @@ namespace FreestyleOrm.Core
 
         public Func<string, string> FormatPropertyName => _mapOptions.FormatPropertyName;
 
-        public object CreateSettedEntity()
+        public void BindEntity(object entity)
         {
-            object entity = _mapOptions.CreateEntity();
-
-            SetEntity(entity);
-
-            return entity;
+            _mapOptions.BindEntity(this, entity);            
         }
 
-        public void SetEntity(object entity)
+        public void BindRow(object entity, IRootEntityNode rootEntityNode)
         {
-            _mapOptions.SetEntity(this, entity);            
-        }
-
-        public void SetRow(object entity, IRootEntityNode rootEntityNode)
-        {
-            _mapOptions.SetRow(entity, rootEntityNode, this);
+            _mapOptions.BindRow(entity, rootEntityNode, this);
         }
 
         public IEnumerable<string> Columns => _columns;        
@@ -112,7 +111,7 @@ namespace FreestyleOrm.Core
         
         public string GetColumnWithoutPrefix(string column)
         {
-            if (!column.StartsWith(_mapOptions.IncludePrefix))
+            if (!StartWithPrefix(column))
             {
                 return column;
             }
@@ -122,18 +121,18 @@ namespace FreestyleOrm.Core
 
         public bool AutoId => _mapOptions.AutoId;        
 
-        public bool CanCreate(IRow prevRow)
+        public bool CanCreate(IRow prevRow, IEnumerable<string> prevUniqueKeys)
         {
             if (UniqueKeys.Count() == 0) return true;
 
-            foreach (var column in UniqueKeys)
+            foreach (var column in prevUniqueKeys.Concat(UniqueKeys))
             {
                 if (this[column] == DBNull.Value) return false;
             }
 
             if (prevRow == null) return true;
 
-            foreach (var column in UniqueKeys)
+            foreach (var column in prevUniqueKeys.Concat(UniqueKeys))
             {
                 if (prevRow[column] == DBNull.Value) continue;
                 if (this[column].ToString() != prevRow[column].ToString()) return true;

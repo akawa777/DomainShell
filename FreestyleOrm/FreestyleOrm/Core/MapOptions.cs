@@ -12,11 +12,11 @@ namespace FreestyleOrm.Core
             _queryDefine = queryDefine;
 
             ExpressionPath = expressionPath;
-            EntityType = entityType;
-            IsToMany = isToMany;            
+            EntityType = property == null ? rootEntityType : entityType;
+            IsToMany = isToMany;
+            IncludePrefix = queryDefine.GetIncludePrefix(rootEntityType, entityType, property);
             FormatPropertyName = column => _queryDefine.GetFormatPropertyName(rootEntityType, entityType, column);
-            AutoId = _queryDefine.GetAutoId(rootEntityType, entityType);
-            CreateEntity = () => _queryDefine.CreateEntity(rootEntityType, entityType);
+            AutoId = _queryDefine.GetAutoId(rootEntityType, entityType);            
             Table = _queryDefine.GetTable(rootEntityType, entityType);
 
             RelationId relationId = new RelationId();
@@ -33,8 +33,18 @@ namespace FreestyleOrm.Core
 
             Binder binder = new Binder();
 
-            SetEntity = binder.Bind;
+            GetEntity = (row, rootEntity) =>
+            {
+                object entity = _queryDefine.CreateEntity(rootEntityType, entityType);
+                binder.Bind(row, entity);
+
+                return entity;
+            };
+
             SetRow = binder.Bind;
+
+            BindEntity = binder.Bind;
+            BindRow = binder.Bind;
         }
 
         private IQueryDefine _queryDefine;
@@ -47,14 +57,15 @@ namespace FreestyleOrm.Core
         public string UniqueKeys { get; set; }
         public string IncludePrefix { get; set; }
         public Refer Refer { get; set; }
-        public Action<Row, object> SetEntity { get; set; }
+        public Func<Row, object, object> GetEntity { get; set; }
+        public Action<Row, object> BindEntity { get; set; }
         public Action<object, IRootEntityNode, Row> SetRow { get; set; }
+        public Action<object, IRootEntityNode, Row> BindRow { get; set; }
         public Func<string, string> FormatPropertyName { get; set; }
         public bool AutoId { get; set; }
         public string Table { get; set; }
         public string RelationIdColumn { get; set; }
-        public string RelationEntityPath { get; set; }
-        public Func<object> CreateEntity { get; set; }
+        public string RelationEntityPath { get; set; }        
         public string RowVersionColumn { get; set; }
         public Func<object, object> NewRowVersion { get; set; }
     }

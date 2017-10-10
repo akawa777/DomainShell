@@ -35,13 +35,12 @@ namespace FreestyleOrm
         IMapOptions<TRootEntity, TEntity> UniqueKeys(string columns);
         IMapOptions<TRootEntity, TEntity> IncludePrefix(string prefix);
         IMapOptions<TRootEntity, TEntity> Refer(Refer refer);
-        IMapOptions<TRootEntity, TEntity> SetEntity(Action<IRow, TEntity> setEntity);
+        IMapOptions<TRootEntity, TEntity> GetEntity(Func<IRow, TRootEntity, TEntity> getEntity);
         IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, IRootEntityNode, IRow> setRow);
         IMapOptions<TRootEntity, TEntity> Table(string table);
         IMapOptions<TRootEntity, TEntity> RelationId<TRelationEntity>(string relationIdColumn, Expression<Func<TRootEntity, TRelationEntity>> relationEntity) where TRelationEntity : class;
         IMapOptions<TRootEntity, TEntity> FormatPropertyName(Func<string, string> formatPropertyName);
-        IMapOptions<TRootEntity, TEntity> AutoId(bool autoId);        
-        IMapOptions<TRootEntity, TEntity> CreateEntity(Func<TEntity> createEntity);
+        IMapOptions<TRootEntity, TEntity> AutoId(bool autoId);                
         IMapOptions<TRootEntity, TEntity> OptimisticLock<TRowVersion>(string rowVersionColumn, Func<TEntity, TRowVersion> newRowVersion = null);
     }
 
@@ -71,8 +70,8 @@ namespace FreestyleOrm
     public interface IRow
     {        
         object this[string column] { get; set; }
-        void SetEntity(object entity);
-        void SetRow(object entity, IRootEntityNode rootEntityNode);
+        void BindEntity(object entity);
+        void BindRow(object entity, IRootEntityNode rootEntityNode);
         IEnumerable<string> Columns { get; }                        
     }
 }
