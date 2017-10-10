@@ -103,7 +103,7 @@
       ]
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
-      "sha512": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
+      "sha512": "gOj37E2j+FNqLrK6hcd5jCXsAVYSnxfTyicayWS6DXDU+pRmf6Muzy662MRV2OaVPT+QOvjuedkhXRsI0T/9nQ==",
       "type": "package",
       "path": "microsoft.netcore.platforms/1.1.0",
       "files": [
@@ -251,23 +251,26 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Akira\\.nuget\\packages\\": {},
+    "C:\\Users\\a-kawamoto.GK\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
+    "restoreSettings": {
+      "hideWarningsAndErrors": true
+    },
     "restore": {
-      "projectUniqueName": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\FreestyleOrm\\FreestyleOrm\\FreestyleOrm.csproj",
+      "projectUniqueName": "E:\\Documents\\GitHub\\DomainShell\\FreestyleOrm\\FreestyleOrm\\FreestyleOrm.csproj",
       "projectName": "FreestyleOrm",
-      "projectPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\FreestyleOrm\\FreestyleOrm\\FreestyleOrm.csproj",
-      "packagesPath": "C:\\Users\\Akira\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\Akira\\Documents\\GitHub\\DomainShell\\FreestyleOrm\\FreestyleOrm\\obj\\",
+      "projectPath": "E:\\Documents\\GitHub\\DomainShell\\FreestyleOrm\\FreestyleOrm\\FreestyleOrm.csproj",
+      "packagesPath": "C:\\Users\\a-kawamoto.GK\\.nuget\\packages\\",
+      "outputPath": "E:\\Documents\\GitHub\\DomainShell\\FreestyleOrm\\FreestyleOrm\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Akira\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\a-kawamoto.GK\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -275,8 +278,8 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\Akira\\.dotnet\\NuGetFallbackFolder": {},
-        "https://api.nuget.org/v3/index.json": {}
+        "C:\\Users\\a-kawamoto.GK\\.dotnet\\NuGetFallbackFolder": {},
+        "https://www.nuget.org/api/v2/": {}
       },
       "frameworks": {
         "netstandard2.0": {

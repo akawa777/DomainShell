@@ -78,6 +78,11 @@ namespace FreestyleOrm.Core
             return Activator.CreateInstance(type, true);
         }
 
+        public static string GetEntityPath<TRoot, TTarget>(this Expression<Func<TRoot, TTarget>> expression) where TRoot : class
+        {
+            return GetEntityPath(expression, out PropertyInfo property);
+        }
+
         public static string GetEntityPath<TRoot, TTarget>(this Expression<Func<TRoot, TTarget>> expression, out PropertyInfo property) where TRoot : class
         {
             property = null;

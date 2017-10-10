@@ -62,10 +62,7 @@ namespace FreeStyleOrm.Tests
                     {
                         row[nameof(entity.PurchaseOrderId)] = entity.PurchaseOrderId;
                     })
-                    .Table(t =>
-                    {
-                        t.Name("PurchaseOrder");
-                    })
+                    .Table("PurchaseOrder")
                     .AutoId(true)
                     .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);                    
 
@@ -90,11 +87,8 @@ namespace FreeStyleOrm.Tests
                         row[nameof(order.PurchaseOrderId)] = order.PurchaseOrderId;
                         row[nameof(entity.PurchaseItemNo)] = entity.PurchaseItemNo;
                     })
-                    .Table(t =>
-                    {
-                        t.Name("PurdfhaeItem");
-                        t.RelationId("PurchaseOrderId", x => x);
-                    })
+                    .Table("PurdfhaeItem")
+                    .RelationId("PurchaseOrderId", x => x)
                     .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);
 
                 m.ToOne(rootEntity => rootEntity.PurchaseItems.First())
@@ -124,7 +118,7 @@ namespace FreeStyleOrm.Tests
                     .UniqueKeys("PurchaseOrderId, PurchaseItemNo")
                     .IncludePrefix("pi")
                     .Refer(Refer.Write)
-                    .Table(t => t.RelationId("PurchaseOrderId", x => x))
+                    .RelationId("PurchaseOrderId", x => x)
                     .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);
 
                 m.ToOne(rootEntity => rootEntity.PurchaseItems.First())

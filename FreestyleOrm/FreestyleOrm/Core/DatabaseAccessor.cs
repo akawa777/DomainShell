@@ -50,16 +50,16 @@ namespace FreestyleOrm.Core
 
             Dictionary<string, IDbDataParameter> parameters = GetParameters(row, command, row.AutoId ? ParameterFilter.WithoutPrimaryKeys : ParameterFilter.All);
 
-            if (!string.IsNullOrEmpty(row.Table.RelationIdColumn)
+            if (!string.IsNullOrEmpty(row.RelationIdColumn)
                 && (
-                    row[row.Table.RelationIdColumn] == DBNull.Value
-                    || row[row.Table.RelationIdColumn] == null
-                    || row[row.Table.RelationIdColumn].ToString() == string.Empty
-                    || (decimal.TryParse(row[row.Table.RelationIdColumn].ToString(), out decimal result) && result == 0)
+                    row[row.RelationIdColumn] == DBNull.Value
+                    || row[row.RelationIdColumn] == null
+                    || row[row.RelationIdColumn].ToString() == string.Empty
+                    || (decimal.TryParse(row[row.RelationIdColumn].ToString(), out decimal result) && result == 0)
                 )
-                && _lastIdMap.TryGetValue(row.Table.RelationEntityPath, out object id))
+                && _lastIdMap.TryGetValue(row.RelationEntityPath, out object id))
             {
-                parameters[row.Table.RelationIdColumn].Value = id;
+                parameters[row.RelationIdColumn].Value = id;
             }
 
             string columnNames = string.Join(", ", parameters.Keys);

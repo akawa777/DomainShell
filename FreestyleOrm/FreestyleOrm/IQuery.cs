@@ -37,11 +37,12 @@ namespace FreestyleOrm
         IMapOptions<TRootEntity, TEntity> Refer(Refer refer);
         IMapOptions<TRootEntity, TEntity> SetEntity(Action<IRow, TEntity> setEntity);
         IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, IRootEntityNode, IRow> setRow);
-        IMapOptions<TRootEntity, TEntity> Table(Action<ITable<TRootEntity>> table);
+        IMapOptions<TRootEntity, TEntity> Table(string table);
+        IMapOptions<TRootEntity, TEntity> RelationId<TRelationEntity>(string relationIdColumn, Expression<Func<TRootEntity, TRelationEntity>> relationEntity) where TRelationEntity : class;
         IMapOptions<TRootEntity, TEntity> FormatPropertyName(Func<string, string> formatPropertyName);
         IMapOptions<TRootEntity, TEntity> AutoId(bool autoId);        
         IMapOptions<TRootEntity, TEntity> CreateEntity(Func<TEntity> createEntity);
-        IMapOptions<TRootEntity, TEntity> OptimisticLock(string rowVersionColumn, Func<TEntity, object> newRowVersion = null);
+        IMapOptions<TRootEntity, TEntity> OptimisticLock<TRowVersion>(string rowVersionColumn, Func<TEntity, TRowVersion> newRowVersion = null);
     }
 
     public enum Refer

@@ -113,9 +113,17 @@ namespace FreestyleOrm.Core
             return this;
         }
 
-        public IMapOptions<TRootEntity, TEntity> Table(Action<ITable<TRootEntity>> table)
+        public IMapOptions<TRootEntity, TEntity> Table(string table)
         {
-            table(new Table<TRootEntity>(_mapOptions.Table));
+            _mapOptions.Table = table;
+
+            return this;
+        }
+
+        public IMapOptions<TRootEntity, TEntity> RelationId<TRelationEntity>(string relationIdColumn, Expression<Func<TRootEntity, TRelationEntity>> relationEntity) where TRelationEntity : class
+        {
+            _mapOptions.RelationIdColumn = relationIdColumn;
+            _mapOptions.RelationEntityPath = relationEntity.GetEntityPath();
 
             return this;
         }
@@ -127,10 +135,10 @@ namespace FreestyleOrm.Core
             return this;
         }
 
-        public IMapOptions<TRootEntity, TEntity> OptimisticLock(string rowVersionColumn, Func<TEntity, object> newRowVersion = null)
+        public IMapOptions<TRootEntity, TEntity> OptimisticLock<TRowVersion>(string rowVersionColumn, Func<TEntity, TRowVersion> newRowVersion = null)
         {
             _mapOptions.RowVersionColumn = rowVersionColumn;
-            _mapOptions.NewRowVersion = entity => newRowVersion(entity as TEntity);
+            if (newRowVersion != null) _mapOptions.NewRowVersion = entity => newRowVersion(entity as TEntity);
 
             return this;
         }

@@ -88,9 +88,7 @@ namespace FreestyleOrm.Core
             _mapOptions.SetRow(entity, rootEntityNode, this);
         }
 
-        public IEnumerable<string> Columns => _columns;
-
-        public Table Table => _mapOptions.Table;
+        public IEnumerable<string> Columns => _columns;        
 
         public IEnumerable<string> UniqueKeys
         {
@@ -158,6 +156,12 @@ namespace FreestyleOrm.Core
                 return string.Join(",", primaryValues);
             }
         }
+
+        public string Table => _mapOptions.Table;
+
+        public string RelationIdColumn => _mapOptions.RelationIdColumn;
+
+        public string RelationEntityPath => _mapOptions.RelationEntityPath;
 
         public string RowVersionColumn => _mapOptions.RowVersionColumn;        
 
