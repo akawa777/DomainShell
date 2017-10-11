@@ -82,9 +82,9 @@ namespace FreestyleOrm.Core
             _mapOptions.BindEntity(this, entity);            
         }
 
-        public void BindRow(object entity, IRootEntityNode rootEntityNode)
+        public void BindRow(object entity)
         {
-            _mapOptions.BindRow(entity, rootEntityNode, this);
+            _mapOptions.BindRow(entity, this);
         }
 
         public IEnumerable<string> Columns => _columns;        
@@ -131,6 +131,7 @@ namespace FreestyleOrm.Core
             }
 
             if (prevRow == null) return true;
+            if (UniqueKeys.Count() == 0) return true;
 
             foreach (var column in prevUniqueKeys.Concat(UniqueKeys))
             {

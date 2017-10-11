@@ -15,9 +15,24 @@ namespace FreestyleOrm.Core
         }
 
         private IQueryDefine _queryDefine;
-        private List<MapOptions> _mapOptionsList = new List<MapOptions>();
+        private List<MapOptions> _mapOptionsList = new List<MapOptions>();        
 
-        public MapOptions RootMapOptions => _mapOptionsList.FirstOrDefault(x => string.IsNullOrEmpty(x.ExpressionPath));
+        public MapOptions RootMapOptions
+        {
+            get
+            {
+                MapOptions mapOptions = _mapOptionsList.FirstOrDefault(x => string.IsNullOrEmpty(x.ExpressionPath));
+
+                if (mapOptions != null) return mapOptions;
+
+                mapOptions = new MapOptions(_queryDefine, typeof(TRootEntity));
+
+                _mapOptionsList.Insert(0, mapOptions);
+
+                return _mapOptionsList.FirstOrDefault(x => string.IsNullOrEmpty(x.ExpressionPath));
+            }
+        }
+
         public IEnumerable<MapOptions> MapOptionsListWithoutRoot => _mapOptionsList.Where(x => x != RootMapOptions).OrderBy(x => x.ExpressionSections.Length);
 
         public IMapOptions<TRootEntity, TRootEntity> To()
@@ -99,9 +114,9 @@ namespace FreestyleOrm.Core
             return this;
         }
 
-        public IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, IRootEntityNode, IRow> setRow)
+        public IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, TRootEntity, IRow> setRow)
         {
-            _mapOptions.SetRow = (entity, rootNode, row) => setRow(entity as TEntity, rootNode, row);
+            _mapOptions.SetRow = (entity, rootEntity, row) => setRow(entity as TEntity, rootEntity as TRootEntity, row);
 
             return this;
         }

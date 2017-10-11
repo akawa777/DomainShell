@@ -16,6 +16,7 @@ namespace FreestyleOrm
         IQuery<TRootEntity> Connection(IDbConnection connection);
         IQuery<TRootEntity> Transaction(IDbTransaction transaction);
         IEnumerable<TRootEntity> Fetch();
+        IEnumerable<TRootEntity> Fetch(int page, int size);
         void Insert<TId>(TRootEntity rootEntity, out TId lastId);
         void Insert(TRootEntity rootEntity);
         void Update(TRootEntity rootEntity);
@@ -36,7 +37,7 @@ namespace FreestyleOrm
         IMapOptions<TRootEntity, TEntity> IncludePrefix(string prefix);
         IMapOptions<TRootEntity, TEntity> Refer(Refer refer);
         IMapOptions<TRootEntity, TEntity> GetEntity(Func<IRow, TRootEntity, TEntity> getEntity);
-        IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, IRootEntityNode, IRow> setRow);
+        IMapOptions<TRootEntity, TEntity> SetRow(Action<TEntity, TRootEntity, IRow> setRow);
         IMapOptions<TRootEntity, TEntity> Table(string table);
         IMapOptions<TRootEntity, TEntity> RelationId<TRelationEntity>(string relationIdColumn, Expression<Func<TRootEntity, TRelationEntity>> relationEntity) where TRelationEntity : class;
         IMapOptions<TRootEntity, TEntity> FormatPropertyName(Func<string, string> formatPropertyName);
@@ -50,28 +51,11 @@ namespace FreestyleOrm
         Write
     }
 
-    public interface ITable<TRootEntity> where TRootEntity : class
-    {
-        ITable<TRootEntity> Name(string name);
-        ITable<TRootEntity> RelationId<TRelationEntity>(string relationIdColumn, Expression<Func<TRootEntity, TRelationEntity>> getRelationEntity) where TRelationEntity : class;
-    }
-
-    public interface IEntityNode
-    {
-        object Entity { get; }
-        IEntityNode Child { get; }
-    }
-
-    public interface IRootEntityNode : IEntityNode
-    {
-
-    }    
-
     public interface IRow
     {        
         object this[string column] { get; set; }
         void BindEntity(object entity);
-        void BindRow(object entity, IRootEntityNode rootEntityNode);
+        void BindRow(object entity);
         IEnumerable<string> Columns { get; }                        
     }
 }

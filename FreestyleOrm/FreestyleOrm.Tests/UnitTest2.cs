@@ -8,7 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 
 
-namespace FreeStyleOrm.Tests
+namespace FreestyleOrm.Tests
 {
     [TestClass]
     public class UnitTest2 : UnitTest

@@ -8,13 +8,13 @@ using System.Data.SqlClient;
 using System.Linq;
 
 
-namespace FreeStyleOrm.Tests
+namespace FreestyleOrm.Tests
 {
     [TestClass]
     public class UnitTest
     {
         protected virtual bool ShouldManualQuery => true;
-        protected virtual int PurchaseOrderNo => 10;        
+        protected virtual int PurchaseOrderNo => 100;        
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
@@ -82,26 +82,94 @@ namespace FreeStyleOrm.Tests
         }
 
         [TestMethod]
+        public void Test_FetchList()
+        {
+            var query = CreatePurchaseOrderQuery();
+
+            query
+                .Formats(f => f["where"] = string.Empty);                
+
+            var orders = query.Fetch().ToList();
+        }
+
+        [TestMethod]
+        public void Test_FlatFetch()
+        {
+            var customers = _connection.Query<Customer>("select * from Customer").Transaction(_transaction).Fetch().ToList();
+
+            Assert.AreEqual(10, customers.Count);        }
+
+        [TestMethod]
         public void Test_Fetch()
         {
             var query = CreatePurchaseOrderQueryByManual();
 
             query
-                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId <= @PurchaseOrderId")
-                .Parametes(p => p["@PurchaseOrderId"] = PurchaseOrderNo);
+                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId not in (@PurchaseOrderIds)")
+                .Parametes(p => p["@PurchaseOrderIds"] = new object[] { PurchaseOrderNo + 1, PurchaseOrderNo + 2 });
 
             var ordersByManual = query.Fetch().ToList();
 
             query = CreatePurchaseOrderQueryByAuto();
 
             query
-                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId <= @PurchaseOrderId")
-                .Parametes(p => p["@PurchaseOrderId"] = PurchaseOrderNo);
+                .Formats(f => f["where"] = "where PurchaseOrder.PurchaseOrderId not in (select OrderId from #OrderIds)")
+                .TempTables(t =>
+                {
+                    t["#OrderIds"] = new TempTable
+                    {
+                        Columns = "OrderId int, KeyWord nvarchar(100)",
+                        IndexSet = new string[] { "OrderId", "OrderId, KeyWord" },
+                        Values = new object[] 
+                        {
+                            new { OrderId = PurchaseOrderNo + 1, KeyWord = "xxx" },
+                            new { OrderId = PurchaseOrderNo + 2, KeyWord = "yyy" }
+                        }
+                    };
+                });
 
             var ordersByAuto = query.Fetch().ToList();
 
             Assert.AreEqual(PurchaseOrderNo, ordersByManual.Count);
             for (int i = 0; i < ordersByManual.Count; i++) AssertEqualPurchaseOrder(ordersByManual[i], ordersByAuto[i], false);
+        }
+
+        [TestMethod]
+        public void Test_Page()
+        {
+            var query = CreatePurchaseOrderQuery();
+
+            query
+                .Formats(f => f["where"] = string.Empty);
+
+            int size = 5;
+            int page = PurchaseOrderNo / size;            
+
+            var orders = query.Fetch(page, size).ToList();
+
+            Assert.AreEqual(size, orders.Count);
+            Assert.AreEqual(size * page, orders.Last().PurchaseOrderId);
+        }
+
+        [TestMethod]
+        public void Test_Skip()
+        {
+            var query = CreatePurchaseOrderQuery();
+
+            query
+                .Formats(f => f["where"] = string.Empty);
+
+            var orders = query.Fetch();
+
+            var ordersByTake = orders.Take(PurchaseOrderNo / 2);
+            var orderListByTake = ordersByTake.ToList();
+
+            var ordersBySkip = orders.Skip(PurchaseOrderNo / 2);
+            var ordersBySkipList = ordersBySkip.ToList();
+
+            var ordersList = query.Fetch().Skip(PurchaseOrderNo / 2).ToList();
+            
+            for (int i = 0; i < ordersList.Count; i++) AssertEqualPurchaseOrder(ordersList[i], ordersBySkipList[i], false);
         }
 
         [TestMethod]
@@ -183,7 +251,7 @@ namespace FreeStyleOrm.Tests
                 Assert.AreEqual(srcItem.Product.ProductId, destItem.Product.ProductId);
                 Assert.AreEqual(false, string.IsNullOrEmpty(destItem.Product.ProductName));
 
-                if (updated) Assert.AreEqual(srcItem.RecordVersion + 1, destItem.RecordVersion);
+                if (updated) Assert.AreEqual(srcItem.RecordVersion == null ? 1 : srcItem.RecordVersion + 1, destItem.RecordVersion);
                 else Assert.AreEqual(srcItem.RecordVersion, destItem.RecordVersion);
             }
         }
@@ -215,10 +283,10 @@ namespace FreeStyleOrm.Tests
         private string GetDropTableSql()
         {
             return @"
-                drop table PurchaseOrder;
                 drop table Customer;
-                drop table PurchaseItem;
                 drop table Product;
+                drop table PurchaseOrder;                
+                drop table PurchaseItem;
             ";
         }
 
@@ -275,7 +343,7 @@ namespace FreeStyleOrm.Tests
         {
             var query = _connection
                 .Query<Customer>("select * from Customer")
-                .Map(m => m.To().UniqueKeys("CustomerId").Refer(Refer.Write).OptimisticLock("RecordVersion", x => x.RecordVersion + 1))
+                .Map(m => m.To().UniqueKeys("CustomerId").Refer(Refer.Write).OptimisticLock("RecordVersion", x => x.RecordVersion == null ? 1 : x.RecordVersion + 1))
                 .Transaction(_transaction);
 
             foreach (var model in models) query.Insert(model);
@@ -285,7 +353,7 @@ namespace FreeStyleOrm.Tests
         {
             var query = _connection
                 .Query<Product>("select * from Product")
-                .Map(m => m.To().UniqueKeys("ProductId").Refer(Refer.Write).OptimisticLock("RecordVersion", x => x.RecordVersion + 1))
+                .Map(m => m.To().UniqueKeys("ProductId").Refer(Refer.Write).OptimisticLock("RecordVersion", x => x.RecordVersion == null ? 1 : x.RecordVersion + 1))
                 .Transaction(_transaction);
 
             foreach (var model in models) query.Insert(model);
@@ -326,7 +394,7 @@ namespace FreeStyleOrm.Tests
         {
             for (int i = 0; i < number; i++)
             {
-                PurchaseOrder order = PurchaseOrder.Create(0, 0);
+                PurchaseOrder order = PurchaseOrder.Create(0);
 
                 order.Title = $"{nameof(order.Title)}_{i + 1}";
                 order.Customer = Customer.Create((i % maxCutomerId) + 1);
@@ -362,12 +430,12 @@ namespace FreeStyleOrm.Tests
                     .Refer(Refer.Write)
                     .GetEntity((row, rootEntity) =>
                     {
-                        PurchaseOrder entity = PurchaseOrder.Create((int)row[nameof(entity.PurchaseOrderId)], (int)row[nameof(entity.RecordVersion)]);
+                        PurchaseOrder entity = PurchaseOrder.Create((int)row[nameof(entity.PurchaseOrderId)]);
                         entity.Title = (string)row[nameof(entity.Title)];
-
+                        entity.RecordVersion = (int)row[nameof(entity.RecordVersion)];
                         return entity;
                     })
-                    .SetRow((entity, rootNode, row) =>
+                    .SetRow((entity, root, row) =>
                     {
                         row[nameof(entity.PurchaseOrderId)] = entity.PurchaseOrderId;
                         row[nameof(entity.Title)] = entity.Title;
@@ -376,7 +444,7 @@ namespace FreeStyleOrm.Tests
                     })
                     .Table("PurchaseOrder")
                     .AutoId(true)
-                    .OptimisticLock("RecordVersion", entity => entity.RecordVersion + 1);
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion == null ? 1 : x.RecordVersion + 1);
 
                 m.ToOne(x => x.Customer)
                     .UniqueKeys("CustomerId");
@@ -388,15 +456,13 @@ namespace FreeStyleOrm.Tests
                     .Refer(Refer.Write)
                     .GetEntity((row, rootEntity) =>
                     {
-                        PurchaseItem entity = PurchaseItem.Create((int)row[nameof(entity.PurchaseItemNo)], (int)row[$"PurchaseItems_{nameof(entity.RecordVersion)}"]);
+                        PurchaseItem entity = PurchaseItem.Create((int)row[nameof(entity.PurchaseItemNo)]);
                         entity.Number = (int)row[nameof(entity.Number)];
-
+                        entity.RecordVersion = (int)row[$"PurchaseItems_{nameof(entity.RecordVersion)}"];
                         return entity;
                     })
-                    .SetRow((entity, rootEntityNode, row) =>
+                    .SetRow((entity, root, row) =>
                     {
-                        var root = rootEntityNode.Entity as PurchaseOrder;
-
                         row[nameof(root.PurchaseOrderId)] = root.PurchaseOrderId;
                         row[nameof(entity.PurchaseItemNo)] = entity.PurchaseItemNo;
                         row[nameof(entity.Product.ProductId)] = entity.Product.ProductId;
@@ -405,7 +471,7 @@ namespace FreeStyleOrm.Tests
                     })
                     .Table("PurchaseItem")
                     .RelationId("PurchaseOrderId", x => x)
-                    .OptimisticLock("RecordVersion", x => x.RecordVersion + 1);
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion == null ? 1 : x.RecordVersion + 1);
 
                 m.ToOne(x => x.PurchaseItems.First().Product)
                     .UniqueKeys("ProductId");
@@ -424,8 +490,13 @@ namespace FreeStyleOrm.Tests
                 m.To()
                     .UniqueKeys("PurchaseOrderId")
                     .Refer(Refer.Write)
+                    .SetRow((entity, root, row) =>
+                    {
+                        row.BindRow(entity);
+                        row[nameof(entity.Customer.CustomerId)] = entity.Customer.CustomerId;
+                    })
                     .AutoId(true)
-                    .OptimisticLock("RecordVersion", x => x.RecordVersion + 1);
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion == null ? 1 : x.RecordVersion + 1);
 
                 m.ToOne(x => x.Customer)
                     .UniqueKeys("CustomerId");
@@ -433,8 +504,14 @@ namespace FreeStyleOrm.Tests
                 m.ToMany(x => x.PurchaseItems)
                     .UniqueKeys("PurchaseOrderId, PurchaseItemNo")
                     .Refer(Refer.Write)
+                    .SetRow((entity, root, row) =>
+                    {
+                        row.BindRow(entity);
+                        row[nameof(root.PurchaseOrderId)] = root.PurchaseOrderId;                        
+                        row[nameof(entity.Product.ProductId)] = entity.Product.ProductId;
+                    })
                     .RelationId("PurchaseOrderId", x => x)
-                    .OptimisticLock("RecordVersion", x => x.RecordVersion + 1);
+                    .OptimisticLock("RecordVersion", x => x.RecordVersion == null ? 1 : x.RecordVersion + 1);
 
                 m.ToOne(x => x.PurchaseItems.First().Product)
                     .UniqueKeys("ProductId");
@@ -456,16 +533,16 @@ namespace FreeStyleOrm.Tests
                 return new Customer();
             }
 
-            public static Customer Create(int customerId, int recordVersion = 0)
+            public static Customer Create(int customerId)
             {
-                return new Customer() { CustomerId = customerId, RecordVersion = recordVersion };
+                return new Customer() { CustomerId = customerId };
             }
 
             public int CustomerId { get; private set; }
 
             public string CustomerName { get; set; }
 
-            public int RecordVersion { get; private set; }
+            public int? RecordVersion { get; set; }
         }
 
         public class Product
@@ -480,16 +557,16 @@ namespace FreeStyleOrm.Tests
                 return new Product();
             }
 
-            public static Product Create(int productId, int recordVersion = 0)
+            public static Product Create(int productId)
             {
-                return new Product() { ProductId = productId, RecordVersion = recordVersion };
+                return new Product() { ProductId = productId };
             }
 
             public int ProductId { get; private set; }
 
             public string ProductName { get; set; }
 
-            public int RecordVersion { get; private set; }
+            public int? RecordVersion { get; set; }
         }
 
         public partial class PurchaseOrder
@@ -499,12 +576,11 @@ namespace FreeStyleOrm.Tests
 
             }
 
-            public static PurchaseOrder Create(int purchaseOrderId, int recordVersion = 0)
+            public static PurchaseOrder Create(int purchaseOrderId)
             {
                 PurchaseOrder order = new PurchaseOrder
                 {
-                    PurchaseOrderId = purchaseOrderId,
-                    RecordVersion = recordVersion
+                    PurchaseOrderId = purchaseOrderId
                 };
 
                 return order;
@@ -530,7 +606,7 @@ namespace FreeStyleOrm.Tests
                 }
             }
 
-            public int RecordVersion { get; private set; }
+            public int? RecordVersion { get; set; }
 
             public int GetNewItemNo()
             {
@@ -566,9 +642,9 @@ namespace FreeStyleOrm.Tests
 
             }
 
-            public static PurchaseItem Create(int no, int recordVersion = 0)
+            public static PurchaseItem Create(int no)
             {
-                return new PurchaseItem { PurchaseItemNo = no, RecordVersion = recordVersion };
+                return new PurchaseItem { PurchaseItemNo = no };
             }
 
             public int PurchaseItemNo { get; private set; }
@@ -577,7 +653,7 @@ namespace FreeStyleOrm.Tests
 
             public int Number { get; set; }
 
-            public int RecordVersion { get; private set; }
+            public int? RecordVersion { get; set; }
         }
 
     }

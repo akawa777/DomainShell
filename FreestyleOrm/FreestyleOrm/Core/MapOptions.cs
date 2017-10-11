@@ -7,6 +7,11 @@ namespace FreestyleOrm.Core
 {
     internal class MapOptions
     {
+        public MapOptions(IQueryDefine queryDefine, Type rootEntityType): this(queryDefine, rootEntityType, rootEntityType, null, null, false)
+        {
+            
+        }
+
         public MapOptions(IQueryDefine queryDefine, Type rootEntityType, Type entityType, string expressionPath, PropertyInfo property, bool isToMany)
         {
             _queryDefine = queryDefine;
@@ -41,7 +46,7 @@ namespace FreestyleOrm.Core
                 return entity;
             };
 
-            SetRow = binder.Bind;
+            SetRow = (entity, rootEntity, row) => binder.Bind(entity, row);
 
             BindEntity = binder.Bind;
             BindRow = binder.Bind;
@@ -59,8 +64,8 @@ namespace FreestyleOrm.Core
         public Refer Refer { get; set; }
         public Func<Row, object, object> GetEntity { get; set; }
         public Action<Row, object> BindEntity { get; set; }
-        public Action<object, IRootEntityNode, Row> SetRow { get; set; }
-        public Action<object, IRootEntityNode, Row> BindRow { get; set; }
+        public Action<object, object, Row> SetRow { get; set; }
+        public Action<object, Row> BindRow { get; set; }
         public Func<string, string> FormatPropertyName { get; set; }
         public bool AutoId { get; set; }
         public string Table { get; set; }

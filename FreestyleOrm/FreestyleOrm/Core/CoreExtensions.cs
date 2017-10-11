@@ -9,31 +9,126 @@ namespace FreestyleOrm.Core
 {
     internal static class CoreExtensions
     {
+        private static Dictionary<PropertyInfo, PropertyAccessor> _propertyAccessorMap = new Dictionary<PropertyInfo, PropertyAccessor>();
+
+        private class PropertyAccessor
+        {
+            public PropertyAccessor(PropertyInfo property)
+            {
+                MethodInfo method = typeof(CoreExtensions)
+                    .GetMethod("CreateGetter", BindingFlags.Static | BindingFlags.NonPublic)
+                    .MakeGenericMethod(property.ReflectedType, property.PropertyType);
+
+                Func<object, object> getter = (Func<object, object>)method.Invoke(null, new object[] { property });
+
+                Get = getter;
+
+                method = typeof(CoreExtensions)
+                    .GetMethod("CreateSetter", BindingFlags.Static | BindingFlags.NonPublic)
+                    .MakeGenericMethod(property.ReflectedType, property.PropertyType);
+
+                Action<object, object> setter = (Action<object, object>)method.Invoke(null, new object[] { property });
+
+                Set = setter; ;
+            }
+
+            public Func<object, object> Get { get; }
+            public Action<object, object> Set { get; }
+        }
+
+        private static Func<object, object> CreateGetter<TObj, TValue>(PropertyInfo property)
+        {
+            if (!property.CanRead)
+            {
+                return obj => property.Get(obj);
+            }
+
+            Func<TObj, TValue> getDelegate =
+                (Func<TObj, TValue>)Delegate.CreateDelegate(
+                         typeof(Func<TObj, TValue>),
+                         property.GetGetMethod(nonPublic: true));
+
+            return obj =>
+            {
+                TValue value = getDelegate((TObj)obj);
+
+                return value;
+            };
+        }
+
+        private static Action<object, object> CreateSetter<TObj, TValue>(PropertyInfo property)
+        {
+            if (!property.CanWrite)
+            {
+                return (obj, value) => property.Set(obj, value);
+            }
+
+            Action<TObj, TValue> setDelegate =
+                (Action<TObj, TValue>)Delegate.CreateDelegate(
+                         typeof(Action<TObj, TValue>),
+                         property.GetSetMethod(nonPublic: true));
+
+            return (obj, value) =>
+            {
+                if (value is TValue)
+                {
+                    setDelegate((TObj)obj, (TValue)value);
+                }
+                else if (CanChangeType<TValue>(value))
+                {
+                    if (Nullable.GetUnderlyingType(typeof(TValue)) != null)
+                    {
+                        value = Convert.ChangeType(value, typeof(TValue).GetGenericArguments()[0]);
+                    }
+                    else
+                    {
+                        value = Convert.ChangeType(value, typeof(TValue));
+                    }
+
+                    setDelegate((TObj)obj, (TValue)value);
+                }
+            };
+        }
+
+        private static bool CanChangeType<TValue>(object value)
+        {
+            Type conversionType = typeof(TValue);
+
+            if (conversionType == null
+                || value == null
+                || value == DBNull.Value
+                || !(value is IConvertible))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static object Get(this PropertyInfo property, object obj)
         {
-            return property.GetValue(obj);
-        }
+            PropertyAccessor accessor;
+
+            if (!_propertyAccessorMap.TryGetValue(property, out accessor))
+            {
+                accessor = new PropertyAccessor(property);
+                _propertyAccessorMap[property] = accessor;
+            }
+
+            return accessor.Get(obj);
+        }        
 
         public static void Set(this PropertyInfo property, object obj, object value)
         {
-            object convertedValue;
+            PropertyAccessor accessor;
 
-            try
+            if (!_propertyAccessorMap.TryGetValue(property, out accessor))
             {
-                convertedValue = Convert.ChangeType(value, property.PropertyType);
-                property.SetValue(obj, convertedValue);
+                accessor = new PropertyAccessor(property);
+                _propertyAccessorMap[property] = accessor;
             }
-            catch
-            {
-                try
-                {
-                    property.SetValue(obj, value);
-                }
-                catch
-                {
 
-                }
-            }            
+            accessor.Set(obj, value);
         }
 
         public static bool IsList(this Type type)
@@ -77,7 +172,7 @@ namespace FreestyleOrm.Core
 
         public static Dictionary<string, PropertyInfo> GetPropertyMap(this Type type, BindingFlags bindingFlags, PropertyTypeFilters propertyTypeFilters)
         {
-            PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | bindingFlags);
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | bindingFlags);            
 
             Dictionary<string, PropertyInfo> map = new Dictionary<string, PropertyInfo>();
 

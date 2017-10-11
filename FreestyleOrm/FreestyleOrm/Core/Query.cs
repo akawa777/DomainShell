@@ -41,7 +41,7 @@ namespace FreestyleOrm.Core
 
             _setMap(map);            
 
-            using (var reader = _databaseAccessor.CreateFetchReader(_queryOptions))
+            using (var reader = _databaseAccessor.CreateFetchReader(_queryOptions, out Action dispose))
             {
                 TRootEntity rootEntity = null;
                 Row prevRow = null;
@@ -161,7 +161,13 @@ namespace FreestyleOrm.Core
                 if (rootEntity != null) yield return rootEntity;
 
                 reader.Close();
+                dispose();
             }
+        }
+
+        public IEnumerable<TRootEntity> Fetch(int page, int size)
+        {
+            return Fetch().Skip((page - 1) * size).Take(size);
         }
 
         public IQuery<TRootEntity> Formats(Action<Dictionary<string, object>> setFormats)
@@ -205,7 +211,8 @@ namespace FreestyleOrm.Core
             if (rootEntity == null) throw new ArgumentException("rootEntity is null.");
             if (_queryOptions.Transaction == null) throw new InvalidOperationException("Transaction is null.");
 
-            lastId = default(TId);            
+            lastId = default(TId);
+            _databaseAccessor.BeginSave();
 
             List<Row> updateRows = GetRows(rootEntity);            
 
@@ -288,7 +295,7 @@ namespace FreestyleOrm.Core
             using (var reader = _databaseAccessor.CreateTableReader(_queryOptions, map.RootMapOptions, out string[] primaryKeys))
             {
                 Row row = Row.CreateWriteRow(reader, map.RootMapOptions, primaryKeys, rootEntity);
-                map.RootMapOptions.SetRow(rootEntity, new RootEntityNode { Entity = rootEntity }, row);
+                map.RootMapOptions.SetRow(rootEntity, rootEntity, row);
                 
                 rows.Add(row);
 
@@ -300,9 +307,7 @@ namespace FreestyleOrm.Core
                 if (mapOptions.Refer == Refer.Read) continue;
 
                 object parentEntity = rootEntity;
-                PropertyInfo property = null;
-                RootEntityNode rootEntityNode = new RootEntityNode { Entity = rootEntity };
-                EntityNode parentEntityNode = rootEntityNode;
+                PropertyInfo property = null;                
 
                 foreach (var section in mapOptions.ExpressionSections)
                 {
@@ -317,10 +322,6 @@ namespace FreestyleOrm.Core
                         {
                             parentEntity = property.Get(parentEntity);
                         }
-
-                        EntityNode entityNode = new EntityNode { Entity = parentEntity };
-                        parentEntityNode.Child = entityNode;
-                        parentEntityNode = entityNode;
                     }
 
                     Dictionary<string, PropertyInfo> propertyMap = parentEntity.GetType().GetPropertyMap(BindingFlags.GetProperty | BindingFlags.SetProperty, PropertyTypeFilters.OnlyClass);
@@ -338,7 +339,7 @@ namespace FreestyleOrm.Core
                         foreach (object entity in list as IEnumerable)
                         {
                             Row row = Row.CreateWriteRow(reader, mapOptions, primaryKeys, entity);
-                            mapOptions.SetRow(entity, rootEntityNode, row);
+                            mapOptions.SetRow(entity, rootEntity, row);
                             rows.Add(row);
                         }
 
@@ -353,7 +354,7 @@ namespace FreestyleOrm.Core
                     using (var reader = _databaseAccessor.CreateTableReader(_queryOptions, mapOptions, out string[] primaryKeys))
                     {
                         Row row = Row.CreateWriteRow(reader, mapOptions, primaryKeys, entity);
-                        mapOptions.SetRow(entity, rootEntityNode, row);
+                        mapOptions.SetRow(entity, rootEntity, row);
                         rows.Add(row);
 
                         reader.Close();

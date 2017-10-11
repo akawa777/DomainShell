@@ -51,71 +51,16 @@ namespace FreestyleOrm.Core
             return map;
         }
 
-        public void Bind(object entity, IRootEntityNode rootEntityNode, Row row)
+        public void Bind(object entity, Row row)
         {
             if (entity == null) return;
 
-            List<object> relationEntities = new List<object>();
+            Dictionary<string, PropertyInfo> propertyMap = entity.GetType().GetPropertyMap(BindingFlags.GetProperty, PropertyTypeFilters.IgonreClass);
+            Dictionary<string, string> formatedPropertyNameMap = GetFormatedPropertyNameMap(row);
 
-            SetRelationEntitis(entity, rootEntityNode, relationEntities);
-
-            if (entity != rootEntityNode.Entity)
+            foreach (var formatedPropertyName in formatedPropertyNameMap)
             {
-                Dictionary<string, PropertyInfo> map = entity.GetType().GetPropertyMap(BindingFlags.GetProperty, PropertyTypeFilters.OnlyClass);
-
-                foreach (var entry in map)
-                {
-                    if (entry.Value.PropertyType.IsList()) continue;
-
-                    relationEntities.Add(entry.Value.Get(entity));
-                }
-
-                relationEntities.Add(entity);
-            }
-
-            SetRow(relationEntities, row);
-        }
-
-        private void SetRelationEntitis(object entity, IRootEntityNode rootEntityNode, List<object> relationEntities)
-        {
-            SetRelationEntitis(entity, rootEntityNode.Entity, relationEntities);
-
-            if (rootEntityNode.Child != null) SetRelationEntitis(entity, rootEntityNode.Child, relationEntities);
-        }
-
-        private void SetRelationEntitis(object entity, object rootEntity, List<object> relationEntities)
-        {
-            if (relationEntities.Count == 0) relationEntities.Add(rootEntity);
-
-            Dictionary<string, PropertyInfo> map = rootEntity.GetType().GetPropertyMap(BindingFlags.GetProperty, PropertyTypeFilters.OnlyClass);
-
-            foreach (var property in map.Values)
-            {
-                if (property.PropertyType.IsList()) continue;
-                
-                object childEntity = property.Get(rootEntity);
-
-                if (childEntity == null) continue;
-                if (childEntity == entity) continue;
-                if (relationEntities.Any(x => x == childEntity)) continue;
-
-                relationEntities.Add(childEntity);
-
-                SetRelationEntitis(entity, childEntity, relationEntities);
-            }
-        }
-
-        private void SetRow(List<object> relationEntities, Row row)
-        {
-            foreach (var relationEntity in relationEntities)
-            {
-                Dictionary<string, PropertyInfo> propertyMap = relationEntity.GetType().GetPropertyMap(BindingFlags.GetProperty, PropertyTypeFilters.IgonreClass);
-                Dictionary<string, string> formatedPropertyNameMap = GetFormatedPropertyNameMap(row);
-
-                foreach (var formatedPropertyName in formatedPropertyNameMap)
-                {
-                    if (propertyMap.TryGetValue(formatedPropertyName.Key, out PropertyInfo property)) row[formatedPropertyName.Value] = property.Get(relationEntity);
-                }
+                if (propertyMap.TryGetValue(formatedPropertyName.Key, out PropertyInfo property)) row[formatedPropertyName.Value] = property.Get(entity);
             }
         }
     }
