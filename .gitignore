@@ -41,14 +41,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-DomainShell/obj/Debug/netstandard2.0/Domainshell.csproj.CoreCompileInputs.cache
-DomainShell.Test/obj/Debug/netcoreapp2.0/Domainshell.Test.csproj.CoreCompileInputs.cache
-DomainShell/obj/Debug/netstandard2.0/Domainshell.pdb
-DomainShell/bin/Debug/netstandard2.0/Domainshell.dll
-DomainShell/bin/Debug/netstandard2.0/Domainshell.pdb
-DomainShell/obj/Debug/netstandard2.0/Domainshell.dll
-DomainShell.Test/bin/Debug/netcoreapp2.0/Domainshell.dll
-DomainShell.Test/bin/Debug/netcoreapp2.0/Domainshell.pdb
-DomainShell.Test/obj/DomainShell.Test.csproj.nuget.cache
-DomainShell.Test/obj/DomainShell.Test.csproj.nuget.g.props
-DomainShell.Test/obj/project.assets.json
+*.dll
+*.pdb
+*.cache
+*.props
