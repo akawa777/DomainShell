@@ -1,5 +1,5 @@
-#obj/
-#bin/
-#.vs/
-#*.cache
-#*.props
+obj/
+bin/
+.vs/
+*.cache
+*.props
