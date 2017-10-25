@@ -243,36 +243,18 @@ namespace DomainShell
         }
     }
 
-    public interface IProxyMaterial<T> where T : class
-    {
-        IProxyPropery<P> Target<P>(Expression<Func<T, P>> expression);
-        T Material { get; }
+    public interface IProxyObject<TMaterial> where TMaterial : class
+    {   
+        TMaterial Material { get; }
+        IProxyPropery<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression);
+        IProxyObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> set);
     }
 
-    public class ProxyMaterial<T> : IProxyMaterial<T> where T : class
+    public interface IProxyPropery<TMaterial>
     {
-        public ProxyMaterial(T material)
-        {
-
-        }
-
-        public ProxyMaterial()
-        {
-
-        }
-
-        public IProxyPropery<P> Target<P>(Expression<Func<T, P>> expression)
-        {
-            return null;
-        }
-
-        public T Material { get; }
-    }
-
-    public interface IProxyPropery<T>
-    {
-        IProxyPropery<P> Target<P>(Expression<Func<T, P>> expression);
-        T Value { get; set; }
         PropertyInfo Property { get; }
+        TMaterial Material { get; }
+        IProxyPropery<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression);
+        IProxyPropery<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> set);
     }
 }

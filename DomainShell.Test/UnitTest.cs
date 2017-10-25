@@ -170,16 +170,21 @@ namespace DomainShell.Test
         [TestMethod]
         public void TestMethod_ShadowObject()
         {
-            ProxyMaterial<Root> proxyRoot = new ProxyMaterial<Root>();
+            IProxyObject<Root> proxyRoot = null;
 
-            proxyRoot.Target(x => x.Node).Value = Node.New();
-            proxyRoot.Target(x => x.Node).Target(x => x.Id).Value = 1;            
+            proxyRoot
+                .Set(x => x.Node, (x, p) => Node.New())
+                .Get(x => x.Node)
+                .Set(x => x.Id, (x, p) => 999)
+                .Set(x => x.Name, (x, p) => "xxx");
 
-            ProxyMaterial<Node> proxyNode = new ProxyMaterial<Node>();
-            proxyNode.Target(x => x.Id).Value = 1;
+            IProxyObject<Node> proxyNode = null;
+            proxyNode
+                .Set(x => x.Id, (x, p) => 999)
+                .Set(x => x.Name, (x, p) => "xxx");
 
-            proxyRoot.Target(x => x.NodeList).Value = new List<Node>();
-            proxyRoot.Target(x => x.NodeList).Value.Add(proxyNode.Material);
+            proxyRoot
+                .Set(x => x.Nodes, (x, p) => new Node[] { proxyNode.Material });
         }
 
         public class Node
