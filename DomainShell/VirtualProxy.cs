@@ -242,4 +242,37 @@ namespace DomainShell
             return value is TConversion;
         }
     }
+
+    public interface IProxyMaterial<T> where T : class
+    {
+        IProxyPropery<P> Target<P>(Expression<Func<T, P>> expression);
+        T Material { get; }
+    }
+
+    public class ProxyMaterial<T> : IProxyMaterial<T> where T : class
+    {
+        public ProxyMaterial(T material)
+        {
+
+        }
+
+        public ProxyMaterial()
+        {
+
+        }
+
+        public IProxyPropery<P> Target<P>(Expression<Func<T, P>> expression)
+        {
+            return null;
+        }
+
+        public T Material { get; }
+    }
+
+    public interface IProxyPropery<T>
+    {
+        IProxyPropery<P> Target<P>(Expression<Func<T, P>> expression);
+        T Value { get; set; }
+        PropertyInfo Property { get; }
+    }
 }

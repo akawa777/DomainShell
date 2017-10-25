@@ -167,6 +167,21 @@ namespace DomainShell.Test
             }
         }
 
+        [TestMethod]
+        public void TestMethod_ShadowObject()
+        {
+            ProxyMaterial<Root> proxyRoot = new ProxyMaterial<Root>();
+
+            proxyRoot.Target(x => x.Node).Value = Node.New();
+            proxyRoot.Target(x => x.Node).Target(x => x.Id).Value = 1;            
+
+            ProxyMaterial<Node> proxyNode = new ProxyMaterial<Node>();
+            proxyNode.Target(x => x.Id).Value = 1;
+
+            proxyRoot.Target(x => x.NodeList).Value = new List<Node>();
+            proxyRoot.Target(x => x.NodeList).Value.Add(proxyNode.Material);
+        }
+
         public class Node
         {
             protected Node()
