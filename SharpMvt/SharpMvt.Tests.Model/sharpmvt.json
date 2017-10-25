@@ -1,9 +1,0 @@
-﻿{
-  "project": "SharpMvt.Tests.Model.csproj",
-  "dllDir": "./bin/debug",
-  "postHandler": {
-    "import": "import * as _$_Handler_$_ from './post-handler'",
-    "function": "_$_Handler_$_.default.post"
-  },
-  "destFile": "../SharpMvt.Tests.Web/Scripts/dlls.ts"
-}

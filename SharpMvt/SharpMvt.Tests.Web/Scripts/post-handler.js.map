@@ -1,1 +1,0 @@
-{"version":3,"file":"post-handler.js","sourceRoot":"","sources":["post-handler.ts"],"names":[],"mappings":";;;IAAA,IAAI,WAAW,GAAG;QACd,IAAI,EAAE,UAAa,QAAa;YAE5B,MAAM,CAAC,IAAI,OAAO,CAAC,CAAC,OAAO,EAAE,MAAM;gBAC/B,OAAO,CAAC,IAAI,CAAC,CAAC;YAClB,CAAC,CAAC,CAAC;QACP,CAAC;KACJ,CAAA;IAED,kBAAe,WAAW,CAAA"}
