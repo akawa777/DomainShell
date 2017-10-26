@@ -1,260 +1,245 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Linq.Expressions;
+// using System;
+// using System.Linq;
+// using System.Collections.Generic;
+// using System.Reflection;
+// using System.Linq.Expressions;
 
-namespace DomainShell
-{
-    public abstract class VirtualProperty
-    {
-        public abstract string Name { get; }
-        public abstract object Value { get; }
-        public abstract PropertyInfo Property { get; }
-    }
+// namespace DomainShell
+// {
+//     public abstract class VirtualProperty
+//     {
+//         public abstract string Name { get; }
+//         public abstract object Value { get; }
+//         public abstract PropertyInfo Property { get; }
+//     }
 
-    public class VirtualObject<TMaterial> where TMaterial : class
-    {
-        private class InternalVirtualProperty : VirtualProperty
-        {
-            public InternalVirtualProperty(PropertyInfo property, Func<string> getName, Func<object> getValue)
-            {
-                _getName = getName;
-                _getValue = getValue;
-                _property = property;
-            }
+//     public class VirtualObject<TMaterial> where TMaterial : class
+//     {
+//         private class InternalVirtualProperty : VirtualProperty
+//         {
+//             public InternalVirtualProperty(PropertyInfo property, Func<string> getName, Func<object> getValue)
+//             {
+//                 _getName = getName;
+//                 _getValue = getValue;
+//                 _property = property;
+//             }
 
-            private Func<string> _getName;
-            private Func<object> _getValue;
-            private PropertyInfo _property;
+//             private Func<string> _getName;
+//             private Func<object> _getValue;
+//             private PropertyInfo _property;
 
-            public override string Name { get { return _getName(); } }
-            public override object Value { get { return _getValue(); } }
-            public override PropertyInfo Property { get { return _property; } }
-        }
+//             public override string Name { get { return _getName(); } }
+//             public override object Value { get { return _getValue(); } }
+//             public override PropertyInfo Property { get { return _property; } }
+//         }
 
-        public VirtualObject()
-        {
-            _material = Activator.CreateInstance(typeof(TMaterial), true) as TMaterial;
-        }
+//         public VirtualObject()
+//         {
+//             _material = Activator.CreateInstance(typeof(TMaterial), true) as TMaterial;
+//         }
 
-        public VirtualObject(TMaterial material)
-        {
-            _material = material;
-        }
+//         public VirtualObject(TMaterial material)
+//         {
+//             _material = material;
+//         }
 
-        private TMaterial _material;
+//         private TMaterial _material;
 
-        public TMaterial Material
-        {
-            get { return _material; }
-        }
+//         public TMaterial Material
+//         {
+//             get { return _material; }
+//         }
 
-        public virtual VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, string> getName = null, Func < TMaterial, PropertyInfo, object> getValue = null )
-        {            
-            string propertyName = GetPropertyName(propertyLambda);
-            PropertyInfo property = GetPropertyInfo(propertyName);
+//         public virtual VirtualProperty GetProperty<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, string> getName = null, Func < TMaterial, PropertyInfo, object> getValue = null )
+//         {            
+//             string propertyName = GetPropertyName(propertyLambda);
+//             PropertyInfo property = GetPropertyInfo(propertyName);
 
-            if (getName == null) getName = (m, p) => property.Name;
-            if (getValue == null) getValue = (m, p) => property.GetValue(_material);  
+//             if (getName == null) getName = (m, p) => property.Name;
+//             if (getValue == null) getValue = (m, p) => property.GetValue(_material);  
 
-            return new InternalVirtualProperty(property, () => getName(Material, property), () => getValue(Material, property));
-        }
+//             return new InternalVirtualProperty(property, () => getName(Material, property), () => getValue(Material, property));
+//         }
 
-        public virtual VirtualObject<TProperty> Get<TProperty>(string propertyName) where TProperty : class
-        {
-            System.Reflection.PropertyInfo property = GetPropertyInfo(propertyName);
+//         public virtual VirtualObject<TProperty> Get<TProperty>(string propertyName) where TProperty : class
+//         {
+//             System.Reflection.PropertyInfo property = GetPropertyInfo(propertyName);
 
-            TProperty propertyMaterial = property.GetValue(_material) as TProperty;
+//             TProperty propertyMaterial = property.GetValue(_material) as TProperty;
 
-            return new VirtualObject<TProperty>(propertyMaterial);
-        }
+//             return new VirtualObject<TProperty>(propertyMaterial);
+//         }
 
-        public virtual IEnumerable<VirtualObject<TProperty>> List<TProperty>(string propertyName) where TProperty : class
-        {
-            PropertyInfo property = GetPropertyInfo(propertyName);
+//         public virtual IEnumerable<VirtualObject<TProperty>> List<TProperty>(string propertyName) where TProperty : class
+//         {
+//             PropertyInfo property = GetPropertyInfo(propertyName);
 
-            IEnumerable<TProperty> propertyMaterial = property.GetValue(_material) as IEnumerable<TProperty>;
+//             IEnumerable<TProperty> propertyMaterial = property.GetValue(_material) as IEnumerable<TProperty>;
 
-            return propertyMaterial.Select(x => new VirtualObject<TProperty>(x));
-        }
+//             return propertyMaterial.Select(x => new VirtualObject<TProperty>(x));
+//         }
 
-        public virtual VirtualObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda) where TProperty : class
-        {
-            string propertyName = GetPropertyName(propertyLambda);
+//         public virtual VirtualObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda) where TProperty : class
+//         {
+//             string propertyName = GetPropertyName(propertyLambda);
 
-            return Get<TProperty>(propertyName);
-        }        
+//             return Get<TProperty>(propertyName);
+//         }        
 
-        public virtual IEnumerable<VirtualObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> propertyLambda) where TProperty : class
-        {
-            string propertyName = GetPropertyName(propertyLambda);
+//         public virtual IEnumerable<VirtualObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> propertyLambda) where TProperty : class
+//         {
+//             string propertyName = GetPropertyName(propertyLambda);
 
-            return List<TProperty>(propertyName);
-        }
+//             return List<TProperty>(propertyName);
+//         }
 
-        public virtual VirtualObject<TMaterial> Set(string propertyName, Func<TMaterial, PropertyInfo, object> getValue)
-        {
-            if (getValue == null)
-            {
-                throw new ArgumentException(string.Format(
-                    "getValue is required.",
-                    propertyName.ToString()));
-            }
+//         public virtual VirtualObject<TMaterial> Set(string propertyName, Func<TMaterial, PropertyInfo, object> getValue)
+//         {
+//             if (getValue == null)
+//             {
+//                 throw new ArgumentException(string.Format(
+//                     "getValue is required.",
+//                     propertyName.ToString()));
+//             }
 
-            PropertyInfo propertyInfo = GetPropertyInfo(propertyName);
+//             PropertyInfo propertyInfo = GetPropertyInfo(propertyName);
 
-            object value = getValue(_material, propertyInfo);
+//             object value = getValue(_material, propertyInfo);
 
-            if (TryChangeType(propertyInfo.PropertyType, value, out object convertedValue))
-            {
-                propertyInfo.SetValue(_material, convertedValue);
-            }
-            else
-            {
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, can not change type of '{1}'.",
-                    propertyName.ToString(),
-                    propertyInfo.PropertyType.FullName));
-            }
+//             if (TryChangeType(propertyInfo.PropertyType, value, out object convertedValue))
+//             {
+//                 propertyInfo.SetValue(_material, convertedValue);
+//             }
+//             else
+//             {
+//                 throw new ArgumentException(string.Format(
+//                     "Expression '{0}' refers to a field, can not change type of '{1}'.",
+//                     propertyName.ToString(),
+//                     propertyInfo.PropertyType.FullName));
+//             }
 
-            return new VirtualObject<TMaterial>(_material);
-        }
+//             return new VirtualObject<TMaterial>(_material);
+//         }
 
-        public virtual VirtualObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue)
-        {
-            string propertyName = GetPropertyName(propertyLambda);
+//         public virtual VirtualObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda, Func<TMaterial, PropertyInfo, object> getValue)
+//         {
+//             string propertyName = GetPropertyName(propertyLambda);
 
-            return Set(propertyName, getValue);
-        }
+//             return Set(propertyName, getValue);
+//         }
 
-        private PropertyInfo GetPropertyInfo(string propertyName)
-        {
-            if (propertyName == null)
-            {
-                throw new ArgumentException(string.Format(
-                    "propertyName is required.",
-                    propertyName.ToString()));
-            }
+//         private PropertyInfo GetPropertyInfo(string propertyName)
+//         {
+//             if (propertyName == null)
+//             {
+//                 throw new ArgumentException(string.Format(
+//                     "propertyName is required.",
+//                     propertyName.ToString()));
+//             }
 
-            PropertyInfo propertyInfo = GetWritePropertyInfo(_material.GetType(), propertyName);
+//             PropertyInfo propertyInfo = GetWritePropertyInfo(_material.GetType(), propertyName);
 
-            if (propertyInfo == null)
-            {
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a field, not a property or can not write.",
-                    propertyName.ToString()));
-            }
+//             if (propertyInfo == null)
+//             {
+//                 throw new ArgumentException(string.Format(
+//                     "Expression '{0}' refers to a field, not a property or can not write.",
+//                     propertyName.ToString()));
+//             }
 
-            return propertyInfo;
-        }
+//             return propertyInfo;
+//         }
 
-        private PropertyInfo GetWritePropertyInfo(Type type,  string propertyName)
-        {
-            PropertyInfo propertyInfo =
-                type
-                .GetProperty(
-                    propertyName, System.Reflection.BindingFlags.Instance
-                    | System.Reflection.BindingFlags.GetProperty
-                    | System.Reflection.BindingFlags.Public
-                    | System.Reflection.BindingFlags.NonPublic);
+//         private PropertyInfo GetWritePropertyInfo(Type type,  string propertyName)
+//         {
+//             PropertyInfo propertyInfo =
+//                 type
+//                 .GetProperty(
+//                     propertyName, System.Reflection.BindingFlags.Instance
+//                     | System.Reflection.BindingFlags.GetProperty
+//                     | System.Reflection.BindingFlags.Public
+//                     | System.Reflection.BindingFlags.NonPublic);
 
-            if (propertyInfo != null && !propertyInfo.CanWrite && type.BaseType != typeof(object))
-            {
-                return GetWritePropertyInfo(type.BaseType, propertyName);
-            }
+//             if (propertyInfo != null && !propertyInfo.CanWrite && type.BaseType != typeof(object))
+//             {
+//                 return GetWritePropertyInfo(type.BaseType, propertyName);
+//             }
 
-            if (propertyInfo != null && propertyInfo.CanWrite)
-            {
-                return propertyInfo;
-            }
+//             if (propertyInfo != null && propertyInfo.CanWrite)
+//             {
+//                 return propertyInfo;
+//             }
 
-            return null;
-        }
+//             return null;
+//         }
 
 
-        private string GetPropertyName<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda)
-        {
-            if (propertyLambda == null)
-            {
-                throw new ArgumentException(string.Format(
-                    "propertyLambda is required.",
-                    propertyLambda.ToString()));
-            }
+//         private string GetPropertyName<TProperty>(Expression<Func<TMaterial, TProperty>> propertyLambda)
+//         {
+//             if (propertyLambda == null)
+//             {
+//                 throw new ArgumentException(string.Format(
+//                     "propertyLambda is required.",
+//                     propertyLambda.ToString()));
+//             }
 
-            var memberExpression = propertyLambda.Body as MemberExpression;
+//             var memberExpression = propertyLambda.Body as MemberExpression;
 
-            if (memberExpression == null)
-            {
-                throw new ArgumentException(string.Format(
-                    "Expression '{0}' refers to a method, not a property.",
-                    propertyLambda.ToString()));
-            }
+//             if (memberExpression == null)
+//             {
+//                 throw new ArgumentException(string.Format(
+//                     "Expression '{0}' refers to a method, not a property.",
+//                     propertyLambda.ToString()));
+//             }
 
-            return memberExpression.Member.Name;
-        }
+//             return memberExpression.Member.Name;
+//         }
 
-        private bool TryChangeType(Type conversionType, object value, out object convertedValue)
-        {
-            MethodInfo method = 
-                this.GetType()
-                .GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                .Where(x => x.IsGenericMethod && x.Name == "TryChangeType")
-                .First();
+//         private bool TryChangeType(Type conversionType, object value, out object convertedValue)
+//         {
+//             MethodInfo method = 
+//                 this.GetType()
+//                 .GetMethods(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+//                 .Where(x => x.IsGenericMethod && x.Name == "TryChangeType")
+//                 .First();
 
-            object[] parameters = new object[] { value, null };
-            object rtn = method.MakeGenericMethod(conversionType).Invoke(this, parameters);
+//             object[] parameters = new object[] { value, null };
+//             object rtn = method.MakeGenericMethod(conversionType).Invoke(this, parameters);
 
-            convertedValue = parameters[1];
+//             convertedValue = parameters[1];
 
-            return (bool)rtn;
-        }
+//             return (bool)rtn;
+//         }
 
-        private bool TryChangeType<TConversion>(object value, out object convertedValue)
-        {
-            convertedValue = null;
-            try
-            {
-                if (value == null && typeof(TConversion).IsClass)
-                {
-                    convertedValue = null;
-                    return true;
-                }
+//         private bool TryChangeType<TConversion>(object value, out object convertedValue)
+//         {
+//             convertedValue = null;
+//             try
+//             {
+//                 if (value == null && typeof(TConversion).IsClass)
+//                 {
+//                     convertedValue = null;
+//                     return true;
+//                 }
 
-                if (value != null && Is<TConversion>(value))
-                {
-                    convertedValue = value;
-                    return true;
-                }                
+//                 if (value != null && Is<TConversion>(value))
+//                 {
+//                     convertedValue = value;
+//                     return true;
+//                 }                
                 
-                convertedValue = Convert.ChangeType(value, typeof(TConversion));
+//                 convertedValue = Convert.ChangeType(value, typeof(TConversion));
 
-                return  true;                
-            }
-            catch
-            {
-                return false;
-            }
-        } 
+//                 return  true;                
+//             }
+//             catch
+//             {
+//                 return false;
+//             }
+//         } 
 
-        private bool Is<TConversion>(object value)     
-        {
-            return value is TConversion;
-        }
-    }
-
-    public interface IProxyObject<TMaterial> where TMaterial : class
-    {   
-        TMaterial Material { get; }
-        IProxyPropery<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression);
-        IProxyObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> set);
-    }
-
-    public interface IProxyPropery<TMaterial>
-    {
-        PropertyInfo Property { get; }
-        TMaterial Material { get; }
-        IProxyPropery<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression);
-        IProxyPropery<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> set);
-    }
-}
+//         private bool Is<TConversion>(object value)     
+//         {
+//             return value is TConversion;
+//         }
+//     }
+// }

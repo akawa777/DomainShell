@@ -56,14 +56,14 @@ namespace DomainShell.Test.Infras.User
 
                 while (reader.Read())
                 {
-                    var vUserModel = new VirtualObject<UserModel>();
+                    var userSurrogate = new Surrogate<UserModel>();
 
-                    vUserModel
+                    userSurrogate
                         .Set(m => m.UserId, (m, p) => reader[p.Name])
                         .Set(m => m.UserName, (m, p) => reader[p.Name])
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                    yield return vUserModel.Material;
+                    yield return userSurrogate.Material;
                 }
             }
             finally

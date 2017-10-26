@@ -45,9 +45,9 @@ namespace DomainShell.Test.Infras
         {
             if (modelState == ModelState.Unchanged) return;
 
-            VirtualObject<TAggregateRoot> vModel = new VirtualObject<TAggregateRoot>(model);
+            Surrogate<TAggregateRoot> surrogate = new Surrogate<TAggregateRoot>(model);
 
-            vModel
+            surrogate
                 .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
                 .Set(m => m.Dirty, (m, p) => Dirty.Clear(m));
         }

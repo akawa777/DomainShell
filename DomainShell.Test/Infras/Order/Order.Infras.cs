@@ -113,17 +113,17 @@ namespace DomainShell.Test.Infras.Order
 
                 while (reader.Read())
                 {
-                    var vUserValue = new VirtualObject<UserValue>();
+                    var userSurrogate = new Surrogate<UserValue>();
 
-                    vUserValue
+                    userSurrogate
                         .Set(m => m.UserId, (m, p) => reader[p.Name]);
 
                     var orderModel = DomainModelProxyFactory.Create<OrderModel>();
-                    var vOrderModel = new VirtualObject<OrderModel>(orderModel);
+                    var orderSurrogate = new Surrogate<OrderModel>(orderModel);
 
-                    vOrderModel
+                    orderSurrogate
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
-                        .Set(m => m.User, (m, p) => vUserValue.Material)
+                        .Set(m => m.User, (m, p) => userSurrogate.Material)
                         .Set(m => m.OrderDate, (m, p) => DateTime.ParseExact(reader[p.Name].ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture))
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
@@ -131,7 +131,7 @@ namespace DomainShell.Test.Infras.Order
                         .Set(m => m.PayId, (m, p) => reader[p.Name])                        
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                    yield return vOrderModel.Material;
+                    yield return orderSurrogate.Material;
                 }
             }
             finally
@@ -141,26 +141,26 @@ namespace DomainShell.Test.Infras.Order
             }
         }
 
-        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderModel orderModel)
+        private IEnumerable<(string Name, object Value)> GetParameters(OrderModel orderModel)
         {
-            VirtualObject<OrderModel> vOrderModel = new VirtualObject<OrderModel>(orderModel);
+            OrderModel x = orderModel;
 
-            yield return vOrderModel.Get(x => x.User).GetProperty(m => m.UserId);
-            yield return vOrderModel.GetProperty(m => m.OrderDate, getValue: (m, p) => m.OrderDate.Value.ToString("yyyyMMdd"));
-            yield return vOrderModel.GetProperty(m => m.ProductName);
-            yield return vOrderModel.GetProperty(m => m.Price);
-            yield return vOrderModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
-            yield return vOrderModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);            
-            yield return vOrderModel.GetProperty(m => m.RecordVersion);              
+            yield return (nameof(x.User.UserId), x.User.UserId);
+            yield return (nameof(x.OrderDate), x.OrderDate.Value.ToString("yyyyMMdd"));
+            yield return (nameof(x.ProductName), x.ProductName);
+            yield return (nameof(x.Price), x.Price);
+            yield return (nameof(x.CreditCardCode), x.CreditCardCode == null ? DBNull.Value : x.CreditCardCode as object);
+            yield return (nameof(x.PayId), x.PayId == null ? DBNull.Value : x.PayId as object);
+            yield return (nameof(x.RecordVersion), x.RecordVersion);            
         }
         
-        private void AddParams(IDbCommand command, IEnumerable<VirtualProperty> virtualProperties)
+        private void AddParams(IDbCommand command, IEnumerable<(string Name, object Value)> parameters)
         {
-            foreach (var vProp in virtualProperties)
+            foreach (var parameter in parameters)
             {
                 var sqlParam = command.CreateParameter();
-                sqlParam.ParameterName = $"@{vProp.Name}";
-                sqlParam.Value = vProp.Value;
+                sqlParam.ParameterName = $"@{parameter.Name}";
+                sqlParam.Value = parameter.Value;
 
                 command.Parameters.Add(sqlParam);
             }
@@ -177,32 +177,32 @@ namespace DomainShell.Test.Infras.Order
 
         protected override void Insert(OrderModel orderModel)
         {
-            IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderModel);
+            IEnumerable<(string Name, object Value)> parameters = GetParameters(orderModel);
 
             string sql = $@"
                 insert into OrderForm (
-                    {string.Join(", ", vProps.Select(x => x.Name))}
+                    {string.Join(", ", parameters.Select(x => x.Name))}
                 ) values (
-                    {string.Join(", ", vProps.Select(x => $"@{x.Name}"))}
+                    {string.Join(", ", parameters.Select(x => $"@{x.Name}"))}
                 )
             ";
 
             using(IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddParams(command, vProps);
+                AddParams(command, parameters);
                 command.ExecuteNonQuery();
             }
         }
 
         protected override void Update(OrderModel orderModel)
         {
-            IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderModel);
+            IEnumerable<(string Name, object Value)> parameters = GetParameters(orderModel);
 
             string sql = $@"
                 update OrderForm 
                 set
-                    {string.Join(", ", vProps.Select(x => $"{x.Name} = @{x.Name}"))}
+                    {string.Join(", ", parameters.Select(x => $"{x.Name} = @{x.Name}"))}
                 where
                     OrderId = @{nameof(orderModel.OrderId)}
             ";
@@ -210,7 +210,7 @@ namespace DomainShell.Test.Infras.Order
             using(IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddParams(command, vProps);
+                AddParams(command, parameters);
                 AddOrderIdParam(command, orderModel);
                 command.ExecuteNonQuery();
             }
@@ -331,24 +331,24 @@ namespace DomainShell.Test.Infras.Order
 
                 while (reader.Read())
                 {
-                    var vUserValue = new VirtualObject<UserValue>();
+                    var userSurrogate = new Surrogate<UserValue>();
 
-                    vUserValue
+                    userSurrogate
                         .Set(m => m.UserId, (m, p) => reader[$"{p.Name}"]);
 
-                    var vOrderCanceledModel = new VirtualObject<OrderCanceledModel>();
+                    var orderCanceledSurrogate = new Surrogate<OrderCanceledModel>();
 
-                    vOrderCanceledModel
+                    orderCanceledSurrogate
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
                         .Set(m => m.OrderDate, (m, p) => DateTime.ParseExact(reader[p.Name].ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture))
-                        .Set(m => m.User, (m, p) => vUserValue.Material)
+                        .Set(m => m.User, (m, p) => userSurrogate.Material)
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
                         .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
                         .Set(m => m.PayId, (m, p) => reader[p.Name])                        
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                    yield return vOrderCanceledModel.Material;
+                    yield return orderCanceledSurrogate.Material;
                 }
             }
             finally
@@ -358,27 +358,26 @@ namespace DomainShell.Test.Infras.Order
             }
         }
 
-        private IEnumerable<VirtualProperty> GetVirtualProperties(OrderCanceledModel orderCanceledModel)
+        private IEnumerable<(string Name, object Value)> GetParameters(OrderCanceledModel orderCanceledModel)
         {
-            VirtualObject<OrderCanceledModel> vOrderCanceledModel = new VirtualObject<OrderCanceledModel>(orderCanceledModel);
+            OrderCanceledModel x = orderCanceledModel;
 
-            yield return vOrderCanceledModel.GetProperty(m => m.OrderId);
-            yield return vOrderCanceledModel.Get(x => x.User).GetProperty(m => m.UserId);
-            yield return vOrderCanceledModel.GetProperty(m => m.OrderDate, getValue: (m, p) => m.OrderDate.Value.ToString("yyyyMMdd"));
-            yield return vOrderCanceledModel.GetProperty(m => m.ProductName);
-            yield return vOrderCanceledModel.GetProperty(m => m.Price);
-            yield return vOrderCanceledModel.GetProperty(m => m.CreditCardCode, getValue: (m, p) => m.CreditCardCode == null ? DBNull.Value : m.CreditCardCode as object);
-            yield return vOrderCanceledModel.GetProperty(m => m.PayId, getValue: (m, p) => m.PayId == null ? DBNull.Value : m.PayId as object);            
-            yield return vOrderCanceledModel.GetProperty(m => m.RecordVersion);
+            yield return (nameof(x.OrderId), x.OrderId);
+            yield return (nameof(x.OrderDate), x.OrderDate.Value.ToString("yyyyMMdd"));
+            yield return (nameof(x.ProductName), x.ProductName);
+            yield return (nameof(x.Price), x.Price);
+            yield return (nameof(x.CreditCardCode), x.CreditCardCode == null ? DBNull.Value : x.CreditCardCode as object);
+            yield return (nameof(x.PayId), x.PayId == null ? DBNull.Value : x.PayId as object);
+            yield return (nameof(x.RecordVersion), x.RecordVersion);
         }
 
-        private void AddParams(IDbCommand command, IEnumerable<VirtualProperty> virtualProperties)
+        private void AddParams(IDbCommand command, IEnumerable<(string Name, object Value)> parameters)
         {
-            foreach (var vProp in virtualProperties)
+            foreach (var parameter in parameters)
             {
                 var sqlParam = command.CreateParameter();
-                sqlParam.ParameterName = $"@{vProp.Name}";
-                sqlParam.Value = vProp.Value;
+                sqlParam.ParameterName = $"@{parameter.Name}";
+                sqlParam.Value = parameter.Value;
 
                 command.Parameters.Add(sqlParam);
             }
@@ -395,32 +394,32 @@ namespace DomainShell.Test.Infras.Order
 
         protected override void Insert(OrderCanceledModel orderCanceledModel)
         {
-            IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderCanceledModel);
+            IEnumerable<(string Name, object Value)> parameters = GetParameters(orderCanceledModel);
 
             string sql = $@"
                 insert into OrderFormCanceled (
-                    {string.Join(", ", vProps.Select(x => x.Name))}
+                    {string.Join(", ", parameters.Select(x => x.Name))}
                 ) values (
-                    {string.Join(", ", vProps.Select(x => $"@{x.Name}"))}
+                    {string.Join(", ", parameters.Select(x => $"@{x.Name}"))}
                 )
             ";
 
             using (IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddParams(command, vProps);
+                AddParams(command, parameters);
                 command.ExecuteNonQuery();
             }
         }
 
         protected override void Update(OrderCanceledModel orderCanceledModel)
         {
-            IEnumerable<VirtualProperty> vProps = GetVirtualProperties(orderCanceledModel);
+            IEnumerable<(string Name, object Value)> parameters = GetParameters(orderCanceledModel);
 
             string sql = $@"
                 update OrderFormCanceled 
                 set
-                    {string.Join(", ", vProps.Select(x => $"{x.Name} = @{x.Name}"))}
+                    {string.Join(", ", parameters.Select(x => $"{x.Name} = @{x.Name}"))}
                 where
                     OrderId = @{nameof(orderCanceledModel.OrderId)}
             ";
@@ -428,7 +427,7 @@ namespace DomainShell.Test.Infras.Order
             using (IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddParams(command, vProps);
+                AddParams(command, parameters);
                 AddOrderIdParam(command, orderCanceledModel);
                 command.ExecuteNonQuery();
             }
@@ -525,9 +524,9 @@ namespace DomainShell.Test.Infras.Order
 
                 command.Parameters.Add(sqlParam);
 
-                var vMonthlyOrderModel = new VirtualObject<MonthlyOrderModel>();
+                var monthlyOrderSurrogate = new Surrogate<MonthlyOrderModel>();
 
-                vMonthlyOrderModel
+                monthlyOrderSurrogate
                     .Set(m => m.UserId, (m, p) => userId)
                     .Set(m => m.Year, (m, p) => orderDate.Year)
                     .Set(m => m.Month, (m, p) => orderDate.Month);
@@ -536,14 +535,14 @@ namespace DomainShell.Test.Infras.Order
                 {
                     while (reader.Read())
                     {                        
-                        vMonthlyOrderModel                                                        
+                        monthlyOrderSurrogate                                                        
                             .Set(m => m.Budget, (m, p) => reader[p.Name])
                             .Set(m => m.TotalPrice, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name])
                             .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name]);
                     }
                 }               
 
-                return vMonthlyOrderModel.Material;
+                return monthlyOrderSurrogate.Material;
             }
         }
     }

@@ -84,61 +84,6 @@ namespace DomainShell.Test
             connection.Close();
         }
 
-
-        [TestMethod]
-        public void TestMethod_VirtualObject()
-        {
-            Root root = new Root();
-
-            var vRoot = new VirtualObject<Root>(root);
-
-            vRoot.Get(m => m.Node)
-                .Set(m => m.Id, (m, p) => 999)
-                .Set(m => m.Name, (m, p) => "xxx");
-
-            var nodeList = new List<Node>();
-
-            int loopNo = 0;           
-            foreach (var vNodeItem in vRoot.List(m => m.Nodes))
-            {
-                loopNo++;
-
-                vNodeItem
-                    .Set(m => m.Id, (m, p) => loopNo)
-                    .Set(m => m.Name, (m, p) => $"xxx_{loopNo}");
-
-                var vNode = new VirtualObject<Node>();
-
-                vNode
-                    .Set(m => m.Id, (m, p) => loopNo)
-                    .Set(m => m.Name, (m, p) => $"xxx_{loopNo}");
-
-                nodeList.Add(vNode.Material);
-            }
-
-            vRoot
-                .Set("PrivateNode", (m, p) => root.Node);
-
-            vRoot
-                .Get<Node>("PrivateNode")
-                .Set(m => m.Name, (m, p) => $"private {m.Name}");
-
-            vRoot
-                .Set(m => m.NodeList, (m, p) => nodeList);
-
-            vRoot
-                .Set("PrivateNodeList", (m, p) => nodeList);
-
-            foreach (var vNodeItem in vRoot.List<Node>("PrivateNodeList"))
-            {
-                vNodeItem
-                    .Set(m => m.Name, (m, p) => $"private {m.Name}");
-            }
-
-            vRoot
-                .Set(m => m.NodeCollection, (m, p) => nodeList);            
-        }
-
         public class Root
         {
             public Root()
@@ -167,26 +112,6 @@ namespace DomainShell.Test
             }
         }
 
-        [TestMethod]
-        public void TestMethod_ShadowObject()
-        {
-            IProxyObject<Root> proxyRoot = null;
-
-            proxyRoot
-                .Set(x => x.Node, (x, p) => Node.New())
-                .Get(x => x.Node)
-                .Set(x => x.Id, (x, p) => 999)
-                .Set(x => x.Name, (x, p) => "xxx");
-
-            IProxyObject<Node> proxyNode = null;
-            proxyNode
-                .Set(x => x.Id, (x, p) => 999)
-                .Set(x => x.Name, (x, p) => "xxx");
-
-            proxyRoot
-                .Set(x => x.Nodes, (x, p) => new Node[] { proxyNode.Material });
-        }
-
         public class Node
         {
             protected Node()
@@ -200,6 +125,32 @@ namespace DomainShell.Test
             }
             public int Id { get; private set; }
             public string Name { get; private set; }
+        }
+
+        [TestMethod]
+        public void TestMethod_Surrogate()
+        {
+            Surrogate<Root> rootSurrogate = new Surrogate<Root>();
+
+            rootSurrogate
+                .Set(x => x.Node, (x, p) => Node.New())
+                .Get(x => x.Node)
+                .Set(x => x.Id, (x, p) => 999)
+                .Set(x => x.Name, (x, p) => "xxx");
+
+            Surrogate<Node> nodeSurrogate = new Surrogate<Node>();
+
+            nodeSurrogate
+                .Set(x => x.Id, (x, p) => 999)
+                .Set(x => x.Name, (x, p) => "xxx");
+
+            rootSurrogate
+                .Set(x => x.Nodes, (x, p) => new Node[] { nodeSurrogate.Material });
+
+            foreach(var surrogate in rootSurrogate.List(x => x.Nodes))
+            {
+                surrogate.Set(x => x.Name, (x, p) => "zzz") ;
+            }
         }
     }
 }
