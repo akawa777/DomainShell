@@ -83,6 +83,32 @@ namespace DomainShell.Test
 
             connection.Close();
         }
+        
+        [TestMethod]
+        public void TestMethod_ProxyObject()
+        {
+            ProxyObject<Root> rootProxyObject = new ProxyObject<Root>();
+
+            rootProxyObject
+                .Set(x => x.Node, (x, p) => Node.New())
+                .Get(x => x.Node)
+                .Set(x => x.Id, (x, p) => 999)
+                .Set(x => x.Name, (x, p) => "xxx");
+
+            ProxyObject<Node> nodeProxyObject = new ProxyObject<Node>();
+
+            nodeProxyObject
+                .Set(x => x.Id, (x, p) => 999)
+                .Set(x => x.Name, (x, p) => "xxx");
+
+            rootProxyObject
+                .Set(x => x.Nodes, (x, p) => new Node[] { nodeProxyObject.Material });
+
+            foreach(var itemProxyObject in rootProxyObject.List(x => x.Nodes))
+            {
+                itemProxyObject.Set(x => x.Name, (x, p) => "zzz") ;
+            }
+        }
 
         public class Root
         {
@@ -125,32 +151,6 @@ namespace DomainShell.Test
             }
             public int Id { get; private set; }
             public string Name { get; private set; }
-        }
-
-        [TestMethod]
-        public void TestMethod_Surrogate()
-        {
-            Surrogate<Root> rootSurrogate = new Surrogate<Root>();
-
-            rootSurrogate
-                .Set(x => x.Node, (x, p) => Node.New())
-                .Get(x => x.Node)
-                .Set(x => x.Id, (x, p) => 999)
-                .Set(x => x.Name, (x, p) => "xxx");
-
-            Surrogate<Node> nodeSurrogate = new Surrogate<Node>();
-
-            nodeSurrogate
-                .Set(x => x.Id, (x, p) => 999)
-                .Set(x => x.Name, (x, p) => "xxx");
-
-            rootSurrogate
-                .Set(x => x.Nodes, (x, p) => new Node[] { nodeSurrogate.Material });
-
-            foreach(var surrogate in rootSurrogate.List(x => x.Nodes))
-            {
-                surrogate.Set(x => x.Name, (x, p) => "zzz") ;
-            }
-        }
+        }        
     }
 }

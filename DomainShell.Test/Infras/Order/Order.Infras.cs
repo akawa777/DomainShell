@@ -113,17 +113,17 @@ namespace DomainShell.Test.Infras.Order
 
                 while (reader.Read())
                 {
-                    var userSurrogate = new Surrogate<UserValue>();
+                    var userProxyObject = new ProxyObject<UserValue>();
 
-                    userSurrogate
+                    userProxyObject
                         .Set(m => m.UserId, (m, p) => reader[p.Name]);
 
                     var orderModel = DomainModelProxyFactory.Create<OrderModel>();
-                    var orderSurrogate = new Surrogate<OrderModel>(orderModel);
+                    var orderProxyObject = new ProxyObject<OrderModel>(orderModel);
 
-                    orderSurrogate
+                    orderProxyObject
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
-                        .Set(m => m.User, (m, p) => userSurrogate.Material)
+                        .Set(m => m.User, (m, p) => userProxyObject.Material)
                         .Set(m => m.OrderDate, (m, p) => DateTime.ParseExact(reader[p.Name].ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture))
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
@@ -131,7 +131,7 @@ namespace DomainShell.Test.Infras.Order
                         .Set(m => m.PayId, (m, p) => reader[p.Name])                        
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                    yield return orderSurrogate.Material;
+                    yield return orderProxyObject.Material;
                 }
             }
             finally
@@ -331,24 +331,24 @@ namespace DomainShell.Test.Infras.Order
 
                 while (reader.Read())
                 {
-                    var userSurrogate = new Surrogate<UserValue>();
+                    var userProxyObject = new ProxyObject<UserValue>();
 
-                    userSurrogate
+                    userProxyObject
                         .Set(m => m.UserId, (m, p) => reader[$"{p.Name}"]);
 
-                    var orderCanceledSurrogate = new Surrogate<OrderCanceledModel>();
+                    var orderCanceledProxyObject = new ProxyObject<OrderCanceledModel>();
 
-                    orderCanceledSurrogate
+                    orderCanceledProxyObject
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
                         .Set(m => m.OrderDate, (m, p) => DateTime.ParseExact(reader[p.Name].ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture))
-                        .Set(m => m.User, (m, p) => userSurrogate.Material)
+                        .Set(m => m.User, (m, p) => userProxyObject.Material)
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
                         .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
                         .Set(m => m.PayId, (m, p) => reader[p.Name])                        
                         .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
 
-                    yield return orderCanceledSurrogate.Material;
+                    yield return orderCanceledProxyObject.Material;
                 }
             }
             finally
@@ -524,9 +524,9 @@ namespace DomainShell.Test.Infras.Order
 
                 command.Parameters.Add(sqlParam);
 
-                var monthlyOrderSurrogate = new Surrogate<MonthlyOrderModel>();
+                var monthlyOrderProxyObject = new ProxyObject<MonthlyOrderModel>();
 
-                monthlyOrderSurrogate
+                monthlyOrderProxyObject
                     .Set(m => m.UserId, (m, p) => userId)
                     .Set(m => m.Year, (m, p) => orderDate.Year)
                     .Set(m => m.Month, (m, p) => orderDate.Month);
@@ -535,14 +535,14 @@ namespace DomainShell.Test.Infras.Order
                 {
                     while (reader.Read())
                     {                        
-                        monthlyOrderSurrogate                                                        
+                        monthlyOrderProxyObject                                                        
                             .Set(m => m.Budget, (m, p) => reader[p.Name])
                             .Set(m => m.TotalPrice, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name])
                             .Set(m => m.TotalOrderNo, (m, p) => reader[p.Name] == DBNull.Value ? 0 : reader[p.Name]);
                     }
                 }               
 
-                return monthlyOrderSurrogate.Material;
+                return monthlyOrderProxyObject.Material;
             }
         }
     }

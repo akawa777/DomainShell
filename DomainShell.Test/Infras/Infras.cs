@@ -45,9 +45,9 @@ namespace DomainShell.Test.Infras
         {
             if (modelState == ModelState.Unchanged) return;
 
-            Surrogate<TAggregateRoot> surrogate = new Surrogate<TAggregateRoot>(model);
+            ProxyObject<TAggregateRoot> ProxyObject = new ProxyObject<TAggregateRoot>(model);
 
-            surrogate
+            ProxyObject
                 .Set(m => m.RecordVersion, (m, p) => m.RecordVersion + 1)
                 .Set(m => m.Dirty, (m, p) => Dirty.Clear(m));
         }

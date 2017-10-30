@@ -6,29 +6,29 @@ using System.Linq.Expressions;
 
 namespace DomainShell
 {
-    public interface ISurrogate<TMaterial>
+    public interface IProxyObject<TMaterial>
     {   
         TMaterial Material { get; }
         PropertyInfo Property { get; }
-        ISurrogate<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression);
-        IEnumerable<ISurrogate<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> expression);
-        ISurrogate<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> value);
+        IProxyObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression);
+        IEnumerable<IProxyObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> expression);
+        IProxyObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> value);
     }
 
-    public class Surrogate<TMaterial> : ISurrogate<TMaterial>
+    public class ProxyObject<TMaterial> : IProxyObject<TMaterial>
     {
-        public Surrogate()
+        public ProxyObject()
         {
             object material = Activator.CreateInstance(typeof(TMaterial), true);
 
             Material = (TMaterial)material;
         }
-        public Surrogate(TMaterial material)
+        public ProxyObject(TMaterial material)
         {
             Material = material;
         }
 
-        private Surrogate(TMaterial material, PropertyInfo property)
+        private ProxyObject(TMaterial material, PropertyInfo property)
         {
             Material = material;
             Property = property;
@@ -38,28 +38,39 @@ namespace DomainShell
 
         public PropertyInfo Property { get; }
 
-        public ISurrogate<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression)
+        public IProxyObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression)
         {
-            var property = (expression.Body as MemberExpression).Member as PropertyInfo;
-            var material = (TProperty)property.Get(Material);
+            if (expression.Body is MemberExpression memberExpression)
+            {
+                if (memberExpression.Member is PropertyInfo propertyInfo)
+                {
+                    var material = (TProperty)propertyInfo.Get(Material);
+                    return new ProxyObject<TProperty>(material, propertyInfo);
+                }
+            }
 
-            return new Surrogate<TProperty>(material, property);
+            throw new ArgumentException($"{expression.ToString()} is not propery of {typeof(TMaterial).GetType().Name}.");
         }
 
-        public IEnumerable<ISurrogate<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> expression)
+        public IEnumerable<IProxyObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> expression)
         {
-            var property = (expression.Body as MemberExpression).Member as PropertyInfo;
-            var materials = (IEnumerable<TProperty>)property.Get(Material);
+            if (expression.Body is MemberExpression memberExpression)
+            {
+                if (memberExpression.Member is PropertyInfo propertyInfo)
+                {
+                    var property = (expression.Body as MemberExpression).Member as PropertyInfo;
+                    var materials = (IEnumerable<TProperty>)propertyInfo.Get(Material);         
+                    return materials.Select(x => new ProxyObject<TProperty>(x, null));
+                }
+            }
 
-            return materials.Select(x => new Surrogate<TProperty>(x, null));
+            throw new ArgumentException($"{expression.ToString()} is not propery of {typeof(TMaterial).GetType().Name}.");    
         }
 
-        public ISurrogate<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> value)
+        public IProxyObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> value)
         {
-            var property = (expression.Body as MemberExpression).Member as PropertyInfo;            
-
+            var property = (expression.Body as MemberExpression).Member as PropertyInfo;   
             property.Set(Material, value(Material, Property));
-
             return this;
         }
     }   

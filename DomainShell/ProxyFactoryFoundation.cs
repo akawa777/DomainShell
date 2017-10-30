@@ -13,7 +13,7 @@ namespace DomainShell
 
             if (proxy == null)
             {
-                proxy = new Surrogate<T>().Material;
+                proxy = new ProxyObject<T>().Material;
             }
 
             return proxy;
