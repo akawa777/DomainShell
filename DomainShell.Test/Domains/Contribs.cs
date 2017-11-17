@@ -6,6 +6,7 @@ using SimpleInjector;
 using SimpleInjector.Lifestyles;
 using System.Data;
 using System.Reflection;
+using MediatR;
 
 namespace DomainShell.Test.Domains
 {
@@ -135,5 +136,85 @@ namespace DomainShell.Test.Domains
 
             return command;
         }
+    }
+
+    public class SessionBehavior
+    {
+        private Container _container;
+        private IMediator _mediator;
+        private IDbConnection _connection;
+        private IDbTransaction _transaction;
+        public void Open()
+        {
+            _connection.Open();
+        }
+        public void Close()
+        {
+            _connection.Close();
+        }
+
+        public void BeginTran()
+        {
+            _transaction = _connection.BeginTransaction();
+        }
+        public void EndTran(bool completed)
+        {
+            if (completed)
+            {
+                foreach (var trakPack in DomainModelTracker.GetAll())
+                {
+                    if (trakPack.Model is IEventAuthor eventAuthor)
+                    {              
+                        foreach (var IEvent )          
+                        
+                        var task = _mediator.Publish(new SampleEvent());
+                        task.RunSynchronously();
+                        
+                    }
+                }
+            }
+            else
+            {
+
+            }
+
+            _transaction.Commit();
+            _transaction.Dispose();
+            _transaction = null;
+        }
+
+        public IDbCommand CreateCommand()
+        {
+            IDbCommand command = _connection.CreateCommand();
+            command.Transaction = _transaction;
+
+            return command;
+        }
+
+        public void Exception()
+        {
+
+        }
+    }
+
+    public interface IEventAuthor
+    {
+        IEvent[] GetEvents();
+        void ClearEvents();
+    }    
+
+    public class SampleEvent : INotification
+    {
+        
+    }
+
+    public class IAsyncNotification : INotification
+    {
+        public bool Sync { get; set; }
+    }
+
+    public class IExceptionNotification : INotification
+    {
+        Exception Exception { get; set; }
     }
 }
