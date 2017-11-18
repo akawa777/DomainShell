@@ -138,69 +138,128 @@ namespace DomainShell.Test.Domains
         }
     }
 
-    public class SessionBehavior
+    public class SessionR<TEvent> where TEvent : class
     {
-        private Container _container;
-        private IMediator _mediator;
-        private IDbConnection _connection;
-        private IDbTransaction _transaction;
+        private ISessionBehavior<TEvent> _behavior;
+        private bool _opend;
+        private bool _traned;
+
+        private TEvent[] GetEvent()
+        {
+            return null;
+        }
+
+        private void ClearEvents()
+        {
+            
+        }
+
         public void Open()
         {
-            _connection.Open();
-        }
-        public void Close()
-        {
-            _connection.Close();
+            _behavior.Open();
         }
 
-        public void BeginTran()
+        public void Tran()
         {
-            _transaction = _connection.BeginTransaction();
+            _traned = true;
+            _behavior.BeginTran();
         }
-        public void EndTran(bool completed)
-        {
-            if (completed)
-            {
-                foreach (var trakPack in DomainModelTracker.GetAll())
-                {
-                    if (trakPack.Model is IEventAuthor eventAuthor)
-                    {              
-                        foreach (var IEvent )          
-                        
-                        var task = _mediator.Publish(new SampleEvent());
-                        task.RunSynchronously();
-                        
-                    }
-                }
-            }
-            else
-            {
 
+        public void Complete()
+        {
+            _behavior.EndTran(true, GetEvent());
+        }
+
+        public void Dispose()
+        {
+            if (!_traned)
+            {
+                _behavior.EndTran(false, GetEvent());
             }
 
-            _transaction.Commit();
-            _transaction.Dispose();
-            _transaction = null;
-        }
-
-        public IDbCommand CreateCommand()
-        {
-            IDbCommand command = _connection.CreateCommand();
-            command.Transaction = _transaction;
-
-            return command;
-        }
-
-        public void Exception()
-        {
-
+            ClearEvents();
+            _traned = false;
+            _behavior.Close();
         }
     }
 
-    public interface IEventAuthor
+    public interface ISessionBehavior<TEvent>  where TEvent : class
     {
-        IEvent[] GetEvents();
-        void ClearEvents();
+        void Open();
+        void Close();
+        void BeginTran();        
+        void EndTran(bool completed, TEvent[] events);
+        void Exception(Exception exception, IEvent[] events);
+    }    
+
+    public class SessionBehavior : ISessionBehavior<IEvent>
+    {
+       private Container _container;
+       private IMediator _mediator;
+       private IDbConnection _connection;
+       private IDbTransaction _transaction;
+       public void Open()
+       {
+           _connection.Open();
+       }
+       public void Close()
+       {
+           _connection.Close();
+       }
+
+       public void BeginTran()
+       {
+           _transaction = _connection.BeginTransaction();
+       }
+       public void EndTran(bool completed, IEvent[] events)
+       {
+           if (completed)
+           {
+               foreach (var @event in events.Where(x => x is IEvent || (x is IAsyncEvent asyncEvent && asyncEvent.Sync)))
+               {
+                   var task = _mediator.Publish(@event);
+                   task.Wait();
+               }
+           }
+
+           _transaction.Commit();
+           _transaction.Dispose();
+           _transaction = null;
+
+           using (ThreadScopedLifestyle.BeginScope(_container))
+           {
+                foreach (var @event in events.Where(x => x is IAsyncEvent asyncEvent && !asyncEvent.Sync))
+                {
+                    _mediator.Publish(@event);
+                }
+           }
+       }
+
+       public IDbCommand CreateCommand()
+       {
+           IDbCommand command = _connection.CreateCommand();
+           command.Transaction = _transaction;
+
+           return command;
+       }
+
+       public void Exception(Exception exception, IEvent[] events)
+       {
+           using (ThreadScopedLifestyle.BeginScope(_container))
+           {
+                foreach (var @event in events.Where(x => x is IExceptionEvent).Select(x => x as IExceptionEvent))
+                {
+                    @event.Exception = exception;
+                    _mediator.Publish(@event);
+                }
+           }
+       }
+    }
+
+    public interface IEventAuthor<TEvent>
+    {
+       TEvent[] GetEvents();
+       void ClearEvents();
     }    
 
     public class SampleEvent : INotification
@@ -208,13 +267,18 @@ namespace DomainShell.Test.Domains
         
     }
 
-    public class IAsyncNotification : INotification
+    public interface IEvent : INotification
     {
-        public bool Sync { get; set; }
+        bool Async { get; set; }
     }
 
-    public class IExceptionNotification : INotification
+    public interface IAsyncEvent : IEvent
     {
-        Exception Exception { get; set; }
+       bool Sync { get; set; }
+    }
+
+    public interface IExceptionEvent : INotification
+    {
+       Exception Exception { get; set; }
     }
 }
