@@ -76,7 +76,7 @@ namespace DomainShell.Test.Domains.Order
 
             ValidateWhenComplete();            
 
-            creditCardService.Pay(this);
+            PayId = creditCardService.Pay(this);
 
             AddCompletedEvents();
 
@@ -86,6 +86,8 @@ namespace DomainShell.Test.Domains.Order
         public void SendCompletedMail(IMailService mailService)
         {
             mailService.Send(this);
+
+            System.Threading.Thread.Sleep(5000);
         }
 
         public void CancelCompleted(ICreditCardService creditCardService)

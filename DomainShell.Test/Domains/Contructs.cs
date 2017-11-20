@@ -6,7 +6,7 @@ using System.Data;
 
 namespace DomainShell.Test.Domains
 {
-    public interface IConnection
+    public interface IConnection : IDisposable
     {
         IDbCommand CreateCommand();
     }

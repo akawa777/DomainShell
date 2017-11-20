@@ -40,38 +40,40 @@ namespace DomainShell
 
         public IProxyObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression)
         {
-            if (expression.Body is MemberExpression memberExpression)
-            {
-                if (memberExpression.Member is PropertyInfo propertyInfo)
-                {
-                    var material = (TProperty)propertyInfo.Get(Material);
-                    return new ProxyObject<TProperty>(material, propertyInfo);
-                }
-            }
-
-            throw new ArgumentException($"{expression.ToString()} is not propery of {typeof(TMaterial).GetType().Name}.");
+            PropertyInfo property = GetProperty(typeof(TMaterial), expression);
+            var material = (TProperty)property.Get(Material);
+            return new ProxyObject<TProperty>(material, property);
         }
 
         public IEnumerable<IProxyObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> expression)
         {
-            if (expression.Body is MemberExpression memberExpression)
-            {
-                if (memberExpression.Member is PropertyInfo propertyInfo)
-                {
-                    var property = (expression.Body as MemberExpression).Member as PropertyInfo;
-                    var materials = (IEnumerable<TProperty>)propertyInfo.Get(Material);         
-                    return materials.Select(x => new ProxyObject<TProperty>(x, null));
-                }
-            }
-
-            throw new ArgumentException($"{expression.ToString()} is not propery of {typeof(TMaterial).GetType().Name}.");    
+            PropertyInfo property = GetProperty(typeof(TMaterial), expression);
+            var materials = (IEnumerable<TProperty>)property.Get(Material);
+            return materials.Select(x => new ProxyObject<TProperty>(x, null));
         }
 
         public IProxyObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> value)
         {
-            var property = (expression.Body as MemberExpression).Member as PropertyInfo;   
-            property.Set(Material, value(Material, Property));
+            PropertyInfo property = GetProperty(typeof(TMaterial), expression);
+
+            property.Set(Material, value(Material, property));
             return this;
+        }
+
+        private PropertyInfo GetProperty<TProperty>(Type type, Expression<Func<TMaterial, TProperty>> expression)
+        {
+            var property = type.GetProperty((expression.Body as MemberExpression).Member.Name);
+
+            if (property == null && type.BaseType == typeof(object))
+            {
+                throw new ArgumentException($"{expression.ToString()} is not propery of {typeof(TMaterial).GetType().Name}.");
+            }
+            else if (property == null)
+            {
+                return GetProperty(type.BaseType, expression);
+            }
+
+            return property;
         }
     }   
 
@@ -97,7 +99,7 @@ namespace DomainShell
 
                 Action<object, object> setter = (Action<object, object>)method.Invoke(null, new object[] { property });
 
-                Set = setter; ;
+                Set = setter;
             }
 
             public Func<object, object> Get { get; }
@@ -127,8 +129,8 @@ namespace DomainShell
         private static Action<object, object> CreateSetter<TObj, TValue>(PropertyInfo property)
         {
             if (!property.CanWrite)
-            {
-                return (obj, value) => property.Set(obj, value);
+            {             
+                return (obj, value) => { };
             }
 
             Action<TObj, TValue> setDelegate =

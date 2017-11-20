@@ -7,6 +7,7 @@ using SimpleInjector.Lifestyles;
 using System.Data;
 using System.Reflection;
 using MediatR;
+using System.Threading.Tasks;
 
 namespace DomainShell.Test.Domains
 {
@@ -33,62 +34,19 @@ namespace DomainShell.Test.Domains
         }
     }
 
-    public class DomainEventFoundation : DomainEventFoundationBase
+    public class SessionFoundation : SessionFoundationBase<IDomainEvent>, IConnection
     {
-        public DomainEventFoundation(Container container)
+        public SessionFoundation(Container container, IDbConnection connection, IMediator mediator)
         {
             _container = container;
-        }
-
-        private Container _container;
-
-        protected override IDomainEventScope InTranEventScope()
-        {
-            return new DomainEventScope(_container);
-        }
-
-        protected override IDomainEventScope OutTranEventScope()
-        {
-            return new DomainEventScope(_container, isOutTran: true);
-        }
-    }
-
-    public class DomainEventScope : IDomainEventScope
-    {
-        public DomainEventScope(Container container, bool isOutTran = false)
-        {
-            _container = container;
-            if (isOutTran) _scope = ThreadScopedLifestyle.BeginScope(_container);
-        }
-
-        private Container _container;
-        private Scope _scope;
-
-        public IDomainEventHandler<TDomainEvent> GetHandler<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
-        {
-            return _container.GetInstance<IDomainEventHandler<TDomainEvent>>();
-        }
-
-        public void Dispose()
-        {
-            if (_scope != null)
-            {
-                _scope.Dispose();
-                _scope = null;
-            }            
-        }
-    }
-
-    public class SessionFoundation : SessionFoundationBase, IConnection
-    {
-        public SessionFoundation(IDbConnection connection)
-        {
             _connection = connection;
+            _mediator = mediator;
         }
 
+        private Container _container;
+        private IMediator _mediator;
         private IDbConnection _connection;
         private IDbTransaction _transaction;
-
 
         protected override void BeginOpen()
         {
@@ -97,11 +55,6 @@ namespace DomainShell.Test.Domains
         protected override void BeginTran()
         {
             _transaction = _connection.BeginTransaction();
-        }
-
-        protected override void Save()
-        {
-
         }
 
         protected override void EndTran(bool completed)
@@ -123,7 +76,46 @@ namespace DomainShell.Test.Domains
             _connection.Close();
         }
 
-        public override void Dispose()
+        protected override void OnException(Exception exception, IDomainEvent[] domainEvents)
+        {
+            foreach (var domainEvent in domainEvents)
+            {
+                if (domainEvent.Mode.Format == DomainEventFormat.AtException)
+                {
+                    var task = _mediator.Publish(domainEvent);
+                }
+            }
+        }
+
+        protected override void PublishDomainEventInTran(IDomainEvent[] domainEvents)
+        {
+            foreach (var domainEvent in domainEvents)
+            {
+                if (domainEvent.Mode.Format == DomainEventFormat.InTran)
+                {
+                    var task = _mediator.Publish(domainEvent);
+                }
+            }
+        }
+
+        protected override void PublishDomainEventOutTran(IDomainEvent[] domainEvents)
+        {
+            Task.Run(() => 
+            { 
+                using (var scope = ThreadScopedLifestyle.BeginScope(_container))
+                {
+                     foreach (var domainEvent in domainEvents)
+                     {
+                         if (domainEvent.Mode.Format == DomainEventFormat.OutTran)
+                         {
+                            _mediator.Publish(domainEvent);
+                        }
+                     }
+                }
+            });
+        }
+
+        public void Dispose()
         {                      
             _connection.Dispose();
         }
@@ -137,148 +129,63 @@ namespace DomainShell.Test.Domains
             return command;
         }
     }
-
-    public class SessionR<TEvent> where TEvent : class
+    
+    public struct DomainEventMode
     {
-        private ISessionBehavior<TEvent> _behavior;
-        private bool _opend;
-        private bool _traned;
-
-        private TEvent[] GetEvent()
+        private DomainEventMode(DomainEventFormat format)
         {
-            return null;
+            _format = format;
+            _exception = null;
         }
 
-        private void ClearEvents()
+        private DomainEventFormat _format;
+        public DomainEventFormat Format
         {
-            
+            get { return _format; }
+            set { _format = value;  }
         }
 
-        public void Open()
+        private Exception _exception;
+        public Exception GetException()
         {
-            _behavior.Open();
+            return _exception;
         }
 
-        public void Tran()
+        public static DomainEventMode InTran()
         {
-            _traned = true;
-            _behavior.BeginTran();
+            return new DomainEventMode(DomainEventFormat.InTran);
         }
 
-        public void Complete()
+        public static DomainEventMode OutTran()
         {
-            _behavior.EndTran(true, GetEvent());
+            return new DomainEventMode(DomainEventFormat.OutTran);
         }
 
-        public void Dispose()
+        public static DomainEventMode AtException()
         {
-            if (!_traned)
-            {
-                _behavior.EndTran(false, GetEvent());
-            }
-
-            ClearEvents();
-            _traned = false;
-            _behavior.Close();
+            return new DomainEventMode(DomainEventFormat.AtException);
         }
     }
 
-    public interface ISessionBehavior<TEvent>  where TEvent : class
+    public enum DomainEventFormat
     {
-        void Open();
-        void Close();
-        void BeginTran();        
-        void EndTran(bool completed, TEvent[] events);
-        void Exception(Exception exception, IEvent[] events);
-    }    
-
-    public class SessionBehavior : ISessionBehavior<IEvent>
-    {
-       private Container _container;
-       private IMediator _mediator;
-       private IDbConnection _connection;
-       private IDbTransaction _transaction;
-       public void Open()
-       {
-           _connection.Open();
-       }
-       public void Close()
-       {
-           _connection.Close();
-       }
-
-       public void BeginTran()
-       {
-           _transaction = _connection.BeginTransaction();
-       }
-       public void EndTran(bool completed, IEvent[] events)
-       {
-           if (completed)
-           {
-               foreach (var @event in events.Where(x => x is IEvent || (x is IAsyncEvent asyncEvent && asyncEvent.Sync)))
-               {
-                   var task = _mediator.Publish(@event);
-                   task.Wait();
-               }
-           }
-
-           _transaction.Commit();
-           _transaction.Dispose();
-           _transaction = null;
-
-           using (ThreadScopedLifestyle.BeginScope(_container))
-           {
-                foreach (var @event in events.Where(x => x is IAsyncEvent asyncEvent && !asyncEvent.Sync))
-                {
-                    _mediator.Publish(@event);
-                }
-           }
-       }
-
-       public IDbCommand CreateCommand()
-       {
-           IDbCommand command = _connection.CreateCommand();
-           command.Transaction = _transaction;
-
-           return command;
-       }
-
-       public void Exception(Exception exception, IEvent[] events)
-       {
-           using (ThreadScopedLifestyle.BeginScope(_container))
-           {
-                foreach (var @event in events.Where(x => x is IExceptionEvent).Select(x => x as IExceptionEvent))
-                {
-                    @event.Exception = exception;
-                    _mediator.Publish(@event);
-                }
-           }
-       }
+        InTran,
+        OutTran,
+        AtException         
     }
 
-    public interface IEventAuthor<TEvent>
+    public interface IDomainEvent : INotification
     {
-       TEvent[] GetEvents();
-       void ClearEvents();
+        DomainEventMode Mode { get; }
     }    
 
-    public class SampleEvent : INotification
+    public interface IDomainEventHandler<TDomainEvent> : INotificationHandler<TDomainEvent> where TDomainEvent : IDomainEvent
     {
         
     }
 
-    public interface IEvent : INotification
+    public interface IDomainEventAuthor : IDomainEventAuthor<IDomainEvent>
     {
-        bool Async { get; set; }
-    }
 
-    public interface IAsyncEvent : IEvent
-    {
-       bool Sync { get; set; }
-    }
-
-    public interface IExceptionEvent : INotification
-    {
-       Exception Exception { get; set; }
     }
 }

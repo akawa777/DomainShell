@@ -27,9 +27,9 @@ namespace DomainShell
     {
         private static Func<IDomainModelProxyFactory> _getDomainModelProxyFactory;
 
-        public static void Startup(Func<IDomainModelProxyFactory> getDomainModelProxyFactoryPerThread)
+        public static void Startup(Func<IDomainModelProxyFactory> getDomainModelProxyFactory)
         {            
-            _getDomainModelProxyFactory = getDomainModelProxyFactoryPerThread;
+            _getDomainModelProxyFactory = getDomainModelProxyFactory;
         }
 
         private static void Validate()

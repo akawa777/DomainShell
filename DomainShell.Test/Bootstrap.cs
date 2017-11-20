@@ -14,6 +14,8 @@ using DomainShell.Test.Domains.User;
 using DomainShell.Test.Domains.Order;
 using DomainShell.Test.Infras.User;
 using DomainShell.Test.Infras.Order;
+using MediatR;
+using System.Reflection;
 
 namespace DomainShell.Test
 {
@@ -51,14 +53,21 @@ namespace DomainShell.Test
 
             // start up for DomainShell >>
             container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);            
-            container.Register<IDomainEventPublisher, DomainEventFoundation>(Lifestyle.Scoped);            
+            container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);       
             container.Register<ISession, SessionFoundation>(Lifestyle.Scoped); 
 
             DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);            
-            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);            
-            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisher>);
+            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);                        
             Session.Startup(container.GetInstance<ISession>);   
+            // <<
+
+            // MediatR >>                        
+            container.RegisterSingleton<IMediator, Mediator>();
+            container.RegisterCollection(typeof(INotificationHandler<>), Assembly.GetExecutingAssembly());
+            container.RegisterCollection(typeof(IAsyncNotificationHandler<>), Assembly.GetExecutingAssembly());
+            container.RegisterCollection(typeof(ICancellableAsyncNotificationHandler<>), Assembly.GetExecutingAssembly());
+            container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
+            container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
             // <<
                         
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
@@ -75,9 +84,9 @@ namespace DomainShell.Test
             container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
             container.Register<IMailService, MailService>(Lifestyle.Scoped);
 
-            container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            //container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            //container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            //container.Register<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);                      

@@ -13,7 +13,7 @@ namespace DomainShell
 
         public static void Startup(Func<ISession> getSessionPerThread)
         {
-            _getSession = getSessionPerThread;
+            _getSession = getSessionPerThread;            
         }
 
         private static void Validate()
@@ -28,7 +28,7 @@ namespace DomainShell
         {
             Validate();
 
-            ISession session = _getSession();
+            ISession session = _getSession();            
             return session.Open();
         }
 
@@ -92,12 +92,13 @@ namespace DomainShell
         }
     }
 
-    public abstract class SessionFoundationBase : ISession, IDisposable
+    public abstract class SessionFoundationBase<TDomainEvent> : ISession where TDomainEvent : class
     {
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
         private object _lockTran = new object();
+        private List<TDomainEvent> _allDomainEvents = new List<TDomainEvent>();
 
         public virtual IOpenScope Open()
         {
@@ -105,9 +106,6 @@ namespace DomainShell
             {
                 if (_openScope == null)
                 {
-                    DomainModelTracker.RevokeAll();
-                    DomainEventPublisher.Revoke();
-
                     BeginOpen();
 
                     _openScope = new OpenScope(() =>
@@ -149,21 +147,25 @@ namespace DomainShell
                         {
                             try
                             {
+                                TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                                _allDomainEvents.AddRange(domainEvents);
+
+                                if (completed)
+                                {                                    
+                                    PublishDomainEventInTran(domainEvents);                               
+                                }
+                                
+                                EndTran(completed);
+
                                 if (completed)
                                 {
-                                    Save();
-                                    PublishDomainEventInTran();
-                                    EndTran(completed);
-                                    PublishDomainEventOutTran();                                    
-                                }
-                                else
-                                {
-                                    EndTran(completed);
+                                    PublishDomainEventOutTran(_allDomainEvents.ToArray());
                                 }
                             }
                             finally
                             {
                                 _tranScope = null;
+                                _allDomainEvents.Clear();
                                 openScope.Dispose();
                             }
                         }
@@ -175,40 +177,43 @@ namespace DomainShell
                 return new TranScope(
                 completed => 
                 {
+                    TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                    _allDomainEvents.AddRange(domainEvents);
+
                     if (completed)
-                    {
-                        Save();
-                        PublishDomainEventInTran();
+                    { 
+                        PublishDomainEventInTran(domainEvents);
                     }
                 });
+            }
+        }        
+
+        protected virtual IEnumerable<TDomainEvent> GetDomainEvents()
+        {
+            foreach (var trackPack in DomainModelTracker.GetAll())
+            {
+                if (trackPack.Model is IDomainEventAuthor<TDomainEvent> domainEvenAuthor)
+                {
+                    foreach (var domainEvent in domainEvenAuthor.GetEvents()) yield return domainEvent;
+                    domainEvenAuthor.ClearEvents();
+                }
             }
         }
 
         public virtual void OnException(Exception exception)
-        {   
-            PublishDomainEventOnException(exception);
+        {
+            TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+            _allDomainEvents.AddRange(domainEvents);
+
+            OnException(exception, _allDomainEvents.ToArray());
         }
 
-        protected abstract void BeginOpen();        
+        protected abstract void BeginOpen();
         protected abstract void BeginTran();
-        protected abstract void Save();
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
-        public abstract void Dispose();
-
-        protected virtual void PublishDomainEventInTran()
-        {
-            DomainEventPublisher.PublishInTran();
-        }
-
-        protected virtual void PublishDomainEventOutTran()
-        {
-            DomainEventPublisher.PublishOutTran();
-        }
-
-        protected virtual void PublishDomainEventOnException(Exception exception)
-        {
-            DomainEventPublisher.PublishOnException(exception);
-        }
+        protected abstract void OnException(Exception exception, TDomainEvent[] domainEvents);
+        protected abstract void PublishDomainEventInTran(TDomainEvent[] domainEvents);
+        protected abstract void PublishDomainEventOutTran(TDomainEvent[] domainEvents);        
     }   
 }
