@@ -11,9 +11,9 @@ namespace DomainShell
     {
         private static Func<ISession> _getSession;
 
-        public static void Startup(Func<ISession> getSessionPerThread)
+        public static void Startup(Func<ISession> getSession)
         {
-            _getSession = getSessionPerThread;            
+            _getSession = getSession;            
         }
 
         private static void Validate()

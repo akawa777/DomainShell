@@ -14,9 +14,9 @@ namespace DomainShell
     {
         private static Func<IDomainModelTracker> _getDomainModelTracker;
 
-        public static void Startup(Func<IDomainModelTracker> getDomainModelTrackerPerThread)
+        public static void Startup(Func<IDomainModelTracker> getDomainModelTracker)
         {
-            _getDomainModelTracker = getDomainModelTrackerPerThread;
+            _getDomainModelTracker = getDomainModelTracker;
         }
 
         private static void Validate()
