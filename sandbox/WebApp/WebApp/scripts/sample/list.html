@@ -1,0 +1,18 @@
+<div>
+    <table class="table">
+        <thead>
+            <th></th>
+            <th>id</th>
+            <th>name</th>
+        </thead>
+        <tbody>
+            <tr v-for="item in dataContext.items">
+                <td>
+                    <button class="btn btn-default" v-on:click="edit(item)">edit</button>
+                </td>
+                <td>{{item.id}}</td>
+                <td>{{item.name}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
