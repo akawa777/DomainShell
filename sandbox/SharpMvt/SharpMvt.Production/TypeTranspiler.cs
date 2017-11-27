@@ -10,36 +10,26 @@ namespace SharpMvt.Production
     {
         Type Type { get; set; }
         string TsType { get; }
-        bool IsService { get; }
+        bool IsTsService { get; }
         bool IsTsClass { get; }
         bool IsArray { get; }
-        string TsElementType { get; }
-    }
-
-    public interface ITsTypeTranspiler<TTsTypeInfo> where TTsTypeInfo : ITsTypeInfo
-    {
-        string GetTsCode(TTsTypeInfo tsTypeInfo, Dictionary<Type, ITsTypeInfo> tsTypeInfoMap);
+        ITsTypeInfo TsElementTypeInfo { get; set; }
     }
 
     public interface ITsTypeTranspiler : ITsTypeInfo
     {        
-        string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap);
+        string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap);
     }  
-
-    public interface ITsArrayTypeTranspler : ITsTypeTranspiler
-    {
-        void SetElementTypeTranspiler(ITsTypeTranspiler elementTypeTranspiler);
-    }
 
     public class VoidTranspiler : ITsTypeTranspiler
     {
         public Type Type { get; set;} = typeof(void);
         public string TsType => "void";
-        public bool IsService => false;
+        public bool IsTsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public ITsTypeInfo TsElementTypeInfo { get { throw new InvalidOperationException($"{TsType} is not array."); } set { throw new InvalidOperationException($"{TsType} is not array."); } }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             return string.Empty;
         }
@@ -49,11 +39,11 @@ namespace SharpMvt.Production
     {
         public Type Type { get; set;}
         public string TsType => "number";
-        public bool IsService => false;
+        public bool IsTsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public ITsTypeInfo TsElementTypeInfo { get { throw new InvalidOperationException($"{TsType} is not array."); } set { throw new InvalidOperationException($"{TsType} is not array."); } }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             return string.Empty;
         }
@@ -63,53 +53,33 @@ namespace SharpMvt.Production
     {
         public Type Type { get; set;} =  typeof(bool);
         public string TsType => "boolean";
-        public bool IsService => false;
+        public bool IsTsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
-        {
-            return string.Empty;
-        }
+        public ITsTypeInfo TsElementTypeInfo { get { throw new InvalidOperationException($"{TsType} is not array."); } set { throw new InvalidOperationException($"{TsType} is not array."); } }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap) => string.Empty;
     }
 
     public class StringTranspiler : ITsTypeTranspiler
     {
         public Type Type { get; set;} =  typeof(string);
         public string TsType => "string";
-        public bool IsService => false;
+        public bool IsTsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
-        {
-            return string.Empty;
-        }
+        public ITsTypeInfo TsElementTypeInfo { get { throw new InvalidOperationException($"{TsType} is not array."); } set { throw new InvalidOperationException($"{TsType} is not array."); } }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap) => string.Empty;
     }
 
-    public class ArrayTranspiler : ITsArrayTypeTranspler
+    public class ArrayTranspiler : ITsTypeTranspiler
     {
-        private ITsTypeTranspiler _elementTypeTranspiler;
         public Type Type { get; set; } 
-        public string TsType => $"{_elementTypeTranspiler.TsType}[]";
-
-        public bool IsService => false;
+        public string TsType => $"{TsElementTypeInfo.TsType}[]";
+        public bool IsTsService => false;
         public bool IsTsClass => true;
         public bool IsArray => true;
-        public string TsElementType
-        {
-            get {                
-                return _elementTypeTranspiler.TsType;
-            }
-        }
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
-        {
-            return string.Empty;
-        }
-        public void SetElementTypeTranspiler(ITsTypeTranspiler elementTypeTranspiler)
-        {
-            _elementTypeTranspiler = elementTypeTranspiler;
-        }
+        public ITsTypeInfo TsElementTypeInfo { get; set; }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap) => string.Empty;
     }
 
     public class TsProperty
@@ -119,30 +89,30 @@ namespace SharpMvt.Production
         public string TsType { get; set; }
         public bool IsArray { get; set; }
         public string TsElementType { get; set;}
-        public string GetConstructorCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap, string self, string arg)
+        public string GetConstructorCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             string code;
 
             if (IsArray)
             {
                 code = $@"
-                    {self}.{TsName} ={TsElementType}[]
+                    this.{TsName} = []
                     
-                    {arg}.{TsName}.forEach(x =>{{
+                    arguments[0].{TsName}.forEach(x =>{{
                         var item = new {TsElementType}(x)
-                        {self}.{TsName}.push(item);
+                        this.{TsName}.push(item)
                     }})";
             }
             else
             {
                 code = $@"
-                        {self}.{TsName} = {arg}.{TsName}";
+                    this.{TsName} = arguments[0].{TsName}";
             }
 
             return code;
         }
 
-        public string GetPropertyCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string GetPropertyCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             string code = $@"
                     {TsName}: {TsType}";            
@@ -167,26 +137,25 @@ namespace SharpMvt.Production
             } 
         }
         public string TsType => Type.GetCamelCaseFullName();
-        public bool IsService => false;
+        public bool IsTsService => false;
         public bool IsTsClass => true;
         public bool IsArray => false;
-        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public ITsTypeInfo TsElementTypeInfo { get { throw new InvalidOperationException($"{TsType} is not array."); } set { throw new InvalidOperationException($"{TsType} is not array."); } }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
-            TsProperty[] tsProperties = GetTsProperties(tsTypeTranspilerMap);
+            TsProperty[] tsProperties = GetTsProperties(tsTypeInfoMap);
             StringBuilder constructorCode = new StringBuilder();
             StringBuilder propertiesCode = new StringBuilder();
 
             foreach (var tsProperty in tsProperties)
             {
-                constructorCode.Append(tsProperty.GetConstructorCode(tsTypeTranspilerMap, "self", Type.Name.ToFirstLower()));
-                propertiesCode.Append(tsProperty.GetPropertyCode(tsTypeTranspilerMap));
+                constructorCode.Append(tsProperty.GetConstructorCode(tsTypeInfoMap));
+                propertiesCode.Append(tsProperty.GetPropertyCode(tsTypeInfoMap));
             }
 
             string code = $@"
                 {TsType} {{
-                    constructor({TsType} {Type.Name.ToFirstLower()}) {{
-                        var self = this
+                    constructor({TsType} {Type.Name.ToFirstLower()}) {{                        
                         {constructorCode}
                     }}
 
@@ -197,7 +166,7 @@ namespace SharpMvt.Production
             return code;
         }
         
-        private TsProperty[] GetTsProperties(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        private TsProperty[] GetTsProperties(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             PropertyInfo[] propertyInfos = Type.GetProperties();
 
@@ -205,7 +174,7 @@ namespace SharpMvt.Production
 
             foreach (var propertyInfo in propertyInfos)
             {
-                ITsTypeTranspiler tsTypeTranspiler = tsTypeTranspilerMap.Get(propertyInfo.PropertyType);
+                ITsTypeInfo tsTypeInfo = tsTypeInfoMap.Get(propertyInfo.PropertyType);
 
                 tsProperties.Add(new TsProperty{ PropertyInfo = propertyInfo });
             }
@@ -220,18 +189,16 @@ namespace SharpMvt.Production
         public string TsName => MethodBase.Name.ToFirstLower();
         public bool Ignore => Attribute.GetCustomAttribute(MethodBase, typeof(IgnoreAttrubute)) != null;
         public int ValidParameterCount => MethodBase.GetParameters().Where(x => Attribute.GetCustomAttribute(x, typeof(InjectAttribute)) == null).Count();
-        public string GetTsSignatureCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string GetTsSignatureCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
-            ParameterInfo[] parameterInfos = MethodBase.GetParameters();
+            ParameterInfo[] parameterInfos = MethodBase.GetParameterInfos();
             StringBuilder signatureCode = new StringBuilder();            
 
             int index = 0;
             foreach (var parameterInfo in parameterInfos)
             {
-                if (Attribute.GetCustomAttribute(parameterInfo, typeof(InjectAttribute)) != null) continue;
-
                 if (index > 0) signatureCode.Append(", ");
-                signatureCode.Append($"{tsTypeTranspilerMap.Get(parameterInfo.ParameterType).TsType} {parameterInfo.Name.ToFirstLower()}");
+                signatureCode.Append($"{tsTypeInfoMap.Get(parameterInfo.ParameterType).TsType} {parameterInfo.Name.ToFirstLower()}");
                 index++;
             }
 
@@ -239,17 +206,17 @@ namespace SharpMvt.Production
             return code;
         }
 
-        public string GetTsReturnType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string GetTsReturnType(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             if (MethodBase is MethodInfo methodInfo)
             {
                 if (Attribute.GetCustomAttribute(methodInfo, typeof(LinkAttrubute)) == null)
                 {
-                    return tsTypeTranspilerMap.Get(methodInfo.ReturnType).TsType;
+                    return tsTypeInfoMap.Get(methodInfo.ReturnType).TsType;
                 }
                 else
                 {
-                    return tsTypeTranspilerMap.Get(typeof(string)).TsType;
+                    return tsTypeInfoMap.Get(typeof(string)).TsType;
                 }
             } 
             else
@@ -258,31 +225,31 @@ namespace SharpMvt.Production
             } 
         }
 
-        public string GetJudgmentCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string GetJudgmentCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
-            ParameterInfo[] parameterInfos = MethodBase.GetParameters();
+            ParameterInfo[] parameterInfos = MethodBase.GetParameterInfos();
             StringBuilder judgmentCode = new StringBuilder();
+
+            if (parameterInfos.Length == 0) return "true";
 
             int index = 0;
             foreach (var parameterInfo in parameterInfos)
-            {       
-                if (Attribute.GetCustomAttribute(parameterInfo, typeof(InjectAttribute)) != null) continue;
-
+            {   
                 if (index > 0) judgmentCode.Append(" && ");
 
-                ITsTypeTranspiler tsTypeTranspiler = tsTypeTranspilerMap.Get(parameterInfo.ParameterType);
+                ITsTypeInfo tsTypeInfo = tsTypeInfoMap.Get(parameterInfo.ParameterType);
 
-                if (tsTypeTranspiler.IsArray)
+                if (tsTypeInfo.IsArray)
                 {
                     judgmentCode.Append($"arguments[{index}] instanceof Array");                    
                 }
-                else if (tsTypeTranspiler.IsTsClass)
+                else if (tsTypeInfo.IsTsClass)
                 {
-                    judgmentCode.Append($"arguments[{index}] instanceof {tsTypeTranspiler.TsType}");
+                    judgmentCode.Append($"arguments[{index}] instanceof {tsTypeInfo.TsType}");
                 }
                 else
                 {
-                    judgmentCode.Append($"typeof(arguments[{index}]) === '{tsTypeTranspiler.TsType}'");
+                    judgmentCode.Append($"typeof(arguments[{index}]) === '{tsTypeInfo.TsType}'");
                 }
                 
                 index++;
@@ -293,17 +260,15 @@ namespace SharpMvt.Production
             return code;
         }
 
-        public string GetSettingParameterCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap, string parameters)
+        public string GetSettingParameterCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap, string parameters)
         {
-            ParameterInfo[] parameterInfos = MethodBase.GetParameters();            
+            ParameterInfo[] parameterInfos = MethodBase.GetParameterInfos();            
             StringBuilder settingParameterCode = new StringBuilder();
 
             int index = 0;
             foreach (var parameterInfo in parameterInfos)
-            {       
-                if (Attribute.GetCustomAttribute(parameterInfo, typeof(InjectAttribute)) != null) continue;                
-
-                ITsTypeTranspiler tsTypeTranspiler = tsTypeTranspilerMap.Get(parameterInfo.ParameterType);
+            {   
+                ITsTypeInfo tsTypeInfo = tsTypeInfoMap.Get(parameterInfo.ParameterType);
 
                 settingParameterCode.Append($@"
                     {parameters}.{parameterInfo.Name.ToFirstLower()} = arguments[{index}]
@@ -320,20 +285,33 @@ namespace SharpMvt.Production
 
     public class ServiceTranspiler : ITsTypeTranspiler
     {
-        public Type Type { get; set; }
+        private Type _type;
+        public Type Type 
+        { 
+            get 
+            { 
+                return _type; 
+            } 
+            set 
+            { 
+                if (_type.GetConstructor(new Type[0]) == null) throw new InvalidOperationException($"{_type} not has no parameter constructor");
+                _type = value;
+            } 
+        }
         public string TsType => Type.GetCamelCaseFullName();
-        public bool IsService => true;
+        public bool IsTsService => true;
         public bool IsTsClass => true;
         public bool IsArray => false;
-        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
-        public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public ITsTypeInfo TsElementTypeInfo { get { throw new InvalidOperationException($"{TsType} is not array."); } set { throw new InvalidOperationException($"{TsType} is not array."); } }
+        public string GetTsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
-            string constructorCode = GetConstructorCode(tsTypeTranspilerMap);
-            string methodsCode = GetMethodsCode(tsTypeTranspilerMap);
+            string constructorCode = GetConstructorCode(tsTypeInfoMap);
+            string methodsCode = GetMethodsCode(tsTypeInfoMap);
 
             string code = $@"
                 {TsType} {{
                     {constructorCode}
+                    private constructorHash:string
                     private constructorParameters = {{}}
                     {methodsCode}
                 }}
@@ -342,25 +320,30 @@ namespace SharpMvt.Production
             return code;
         }
 
-        public string GetConstructorCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string GetConstructorCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
-            TsMethod[] tsMethods = GetTsMethods(tsTypeTranspilerMap, Type.GetConstructors());
+            TsMethod[] tsMethods = GetTsMethods(tsTypeInfoMap, Type.GetConstructors());
             StringBuilder signatureCodes = new StringBuilder();
             StringBuilder settingParameterCode = new StringBuilder();
-           
-            foreach (var tsMethod in tsMethods)
-            {
-                signatureCodes.Append($@"
-                constructor({tsMethod.GetTsSignatureCode(tsTypeTranspilerMap)})");
 
+            foreach (var tsMethod in tsMethods.OrderBy(x => x.ValidParameterCount))
+            {                
+                signatureCodes.Append($@"
+                constructor({tsMethod.GetTsSignatureCode(tsTypeInfoMap)})");
+            }
+           
+            foreach (var tsMethod in tsMethods.OrderByDescending(x => x.ValidParameterCount))
+            {                
                 settingParameterCode.Append($@"
-                else if({tsMethod.GetJudgmentCode(tsTypeTranspilerMap)}) {{
-                    {tsMethod.GetSettingParameterCode(tsTypeTranspilerMap, "self.constructorParameters")}
-                }}");
+                        else if({tsMethod.GetJudgmentCode(tsTypeInfoMap)}) {{
+                        valid = true
+                        this.constructorHash = {tsMethod.MethodBase.GetMethodHash()}
+                        {tsMethod.GetSettingParameterCode(tsTypeInfoMap, "this.constructorParameters")}
+                    }}");
             }
 
             StringBuilder lastSignatureCode = new StringBuilder();
-            for (int i = 0; i < tsMethods.Last().ValidParameterCount; i++)
+            for (int i = 0; i < tsMethods.Max(x => x.ValidParameterCount); i++)
             {
                 if (i > 0) lastSignatureCode.Append(", ");
                 lastSignatureCode.Append($"param{i}?: any");
@@ -370,44 +353,46 @@ namespace SharpMvt.Production
                 constructor({lastSignatureCode})");            
 
             string code = $@"
-                {signatureCodes} {{
-                    var self = this;
+                {signatureCodes} {{    
+                    var valid: boolean = false                
                     if (false) {{
-
-                    {settingParameterCode}
-                    }} else {{
-
-                    }}
+                    }} {settingParameterCode}
+                    if(!valid) throw new Error('constructor parameter is invalid.')
                 }}
             ";
 
             return code;
         }
 
-        public string GetMethodsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string GetMethodsCode(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
             var groups = Type.GetMethods().GroupBy(x => x.Name);
             StringBuilder code = new StringBuilder();
 
             foreach (var group in groups)
             {
-                TsMethod[] tsMethods = GetTsMethods(tsTypeTranspilerMap, group.ToArray());
+                TsMethod[] tsMethods = GetTsMethods(tsTypeInfoMap, group.ToArray());
                 StringBuilder signatureCodes = new StringBuilder();
                 StringBuilder settingParameterCode = new StringBuilder();
             
-                foreach (var tsMethod in tsMethods)
+                foreach (var tsMethod in tsMethods.OrderBy(x => x.ValidParameterCount))
                 {
                     signatureCodes.Append($@"
-                    {group.Key}({tsMethod.GetTsSignatureCode(tsTypeTranspilerMap)}): {tsMethod.GetTsReturnType(tsTypeTranspilerMap)}");
+                    {group.Key}({tsMethod.GetTsSignatureCode(tsTypeInfoMap)}): {tsMethod.GetTsReturnType(tsTypeInfoMap)}");
+                }
 
+                foreach (var tsMethod in tsMethods.OrderByDescending(x => x.ValidParameterCount))
+                {
                     settingParameterCode.Append($@"
-                    else if({tsMethod.GetJudgmentCode(tsTypeTranspilerMap)}) {{
-                        {tsMethod.GetSettingParameterCode(tsTypeTranspilerMap, "methodParameters")}
+                        else if({tsMethod.GetJudgmentCode(tsTypeInfoMap)}) {{
+                        valid = true
+                        methodHash = {tsMethod.MethodBase.GetMethodHash()}
+                        {tsMethod.GetSettingParameterCode(tsTypeInfoMap, "methodParameters")}
                     }}");
                 }
 
                 StringBuilder lastSignatureCode = new StringBuilder();
-                for (int i = 0; i < tsMethods.Last().ValidParameterCount; i++)
+                for (int i = 0; i < tsMethods.Max(x => x.ValidParameterCount); i++)
                 {
                     if (i > 0) lastSignatureCode.Append(", ");
                     lastSignatureCode.Append($"param{i}?: any");
@@ -417,22 +402,20 @@ namespace SharpMvt.Production
                     {group.Key}({lastSignatureCode})");            
 
                 code.Append($@"
-                    {signatureCodes} {{
-                        var self = this;
+                    {signatureCodes} {{     
+                        var valid: boolean = false
+                        var methodHash:string = ''  
+                        var methodParameters = {{}}                 
                         if (false) {{
-
-                        {settingParameterCode}
-                        }} else {{
-
-                        }}
+                        }} {settingParameterCode}
+                        if(!valid) throw new Error('constructor parameter is invalid.')
                     }}");
-
             }
             
             return code.ToString();
         }
 
-        private TsMethod[] GetTsMethods(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap, MethodBase[] methodBases)
+        private TsMethod[] GetTsMethods(Dictionary<Type, ITsTypeInfo> tsTypeInfoMap, MethodBase[] methodBases)
         {
             List<TsMethod> tsMethods = new List<TsMethod>();
 

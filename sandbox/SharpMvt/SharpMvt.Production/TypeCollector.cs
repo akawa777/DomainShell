@@ -27,5 +27,20 @@ namespace SharpMvt.Production
 
             return types.ToArray();
         }
+
+        
+
+        public void aa(Type[] types, Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
+        {
+            foreach (Type type in types)
+            {
+                if (tsTypeInfoMap.ContainsKey(type)) continue;
+
+                if (type.IsTsService())
+                {
+                    Type[] parameterTypes = type.GetParameterTypes();
+                }
+            }
+        }
     }
 }

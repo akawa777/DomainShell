@@ -30,14 +30,14 @@ namespace SharpMvt.Production
             return $"{firstWord}{restWord}";
         }
 
-        public static ITsTypeTranspiler Get(this Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap, Type type)
+        public static ITsTypeInfo Get(this Dictionary<Type, ITsTypeInfo> tsTypeInfoMap, Type type)
         {
-            if (!tsTypeTranspilerMap.ContainsKey(type))
+            if (!tsTypeInfoMap.ContainsKey(type))
             {
-                throw new InvalidOperationException($"{type.GetFullName()} TypeTranspiler is not found.");
+                throw new InvalidOperationException($"{type.GetFullName()} ITsTypeInfo is not found.");
             }
 
-            return tsTypeTranspilerMap[type];
+            return tsTypeInfoMap[type];
         }
 
         public static bool IsArray(this Type type, out Type elementType)
@@ -54,6 +54,18 @@ namespace SharpMvt.Production
             }
 
             return elementType != null;
+        }
+
+        public static string GetSignatureHash(this MethodBase methodBase)
+        {
+            List<string> types = new List<string>();
+
+            foreach (var parameter in methodBase.GetParameters())
+            {
+                types.Add(parameter.ParameterType.ToString());
+            }
+
+            return string.Join(",", types);
         }
     }
 }
