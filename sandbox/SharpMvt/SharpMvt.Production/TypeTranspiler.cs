@@ -6,25 +6,39 @@ using System.Text;
 
 namespace SharpMvt.Production
 {
-    public interface ITsTypeTranspiler
+    public interface ITsTypeInfo
     {
-        Type Type { get;}
-        string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap);
+        Type Type { get; set; }
+        string TsType { get; }
         bool IsService { get; }
         bool IsTsClass { get; }
         bool IsArray { get; }
-        string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap);
+        string TsElementType { get; }
+    }
+
+    public interface ITsTypeTranspiler<TTsTypeInfo> where TTsTypeInfo : ITsTypeInfo
+    {
+        string GetTsCode(TTsTypeInfo tsTypeInfo, Dictionary<Type, ITsTypeInfo> tsTypeInfoMap);
+    }
+
+    public interface ITsTypeTranspiler : ITsTypeInfo
+    {        
         string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap);
-    }   
+    }  
+
+    public interface ITsArrayTypeTranspler : ITsTypeTranspiler
+    {
+        void SetElementTypeTranspiler(ITsTypeTranspiler elementTypeTranspiler);
+    }
 
     public class VoidTranspiler : ITsTypeTranspiler
     {
-        public Type Type => typeof(void);
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => "void";
+        public Type Type { get; set;} = typeof(void);
+        public string TsType => "void";
         public bool IsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => throw new InvalidOperationException($"{GetTsType(tsTypeTranspilerMap)} is not array.");
+        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             return string.Empty;
@@ -33,17 +47,12 @@ namespace SharpMvt.Production
 
     public class NumberTranspiler : ITsTypeTranspiler
     {
-        public NumberTranspiler(Type type)
-        {
-            Type = type;
-        }        
-
-        public Type Type { get; }
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => "number";
+        public Type Type { get; set;}
+        public string TsType => "number";
         public bool IsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => throw new InvalidOperationException($"{GetTsType(tsTypeTranspilerMap)} is not array.");
+        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             return string.Empty;
@@ -52,12 +61,12 @@ namespace SharpMvt.Production
 
     public class BoolTranspiler : ITsTypeTranspiler
     {
-        public Type Type => typeof(bool);
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => "boolean";
+        public Type Type { get; set;} =  typeof(bool);
+        public string TsType => "boolean";
         public bool IsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => throw new InvalidOperationException($"{GetTsType(tsTypeTranspilerMap)} is not array.");
+        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             return string.Empty;
@@ -66,47 +75,40 @@ namespace SharpMvt.Production
 
     public class StringTranspiler : ITsTypeTranspiler
     {
-        public Type Type => typeof(string);
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => "string";
+        public Type Type { get; set;} =  typeof(string);
+        public string TsType => "string";
         public bool IsService => false;
         public bool IsTsClass => false;
         public bool IsArray => false;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => throw new InvalidOperationException($"{GetTsType(tsTypeTranspilerMap)} is not array.");
+        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             return string.Empty;
         }
     }
 
-    public class ArrayTranspiler : ITsTypeTranspiler
+    public class ArrayTranspiler : ITsArrayTypeTranspler
     {
-        public ArrayTranspiler(Type type, Type elementType)
-        {
-            Type = type;
-            _elementType = elementType;            
-        }    
-
-        private Type _elementType;
-        public Type Type { get; }
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
-        {            
-            ITsTypeTranspiler tsTypeTranspiler = tsTypeTranspilerMap.Get(_elementType);
-            string tsElementType = tsTypeTranspilerMap[_elementType].GetTsType(tsTypeTranspilerMap);
-
-            return $"{tsElementType}[]";
-        }
+        private ITsTypeTranspiler _elementTypeTranspiler;
+        public Type Type { get; set; } 
+        public string TsType => $"{_elementTypeTranspiler.TsType}[]";
 
         public bool IsService => false;
         public bool IsTsClass => true;
         public bool IsArray => true;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
+        public string TsElementType
         {
-            ITsTypeTranspiler tsTypeTranspiler = tsTypeTranspilerMap.Get(_elementType);
-            return tsTypeTranspilerMap[_elementType].GetTsType(tsTypeTranspilerMap);
+            get {                
+                return _elementTypeTranspiler.TsType;
+            }
         }
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             return string.Empty;
+        }
+        public void SetElementTypeTranspiler(ITsTypeTranspiler elementTypeTranspiler)
+        {
+            _elementTypeTranspiler = elementTypeTranspiler;
         }
     }
 
@@ -114,18 +116,20 @@ namespace SharpMvt.Production
     {
         public PropertyInfo PropertyInfo { get; set; }
         public string TsName => PropertyInfo.Name.ToFirstLower();
-        public ITsTypeTranspiler TsTypeTranspiler { get; set; }
+        public string TsType { get; set; }
+        public bool IsArray { get; set; }
+        public string TsElementType { get; set;}
         public string GetConstructorCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap, string self, string arg)
         {
             string code;
 
-            if (TsTypeTranspiler.IsArray)
+            if (IsArray)
             {
                 code = $@"
-                    {self}.{TsName} = new Array<{TsTypeTranspiler.GetTsElementType(tsTypeTranspilerMap)}>()
+                    {self}.{TsName} ={TsElementType}[]
                     
                     {arg}.{TsName}.forEach(x =>{{
-                        var item = new {TsTypeTranspiler.GetTsElementType(tsTypeTranspilerMap)}(x)
+                        var item = new {TsElementType}(x)
                         {self}.{TsName}.push(item);
                     }})";
             }
@@ -141,7 +145,7 @@ namespace SharpMvt.Production
         public string GetPropertyCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             string code = $@"
-                    {TsName}: {TsTypeTranspiler.GetTsType(tsTypeTranspilerMap)}";            
+                    {TsName}: {TsType}";            
 
             return code;
         }
@@ -149,19 +153,24 @@ namespace SharpMvt.Production
 
     public class ClassParameterTranspiler : ITsTypeTranspiler
     {
-        public ClassParameterTranspiler(Type type)
-        {
-            if (type.GetConstructor(new Type[0]) == null) throw new InvalidOperationException($"{type} not has no parameter constructor");
-
-            Type = type;
-        }    
-
-        public Type Type { get; }
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => Type.GetCamelCaseFullName();
+        private Type _type;
+        public Type Type 
+        { 
+            get 
+            { 
+                return _type; 
+            } 
+            set 
+            { 
+                if (_type.GetConstructor(new Type[0]) == null) throw new InvalidOperationException($"{_type} not has no parameter constructor");
+                _type = value;
+            } 
+        }
+        public string TsType => Type.GetCamelCaseFullName();
         public bool IsService => false;
         public bool IsTsClass => true;
         public bool IsArray => false;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => throw new InvalidOperationException($"{GetTsType(tsTypeTranspilerMap)} is not array.");
+        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             TsProperty[] tsProperties = GetTsProperties(tsTypeTranspilerMap);
@@ -175,8 +184,8 @@ namespace SharpMvt.Production
             }
 
             string code = $@"
-                {GetTsType(tsTypeTranspilerMap)} {{
-                    constructor({GetTsType(tsTypeTranspilerMap)} {Type.Name.ToFirstLower()}) {{
+                {TsType} {{
+                    constructor({TsType} {Type.Name.ToFirstLower()}) {{
                         var self = this
                         {constructorCode}
                     }}
@@ -198,7 +207,7 @@ namespace SharpMvt.Production
             {
                 ITsTypeTranspiler tsTypeTranspiler = tsTypeTranspilerMap.Get(propertyInfo.PropertyType);
 
-                tsProperties.Add(new TsProperty{ PropertyInfo = propertyInfo, TsTypeTranspiler = tsTypeTranspiler });
+                tsProperties.Add(new TsProperty{ PropertyInfo = propertyInfo });
             }
 
             return tsProperties.ToArray();
@@ -222,7 +231,7 @@ namespace SharpMvt.Production
                 if (Attribute.GetCustomAttribute(parameterInfo, typeof(InjectAttribute)) != null) continue;
 
                 if (index > 0) signatureCode.Append(", ");
-                signatureCode.Append($"{tsTypeTranspilerMap.Get(parameterInfo.ParameterType).GetTsType(tsTypeTranspilerMap)} {parameterInfo.Name.ToFirstLower()}");
+                signatureCode.Append($"{tsTypeTranspilerMap.Get(parameterInfo.ParameterType).TsType} {parameterInfo.Name.ToFirstLower()}");
                 index++;
             }
 
@@ -236,11 +245,11 @@ namespace SharpMvt.Production
             {
                 if (Attribute.GetCustomAttribute(methodInfo, typeof(LinkAttrubute)) == null)
                 {
-                    return tsTypeTranspilerMap.Get(methodInfo.ReturnType).GetTsType(tsTypeTranspilerMap);
+                    return tsTypeTranspilerMap.Get(methodInfo.ReturnType).TsType;
                 }
                 else
                 {
-                    return tsTypeTranspilerMap.Get(typeof(string)).GetTsType(tsTypeTranspilerMap);
+                    return tsTypeTranspilerMap.Get(typeof(string)).TsType;
                 }
             } 
             else
@@ -269,11 +278,11 @@ namespace SharpMvt.Production
                 }
                 else if (tsTypeTranspiler.IsTsClass)
                 {
-                    judgmentCode.Append($"arguments[{index}] instanceof {tsTypeTranspiler.GetTsType(tsTypeTranspilerMap)}");
+                    judgmentCode.Append($"arguments[{index}] instanceof {tsTypeTranspiler.TsType}");
                 }
                 else
                 {
-                    judgmentCode.Append($"typeof(arguments[{index}]) === '{tsTypeTranspiler.GetTsType(tsTypeTranspilerMap)}'");
+                    judgmentCode.Append($"typeof(arguments[{index}]) === '{tsTypeTranspiler.TsType}'");
                 }
                 
                 index++;
@@ -311,24 +320,19 @@ namespace SharpMvt.Production
 
     public class ServiceTranspiler : ITsTypeTranspiler
     {
-        public ServiceTranspiler(Type type)
-        {
-            Type = type;
-        }    
-
-        public Type Type { get; }
-        public string GetTsType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => Type.GetCamelCaseFullName();
+        public Type Type { get; set; }
+        public string TsType => Type.GetCamelCaseFullName();
         public bool IsService => true;
         public bool IsTsClass => true;
         public bool IsArray => false;
-        public string GetTsElementType(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap) => throw new InvalidOperationException($"{GetTsType(tsTypeTranspilerMap)} is not array.");
+        public string TsElementType => throw new InvalidOperationException($"{TsType} is not array.");
         public string GetTsCode(Dictionary<Type, ITsTypeTranspiler> tsTypeTranspilerMap)
         {
             string constructorCode = GetConstructorCode(tsTypeTranspilerMap);
             string methodsCode = GetMethodsCode(tsTypeTranspilerMap);
 
             string code = $@"
-                {GetTsType(tsTypeTranspilerMap)} {{
+                {TsType} {{
                     {constructorCode}
                     private constructorParameters = {{}}
                     {methodsCode}
