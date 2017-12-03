@@ -56,8 +56,12 @@ namespace SharpMvt.Production
             return elementType != null;
         }
 
-        public static string GetSignatureHash(this MethodBase methodBase)
+        public static string GetMethodHash(this MethodBase methodBase)
         {
+            HashAttrubute hashAttribute = Attribute.GetCustomAttribute(methodBase, typeof(HashAttrubute)) as HashAttrubute;
+
+            if (hashAttribute != null) return hashAttribute.Hash;
+
             List<string> types = new List<string>();
 
             foreach (var parameter in methodBase.GetParameters())
@@ -67,5 +71,47 @@ namespace SharpMvt.Production
 
             return string.Join(",", types);
         }
-    }
+
+        public static ParameterInfo[] GetParametersWithoutInject(this MethodBase methodBase)
+        {
+            return methodBase.GetParameters().Where(x => Attribute.GetCustomAttribute(x, typeof(InjectAttribute)) == null).ToArray();
+        }
+
+        public static ConstructorInfo[] GetConstructorsWithoutIgnore(this Type type)
+        {
+            return type.GetConstructors().Where(x => Attribute.GetCustomAttribute(x, typeof(IgnoreAttrubute)) != null).ToArray();
+        }
+
+        public static MethodInfo[] GetMethodsWithoutIgnore(this Type type)
+        {
+            return type.GetMethods().Where(x => Attribute.GetCustomAttribute(x, typeof(IgnoreAttrubute)) != null).ToArray();
+        }
+
+        public static bool IsTsService(this Type type)
+        {
+            ServiceAttribute serviceAttribute = Attribute.GetCustomAttribute(type, typeof(ServiceAttribute)) as ServiceAttribute;            
+            return serviceAttribute != null;
+        }
+
+        public static bool IsTsClass(this Type type) => type != typeof(string) && type.IsClass;
+
+        public static bool IsTsArray(this Type type, out Type elementType) => type.IsArray(out elementType);
+
+        public static Type[] GetParameterTypes(this Type type)
+        {
+            List<Type> types = new List<Type>();
+            
+            foreach (var constructorInfo in type.GetConstructorsWithoutIgnore())
+            {
+                types.AddRange(constructorInfo.GetParametersWithoutInject().Select(x => x.ParameterType));
+            }
+
+            foreach (var methodInfo in type.GetMethodsWithoutIgnore())
+            {
+                types.AddRange(methodInfo.GetParametersWithoutInject().Select(x => x.ParameterType));
+            }
+
+            return types.ToArray();
+        }
+     }
 }

@@ -32,13 +32,26 @@ namespace SharpMvt.Production
 
         public void aa(Type[] types, Dictionary<Type, ITsTypeInfo> tsTypeInfoMap)
         {
-            foreach (Type type in types)
+            foreach (var type in types)
             {
                 if (tsTypeInfoMap.ContainsKey(type)) continue;
 
                 if (type.IsTsService())
                 {
                     Type[] parameterTypes = type.GetParameterTypes();
+
+                    foreach(var parameterType in parameterTypes)
+                    {
+                        if (tsTypeInfoMap.ContainsKey(type)) continue;
+
+                        if (parameterType.IsArray(out Type elementType))
+                        {
+                            if (!tsTypeInfoMap.ContainsKey(type))
+                            {
+                                
+                            }
+                        }
+                    }
                 }
             }
         }
