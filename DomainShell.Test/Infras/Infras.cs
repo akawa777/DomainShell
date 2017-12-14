@@ -21,10 +21,12 @@ namespace DomainShell.Test.Infras
         }
 
         private ModelState GetModelState(TAggregateRoot model)
-        {
-            if (!model.Dirty.Is()) return ModelState.Unchanged;
-            if (model.Dirty.Is() && model.Deleted) return ModelState.Deleted;
-            if (model.Dirty.Is() && model.RecordVersion == 0) return ModelState.Added;
+        {        
+            bool dirty = model.Dirty.Verify();
+
+            if (!dirty) return ModelState.Unchanged;
+            if (model.Deleted) return ModelState.Deleted;
+            if (model.RecordVersion == 0) return ModelState.Added;
             else return ModelState.Modified;
         }
 

@@ -29,7 +29,7 @@ namespace DomainShell
             return JsonConvert.SerializeObject(domainMpdel, Formatting.Indented);            
         }
         
-        public bool Is()
+        public bool Verify()
         {
             if (_domainModel == null) return false;
 
