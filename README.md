@@ -1,2 +1,2 @@
 # DomainShell
-Domain Model helper libraries.
+Domain Model helper libraries.(currently under development)
