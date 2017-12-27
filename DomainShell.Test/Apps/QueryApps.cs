@@ -9,14 +9,32 @@ namespace DomainShell.Test.Apps
 {   
     public class OrderQueryApp
     {
-        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository)
+        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository, IMonthlyOrderRepository monthlyOrderRepository)
         {            
             _orderRepository = orderRepository;
             _orderCanceledRepository = orderCanceledRepository;
+             _monthlyOrderRepository = monthlyOrderRepository;
         }
         
         private IOrderRepository _orderRepository;
         private IOrderCanceledRepository _orderCanceledRepository;
+        private IMonthlyOrderRepository _monthlyOrderRepository;
+
+        public object[] GetMonthlyOrderBudgets()
+        {
+            try
+            {
+                using(Session.Open())
+                {
+                    return _monthlyOrderRepository.GetMonthlyOrderBudgets();
+                }
+            }
+            catch(Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
 
         public OrderDto Find(int orderId)
         {

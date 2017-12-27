@@ -20,6 +20,7 @@ namespace DomainShell.Test.Domains.Order
     public interface IMonthlyOrderRepository
     {        
         MonthlyOrderModel GetMonthlyByUserId(string userId, DateTime orderDate, int excludeOrderId = 0);        
+        object[] GetMonthlyOrderBudgets();
     }
 
     public interface ICreditCardService

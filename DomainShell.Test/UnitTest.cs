@@ -13,6 +13,18 @@ namespace DomainShell.Test
     public class UnitTest
     {
         [TestMethod]
+        public void TestGetMontlyOrders()
+        {
+            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
+
+            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
+            {
+                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+                var items = queryApp.GetMonthlyOrderBudgets();
+            }
+        }
+
+        [TestMethod]
         public void TestMethod()
         {
             Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);

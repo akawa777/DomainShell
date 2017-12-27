@@ -3,10 +3,39 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 using System.Data;
+using System.Data.Common;
 using DomainShell.Test.Domains;
+using DomainShell.Test.Domains.Entites;
+using Microsoft.EntityFrameworkCore;
 
 namespace DomainShell.Test.Infras
 {
+    public class DatabaseContext : DbContext
+    {
+        public DatabaseContext(IDbConnection connection)
+        {
+            _connection = connection as DbConnection;
+        }
+        public DatabaseContext(IConnection connection)
+        {
+            _connection = connection.CreateCommand().Connection as DbConnection;
+        }
+        private DbConnection _connection;
+         public DbSet<LoginUser> LoginUser { get; set; }
+        // public DbSet<OrderForm> OrderForms { get; set; }
+        // public DbSet<OrderFormCanceled> OrderFormCanceleds { get; set;}
+        public DbSet<MonthlyOrderBudget> MonthlyOrderBudget { get; set;}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {   
+            optionsBuilder.UseSqlite(_connection);
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LoginUser>().HasKey(x => x.UserId);            
+            modelBuilder.Entity<MonthlyOrderBudget>().HasKey(x => x.UserId);            
+        }
+    }
+
     public abstract class WriteRepository<TAggregateRoot> : IWriteRepository<TAggregateRoot> where TAggregateRoot : class, IAggregateRoot
     {
         public void Save(TAggregateRoot model)

@@ -545,5 +545,21 @@ namespace DomainShell.Test.Infras.Order
                 return monthlyOrderProxyObject.Material;
             }
         }
+
+        public object[] GetMonthlyOrderBudgets()
+        {
+            using (var dbContext = new DatabaseContext(_connection))
+            {
+                return dbContext.MonthlyOrderBudget.Join(
+                    dbContext.LoginUser, 
+                    x => x.UserId, 
+                    x => x.UserId,
+                    (main, join) => new 
+                    {
+                        UserId = main.UserId,
+                        UserName = join.UserName
+                    }).ToArray();
+            }
+        }
     }
 }

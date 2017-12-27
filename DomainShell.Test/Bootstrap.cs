@@ -106,13 +106,13 @@ namespace DomainShell.Test
         private class DatabaseContext : DbContext
         {
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            {
+            {                
                 if (System.IO.File.Exists(_databaseFile))
                 {
                     System.IO.File.Delete(_databaseFile);
                 }
 
-                optionsBuilder.UseSqlite($"Filename={_databaseFile}");
+                optionsBuilder.UseSqlite($"Filename={_databaseFile}");                
             }
         }
 
