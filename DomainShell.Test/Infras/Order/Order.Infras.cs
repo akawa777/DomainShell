@@ -557,7 +557,8 @@ namespace DomainShell.Test.Infras.Order
                     (main, join) => new 
                     {
                         UserId = main.UserId,
-                        UserName = join.UserName
+                        UserName = join.UserName,
+                        Budget = main.Budget
                     }).ToArray();
             }
         }
