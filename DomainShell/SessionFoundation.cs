@@ -114,7 +114,14 @@ namespace DomainShell
                         {
                             try
                             {
+                                TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                                _allDomainEvents.AddRange(domainEvents);
+
+                                PublishDomainEventInSession(domainEvents);
+
                                 EndOpen();
+
+                                PublishDomainEventOutSession(_allDomainEvents.ToArray());
                             }
                             finally
                             {
@@ -126,7 +133,13 @@ namespace DomainShell
                     return _openScope;
                 }
 
-                return new OpenScope(() => { });
+                return new OpenScope(() => 
+                {
+                    TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                    _allDomainEvents.AddRange(domainEvents);
+
+                    PublishDomainEventInSession(domainEvents);
+                });
             }
         }
 
@@ -151,21 +164,20 @@ namespace DomainShell
                                 _allDomainEvents.AddRange(domainEvents);
 
                                 if (completed)
-                                {                                    
-                                    PublishDomainEventInTran(domainEvents);                               
+                                {
+                                    PublishDomainEventInSession(domainEvents);                               
                                 }
                                 
                                 EndTran(completed);
 
                                 if (completed)
                                 {
-                                    PublishDomainEventOutTran(_allDomainEvents.ToArray());
+                                    PublishDomainEventOutSession(_allDomainEvents.ToArray());
                                 }
                             }
                             finally
                             {
-                                _tranScope = null;
-                                _allDomainEvents.Clear();
+                                _tranScope = null;                                
                                 openScope.Dispose();
                             }
                         }
@@ -181,8 +193,8 @@ namespace DomainShell
                     _allDomainEvents.AddRange(domainEvents);
 
                     if (completed)
-                    { 
-                        PublishDomainEventInTran(domainEvents);
+                    {
+                        PublishDomainEventInSession(domainEvents);
                     }
                 });
             }
@@ -194,8 +206,8 @@ namespace DomainShell
             {
                 if (trackPack.Model is IDomainEventAuthor<TDomainEvent> domainEvenAuthor)
                 {
-                    foreach (var domainEvent in domainEvenAuthor.GetEvents()) yield return domainEvent;
-                    domainEvenAuthor.ClearEvents();
+                    foreach (var domainEvent in domainEvenAuthor.GetDomainEvents()) yield return domainEvent;
+                    domainEvenAuthor.ClearDomainEvents();
                 }
             }
         }
@@ -213,7 +225,7 @@ namespace DomainShell
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
         protected abstract void OnException(Exception exception, TDomainEvent[] domainEvents);
-        protected abstract void PublishDomainEventInTran(TDomainEvent[] domainEvents);
-        protected abstract void PublishDomainEventOutTran(TDomainEvent[] domainEvents);        
+        protected abstract void PublishDomainEventInSession(TDomainEvent[] domainEvents);
+        protected abstract void PublishDomainEventOutSession(TDomainEvent[] domainEvents);        
     }   
 }

@@ -34,23 +34,29 @@ namespace DomainShell.Test
                 OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
                 OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
 
-                OrderDto order = new OrderDto();
-                order.OrderDate = "20171001";
-                order.ProductName = "product1";
-                order.Price = 999;
-                order.UserId = "user1";
+                OrderDto order = new OrderDto
+                {
+                    OrderDate = "20171001",
+                    ProductName = "product1",
+                    Price = 999,
+                    UserId = "user1"
+                };
 
-                OrderDto order2 = new OrderDto();
-                order2.OrderDate = "20171001";
-                order2.ProductName = "product2";
-                order2.Price = 999;
-                order2.UserId = "user1";
+                OrderDto order2 = new OrderDto
+                {
+                    OrderDate = "20171001",
+                    ProductName = "product2",
+                    Price = 999,
+                    UserId = "user1"
+                };
 
-                OrderDto order3 = new OrderDto();
-                order3.OrderDate = "20171001";
-                order3.ProductName = "product1";
-                order3.Price = 999;
-                order3.UserId = "user2";
+                OrderDto order3 = new OrderDto
+                {
+                    OrderDate = "20171001",
+                    ProductName = "product1",
+                    Price = 999,
+                    UserId = "user2"
+                };
 
                 commandApp.Register(order);
                 commandApp.Register(order2);
@@ -67,6 +73,31 @@ namespace DomainShell.Test
                 commandApp.Cancel(order);                
 
                 order = queryApp.GetCanceledByOrderId(order.OrderId);
+            }
+        }
+
+        [TestMethod]
+        public void TestMethod2()
+        {
+            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
+
+            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
+            {
+                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
+                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+
+                OrderDto order = new OrderDto
+                {
+                    OrderDate = "20171001",
+                    ProductName = "product1",
+                    Price = 999,
+                    UserId = "user1"
+                };
+
+                commandApp.Register(order);
+                order = queryApp.GetLastByUser("user1");
+
+                order = queryApp.FindWithSendMail(order.OrderId);
             }
         }
 

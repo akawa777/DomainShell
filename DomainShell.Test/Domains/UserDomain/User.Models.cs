@@ -3,13 +3,13 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 
-namespace DomainShell.Test.Domains.User
+namespace DomainShell.Test.Domains.UserDomain
 {
     public class UserModel : IAggregateRoot
     {
         protected UserModel()
         {
-            
+            DomainModelTracker.Mark(this);
         }
 
         public string UserId { get; private set; }
@@ -34,8 +34,10 @@ namespace DomainShell.Test.Domains.User
         {
             if (userModel == null || userModel.RecordVersion == 0) throw new ArgumentException("userModel is invalid.");
 
-            UserValue userValue = new UserValue();
-            userValue.UserId = userModel.UserId;
+            UserValue userValue = new UserValue
+            {
+                UserId = userModel.UserId
+            };
 
             return userValue;
         }

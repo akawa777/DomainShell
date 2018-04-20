@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Data;
 
-namespace DomainShell.Test.Domains.User
+namespace DomainShell.Test.Domains.UserDomain
 {
     public interface IUserRepository
     {

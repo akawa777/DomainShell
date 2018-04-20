@@ -11,18 +11,26 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Test.Domains
 {
-    public class DomainModelProxyFactoryFoundation : DomainModelProxyFactoryFoundationBase
+    public class DomainModelFactoryFoundation : DomainModelFactoryFoundationBase
     {
-        public DomainModelProxyFactoryFoundation(Container container)
+        public DomainModelFactoryFoundation(Container container)
         {
             _container = container;
         }
 
         private Container _container;
 
-        protected override T CreateProxy<T>()
+        protected override bool TryCreate<T>(out T model)
         {
-            return _container.GetInstance<T>();
+            model = default(T);
+
+            var producer = _container.GetRegistration(typeof(T));
+
+            if (producer == null) return false;
+
+            model = _container.GetInstance<T>();
+
+            return true;
         }
     }
 
@@ -36,15 +44,16 @@ namespace DomainShell.Test.Domains
 
     public class SessionFoundation : SessionFoundationBase<IDomainEvent>, IConnection
     {
-        public SessionFoundation(Container container, IDbConnection connection, IMediator mediator)
+        //public SessionFoundation(Container container, IDbConnection connection, IMediator mediator)
+        public SessionFoundation(Container container, IDbConnection connection)
         {
             _container = container;
             _connection = connection;
-            _mediator = mediator;
+            //_mediator = mediator;
         }
 
         private Container _container;
-        private IMediator _mediator;
+        //private IMediator _mediator;
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
@@ -82,23 +91,31 @@ namespace DomainShell.Test.Domains
             {
                 if (domainEvent.Mode.Format == DomainEventFormat.AtException)
                 {
-                    var task = _mediator.Publish(domainEvent);
+                    //var task = _mediator.Publish(domainEvent);
+
+                    object handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
+
+                    handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
                 }
             }
         }
 
-        protected override void PublishDomainEventInTran(IDomainEvent[] domainEvents)
+        protected override void PublishDomainEventInSession(IDomainEvent[] domainEvents)
         {
             foreach (var domainEvent in domainEvents)
             {
-                if (domainEvent.Mode.Format == DomainEventFormat.InTran)
+                if (domainEvent.Mode.Format == DomainEventFormat.InSession)
                 {
-                    var task = _mediator.Publish(domainEvent);
+                    //var task = _mediator.Publish(domainEvent);
+
+                    object handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
+
+                    handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
                 }
             }
         }
 
-        protected override void PublishDomainEventOutTran(IDomainEvent[] domainEvents)
+        protected override void PublishDomainEventOutSession(IDomainEvent[] domainEvents)
         {
             Task.Run(() => 
             { 
@@ -106,9 +123,13 @@ namespace DomainShell.Test.Domains
                 {
                      foreach (var domainEvent in domainEvents)
                      {
-                         if (domainEvent.Mode.Format == DomainEventFormat.OutTran)
+                         if (domainEvent.Mode.Format == DomainEventFormat.OutSession)
                          {
-                            _mediator.Publish(domainEvent);
+                            //_mediator.Publish(domainEvent);
+
+                            object handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
+
+                            handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
                         }
                      }
                 }
@@ -151,14 +172,14 @@ namespace DomainShell.Test.Domains
             return _exception;
         }
 
-        public static DomainEventMode InTran()
+        public static DomainEventMode InSession()
         {
-            return new DomainEventMode(DomainEventFormat.InTran);
+            return new DomainEventMode(DomainEventFormat.InSession);
         }
 
-        public static DomainEventMode OutTran()
+        public static DomainEventMode OutSession()
         {
-            return new DomainEventMode(DomainEventFormat.OutTran);
+            return new DomainEventMode(DomainEventFormat.OutSession);
         }
 
         public static DomainEventMode AtException()
@@ -169,17 +190,17 @@ namespace DomainShell.Test.Domains
 
     public enum DomainEventFormat
     {
-        InTran,
-        OutTran,
+        InSession,
+        OutSession,
         AtException         
     }
 
-    public interface IDomainEvent : INotification
+    public interface IDomainEvent //: INotification
     {
         DomainEventMode Mode { get; }
     }    
 
-    public interface IDomainEventHandler<TDomainEvent> : INotificationHandler<TDomainEvent> where TDomainEvent : IDomainEvent
+    public interface IDomainEventHandler<TDomainEvent> //: INotificationHandler<TDomainEvent> where TDomainEvent : IDomainEvent
     {
         
     }

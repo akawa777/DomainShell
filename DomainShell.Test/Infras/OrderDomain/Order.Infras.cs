@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Data;
 using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.User;
-using DomainShell.Test.Domains.Order;
+using DomainShell.Test.Domains.UserDomain;
+using DomainShell.Test.Domains.OrderDomain;
 
-namespace DomainShell.Test.Infras.Order
+namespace DomainShell.Test.Infras.OrderInfra
 {    
-    public class OrderRepository : WriteRepository<OrderModel>, IOrderRepository
+    public class OrderRepository : WriteRepository<Order>, IOrderRepository
     {
         public OrderRepository(IConnection connection)
         {
@@ -18,7 +18,7 @@ namespace DomainShell.Test.Infras.Order
 
         private IConnection _connection;         
 
-        public OrderModel Find(int orderId, bool throwError = false)
+        public Order Find(int orderId, bool throwError = false)
         {  
             var readSet = Read(command =>
             {
@@ -31,14 +31,14 @@ namespace DomainShell.Test.Infras.Order
                 return (whereSqls, orderSqls);
             });
 
-            OrderModel orderModel = Map(readSet).FirstOrDefault();
+            Order Order = Map(readSet).FirstOrDefault();
 
-            if (throwError && orderModel == null) throw new Exception("order not found.");
+            if (throwError && Order == null) throw new Exception("order not found.");
 
-            return orderModel;
+            return Order;
         }
 
-        public OrderModel GetLastByUser(string userId)
+        public Order GetLastByUser(string userId)
         {
             var readSet = Read(command =>
             {
@@ -51,9 +51,9 @@ namespace DomainShell.Test.Infras.Order
                 return (whereSqls, orderSqls);
             });
 
-            OrderModel orderModel = Map(readSet).FirstOrDefault();
+            Order Order = Map(readSet).FirstOrDefault();
 
-            return orderModel;
+            return Order;
         }
 
         private void SetWhereByOrderId(int orderId, IDbCommand command, List<string> whereSqls)
@@ -92,12 +92,12 @@ namespace DomainShell.Test.Infras.Order
         {
             IDbCommand command = _connection.CreateCommand();
 
-            var filter = createFilter(command);
+            var (whereSql, orderSqls) = createFilter(command);
 
             string sql = $@"
                 select * from OrderForm
-                where {string.Join($" {andOr} ", filter.whereSql)}
-                order by {string.Join(", ", filter.orderSqls)}
+                where {string.Join($" {andOr} ", whereSql)}
+                order by {string.Join(", ", orderSqls)}
             ";            
 
             command.CommandText = sql;
@@ -105,7 +105,7 @@ namespace DomainShell.Test.Infras.Order
             return (command.ExecuteReader(), command);
         }
 
-        private IEnumerable<OrderModel> Map((IDataReader reader, IDbCommand command) readSet)
+        private IEnumerable<Order> Map((IDataReader reader, IDbCommand command) readSet)
         {
             try
             {
@@ -118,8 +118,18 @@ namespace DomainShell.Test.Infras.Order
                     userProxyObject
                         .Set(m => m.UserId, (m, p) => reader[p.Name]);
 
-                    var orderModel = DomainModelProxyFactory.Create<OrderModel>();
-                    var orderProxyObject = new ProxyObject<OrderModel>(orderModel);
+                    ProxyObject<Order> orderProxyObject;                    
+
+                    if (reader["OrderId"].ToString() != "1")
+                    {
+                        var order = Order.NewOrder();
+                        orderProxyObject = new ProxyObject<Order>(order);
+                    }
+                    else
+                    {
+                        var order = SpecialOrder.NewSpecialOrder();
+                        orderProxyObject = new ProxyObject<Order>(order);
+                    }
 
                     orderProxyObject
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
@@ -141,9 +151,9 @@ namespace DomainShell.Test.Infras.Order
             }
         }
 
-        private IEnumerable<(string Name, object Value)> GetParameters(OrderModel orderModel)
+        private IEnumerable<(string Name, object Value)> GetParameters(Order Order)
         {
-            OrderModel x = orderModel;
+            Order x = Order;
 
             yield return (nameof(x.User.UserId), x.User.UserId);
             yield return (nameof(x.OrderDate), x.OrderDate.Value.ToString("yyyyMMdd"));
@@ -156,28 +166,28 @@ namespace DomainShell.Test.Infras.Order
         
         private void AddParams(IDbCommand command, IEnumerable<(string Name, object Value)> parameters)
         {
-            foreach (var parameter in parameters)
+            foreach (var (Name, Value) in parameters)
             {
                 var sqlParam = command.CreateParameter();
-                sqlParam.ParameterName = $"@{parameter.Name}";
-                sqlParam.Value = parameter.Value;
+                sqlParam.ParameterName = $"@{Name}";
+                sqlParam.Value = Value;
 
                 command.Parameters.Add(sqlParam);
             }
         }
 
-        private void AddOrderIdParam(IDbCommand command, OrderModel orderModel)
+        private void AddOrderIdParam(IDbCommand command, Order Order)
         {
             var sqlParam = command.CreateParameter();
-            sqlParam.ParameterName = $"@{nameof(orderModel.OrderId)}";
-            sqlParam.Value = orderModel.OrderId;
+            sqlParam.ParameterName = $"@{nameof(Order.OrderId)}";
+            sqlParam.Value = Order.OrderId;
 
             command.Parameters.Add(sqlParam);
         }
 
-        protected override void Insert(OrderModel orderModel)
+        protected override void Insert(Order Order)
         {
-            IEnumerable<(string Name, object Value)> parameters = GetParameters(orderModel);
+            IEnumerable<(string Name, object Value)> parameters = GetParameters(Order);
 
             string sql = $@"
                 insert into OrderForm (
@@ -195,68 +205,48 @@ namespace DomainShell.Test.Infras.Order
             }
         }
 
-        protected override void Update(OrderModel orderModel)
+        protected override void Update(Order Order)
         {
-            IEnumerable<(string Name, object Value)> parameters = GetParameters(orderModel);
+            IEnumerable<(string Name, object Value)> parameters = GetParameters(Order);
 
             string sql = $@"
                 update OrderForm 
                 set
                     {string.Join(", ", parameters.Select(x => $"{x.Name} = @{x.Name}"))}
                 where
-                    OrderId = @{nameof(orderModel.OrderId)}
+                    OrderId = @{nameof(Order.OrderId)}
             ";
 
             using(IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
                 AddParams(command, parameters);
-                AddOrderIdParam(command, orderModel);
+                AddOrderIdParam(command, Order);
                 command.ExecuteNonQuery();
             }
         }
 
-        protected override void Delete(OrderModel orderModel)
+        protected override void Delete(Order Order)
         {
             string sql = $@"
                 delete from OrderForm                 
                 where
-                    OrderId = @{nameof(orderModel.OrderId)}
+                    OrderId = @{nameof(Order.OrderId)}
             ";
 
             using(IDbCommand command = _connection.CreateCommand())
             {
                 command.CommandText = sql;
-                AddOrderIdParam(command, orderModel);
+                AddOrderIdParam(command, Order);
                 command.ExecuteNonQuery();
             }
         }
 
-        protected override OrderModel Find(OrderModel model)
+        protected override Order Find(Order model)
         {
             return Find(model.OrderId);
         }
-    }    
-
-    public class OrderModelProxy : OrderModel, IDomainModelProxy
-    {
-        public override void Complete(ICreditCardService creditCardService, string creditCardCode)
-        {
-            OutputLog($"{nameof(OrderModelProxy)} {nameof(Complete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-            
-            base.Complete(creditCardService, creditCardCode);
-        }
-
-        public Type GetImplementType()
-        {
-            return typeof(OrderModel);
-        }
-
-        private void OutputLog(string message)
-        {
-            Console.WriteLine($"logging {message}");
-        }
-    }
+    }        
 
     public class OrderCanceledRepository : WriteRepository<OrderCanceledModel>, IOrderCanceledRepository
     {
@@ -310,12 +300,12 @@ namespace DomainShell.Test.Infras.Order
         {
             IDbCommand command = _connection.CreateCommand();
 
-            var filter = createFilter(command);
+            var (whereSql, orderSqls) = createFilter(command);
 
             string sql = $@"
                 select * from OrderFormCanceled
-                where {string.Join($" {andOr} ", filter.whereSql)}
-                order by {string.Join(", ", filter.orderSqls)}
+                where {string.Join($" {andOr} ", whereSql)}
+                order by {string.Join(", ", orderSqls)}
             ";
 
             command.CommandText = sql;
@@ -373,11 +363,11 @@ namespace DomainShell.Test.Infras.Order
 
         private void AddParams(IDbCommand command, IEnumerable<(string Name, object Value)> parameters)
         {
-            foreach (var parameter in parameters)
+            foreach (var (Name, Value) in parameters)
             {
                 var sqlParam = command.CreateParameter();
-                sqlParam.ParameterName = $"@{parameter.Name}";
-                sqlParam.Value = parameter.Value;
+                sqlParam.ParameterName = $"@{Name}";
+                sqlParam.Value = Value;
 
                 command.Parameters.Add(sqlParam);
             }
@@ -477,7 +467,7 @@ namespace DomainShell.Test.Infras.Order
 
         private IConnection _connection;
 
-        public MonthlyOrderModel GetMonthlyByUserId(string userId, DateTime orderDate, int excludeOrderId = 0)
+        public MonthlyOrder GetMonthlyByUserId(string userId, DateTime orderDate, int excludeOrderId = 0)
         {
             string yearMonth = orderDate.Year.ToString() + orderDate.Month.ToString().PadLeft(2, '0');
 
@@ -524,7 +514,7 @@ namespace DomainShell.Test.Infras.Order
 
                 command.Parameters.Add(sqlParam);
 
-                var monthlyOrderProxyObject = new ProxyObject<MonthlyOrderModel>();
+                var monthlyOrderProxyObject = new ProxyObject<MonthlyOrder>();
 
                 monthlyOrderProxyObject
                     .Set(m => m.UserId, (m, p) => userId)
@@ -556,9 +546,9 @@ namespace DomainShell.Test.Infras.Order
                     x => x.UserId,
                     (main, join) => new 
                     {
-                        UserId = main.UserId,
-                        UserName = join.UserName,
-                        Budget = main.Budget
+                         main.UserId,
+                         join.UserName,
+                         main.Budget
                     }).ToArray();
             }
         }

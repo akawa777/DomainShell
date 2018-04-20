@@ -2,22 +2,22 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
-using DomainShell.Test.Domains.User;
+using DomainShell.Test.Domains.UserDomain;
 
-namespace DomainShell.Test.Domains.Order
+namespace DomainShell.Test.Domains.OrderDomain
 {
-    public class OrderModel : IAggregateRoot, IDomainEventAuthor
+    public class Order : IAggregateRoot, IDomainEventAuthor
     {
-        public static OrderModel NewOrder()
+        public static Order NewOrder()
         {
-            OrderModel orderModel = DomainModelProxyFactory.Create<OrderModel>();
+            Order order = DomainModelFactory.Create<Order>();
             
-            return orderModel;
+            return order;
         }
 
-        protected OrderModel()
+        protected Order()
         {
-            
+            DomainModelTracker.Mark(this);
         }
 
         public int OrderId { get; private set; }
@@ -42,19 +42,19 @@ namespace DomainShell.Test.Domains.Order
 
         private List<IDomainEvent> _events = new List<IDomainEvent>();
         
-        public IEnumerable<IDomainEvent> GetEvents()
+        public IEnumerable<IDomainEvent> GetDomainEvents()
         {
             return _events;
         }
 
-        public void ClearEvents()
+        public void ClearDomainEvents()
         {
             _events.Clear();
         }
 
-        public void Register(IOrderBudgetCheckService orderBudgetCheckService)
+        public void Register(IOrderService orderService)
         {
-            ValidateWhenRegister(orderBudgetCheckService);
+            ValidateWhenRegister(orderService);
 
             Dirty = Dirty.Seal(this);
         }
@@ -70,31 +70,38 @@ namespace DomainShell.Test.Domains.Order
             Dirty = Dirty.Seal(this);
         }
 
-        public virtual void Complete(ICreditCardService creditCardService, string creditCardCode)
+        public virtual void Complete(IOrderService orderService, string creditCardCode)
         {
             CreditCardCode = creditCardCode;            
 
             ValidateWhenComplete();            
 
-            PayId = creditCardService.Pay(this);
+            PayId = orderService.Pay(this);
 
             AddCompletedEvents();
 
             Dirty = Dirty.Seal(this);
         }
 
-        public void SendCompletedMail(IMailService mailService)
+        public void SendCompletedMail(IOrderService orderService)
         {
-            mailService.Send(this);
+            orderService.SendMail(this);
 
             System.Threading.Thread.Sleep(5000);
         }
 
-        public void CancelCompleted(ICreditCardService creditCardService)
+        public void SendCompleteMail()
+        {
+            AddMailSendedEvents();
+
+            System.Threading.Thread.Sleep(5000);
+        }
+
+        public void CancelCompleted(IOrderService orderService)
         {
             ValidateWhenCancelCompleted();
 
-            creditCardService.Cancel(this);
+            orderService.Cancel(this);
 
             Dirty = Dirty.Seal(this);
         }
@@ -110,12 +117,17 @@ namespace DomainShell.Test.Domains.Order
             _events.Add(new OrderCompletedExceptionEvent { OrderId = OrderId });            
         }
 
-        private void ValidateWhenRegister(IOrderBudgetCheckService orderBudgetCheckService)
+        private void AddMailSendedEvents()
+        {
+            _events.Add(new OrderSendedMailEvent { OrderId = OrderId });
+        }
+
+        private void ValidateWhenRegister(IOrderService orderServicee)
         {            
             if (string.IsNullOrEmpty(ProductName)) throw new Exception("ProductName is required.");
             if (User == null) throw new Exception("User is required.");
             if (OrderDate == null) throw new Exception("OrderDate is required.");
-            if (orderBudgetCheckService.IsOverBudget(this)) throw new Exception("BudgetAmount is over.");
+            if (orderServicee.IsOverBudget(this)) throw new Exception("BudgetAmount is over.");
         }
 
         private void ValidateWhenComplete()
@@ -139,8 +151,10 @@ namespace DomainShell.Test.Domains.Order
     {
         public static OrderCanceledModel NewCanceled(int orderId)
         {
-            OrderCanceledModel orderCanceledModel = new OrderCanceledModel();
-            orderCanceledModel.OrderId = orderId;
+            OrderCanceledModel orderCanceledModel = new OrderCanceledModel
+            {
+                OrderId = orderId
+            };
 
             return orderCanceledModel;
         }
@@ -187,7 +201,7 @@ namespace DomainShell.Test.Domains.Order
 
     public class OrderCanceledEvent : IDomainEvent
     {
-        public DomainEventMode Mode => DomainEventMode.InTran();
+        public DomainEventMode Mode => DomainEventMode.InSession();
 
         public int OrderId { get; set; }
         public UserValue User { get; set; }
@@ -199,7 +213,7 @@ namespace DomainShell.Test.Domains.Order
 
     public class OrderCompletedEvent : IDomainEvent
     {
-        public DomainEventMode Mode => DomainEventMode.OutTran();
+        public DomainEventMode Mode => DomainEventMode.OutSession();
 
         public int OrderId { get; set; }
     }
@@ -211,11 +225,18 @@ namespace DomainShell.Test.Domains.Order
         public int OrderId { get; set; }
     }
 
-    public class MonthlyOrderModel
+    public class OrderSendedMailEvent : IDomainEvent
     {
-        protected MonthlyOrderModel()
-        {
+        public DomainEventMode Mode => DomainEventMode.InSession();
 
+        public int OrderId { get; set; }
+    }
+
+    public class MonthlyOrder
+    {
+        protected MonthlyOrder()
+        {
+            DomainModelTracker.Mark(this);
         }
 
         public string UserId { get; private set; }
@@ -225,5 +246,37 @@ namespace DomainShell.Test.Domains.Order
         public decimal TotalPrice { get; private set; }
         public decimal TotalOrderNo { get; private set; }
         public bool IsOverBudgetByIncludingPrice(decimal price) => Budget < TotalPrice + price;
+    }
+
+    public class SpecialOrder : Order
+    {
+        public static SpecialOrder NewSpecialOrder()
+        {
+            SpecialOrder order = DomainModelFactory.Create<SpecialOrder>();
+
+            return order;
+        }
+
+        protected SpecialOrder()
+        {
+            DomainModelTracker.Mark(this);
+        }
+
+        public override void Complete(IOrderService orderService, string creditCardCode)
+        {
+            OutputLog($"{nameof(SpecialOrder)} {nameof(Complete)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            base.Complete(orderService, creditCardCode);
+        }
+
+        public Type GetImplementType()
+        {
+            return typeof(Order);
+        }
+
+        private void OutputLog(string message)
+        {
+            Console.WriteLine($"logging {message}");
+        }
     }
 }

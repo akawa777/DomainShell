@@ -9,7 +9,7 @@ namespace DomainShell
 {
     public interface IDomainEventAuthor<TDomainEvent>
     {
-        IEnumerable<TDomainEvent> GetEvents();
-        void ClearEvents();
+        IEnumerable<TDomainEvent> GetDomainEvents();
+        void ClearDomainEvents();
     }
 }

@@ -4,13 +4,8 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace DomainShell
-{
-    public interface IDomainModelProxy
-    {
-        Type GetImplementType();
-    }
-    
-    public interface IDomainModelProxyFactory
+{   
+    public interface IDomainModelFactory
     {
         T Create<T>() where T : class;
     }

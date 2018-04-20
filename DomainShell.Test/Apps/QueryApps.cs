@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.Order;
+using DomainShell.Test.Domains.OrderDomain;
 
 namespace DomainShell.Test.Apps
 {   
@@ -42,12 +42,31 @@ namespace DomainShell.Test.Apps
             {
                 using(Session.Open())
                 {
-                    OrderModel orderModel = _orderRepository.Find(orderId);
+                    Order order = _orderRepository.Find(orderId);
 
-                    return Map(orderModel);
+                    return Map(order);
                 }
             }
             catch(Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
+
+        public OrderDto FindWithSendMail(int orderId)
+        {
+            try
+            {
+                using (Session.Open())
+                {
+                    Order order = _orderRepository.Find(orderId);
+                    order.SendCompleteMail();
+
+                    return Map(order);
+                }
+            }
+            catch (Exception e)
             {
                 Session.OnException(e);
                 throw e;
@@ -60,9 +79,9 @@ namespace DomainShell.Test.Apps
             {
                 using (Session.Open())
                 {
-                    OrderModel orderModel = _orderRepository.GetLastByUser(userId);
+                    Order order = _orderRepository.GetLastByUser(userId);
 
-                    return Map(orderModel);
+                    return Map(order);
                 }
             }
             catch (Exception e)
@@ -90,19 +109,21 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        private OrderDto Map(OrderModel model)
+        private OrderDto Map(Order model)
         {
             if (model == null) return null;
 
-            OrderDto dto = new OrderDto();
-            dto.OrderId = model.OrderId;
-            dto.UserId = model.User.UserId;
-            dto.OrderDate = model.OrderDate.Value.ToString("yyyyMMdd");
-            dto.ProductName = model.ProductName;
-            dto.Price = model.Price;
-            dto.CreditCardCode = model.CreditCardCode;
-            dto.PayId = model.PayId;            
-            dto.RecordVersion = model.RecordVersion;
+            OrderDto dto = new OrderDto
+            {
+                OrderId = model.OrderId,
+                UserId = model.User.UserId,
+                OrderDate = model.OrderDate.Value.ToString("yyyyMMdd"),
+                ProductName = model.ProductName,
+                Price = model.Price,
+                CreditCardCode = model.CreditCardCode,
+                PayId = model.PayId,
+                RecordVersion = model.RecordVersion
+            };
 
             return dto;
         }
@@ -111,14 +132,16 @@ namespace DomainShell.Test.Apps
         {
             if (model == null) return null;
 
-            OrderDto dto = new OrderDto();
-            dto.OrderId = model.OrderId;
-            dto.ProductName = model.ProductName;
-            dto.Price = model.Price;
-            dto.CreditCardCode = model.CreditCardCode;
-            dto.PayId = model.PayId;
-            dto.UserId = model.User.UserId;
-            dto.RecordVersion = model.RecordVersion;
+            OrderDto dto = new OrderDto
+            {
+                OrderId = model.OrderId,
+                ProductName = model.ProductName,
+                Price = model.Price,
+                CreditCardCode = model.CreditCardCode,
+                PayId = model.PayId,
+                UserId = model.User.UserId,
+                RecordVersion = model.RecordVersion
+            };
 
             return dto;
         }

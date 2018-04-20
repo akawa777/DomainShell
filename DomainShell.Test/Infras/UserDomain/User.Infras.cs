@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Data;
 using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.User;
+using DomainShell.Test.Domains.UserDomain;
 
-namespace DomainShell.Test.Infras.User
+namespace DomainShell.Test.Infras.UserInfra
 {    
     public class UserRepository : IUserRepository
     {

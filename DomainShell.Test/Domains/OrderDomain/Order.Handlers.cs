@@ -2,26 +2,25 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace DomainShell.Test.Domains.Order
+namespace DomainShell.Test.Domains.OrderDomain
 {
-    public class OrderEventHandler : IDomainEventHandler<OrderCompletedEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>
+    public class OrderEventHandler : IDomainEventHandler<OrderCompletedEvent>, IDomainEventHandler<OrderCompletedExceptionEvent>, IDomainEventHandler<OrderCanceledEvent>, IDomainEventHandler<OrderSendedMailEvent>
     {
         public OrderEventHandler(
             IOrderRepository orderRepository, 
-            ICreditCardService creditCardService, 
-            IMailService mailService,
+            IOrderService orderService,
             IOrderCanceledRepository orderCanceledRepository)
         {            
             _orderRepository = orderRepository;
-            _creditCardService = creditCardService;
-            _mailService = mailService;
+            _orderService = orderService;
             _orderCanceledRepository = orderCanceledRepository;
         }
         
-        private IOrderRepository _orderRepository;      
-        private ICreditCardService  _creditCardService;
-        private IMailService _mailService;
+        private IOrderRepository _orderRepository;
+        private IOrderService _orderService;
         private IOrderCanceledRepository _orderCanceledRepository;
 
         public void Handle(OrderCompletedEvent domainEvent)
@@ -32,9 +31,9 @@ namespace DomainShell.Test.Domains.Order
             {
                 using(Session.Open())
                 {
-                    OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
+                    Order order = _orderRepository.Find(domainEvent.OrderId);
 
-                    orderModel.SendCompletedMail(_mailService);
+                    order.SendCompletedMail(_orderService);
                 }
             }
             catch(Exception e)
@@ -53,11 +52,11 @@ namespace DomainShell.Test.Domains.Order
             {
                 using(var tran = Session.Tran())
                 {
-                    OrderModel orderModel = _orderRepository.Find(domainEvent.OrderId);
+                    Order order = _orderRepository.Find(domainEvent.OrderId);
 
-                    orderModel.CancelCompleted(_creditCardService);
+                    order.CancelCompleted(_orderService);
 
-                    _orderRepository.Save(orderModel);
+                    _orderRepository.Save(order);
 
                     tran.Complete();
                 }
@@ -87,6 +86,22 @@ namespace DomainShell.Test.Domains.Order
 
                     tran.Complete();
                 }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }
+        }
+
+        public void Handle(OrderSendedMailEvent domainEvent)
+        {
+            Console.WriteLine($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderSendedMailEvent)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            try
+            {
+                Order order = _orderRepository.Find(domainEvent.OrderId);
+                order.SendCompletedMail(_orderService);
             }
             catch (Exception e)
             {

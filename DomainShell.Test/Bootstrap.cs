@@ -10,10 +10,10 @@ using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using DomainShell.Test.Apps;
 using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.User;
-using DomainShell.Test.Domains.Order;
-using DomainShell.Test.Infras.User;
-using DomainShell.Test.Infras.Order;
+using DomainShell.Test.Domains.UserDomain;
+using DomainShell.Test.Domains.OrderDomain;
+using DomainShell.Test.Infras.UserInfra;
+using DomainShell.Test.Infras.OrderInfra;
 using MediatR;
 using System.Reflection;
 
@@ -52,41 +52,36 @@ namespace DomainShell.Test
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
 
             // start up for DomainShell >>
-            container.Register<IDomainModelProxyFactory, DomainModelProxyFactoryFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainModelFactory, DomainModelFactoryFoundation>(Lifestyle.Scoped);
             container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);       
-            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped); 
+            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
 
-            DomainModelProxyFactory.Startup(container.GetInstance<IDomainModelProxyFactory>);            
+            DomainModelFactory.Startup(container.GetInstance<IDomainModelFactory>);            
             DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);                        
-            Session.Startup(container.GetInstance<ISession>);   
+            Session.Startup(container.GetInstance<ISession>);
             // <<
 
             // MediatR >>                        
-            container.RegisterSingleton<IMediator, Mediator>();
-            container.RegisterCollection(typeof(INotificationHandler<>), Assembly.GetExecutingAssembly());
-            container.RegisterCollection(typeof(IAsyncNotificationHandler<>), Assembly.GetExecutingAssembly());
-            container.RegisterCollection(typeof(ICancellableAsyncNotificationHandler<>), Assembly.GetExecutingAssembly());
-            container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
-            container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
-            // <<
-                        
-            container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
-            container.Register<IConnection, SessionFoundation>(Lifestyle.Scoped);            
+            //container.RegisterSingleton<IMediator, Mediator>();
+            //container.RegisterCollection(typeof(INotificationHandler<>), Assembly.GetExecutingAssembly());            
+            //container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
+            //container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
+            // <<            
 
-            container.Register<OrderModel, OrderModelProxy>(Lifestyle.Transient);
+            container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
+            container.Register<IConnection, SessionFoundation>(Lifestyle.Scoped);                        
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped); 
             container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
             container.Register<IMonthlyOrderRepository, MonthlyOrderRepository>(Lifestyle.Scoped);
 
-            container.Register<IOrderBudgetCheckService, OrderBudgetCheckService>(Lifestyle.Scoped);
-            container.Register<ICreditCardService, CreditCardService>(Lifestyle.Scoped);
-            container.Register<IMailService, MailService>(Lifestyle.Scoped);
+            container.Register<IOrderService, OrderService>(Lifestyle.Scoped);            
 
-            //container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            //container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            //container.Register<INotificationHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderSendedMailEvent>, OrderEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);                      
@@ -130,10 +125,11 @@ namespace DomainShell.Test
 
         private string GetConnectionString()
         {
-            SqliteConnectionStringBuilder builder = new SqliteConnectionStringBuilder();
-
-            builder.DataSource = _databaseFile;
-            builder.Mode = SqliteOpenMode.ReadWrite;
+            SqliteConnectionStringBuilder builder = new SqliteConnectionStringBuilder
+            {
+                DataSource = _databaseFile,
+                Mode = SqliteOpenMode.ReadWrite
+            };
 
             return builder.ConnectionString;
         }

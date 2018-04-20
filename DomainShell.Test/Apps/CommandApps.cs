@@ -3,8 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.User;
-using DomainShell.Test.Domains.Order;
+using DomainShell.Test.Domains.UserDomain;
+using DomainShell.Test.Domains.OrderDomain;
 
 namespace DomainShell.Test.Apps
 {
@@ -12,19 +12,16 @@ namespace DomainShell.Test.Apps
     {
         public OrderCommandApp(
             IOrderRepository orderRepository,
-            IOrderBudgetCheckService orderBudgetCheckService,
-            ICreditCardService creditCardService,
+            IOrderService orderService,            
             IUserRepository userRepository)
         {            
             _orderRepository = orderRepository;
-            _orderBudgetCheckService = orderBudgetCheckService;
-            _creditCardService = creditCardService;
+            _orderService = orderService;            
             _userRepository = userRepository;
         }
 
         private IOrderRepository _orderRepository;
-        private IOrderBudgetCheckService _orderBudgetCheckService;
-        private ICreditCardService _creditCardService;
+        private IOrderService _orderService;        
         private IUserRepository _userRepository;
 
         public void Register(OrderDto orderDto)
@@ -35,16 +32,16 @@ namespace DomainShell.Test.Apps
             {
                 using(var tran = Session.Tran())
                 {
-                    OrderModel orderModel;
+                    Order order;
 
-                    if (orderDto.OrderId < 1) orderModel = OrderModel.NewOrder();
-                    else orderModel = _orderRepository.Find(orderDto.OrderId, true);
+                    if (orderDto.OrderId < 1) order = Order.NewOrder();
+                    else order = _orderRepository.Find(orderDto.OrderId, true);
 
-                    Map(orderDto, orderModel);
+                    Map(orderDto, order);
 
-                    orderModel.Register(_orderBudgetCheckService);                    
+                    order.Register(_orderService);                    
 
-                    _orderRepository.Save(orderModel);
+                    _orderRepository.Save(order);
 
                     tran.Complete();
                 }
@@ -64,12 +61,12 @@ namespace DomainShell.Test.Apps
             {
                 using(var tran = Session.Tran())
                 {
-                    OrderModel orderModel = _orderRepository.Find(orderDto.OrderId, true);
-                    Map(orderDto, orderModel);
+                    Order order = _orderRepository.Find(orderDto.OrderId, true);
+                    Map(orderDto, order);
 
-                    orderModel.Complete(_creditCardService, creditCardCode);
+                    order.Complete(_orderService, creditCardCode);
 
-                    _orderRepository.Save(orderModel);
+                    _orderRepository.Save(order);
 
                     tran.Complete();
                 }
@@ -89,12 +86,12 @@ namespace DomainShell.Test.Apps
             {
                 using (var tran = Session.Tran())
                 {
-                    OrderModel orderModel = _orderRepository.Find(orderDto.OrderId, true);
-                    Map(orderDto, orderModel);
+                    Order order = _orderRepository.Find(orderDto.OrderId, true);
+                    Map(orderDto, order);
 
-                    orderModel.Cancel();
+                    order.Cancel();
 
-                    _orderRepository.Save(orderModel);
+                    _orderRepository.Save(order);
 
                     tran.Complete();
                 }
@@ -106,7 +103,7 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        private void Map(OrderDto dto, OrderModel model)
+        private void Map(OrderDto dto, Order model)
         {
             model.User = UserValue.Create(_userRepository.Find(dto.UserId, true));
             model.OrderDate = DateTime.ParseExact(dto.OrderDate, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);

@@ -16,8 +16,6 @@ namespace DomainShell
             {
                 _domainModel = domainModel;
                 _serializedData = SerializeData(_domainModel);
-
-                DomainModelTracker.Mark(domainModel);
             }
         }
 
