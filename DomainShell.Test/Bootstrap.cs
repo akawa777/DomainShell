@@ -14,7 +14,6 @@ using DomainShell.Test.Domains.UserDomain;
 using DomainShell.Test.Domains.OrderDomain;
 using DomainShell.Test.Infras.UserInfra;
 using DomainShell.Test.Infras.OrderInfra;
-using MediatR;
 using System.Reflection;
 
 namespace DomainShell.Test
@@ -25,11 +24,10 @@ namespace DomainShell.Test
 
         public enum DatabaseType
         {
-            Sqlite,
-            SqlServer
+            Sqlite
         }
 
-        private static DatabaseType _databaseType = DatabaseType.SqlServer;
+        private static DatabaseType _databaseType = DatabaseType.Sqlite;
         private static DatabaseProvider _databaseProvider = null;
 
         public static void StartUp(DatabaseType databaseType)
@@ -42,8 +40,7 @@ namespace DomainShell.Test
 
         private static void LaunchDatabase()
         {
-            if (_databaseType == DatabaseType.Sqlite) _databaseProvider = new SqliteDatabaseProvider();
-            else _databaseProvider = new SqlServerDatabaseProvider();
+            if (_databaseType == DatabaseType.Sqlite) _databaseProvider = new SqliteDatabaseProvider();            
         }
 
         private static void LaunchContainer()
@@ -59,29 +56,20 @@ namespace DomainShell.Test
             DomainModelFactory.Startup(container.GetInstance<IDomainModelFactory>);            
             DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);                        
             Session.Startup(container.GetInstance<ISession>);
-            // <<
-
-            // MediatR >>                        
-            //container.RegisterSingleton<IMediator, Mediator>();
-            //container.RegisterCollection(typeof(INotificationHandler<>), Assembly.GetExecutingAssembly());            
-            //container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
-            //container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
-            // <<            
+            // <<    
 
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
             container.Register<IConnection, SessionFoundation>(Lifestyle.Scoped);                        
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
-            container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped); 
-            container.Register<IOrderCanceledRepository, OrderCanceledRepository>(Lifestyle.Scoped);
-            container.Register<IMonthlyOrderRepository, MonthlyOrderRepository>(Lifestyle.Scoped);
+            container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);                         
+            container.Register<IOrderReadRepository, OrderRepository>(Lifestyle.Scoped);                         
 
             container.Register<IOrderService, OrderService>(Lifestyle.Scoped);            
 
-            container.Register<IDomainEventHandler<OrderCompletedEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderCompletedExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderCanceledEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderSendedMailEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderRegisterdEvent>, OrderEventHandler>(Lifestyle.Scoped);            
+            container.Register<IDomainEventHandler<OrderPaidExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderIssuedCertificateEvent>, OrderEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);                      
@@ -154,128 +142,20 @@ namespace DomainShell.Test
                     ProductName text,
                     Price numeric,
                     CreditCardCode text,
-                    PayId text,                    
-                    RecordVersion int
-                );
-
-                create table OrderFormCanceled (
-                    OrderId int primary key,                    
-                    UserId text,       
-                    OrderDate text,
-                    ProductName text,
-                    Price numeric,
-                    CreditCardCode text,
-                    PayId text,                    
-                    RecordVersion int
+                    PaymentId text,     
+                    CertificateIssueCount integer
                 );
 
                 create table LoginUser (
                     UserId text primary key,                    
-                    UserName text,
-                    RecordVersion int
+                    UserName text
                 );
 
-                create table MonthlyOrderBudget (
-                    UserId text primary key,                    
-                    Budget numeric
-                );
-
-                insert into LoginUser values('user1', 'user1', 1);
-                insert into LoginUser values('user2', 'user2', 1);
-
-                insert into MonthlyOrderBudget values('user1', 99999);
-                insert into MonthlyOrderBudget values('user2', 99999);
+                insert into LoginUser values('user1', 'user1');
+                insert into LoginUser values('user2', 'user2');
             ";
 
             command.ExecuteNonQuery();
-
-            connection.Close();
-        }
-    }
-
-    public class SqlServerDatabaseProvider : DatabaseProvider
-    {
-        public SqlServerDatabaseProvider()
-        {
-            LaunchDatabase();
-        }
-
-        public override IDbConnection CreateConnection()
-        {
-            return new SqlConnection(GetConnectionString());
-        }
-
-        private string GetConnectionString()
-        {
-            return @"Data Source = akawawin8\sqlserver2016; Initial Catalog = cplan_demo; Integrated Security = True";
-        }
-
-        private void LaunchDatabase()
-        {
-            var connection = CreateConnection();
-
-            connection.Open();
-
-            var command = connection.CreateCommand();
-
-            command.CommandText = @"
-                drop table OrderForm;
-                drop table OrderFormCanceled;
-                drop table LoginUser;
-                drop table MonthlyOrderBudget;
-            ";
-
-            try
-            {
-                command.ExecuteNonQuery();
-            }
-            catch
-            {
-
-            }
-
-            command.CommandText = @"
-                create table OrderForm (
-                    OrderId int identity primary key,
-                    UserId nvarchar(100),
-                    OrderDate nvarchar(8),
-                    ProductName nvarchar(100),
-                    Price decimal,
-                    CreditCardCode nvarchar(100),
-                    PayId nvarchar(100),                    
-                    RecordVersion int
-                );
-
-                create table OrderFormCanceled (
-                    OrderId int primary key,
-                    UserId nvarchar(100),
-                    OrderDate nvarchar(8),
-                    ProductName nvarchar(100),
-                    Price decimal,
-                    CreditCardCode nvarchar(100),
-                    PayId nvarchar(100),                    
-                    RecordVersion int
-                );
-
-                create table LoginUser(
-                    UserId nvarchar(100) primary key,
-                    UserName nvarchar(100),
-                    RecordVersion int
-                );
-
-                create table MonthlyOrderBudget (
-                    UserId nvarchar(100) primary key,
-                    Budget decimal
-                );
-
-                insert into LoginUser values('user1', 'user1', 1);
-                insert into LoginUser values('user2', 'user2', 1);
-
-                insert into MonthlyOrderBudget values('user1', 99999);
-                insert into MonthlyOrderBudget values('user2', 99999);
-            ";
-
-            command.ExecuteNonQuery();            
 
             connection.Close();
         }

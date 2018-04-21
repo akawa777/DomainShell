@@ -13,18 +13,6 @@ namespace DomainShell.Test
     public class UnitTest
     {
         [TestMethod]
-        public void TestGetMontlyOrders()
-        {
-            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
-
-            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
-            {
-                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
-                var items = queryApp.GetMonthlyOrderBudgets();
-            }
-        }
-
-        [TestMethod]
         public void TestMethod()
         {
             Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
@@ -36,68 +24,24 @@ namespace DomainShell.Test
 
                 OrderDto order = new OrderDto
                 {
-                    OrderDate = "20171001",
-                    ProductName = "product1",
-                    Price = 999,
-                    UserId = "user1"
-                };
-
-                OrderDto order2 = new OrderDto
-                {
-                    OrderDate = "20171001",
-                    ProductName = "product2",
-                    Price = 999,
-                    UserId = "user1"
-                };
-
-                OrderDto order3 = new OrderDto
-                {
-                    OrderDate = "20171001",
-                    ProductName = "product1",
-                    Price = 999,
-                    UserId = "user2"
-                };
-
-                commandApp.Register(order);
-                commandApp.Register(order2);
-                commandApp.Register(order3);
-
-                order = queryApp.GetLastByUser("user1");     
-
-                commandApp.Complete(order, "user1");
-
-                order = queryApp.Find(order.OrderId);
-
-                order = queryApp.GetLastByUser("user2");
-
-                commandApp.Cancel(order);                
-
-                order = queryApp.GetCanceledByOrderId(order.OrderId);
-            }
-        }
-
-        [TestMethod]
-        public void TestMethod2()
-        {
-            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
-
-            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
-            {
-                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
-                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
-
-                OrderDto order = new OrderDto
-                {
-                    OrderDate = "20171001",
+                    OrderDate = "20180101",
                     ProductName = "product1",
                     Price = 999,
                     UserId = "user1"
                 };
 
                 commandApp.Register(order);
-                order = queryApp.GetLastByUser("user1");
 
-                order = queryApp.FindWithSendMail(order.OrderId);
+                var orderRead = queryApp.GetLastByUser("user1");     
+                var lastOrder = queryApp.Find(orderRead.OrderId);
+
+                commandApp.Pay(lastOrder, "xxxx-xxxx-xxxx-xxxx");                
+
+                var certificate = queryApp.IssueCertificate(orderRead.OrderId);
+
+                var messageList = Log.MessageList;
+
+                Assert.AreEqual(1, messageList.Count);
             }
         }
 

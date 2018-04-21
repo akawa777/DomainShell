@@ -16,7 +16,13 @@ namespace DomainShell.Test.Apps
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public string CreditCardCode { get; set; }
-        public string PayId { get; set; }        
-        public int RecordVersion { get; set; }        
+        public string PaymentId { get; set; }         
+    }
+
+    public class OrderReadDto
+    {
+        public int OrderId { get; set; }
+        public string ProductName { get; set; }
+        public decimal Price { get; set; }       
     }
 }

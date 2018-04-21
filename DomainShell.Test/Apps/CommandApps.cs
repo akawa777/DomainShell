@@ -53,7 +53,7 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public void Complete(OrderDto orderDto, string creditCardCode)
+        public void Pay(OrderDto orderDto, string creditCardCode)
         {
             if (orderDto == null) throw new Exception("orderDto is required.");
 
@@ -62,9 +62,10 @@ namespace DomainShell.Test.Apps
                 using(var tran = Session.Tran())
                 {
                     Order order = _orderRepository.Find(orderDto.OrderId, true);
+                    
                     Map(orderDto, order);
 
-                    order.Complete(_orderService, creditCardCode);
+                    order.Pay(_orderService, creditCardCode);
 
                     _orderRepository.Save(order);
 
@@ -78,34 +79,9 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public void Cancel(OrderDto orderDto)
-        {
-            if (orderDto == null) throw new Exception("orderDto is required.");
-
-            try
-            {
-                using (var tran = Session.Tran())
-                {
-                    Order order = _orderRepository.Find(orderDto.OrderId, true);
-                    Map(orderDto, order);
-
-                    order.Cancel();
-
-                    _orderRepository.Save(order);
-
-                    tran.Complete();
-                }
-            }
-            catch (Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-
         private void Map(OrderDto dto, Order model)
         {
-            model.User = UserValue.Create(_userRepository.Find(dto.UserId, true));
+            model.UserId = dto.UserId;
             model.OrderDate = DateTime.ParseExact(dto.OrderDate, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
             model.ProductName = dto.ProductName;         
             model.Price = dto.Price;            

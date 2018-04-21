@@ -6,10 +6,9 @@ using SimpleInjector;
 using SimpleInjector.Lifestyles;
 using System.Data;
 using System.Reflection;
-using MediatR;
 using System.Threading.Tasks;
 
-namespace DomainShell.Test.Domains
+namespace DomainShell.Test
 {
     public class DomainModelFactoryFoundation : DomainModelFactoryFoundationBase
     {
@@ -44,16 +43,13 @@ namespace DomainShell.Test.Domains
 
     public class SessionFoundation : SessionFoundationBase<IDomainEvent>, IConnection
     {
-        //public SessionFoundation(Container container, IDbConnection connection, IMediator mediator)
         public SessionFoundation(Container container, IDbConnection connection)
         {
             _container = container;
             _connection = connection;
-            //_mediator = mediator;
         }
 
         private Container _container;
-        //private IMediator _mediator;
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
@@ -85,15 +81,17 @@ namespace DomainShell.Test.Domains
             _connection.Close();
         }
 
-        protected override void OnException(Exception exception, IDomainEvent[] domainEvents)
+        protected override void PublishDomainEventOnException(Exception exception, IDomainEvent[] domainEvents)
         {
             foreach (var domainEvent in domainEvents)
             {
                 if (domainEvent.Mode.Format == DomainEventFormat.AtException)
                 {
-                    //var task = _mediator.Publish(domainEvent);
+                    var field = domainEvent.Mode.GetType().GetField("_exception", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                    object handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
+                    field.SetValue(domainEvent.Mode, exception);
+
+                    var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
 
                     handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
                 }
@@ -106,9 +104,7 @@ namespace DomainShell.Test.Domains
             {
                 if (domainEvent.Mode.Format == DomainEventFormat.InSession)
                 {
-                    //var task = _mediator.Publish(domainEvent);
-
-                    object handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
+                    var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
 
                     handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
                 }
@@ -125,9 +121,7 @@ namespace DomainShell.Test.Domains
                      {
                          if (domainEvent.Mode.Format == DomainEventFormat.OutSession)
                          {
-                            //_mediator.Publish(domainEvent);
-
-                            object handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
+                            var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
 
                             handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
                         }
@@ -143,7 +137,7 @@ namespace DomainShell.Test.Domains
 
         public IDbCommand CreateCommand()
         {
-            IDbCommand command = _connection.CreateCommand();
+            var command = _connection.CreateCommand();
 
             if (_transaction != null) command.Transaction = _transaction;
 
@@ -195,18 +189,62 @@ namespace DomainShell.Test.Domains
         AtException         
     }
 
-    public interface IDomainEvent //: INotification
+    public interface IDomainEvent
     {
         DomainEventMode Mode { get; }
     }    
 
-    public interface IDomainEventHandler<TDomainEvent> //: INotificationHandler<TDomainEvent> where TDomainEvent : IDomainEvent
+    public interface IDomainEventHandler<TDomainEvent>
     {
-        
+        void Handle(TDomainEvent domainEvent);
     }
 
-    public interface IDomainEventAuthor : IDomainEventAuthor<IDomainEvent>
+    public abstract class AggregateRoot : IAggregateRoot, IDomainEventAuthor<IDomainEvent>
     {
+        protected AggregateRoot()
+        {
+            DomainModelTracker.Mark(this);
+        }
 
+        protected List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
+
+        public IEnumerable<IDomainEvent> GetDomainEvents()
+        {
+            return DomainEvents.AsReadOnly();
+        }
+
+        public void ClearDomainEvents()
+        {
+            DomainEvents.Clear();
+        }
+
+        public bool Deleted { get; protected set; }
+
+        public ModelState State { get; protected set; }
+    }
+
+    public abstract class ReadAggregateRoot : IDomainEventAuthor<IDomainEvent>
+    {
+        protected ReadAggregateRoot()
+        {
+            DomainModelTracker.Mark(this);
+        }
+
+        protected List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
+
+        public IEnumerable<IDomainEvent> GetDomainEvents()
+        {
+            return DomainEvents.AsReadOnly();
+        }
+
+        public void ClearDomainEvents()
+        {
+            DomainEvents.Clear();
+        }
+    }
+
+    public static class Log
+    {
+        public static List<string> MessageList { get; private set; } = new List<string>();
     }
 }

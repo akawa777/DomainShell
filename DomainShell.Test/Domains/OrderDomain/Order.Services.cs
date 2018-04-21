@@ -2,54 +2,32 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
+using DomainShell.Test.Domains.UserDomain;
 
 namespace DomainShell.Test.Domains.OrderDomain
 {    
     public class OrderService : IOrderService
     {
-        public OrderService(IMonthlyOrderRepository monthlyOrderRepository)
-        {
-            _monthlyOrderRepository = monthlyOrderRepository;
-        }
-
-        private IMonthlyOrderRepository _monthlyOrderRepository;
-
-        public string Pay(Order order)
+        public OrderService(            
+            IUserRepository userRepository)
         {            
-            Console.WriteLine($"{nameof(OrderService)} {nameof(Pay)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
+            _userRepository = userRepository;
+        }
+        
+        private IUserRepository _userRepository;
 
-            string payId = Guid.NewGuid().ToString();
+        public PaymentId Pay(Order order)
+        {            
+            var paymentId = Guid.NewGuid().ToString();
 
-            return payId;
+            return new PaymentId(paymentId);
         }
 
-        public void Cancel(Order order)
+        public bool ExistsUser(Order order)
         {
-            Console.WriteLine($"{nameof(OrderService)} {nameof(Cancel)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-        }
+            var user = _userRepository.Find(order.UserId);
 
-        public virtual void SendMail(Order order)
-        {
-            SendMailBy(order as dynamic);
-        }
-
-        private void SendMailBy(Order order)
-        {
-            Console.WriteLine($"{nameof(OrderService)} {nameof(SendMailBy)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-        }
-
-        private void SendMailBy(SpecialOrder order)
-        {
-            Console.WriteLine($"{nameof(OrderService)} {nameof(SendMailBy)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-        }
-
-        public bool IsOverBudget(Order order)
-        {
-            Console.WriteLine($"{nameof(OrderService)} {nameof(IsOverBudget)} {System.Threading.Thread.CurrentThread.ManagedThreadId}");
-
-            MonthlyOrder monthlyOrder = _monthlyOrderRepository.GetMonthlyByUserId(order.User.UserId, order.OrderDate.Value, excludeOrderId: order.OrderId);
-
-            return monthlyOrder.IsOverBudgetByIncludingPrice(order.Price);
+            return user != null;
         }
     }
 }

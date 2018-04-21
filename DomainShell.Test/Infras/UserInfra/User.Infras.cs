@@ -17,20 +17,20 @@ namespace DomainShell.Test.Infras.UserInfra
 
         private IConnection _connection;
 
-        public UserModel Find(string userId, bool throwError = false)
+        public UserRead Find(string userId, bool throwError = false)
         {
             var readSet = Read(userId);
 
-            UserModel userModel = Map(readSet).FirstOrDefault();
+            var user = Map(readSet).FirstOrDefault();
 
-            if (throwError && userModel == null) throw new Exception("user not found.");
+            if (throwError && user == null) throw new Exception("user not found.");
 
-            return userModel;
+            return user;
         }
 
         private (IDataReader reader, IDbCommand command) Read(string userId)
         {
-            IDbCommand command = _connection.CreateCommand();
+            var command = _connection.CreateCommand();
 
             string sql = $@"
                 select * from LoginUser
@@ -48,20 +48,19 @@ namespace DomainShell.Test.Infras.UserInfra
             return (command.ExecuteReader(), command);
         }
 
-        private IEnumerable<UserModel> Map((IDataReader reader, IDbCommand command) readSet)
+        private IEnumerable<UserRead> Map((IDataReader reader, IDbCommand command) readSet)
         {
             try
             {
-                IDataReader reader = readSet.reader;
+                var reader = readSet.reader;
 
                 while (reader.Read())
                 {
-                    var userProxyObject = new ProxyObject<UserModel>();
+                    var userProxyObject = new ProxyObject<UserRead>();
 
                     userProxyObject
                         .Set(m => m.UserId, (m, p) => reader[p.Name])
-                        .Set(m => m.UserName, (m, p) => reader[p.Name])
-                        .Set(m => m.RecordVersion, (m, p) => reader[p.Name]);
+                        .Set(m => m.UserName, (m, p) => reader[p.Name]);
 
                     yield return userProxyObject.Material;
                 }

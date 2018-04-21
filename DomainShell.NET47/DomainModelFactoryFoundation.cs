@@ -41,7 +41,7 @@ namespace DomainShell
         {
             Validate();
 
-            var domainModelFactory = _getDomainModelFactory();
+            IDomainModelFactory domainModelFactory = _getDomainModelFactory();
             return domainModelFactory.Create<T>();
         }
 
@@ -49,7 +49,7 @@ namespace DomainShell
         {
             Validate();
 
-            var domainModelFactory = _getDomainModelFactory();
+            IDomainModelFactory domainModelFactory = _getDomainModelFactory();
             var model = domainModelFactory.Create<T>();
 
             return new ProxyObject<T>(model);

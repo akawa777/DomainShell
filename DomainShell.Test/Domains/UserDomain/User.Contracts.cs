@@ -8,6 +8,6 @@ namespace DomainShell.Test.Domains.UserDomain
 {
     public interface IUserRepository
     {
-        UserModel Find(string userId, bool throwError = false);
+        UserRead Find(string userId, bool throwError = false);
     }
 }

@@ -6,28 +6,30 @@ using System.Data;
 
 namespace DomainShell.Test.Domains.OrderDomain
 {    
-    public interface IOrderRepository : IWriteRepository<Order>
+    public interface IOrderRepository
     {
-        Order Find(int orderId, bool throwError = false);        
-        Order GetLastByUser(string userId);
+        Order Find(int orderId, bool throwError = false); 
+        void Save(Order order);
     }
 
-    public interface IOrderCanceledRepository : IWriteRepository<OrderCanceledModel> 
+    public interface IOrderReadRepository
     {
-        OrderCanceledModel Find(int orderId, bool throwError = false);
+        OrderRead GetLastByUser(string userId);
     }
 
-    public interface IMonthlyOrderRepository
-    {        
-        MonthlyOrder GetMonthlyByUserId(string userId, DateTime orderDate, int excludeOrderId = 0);        
-        object[] GetMonthlyOrderBudgets();
+    public class PaymentId
+    {
+        public PaymentId(string paymenId)
+        {
+            Value = paymenId;
+        }
+
+        public string Value { get; }
     }
 
     public interface IOrderService
     {
-        string Pay(Order Order);
-        void Cancel(Order Order);
-        void SendMail(Order Order);
-        bool IsOverBudget(Order Order);
+        PaymentId Pay(Order order);
+        bool ExistsUser(Order order);
     }
 }

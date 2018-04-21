@@ -9,40 +9,24 @@ namespace DomainShell.Test.Apps
 {   
     public class OrderQueryApp
     {
-        public OrderQueryApp(IOrderRepository orderRepository, IOrderCanceledRepository orderCanceledRepository, IMonthlyOrderRepository monthlyOrderRepository)
+        public OrderQueryApp(
+            IOrderRepository orderRepository,
+            IOrderReadRepository orderReadRepository)
         {            
-            _orderRepository = orderRepository;
-            _orderCanceledRepository = orderCanceledRepository;
-             _monthlyOrderRepository = monthlyOrderRepository;
+            _orderRepository = orderRepository;            
+            _orderReadRepository = orderReadRepository;
         }
         
         private IOrderRepository _orderRepository;
-        private IOrderCanceledRepository _orderCanceledRepository;
-        private IMonthlyOrderRepository _monthlyOrderRepository;
-
-        public object[] GetMonthlyOrderBudgets()
-        {
-            try
-            {
-                using(Session.Open())
-                {
-                    return _monthlyOrderRepository.GetMonthlyOrderBudgets();
-                }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-
+        private IOrderReadRepository _orderReadRepository;
+        
         public OrderDto Find(int orderId)
         {
             try
             {
                 using(Session.Open())
                 {
-                    Order order = _orderRepository.Find(orderId);
+                    var order = _orderRepository.Find(orderId);
 
                     return Map(order);
                 }
@@ -54,16 +38,15 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public OrderDto FindWithSendMail(int orderId)
+        public OrderReadDto GetLastByUser(string userId)
         {
             try
             {
                 using (Session.Open())
                 {
-                    Order order = _orderRepository.Find(orderId);
-                    order.SendCompleteMail();
+                    var orderRead = _orderReadRepository.GetLastByUser(userId);
 
-                    return Map(order);
+                    return Map(orderRead);
                 }
             }
             catch (Exception e)
@@ -73,33 +56,16 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public OrderDto GetLastByUser(string userId)
+        public System.IO.Stream IssueCertificate(int orderId)
         {
             try
             {
                 using (Session.Open())
                 {
-                    Order order = _orderRepository.GetLastByUser(userId);
+                    var order = _orderRepository.Find(orderId);
+                    var certificate = order.IssueCertificate();
 
-                    return Map(order);
-                }
-            }
-            catch (Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-
-        public OrderDto GetCanceledByOrderId(int orderId)
-        {
-            try
-            {
-                using (Session.Open())
-                {
-                    OrderCanceledModel orderCanceledModel = _orderCanceledRepository.Find(orderId);
-
-                    return Map(orderCanceledModel);
+                    return certificate;
                 }
             }
             catch (Exception e)
@@ -113,34 +79,29 @@ namespace DomainShell.Test.Apps
         {
             if (model == null) return null;
 
-            OrderDto dto = new OrderDto
+            var dto = new OrderDto
             {
                 OrderId = model.OrderId,
-                UserId = model.User.UserId,
+                UserId = model.UserId,
                 OrderDate = model.OrderDate.Value.ToString("yyyyMMdd"),
                 ProductName = model.ProductName,
                 Price = model.Price,
                 CreditCardCode = model.CreditCardCode,
-                PayId = model.PayId,
-                RecordVersion = model.RecordVersion
+                PaymentId = model.PaymentId
             };
 
             return dto;
         }
 
-        private OrderDto Map(OrderCanceledModel model)
+        private OrderReadDto Map(OrderRead model)
         {
             if (model == null) return null;
 
-            OrderDto dto = new OrderDto
+            var dto = new OrderReadDto
             {
-                OrderId = model.OrderId,
+                OrderId = model.OrderId,                
                 ProductName = model.ProductName,
-                Price = model.Price,
-                CreditCardCode = model.CreditCardCode,
-                PayId = model.PayId,
-                UserId = model.User.UserId,
-                RecordVersion = model.RecordVersion
+                Price = model.Price
             };
 
             return dto;

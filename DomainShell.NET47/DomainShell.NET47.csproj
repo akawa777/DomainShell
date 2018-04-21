@@ -49,8 +49,8 @@
     <Compile Include="DomainModelTracker.cs" />
     <Compile Include="DomainModelTrackerFoundation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProxyFactory.cs" />
-    <Compile Include="ProxyFactoryFoundation.cs" />
+    <Compile Include="DomainModelFactory.cs" />
+    <Compile Include="DomainModelFactoryFoundation.cs" />
     <Compile Include="ProxyObject.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="SessionFoundation.cs" />

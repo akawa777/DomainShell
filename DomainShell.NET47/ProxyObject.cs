@@ -19,7 +19,7 @@ namespace DomainShell
     {
         public ProxyObject()
         {
-            var material = Activator.CreateInstance(typeof(TMaterial), true);
+            object material = Activator.CreateInstance(typeof(TMaterial), true);
 
             Material = (TMaterial)material;
         }
@@ -40,23 +40,23 @@ namespace DomainShell
 
         public IProxyObject<TProperty> Get<TProperty>(Expression<Func<TMaterial, TProperty>> expression)
         {
-            var property = GetProperty(typeof(TMaterial), expression);
+            PropertyInfo property = GetProperty(typeof(TMaterial), expression);
             var material = (TProperty)property.Get(Material);
             return new ProxyObject<TProperty>(material, property);
         }
 
         public IEnumerable<IProxyObject<TProperty>> List<TProperty>(Expression<Func<TMaterial, IEnumerable<TProperty>>> expression)
         {
-            var property = GetProperty(typeof(TMaterial), expression);
+            PropertyInfo property = GetProperty(typeof(TMaterial), expression);
             var materials = (IEnumerable<TProperty>)property.Get(Material);
             return materials.Select(x => new ProxyObject<TProperty>(x, null));
         }
 
         public IProxyObject<TMaterial> Set<TProperty>(Expression<Func<TMaterial, TProperty>> expression, Func<TMaterial, PropertyInfo, object> value)
         {
-            var property = GetProperty(typeof(TMaterial), expression);
-            var valueObj = value(Material, property);
-            property.Set(Material, valueObj);
+            PropertyInfo property = GetProperty(typeof(TMaterial), expression);
+
+            property.Set(Material, value(Material, property));
             return this;
         }
 
@@ -85,11 +85,11 @@ namespace DomainShell
         {
             public PropertyAccessor(PropertyInfo property)
             {
-                var method = typeof(Extentions)
+                MethodInfo method = typeof(Extentions)
                     .GetMethod("CreateGetter", BindingFlags.Static | BindingFlags.NonPublic)
                     .MakeGenericMethod(property.ReflectedType, property.PropertyType);
 
-                var getter = (Func<object, object>)method.Invoke(null, new object[] { property });
+                Func<object, object> getter = (Func<object, object>)method.Invoke(null, new object[] { property });
 
                 Get = getter;
 
@@ -97,7 +97,7 @@ namespace DomainShell
                     .GetMethod("CreateSetter", BindingFlags.Static | BindingFlags.NonPublic)
                     .MakeGenericMethod(property.ReflectedType, property.PropertyType);
 
-                var setter = (Action<object, object>)method.Invoke(null, new object[] { property });
+                Action<object, object> setter = (Action<object, object>)method.Invoke(null, new object[] { property });
 
                 Set = setter;
             }
@@ -113,14 +113,14 @@ namespace DomainShell
                 return obj => property.Get(obj);
             }
 
-            var getDelegate =
+            Func<TObj, TValue> getDelegate =
                 (Func<TObj, TValue>)Delegate.CreateDelegate(
                          typeof(Func<TObj, TValue>),
                          property.GetGetMethod(nonPublic: true));
 
             return obj =>
             {
-                var value = getDelegate((TObj)obj);
+                TValue value = getDelegate((TObj)obj);
 
                 return value;
             };
@@ -133,7 +133,7 @@ namespace DomainShell
                 return (obj, value) => { };
             }
 
-            var setDelegate =
+            Action<TObj, TValue> setDelegate =
                 (Action<TObj, TValue>)Delegate.CreateDelegate(
                          typeof(Action<TObj, TValue>),
                          property.GetSetMethod(nonPublic: true));
@@ -162,7 +162,7 @@ namespace DomainShell
 
         private static bool CanChangeType<TValue>(object value)
         {
-            var conversionType = typeof(TValue);
+            Type conversionType = typeof(TValue);
 
             if (conversionType == null
                 || value == null
