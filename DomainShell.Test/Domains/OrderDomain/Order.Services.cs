@@ -21,6 +21,11 @@ namespace DomainShell.Test.Domains.OrderDomain
             return PayBy(order as dynamic);
         }
 
+        public void CancelPayment(Order order)
+        {            
+            Log.MessageList.Add($"{nameof(OrderService)} {nameof(CancelPayment)} {nameof(Order)}");
+        }
+
         private PaymentResult PayBy(Order order)
         {            
             var paymentId = Guid.NewGuid().ToString();

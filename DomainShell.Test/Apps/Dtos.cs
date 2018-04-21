@@ -18,11 +18,4 @@ namespace DomainShell.Test.Apps
         public string CreditCardCode { get; set; }
         public string PaymentId { get; set; }         
     }
-
-    public class OrderReadDto
-    {
-        public int OrderId { get; set; }
-        public string ProductName { get; set; }
-        public decimal Price { get; set; }       
-    }
 }

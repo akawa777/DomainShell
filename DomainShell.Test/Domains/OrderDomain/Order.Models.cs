@@ -44,7 +44,14 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public string PaymentId { get; private set; }      
 
-        public int CertificateIssueCount { get; private set; } 
+        public int CertificateIssueCount { get; set; } 
+
+        public void Register(IOrderService orderService)
+        {
+            ValidatePrecondition(orderService);
+
+            State = ModelState.Seal(this);
+        }
 
         public void Pay(IOrderService orderService, string creditCardCode)
         {
@@ -60,7 +67,19 @@ namespace DomainShell.Test.Domains.OrderDomain
             PaymentId = paymentResult.PaymentId; 
 
             DomainEvents.Add(new OrderPaidEvent{ UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });
-            DomainEvents.Add(new OrderPaidExceptionEvent { PaymentId = PaymentId });
+            DomainEvents.Add(new OrderPaidExceptionEvent { OrderId = OrderId });
+
+            State = ModelState.Seal(this);
+        }
+
+        public void CancelPayment(IOrderService orderService)
+        {
+            ValidatePrecondition(orderService);
+
+            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("not paid.");
+            if (string.IsNullOrEmpty(CreditCardCode)) throw new Exception("creditCardCode is required.");            
+
+            orderService.CancelPayment(this);
 
             State = ModelState.Seal(this);
         }
@@ -91,7 +110,7 @@ namespace DomainShell.Test.Domains.OrderDomain
     {
         public DomainEventMode Mode { get; } = DomainEventMode.OnException();
 
-        public string PaymentId { get; set; }
+        public int OrderId { get; set; }
     }
 
     public class OrderRead : ReadAggregateRoot

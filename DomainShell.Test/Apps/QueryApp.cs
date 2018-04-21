@@ -64,7 +64,7 @@ namespace DomainShell.Test.Apps
                 using (Session.Open())
                 {
                     var orderRead = _orderReadRepository.Find(orderId);
-                    
+
                     var certificate = orderRead.IssueCertificate();
 
                     return certificate;
@@ -90,20 +90,6 @@ namespace DomainShell.Test.Apps
                 Price = model.Price,
                 CreditCardCode = model.CreditCardCode,
                 PaymentId = model.PaymentId
-            };
-
-            return dto;
-        }
-
-        private OrderReadDto Map(OrderRead model)
-        {
-            if (model == null) return null;
-
-            var dto = new OrderReadDto
-            {
-                OrderId = model.OrderId,                
-                ProductName = model.ProductName,
-                Price = model.Price
             };
 
             return dto;

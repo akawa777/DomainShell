@@ -24,12 +24,7 @@ namespace DomainShell.Test.Domains.UserDomain
 
         public string UserName { get; set; }
 
-        public int PaymentPoint { get; private set; }
-
-        public void AddPaymentPoint(int paymentPoint)
-        {
-            PaymentPoint += paymentPoint;
-        }
+        public int PaymentPoint { get; set; }
 
         public void Register()
         {

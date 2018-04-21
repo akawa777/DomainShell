@@ -33,6 +33,7 @@ namespace DomainShell.Test.Domains.OrderDomain
     public interface IOrderService
     {
         PaymentResult Pay(Order order);
+        void CancelPayment(Order order);
         bool ExistsUser(Order order);
     }
 }
