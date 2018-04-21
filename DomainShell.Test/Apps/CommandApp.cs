@@ -23,6 +23,7 @@ namespace DomainShell.Test.Apps
         private IOrderRepository _orderRepository;
         private IOrderService _orderService;        
         private IUserRepository _userRepository;
+        
         public void Pay(OrderDto orderDto, string creditCardCode, bool isSpecialOrder)
         {
             if (orderDto == null) throw new Exception("orderDto is required.");
