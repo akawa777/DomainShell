@@ -29,6 +29,7 @@ namespace DomainShell.Test.Domains.UserDomain
         public void Register()
         {
             if (string.IsNullOrEmpty(UserName)) throw new Exception("UserName is required.");
+            if (PaymentPoint < 0) throw new Exception("PaymentPoint is invalid.");
 
             State = ModelState.Seal(this);
         }

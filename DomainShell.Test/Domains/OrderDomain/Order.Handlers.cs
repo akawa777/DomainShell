@@ -105,11 +105,9 @@ namespace DomainShell.Test.Domains.OrderDomain
                 {                    
                     var order = _orderRepository.Find(domainEvent.OrderId);
 
-                    if (order == null) throw new Exception("order not found.");
+                    if (order == null) throw new Exception("order not found.");                    
 
-                    order.CertificateIssueCount++;
-
-                    order.Register(_orderService);
+                    order.IncrementCertificateIssueCount(_orderService);
 
                     _orderRepository.Save(order);
 

@@ -19,7 +19,7 @@ namespace DomainShell.Test.Domains.OrderDomain
             }
             else
             {
-                order = DomainModelFactory.Create<SpecialOrder>();
+                order = SpecialOrder.Create();
             }
             
             return order;
@@ -44,11 +44,15 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public string PaymentId { get; private set; }      
 
-        public int CertificateIssueCount { get; set; } 
+        public int CertificateIssueCount { get; private set; } 
 
-        public void Register(IOrderService orderService)
+        public void IncrementCertificateIssueCount(IOrderService orderService)
         {
             ValidatePrecondition(orderService);
+
+            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("order has not been paid.");
+
+            CertificateIssueCount++;
 
             State = ModelState.Seal(this);
         }
@@ -57,7 +61,7 @@ namespace DomainShell.Test.Domains.OrderDomain
         {
             ValidatePrecondition(orderService);
 
-            if (!string.IsNullOrEmpty(PaymentId)) throw new Exception("already paid.");
+            if (!string.IsNullOrEmpty(PaymentId)) throw new Exception("order has already been paid.");
             if (string.IsNullOrEmpty(creditCardCode)) throw new Exception("creditCardCode is required.");            
 
             CreditCardCode = creditCardCode;    
@@ -76,10 +80,13 @@ namespace DomainShell.Test.Domains.OrderDomain
         {
             ValidatePrecondition(orderService);
 
-            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("not paid.");
+            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("order has not been paid.");
             if (string.IsNullOrEmpty(CreditCardCode)) throw new Exception("creditCardCode is required.");            
 
             orderService.CancelPayment(this);
+
+            this.CreditCardCode = null;
+            this.PaymentId = null;
 
             State = ModelState.Seal(this);
         }
@@ -95,7 +102,15 @@ namespace DomainShell.Test.Domains.OrderDomain
 
     public class SpecialOrder : Order
     {
-        
+        public static SpecialOrder Create()
+        {
+            return DomainModelFactory.Create<SpecialOrder>();
+        }
+
+        protected SpecialOrder()
+        {
+            
+        }
     }
 
     public class OrderPaidEvent : IDomainEvent
@@ -141,7 +156,7 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public Stream IssueCertificate()
         {
-            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("not paid.");
+            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("order has not been paid.");
 
             DomainEvents.Add(new OrderReadIssuedCertificateEvent{ OrderId = OrderId });
 

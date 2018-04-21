@@ -22,7 +22,7 @@ namespace DomainShell.Test.Apps
         private IOrderService _orderService;
 
         public void Pay(OrderDto orderDto, string creditCardCode, bool isSpecialOrder)
-        {
+        {            
             if (orderDto == null) throw new Exception("orderDto is required.");
 
             try

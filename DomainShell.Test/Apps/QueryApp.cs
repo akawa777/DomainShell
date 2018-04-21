@@ -57,13 +57,15 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public System.IO.Stream IssueCertificate(int orderId)
+        public Stream IssueCertificate(int orderId)
         {
             try
             {
                 using (Session.Open())
                 {
                     var orderRead = _orderReadRepository.Find(orderId);
+
+                    if (orderRead == null) throw new Exception("order not found.");
 
                     var certificate = orderRead.IssueCertificate();
 
