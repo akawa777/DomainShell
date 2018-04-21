@@ -40,7 +40,7 @@ namespace DomainShell.Test.Infras.OrderInfra
 
         public void Save(Order order)
         {
-            order.State.Validate();
+            if (!order.State.Sealed()) return;
 
             if (order.Deleted)
             {
