@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 using DomainShell;
 using DomainShell.Test.Domains;
 using DomainShell.Test.Domains.OrderDomain;
@@ -38,15 +39,15 @@ namespace DomainShell.Test.Apps
             }
         }
 
-        public OrderReadDto GetLastByUser(string userId)
+        public OrderDto GetLastByUser(string userId)
         {
             try
             {
                 using (Session.Open())
                 {
-                    var orderRead = _orderReadRepository.GetLastByUser(userId);
+                    var order = _orderRepository.GetLastByUser(userId);
 
-                    return Map(orderRead);
+                    return Map(order);
                 }
             }
             catch (Exception e)
@@ -62,8 +63,8 @@ namespace DomainShell.Test.Apps
             {
                 using (Session.Open())
                 {
-                    var order = _orderRepository.Find(orderId);
-                    var certificate = order.IssueCertificate();
+                    var orderRead = _orderReadRepository.Find(orderId);
+                    var certificate = orderRead.IssueCertificate();
 
                     return certificate;
                 }

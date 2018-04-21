@@ -27,12 +27,12 @@ namespace DomainShell
             return JsonConvert.SerializeObject(domainMpdel, Formatting.Indented);            
         }
         
-        public bool Sealed()
+        public bool Modified()
         {
             if (_domainModel == null) return false;
             
             string serializedData = SerializeData(_domainModel);
-            if (_serializedData == serializedData) true;
+            if (_serializedData == serializedData) return true;
 
             throw new InvalidOperationException($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_serializedData}\"{Environment.NewLine}current{Environment.NewLine}\"{serializedData}\"");
         }        

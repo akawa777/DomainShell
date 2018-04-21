@@ -32,12 +32,13 @@ namespace DomainShell.Test
 
                 commandApp.Register(order);
 
-                var orderRead = queryApp.GetLastByUser("user1");     
-                var lastOrder = queryApp.Find(orderRead.OrderId);
+                var lastOrderRead = queryApp.GetLastByUser("user1");   
+
+                var lastOrder = queryApp.Find(lastOrderRead.OrderId);
 
                 commandApp.Pay(lastOrder, "xxxx-xxxx-xxxx-xxxx");                
 
-                var certificate = queryApp.IssueCertificate(orderRead.OrderId);
+                var certificate = queryApp.IssueCertificate(lastOrderRead.OrderId);
 
                 var messageList = Log.MessageList;
 

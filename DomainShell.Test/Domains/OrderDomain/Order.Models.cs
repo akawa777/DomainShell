@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 using DomainShell;
 using DomainShell.Test.Domains.UserDomain;
 
@@ -15,7 +16,7 @@ namespace DomainShell.Test.Domains.OrderDomain
             return order;
         }
 
-        protected Order() : base()
+        protected Order()
         {
             
         }
@@ -36,7 +37,7 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public int CertificateIssueCount { get; private set; }                  
 
-        public void Register(IOrderService orderService)
+        public virtual void Register(IOrderService orderService)
         {
             ValidatePrecondition(orderService);
 
@@ -62,15 +63,6 @@ namespace DomainShell.Test.Domains.OrderDomain
 
             State = ModelState.Seal(this);
         }
-
-        public System.IO.Stream IssueCertificate()
-        {
-            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("not paid.");
-
-            DomainEvents.Add(new OrderIssuedCertificateEvent{ OrderId = OrderId });
-
-            return new System.IO.MemoryStream();
-        }
         
         private void ValidatePrecondition(IOrderService orderService)
         {            
@@ -83,23 +75,16 @@ namespace DomainShell.Test.Domains.OrderDomain
 
     public class OrderRegisterdEvent : IDomainEvent
     {
-        public DomainEventMode Mode => DomainEventMode.InSession();
+        public DomainEventMode Mode { get; } = DomainEventMode.InSession();
 
         public int OrderId { get; set; }
     }
 
     public class OrderPaidExceptionEvent : IDomainEvent
     {
-        public DomainEventMode Mode => DomainEventMode.AtException();
+        public DomainEventMode Mode { get; } = DomainEventMode.OnException();
 
         public string PaymentId { get; set; }
-    }
-
-    public class OrderIssuedCertificateEvent : IDomainEvent
-    {
-        public DomainEventMode Mode => DomainEventMode.OutSession();
-
-        public int OrderId { get; set; }
     }
 
     public class OrderRead : ReadAggregateRoot
@@ -111,15 +96,51 @@ namespace DomainShell.Test.Domains.OrderDomain
             return orderRead;
         }
 
-        protected OrderRead() : base()
+        protected OrderRead()
         {
             
         }
 
         public int OrderId { get; private set; }
 
+        public string UserId { get; private set; }
+
+        public DateTime? OrderDate { get; private set; }
+
         public string ProductName { get; private set; }
 
         public decimal Price { get; private set; }
+
+        public string PaymentId { get; private set; } 
+
+        public virtual Stream IssueCertificate()
+        {
+            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("not paid.");
+
+            DomainEvents.Add(new OrderReadIssuedCertificateEvent{ OrderId = OrderId });
+
+            using (var memory = new MemoryStream())            
+            using (var writer = new StreamWriter(memory))
+            {
+                writer.Write($@"
+                    {nameof(OrderId)}: {OrderId},
+                    {nameof(UserId)}: {UserId},
+                    {nameof(OrderDate)}: {OrderDate},
+                    {nameof(ProductName)}: {ProductName},
+                    {nameof(Price)}: {Price}
+                ");
+
+                memory.Position = 0;
+
+                return memory;
+            }
+        }        
+    }
+
+    public class OrderReadIssuedCertificateEvent : IDomainEvent
+    {
+        public DomainEventMode Mode { get; } = DomainEventMode.OutSession();
+
+        public int OrderId { get; set; }
     }
 }

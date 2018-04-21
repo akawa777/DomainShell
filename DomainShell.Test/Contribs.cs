@@ -85,7 +85,7 @@ namespace DomainShell.Test
         {
             foreach (var domainEvent in domainEvents)
             {
-                if (domainEvent.Mode.Format == DomainEventFormat.AtException)
+                if (domainEvent.Mode.Format == DomainEventFormat.OnException)
                 {
                     var field = domainEvent.Mode.GetType().GetField("_exception", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -145,7 +145,7 @@ namespace DomainShell.Test
         }
     }
     
-    public struct DomainEventMode
+    public class DomainEventMode
     {
         private DomainEventMode(DomainEventFormat format)
         {
@@ -176,9 +176,9 @@ namespace DomainShell.Test
             return new DomainEventMode(DomainEventFormat.OutSession);
         }
 
-        public static DomainEventMode AtException()
+        public static DomainEventMode OnException()
         {
-            return new DomainEventMode(DomainEventFormat.AtException);
+            return new DomainEventMode(DomainEventFormat.OnException);
         }
     }
 
@@ -186,7 +186,7 @@ namespace DomainShell.Test
     {
         InSession,
         OutSession,
-        AtException         
+        OnException         
     }
 
     public interface IDomainEvent

@@ -7,7 +7,7 @@ namespace DomainShell.Test.Domains.UserDomain
 {
     public class UserRead : ReadAggregateRoot
     {
-        protected UserRead() : base()
+        protected UserRead()
         {
             
         }

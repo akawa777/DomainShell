@@ -17,13 +17,11 @@ namespace DomainShell.Test.Infras.UserInfra
 
         private IConnection _connection;
 
-        public UserRead Find(string userId, bool throwError = false)
+        public UserRead Find(string userId)
         {
             var readSet = Read(userId);
 
             var user = Map(readSet).FirstOrDefault();
-
-            if (throwError && user == null) throw new Exception("user not found.");
 
             return user;
         }
@@ -32,7 +30,7 @@ namespace DomainShell.Test.Infras.UserInfra
         {
             var command = _connection.CreateCommand();
 
-            string sql = $@"
+            var sql = $@"
                 select * from LoginUser
                 where UserId = @userId
             ";

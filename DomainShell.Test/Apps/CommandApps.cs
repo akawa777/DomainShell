@@ -31,11 +31,13 @@ namespace DomainShell.Test.Apps
             try
             {
                 using(var tran = Session.Tran())
-                {
+                {                    
                     Order order;
 
                     if (orderDto.OrderId < 1) order = Order.NewOrder();
-                    else order = _orderRepository.Find(orderDto.OrderId, true);
+                    else order = _orderRepository.Find(orderDto.OrderId);
+
+                    if (order == null) throw new Exception("order not found.");
 
                     Map(orderDto, order);
 
@@ -61,7 +63,9 @@ namespace DomainShell.Test.Apps
             {
                 using(var tran = Session.Tran())
                 {
-                    Order order = _orderRepository.Find(orderDto.OrderId, true);
+                    Order order = _orderRepository.Find(orderDto.OrderId);
+
+                    if (order == null) throw new Exception("order not found.");
                     
                     Map(orderDto, order);
 

@@ -8,13 +8,14 @@ namespace DomainShell.Test.Domains.OrderDomain
 {    
     public interface IOrderRepository
     {
-        Order Find(int orderId, bool throwError = false); 
+        Order Find(int orderId);         
+        Order GetLastByUser(string userId);        
         void Save(Order order);
     }
 
     public interface IOrderReadRepository
     {
-        OrderRead GetLastByUser(string userId);
+        OrderRead Find(int orderId);
     }
 
     public class PaymentId

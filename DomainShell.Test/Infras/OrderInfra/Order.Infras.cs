@@ -18,7 +18,7 @@ namespace DomainShell.Test.Infras.OrderInfra
 
         private IConnection _connection;         
 
-        public Order Find(int orderId, bool throwError = false)
+        Order IOrderRepository.Find(int orderId)
         {  
             var readSet = Read(command =>
             {
@@ -31,16 +31,32 @@ namespace DomainShell.Test.Infras.OrderInfra
                 return (whereSqls, orderSqls);
             });
 
-            var order = Map(readSet).FirstOrDefault();
-
-            if (throwError && order == null) throw new Exception("order not found.");
+            var order = MapToOrder(readSet).FirstOrDefault();
 
             return order;
         }
 
-        public void Save(Order order)
+        Order IOrderRepository.GetLastByUser(string userId)
         {
-            if (!order.State.Sealed()) return;
+            var readSet = Read(command =>
+            {
+                var whereSqls = new List<string>();
+                var orderSqls = new List<string>();
+
+                SetWhereByUser(userId, command, whereSqls);
+                SetOrderByOrderId(orderSqls, "desc");
+
+                return (whereSqls, orderSqls);
+            });
+
+            var order = MapToOrder(readSet).FirstOrDefault();     
+
+            return order;
+        }
+
+        void IOrderRepository.Save(Order order)
+        {
+            if (!order.State.Modified()) return;
 
             if (order.Deleted)
             {
@@ -56,29 +72,22 @@ namespace DomainShell.Test.Infras.OrderInfra
             }
         }
 
-        public OrderRead GetLastByUser(string userId)
-        {
+        OrderRead IOrderReadRepository.Find(int orderId)
+        {  
             var readSet = Read(command =>
             {
-                var whereSqls = new List<string>();
-                var orderSqls = new List<string>();
+                var whereSqls = new List<string>();               
+                var orderSqls = new List<string>();               
 
-                SetWhereByUser(userId, command, whereSqls);
-                SetOrderByOrderId(orderSqls, "desc");
+                SetWhereByOrderId(orderId, command, whereSqls);
+                SetOrderByOrderId(orderSqls);
 
                 return (whereSqls, orderSqls);
             });
 
-            var order = Map(readSet).FirstOrDefault();
+            var orderRead = MapToOrderRead(readSet).FirstOrDefault();
 
-            var orderRead = new ProxyObject<OrderRead>();
-
-            orderRead
-                .Set(m => m.OrderId, (m ,p) => order.OrderId)
-                .Set(m => m.ProductName, (m ,p) => order.ProductName)
-                .Set(m => m.Price, (m ,p) => order.Price);            
-
-            return orderRead.Material;
+            return orderRead;
         }
 
         private void SetWhereByOrderId(int orderId, IDbCommand command, List<string> whereSqls)
@@ -130,7 +139,7 @@ namespace DomainShell.Test.Infras.OrderInfra
             return (command.ExecuteReader(), command);
         }
 
-        private IEnumerable<Order> Map((IDataReader reader, IDbCommand command) readSet)
+        private IEnumerable<Order> MapToOrder((IDataReader reader, IDbCommand command) readSet)
         {
             try
             {
@@ -153,6 +162,37 @@ namespace DomainShell.Test.Infras.OrderInfra
                         .Set(m => m.PaymentId, (m, p) => reader[p.Name]);
 
                     yield return orderProxyObject.Material;
+                }
+            }
+            finally
+            {
+                readSet.reader.Dispose();
+                readSet.command.Dispose();
+            }
+        }
+
+        private IEnumerable<OrderRead> MapToOrderRead((IDataReader reader, IDbCommand command) readSet)
+        {
+            try
+            {
+                var reader = readSet.reader;
+
+                while (reader.Read())
+                {
+                    ProxyObject<OrderRead> orderReadProxyObject;                    
+
+                    var orderRead = OrderRead.Create();
+                    orderReadProxyObject = new ProxyObject<OrderRead>(orderRead);
+
+                    orderReadProxyObject
+                        .Set(m => m.OrderId, (m, p) => reader[p.Name])
+                        .Set(m => m.UserId, (m, p) => reader[p.Name])
+                        .Set(m => m.OrderDate, (m, p) => DateTime.ParseExact(reader[p.Name].ToString(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture))
+                        .Set(m => m.ProductName, (m, p) => reader[p.Name])
+                        .Set(m => m.Price, (m, p) => reader[p.Name])                        
+                        .Set(m => m.PaymentId, (m, p) => reader[p.Name]);
+
+                    yield return orderReadProxyObject.Material;
                 }
             }
             finally

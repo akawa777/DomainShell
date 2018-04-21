@@ -69,7 +69,7 @@ namespace DomainShell.Test
 
             container.Register<IDomainEventHandler<OrderRegisterdEvent>, OrderEventHandler>(Lifestyle.Scoped);            
             container.Register<IDomainEventHandler<OrderPaidExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventHandler<OrderIssuedCertificateEvent>, OrderEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventHandler<OrderReadIssuedCertificateEvent>, OrderReadEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);                      

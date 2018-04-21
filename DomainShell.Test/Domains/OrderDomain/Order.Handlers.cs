@@ -9,8 +9,7 @@ namespace DomainShell.Test.Domains.OrderDomain
 {
     public class OrderEventHandler : 
         IDomainEventHandler<OrderRegisterdEvent>,      
-        IDomainEventHandler<OrderPaidExceptionEvent>,
-        IDomainEventHandler<OrderIssuedCertificateEvent>
+        IDomainEventHandler<OrderPaidExceptionEvent>
     {
         public void Handle(OrderRegisterdEvent domainEvent)
         {
@@ -19,12 +18,17 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public void Handle(OrderPaidExceptionEvent domainEvent)
         {
+            var exception = domainEvent.Mode.GetException();
             Log.MessageList.Add($"{nameof(Handle)} {nameof(OrderPaidExceptionEvent)}");
         }
+    }
 
-        public void Handle(OrderIssuedCertificateEvent domainEvent)
+    public class OrderReadEventHandler :         
+        IDomainEventHandler<OrderReadIssuedCertificateEvent>
+    {
+        public void Handle(OrderReadIssuedCertificateEvent domainEvent)
         {
-            Log.MessageList.Add($"{nameof(Handle)} {nameof(OrderIssuedCertificateEvent)}");
+            Log.MessageList.Add($"{nameof(Handle)} {nameof(OrderReadIssuedCertificateEvent)}");
         }
     }
 }
