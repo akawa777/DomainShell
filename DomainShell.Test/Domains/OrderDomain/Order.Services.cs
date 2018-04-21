@@ -16,11 +16,23 @@ namespace DomainShell.Test.Domains.OrderDomain
         
         private IUserRepository _userRepository;
 
-        public PaymentId Pay(Order order)
+        public PaymentResult Pay(Order order)
+        {            
+            return PayBy(order as dynamic);
+        }
+
+        private PaymentResult PayBy(Order order)
         {            
             var paymentId = Guid.NewGuid().ToString();
 
-            return new PaymentId(paymentId);
+            return new PaymentResult(paymentId, (int)(order.Price * 0.01m));
+        }
+
+        public PaymentResult PayBy(SpecialOrder specialOrder)
+        {            
+            var paymentId = Guid.NewGuid().ToString();
+
+            return new PaymentResult(paymentId, (int)(specialOrder.Price * 0.1m));
         }
 
         public bool ExistsUser(Order order)

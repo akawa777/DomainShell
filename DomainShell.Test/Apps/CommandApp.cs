@@ -23,39 +23,7 @@ namespace DomainShell.Test.Apps
         private IOrderRepository _orderRepository;
         private IOrderService _orderService;        
         private IUserRepository _userRepository;
-
-        public void Register(OrderDto orderDto)
-        {
-            if (orderDto == null) throw new Exception("orderDto is required.");
-
-            try
-            {
-                using(var tran = Session.Tran())
-                {                    
-                    Order order;
-
-                    if (orderDto.OrderId < 1) order = Order.NewOrder();
-                    else order = _orderRepository.Find(orderDto.OrderId);
-
-                    if (order == null) throw new Exception("order not found.");
-
-                    Map(orderDto, order);
-
-                    order.Register(_orderService);                    
-
-                    _orderRepository.Save(order);
-
-                    tran.Complete();
-                }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-
-        public void Pay(OrderDto orderDto, string creditCardCode)
+        public void Pay(OrderDto orderDto, string creditCardCode, bool isSpecialOrder)
         {
             if (orderDto == null) throw new Exception("orderDto is required.");
 
@@ -63,10 +31,8 @@ namespace DomainShell.Test.Apps
             {
                 using(var tran = Session.Tran())
                 {
-                    Order order = _orderRepository.Find(orderDto.OrderId);
+                    Order order = Order.Create(isSpecialOrder);
 
-                    if (order == null) throw new Exception("order not found.");
-                    
                     Map(orderDto, order);
 
                     order.Pay(_orderService, creditCardCode);

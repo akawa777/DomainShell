@@ -8,6 +8,7 @@ namespace DomainShell.Test.Domains.UserDomain
 {
     public interface IUserRepository
     {
-        UserRead Find(string userId);
+        User Find(string userId);
+        void Save(User user);
     }
 }

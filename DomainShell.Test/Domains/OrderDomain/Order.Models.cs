@@ -9,9 +9,18 @@ namespace DomainShell.Test.Domains.OrderDomain
 {
     public class Order : AggregateRoot
     {
-        public static Order NewOrder()
+        public static Order Create(bool isSpecialOrder)
         {
-            var order = DomainModelFactory.Create<Order>();
+            Order order;
+
+            if (!isSpecialOrder)
+            {
+                order = DomainModelFactory.Create<Order>();
+            }
+            else
+            {
+                order = DomainModelFactory.Create<SpecialOrder>();
+            }
             
             return order;
         }
@@ -35,18 +44,9 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public string PaymentId { get; private set; }      
 
-        public int CertificateIssueCount { get; private set; }                  
+        public int CertificateIssueCount { get; private set; } 
 
-        public virtual void Register(IOrderService orderService)
-        {
-            ValidatePrecondition(orderService);
-
-            DomainEvents.Add(new OrderRegisterdEvent{ OrderId = OrderId });
-
-            State = ModelState.Seal(this);
-        }
-
-        public virtual void Pay(IOrderService orderService, string creditCardCode)
+        public void Pay(IOrderService orderService, string creditCardCode)
         {
             ValidatePrecondition(orderService);
 
@@ -55,10 +55,11 @@ namespace DomainShell.Test.Domains.OrderDomain
 
             CreditCardCode = creditCardCode;    
 
-            var paymentId = orderService.Pay(this);
+            var paymentResult = orderService.Pay(this);
 
-            PaymentId = paymentId.Value; 
+            PaymentId = paymentResult.PaymentId; 
 
+            DomainEvents.Add(new OrderPaidEvent{ UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });
             DomainEvents.Add(new OrderPaidExceptionEvent { PaymentId = PaymentId });
 
             State = ModelState.Seal(this);
@@ -73,11 +74,17 @@ namespace DomainShell.Test.Domains.OrderDomain
         }
     }
 
-    public class OrderRegisterdEvent : IDomainEvent
+    public class SpecialOrder : Order
+    {
+        
+    }
+
+    public class OrderPaidEvent : IDomainEvent
     {
         public DomainEventMode Mode { get; } = DomainEventMode.InSession();
 
-        public int OrderId { get; set; }
+        public string UserId { get; set; }
+        public int PaymentPoint { get; set; }
     }
 
     public class OrderPaidExceptionEvent : IDomainEvent
@@ -113,7 +120,7 @@ namespace DomainShell.Test.Domains.OrderDomain
 
         public string PaymentId { get; private set; } 
 
-        public virtual Stream IssueCertificate()
+        public Stream IssueCertificate()
         {
             if (string.IsNullOrEmpty(PaymentId)) throw new Exception("not paid.");
 

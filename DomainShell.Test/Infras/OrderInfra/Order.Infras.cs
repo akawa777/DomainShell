@@ -60,7 +60,7 @@ namespace DomainShell.Test.Infras.OrderInfra
 
             if (order.Deleted)
             {
-                Delete(order);
+                // delete
             }
             else if (order.OrderId == 0)
             {
@@ -68,7 +68,7 @@ namespace DomainShell.Test.Infras.OrderInfra
             }
             else
             {
-                Update(order);
+                // update
             }
         }
 
@@ -147,10 +147,8 @@ namespace DomainShell.Test.Infras.OrderInfra
 
                 while (reader.Read())
                 {
-                    ProxyObject<Order> orderProxyObject;                    
-
-                    var order = Order.NewOrder();
-                    orderProxyObject = new ProxyObject<Order>(order);
+                    var order = Order.Create(reader["SpecialOrderFlg"].ToString() == "1");
+                    ProxyObject<Order> orderProxyObject = new ProxyObject<Order>(order);
 
                     orderProxyObject
                         .Set(m => m.OrderId, (m, p) => reader[p.Name])
@@ -202,9 +200,9 @@ namespace DomainShell.Test.Infras.OrderInfra
             }
         }
 
-        private IEnumerable<(string Name, object Value)> GetParameters(Order Order)
+        private IEnumerable<(string Name, object Value)> GetParameters(Order order)
         {
-            var x = Order;
+            var x = order;
 
             yield return (nameof(x.UserId), x.UserId);
             yield return (nameof(x.OrderDate), x.OrderDate.Value.ToString("yyyyMMdd"));
@@ -212,6 +210,9 @@ namespace DomainShell.Test.Infras.OrderInfra
             yield return (nameof(x.Price), x.Price);
             yield return (nameof(x.CreditCardCode), x.CreditCardCode == null ? DBNull.Value : x.CreditCardCode as object);
             yield return (nameof(x.PaymentId), x.PaymentId == null ? DBNull.Value : x.PaymentId as object);
+
+            if (order is Order) yield return ("SpecialOrderFlg", 0);
+            else yield return ("SpecialOrderFlg", 1);
         }
         
         private void AddParams(IDbCommand command, IEnumerable<(string Name, object Value)> parameters)
@@ -235,9 +236,9 @@ namespace DomainShell.Test.Infras.OrderInfra
             command.Parameters.Add(sqlParam);
         }
 
-        private void Insert(Order Order)
+        private void Insert(Order order)
         {
-            var parameters = GetParameters(Order);
+            var parameters = GetParameters(order);
 
             var sql = $@"
                 insert into OrderForm (
@@ -251,43 +252,6 @@ namespace DomainShell.Test.Infras.OrderInfra
             {
                 command.CommandText = sql;
                 AddParams(command, parameters);
-                command.ExecuteNonQuery();
-            }
-        }
-
-        private void Update(Order Order)
-        {
-            var parameters = GetParameters(Order);
-
-            var sql = $@"
-                update OrderForm 
-                set
-                    {string.Join(", ", parameters.Select(x => $"{x.Name} = @{x.Name}"))}
-                where
-                    OrderId = @{nameof(Order.OrderId)}
-            ";
-
-            using(var command = _connection.CreateCommand())
-            {
-                command.CommandText = sql;
-                AddParams(command, parameters);
-                AddOrderIdParam(command, Order);
-                command.ExecuteNonQuery();
-            }
-        }
-
-        private void Delete(Order Order)
-        {
-            var sql = $@"
-                delete from OrderForm                 
-                where
-                    OrderId = @{nameof(Order.OrderId)}
-            ";
-
-            using(var command = _connection.CreateCommand())
-            {
-                command.CommandText = sql;
-                AddOrderIdParam(command, Order);
                 command.ExecuteNonQuery();
             }
         }

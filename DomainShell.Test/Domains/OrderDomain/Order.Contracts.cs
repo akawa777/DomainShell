@@ -18,19 +18,21 @@ namespace DomainShell.Test.Domains.OrderDomain
         OrderRead Find(int orderId);
     }
 
-    public class PaymentId
+    public class PaymentResult
     {
-        public PaymentId(string paymenId)
+        public PaymentResult(string paymenId, int paymentPoint)
         {
-            Value = paymenId;
+            PaymentId = paymenId;
+            PaymentPoint = paymentPoint;
         }
 
-        public string Value { get; }
+        public string PaymentId { get; }
+        public int PaymentPoint { get; }
     }
 
     public interface IOrderService
     {
-        PaymentId Pay(Order order);
+        PaymentResult Pay(Order order);
         bool ExistsUser(Order order);
     }
 }

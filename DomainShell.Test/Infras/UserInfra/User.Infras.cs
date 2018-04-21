@@ -17,13 +17,18 @@ namespace DomainShell.Test.Infras.UserInfra
 
         private IConnection _connection;
 
-        public UserRead Find(string userId)
+        public User Find(string userId)
         {
             var readSet = Read(userId);
 
             var user = Map(readSet).FirstOrDefault();
 
             return user;
+        }
+
+        public void Save(User user)
+        {
+            Log.MessageList.Add($"{nameof(UserRepository)} {nameof(Save)} {nameof(User)}");
         }
 
         private (IDataReader reader, IDbCommand command) Read(string userId)
@@ -46,7 +51,7 @@ namespace DomainShell.Test.Infras.UserInfra
             return (command.ExecuteReader(), command);
         }
 
-        private IEnumerable<UserRead> Map((IDataReader reader, IDbCommand command) readSet)
+        private IEnumerable<User> Map((IDataReader reader, IDbCommand command) readSet)
         {
             try
             {
@@ -54,11 +59,12 @@ namespace DomainShell.Test.Infras.UserInfra
 
                 while (reader.Read())
                 {
-                    var userProxyObject = new ProxyObject<UserRead>();
+                    var userProxyObject = new ProxyObject<User>();
 
                     userProxyObject
                         .Set(m => m.UserId, (m, p) => reader[p.Name])
-                        .Set(m => m.UserName, (m, p) => reader[p.Name]);
+                        .Set(m => m.UserName, (m, p) => reader[p.Name])
+                        .Set(m => m.PaymentPoint, (m, p) => reader[p.Name]);
 
                     yield return userProxyObject.Material;
                 }

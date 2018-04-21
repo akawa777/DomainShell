@@ -30,19 +30,37 @@ namespace DomainShell.Test
                     UserId = "user1"
                 };
 
-                commandApp.Register(order);
+                commandApp.Pay(order, "xxxx-xxxx-xxxx-xxxx", false);  
 
-                var lastOrderRead = queryApp.GetLastByUser("user1");   
+                var lastOrder = queryApp.GetLastByUser("user1");          
 
-                var lastOrder = queryApp.Find(lastOrderRead.OrderId);
-
-                commandApp.Pay(lastOrder, "xxxx-xxxx-xxxx-xxxx");                
-
-                var certificate = queryApp.IssueCertificate(lastOrderRead.OrderId);
+                var certificate = queryApp.IssueCertificate(lastOrder.OrderId);
 
                 var messageList = Log.MessageList;
+            }
+        }
 
-                Assert.AreEqual(1, messageList.Count);
+        [TestMethod]
+        public void TestMethod2()
+        {
+            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
+
+            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
+            {
+                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
+                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+
+                OrderDto order = new OrderDto
+                {
+                    OrderDate = "20180101",
+                    ProductName = "product1",
+                    Price = 999,
+                    UserId = "user1"
+                };
+
+                commandApp.Pay(order, "xxxx-xxxx-xxxx-xxxx", true);  
+
+                var messageList = Log.MessageList;
             }
         }
 

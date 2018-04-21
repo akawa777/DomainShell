@@ -67,7 +67,7 @@ namespace DomainShell.Test
 
             container.Register<IOrderService, OrderService>(Lifestyle.Scoped);            
 
-            container.Register<IDomainEventHandler<OrderRegisterdEvent>, OrderEventHandler>(Lifestyle.Scoped);            
+            container.Register<IDomainEventHandler<OrderPaidEvent>, OrderEventHandler>(Lifestyle.Scoped);            
             container.Register<IDomainEventHandler<OrderPaidExceptionEvent>, OrderEventHandler>(Lifestyle.Scoped);
             container.Register<IDomainEventHandler<OrderReadIssuedCertificateEvent>, OrderReadEventHandler>(Lifestyle.Scoped);
 
@@ -143,16 +143,18 @@ namespace DomainShell.Test
                     Price numeric,
                     CreditCardCode text,
                     PaymentId text,     
-                    CertificateIssueCount integer
+                    CertificateIssueCount integer,
+                    SpecialOrderFlg integer
                 );
 
                 create table LoginUser (
                     UserId text primary key,                    
-                    UserName text
+                    UserName text,
+                    PaymentPoint integer
                 );
 
-                insert into LoginUser values('user1', 'user1');
-                insert into LoginUser values('user2', 'user2');
+                insert into LoginUser values('user1', 'user1', 0);
+                insert into LoginUser values('user2', 'user2', 0);
             ";
 
             command.ExecuteNonQuery();
