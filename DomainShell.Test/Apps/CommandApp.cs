@@ -12,18 +12,15 @@ namespace DomainShell.Test.Apps
     {
         public OrderCommandApp(
             IOrderRepository orderRepository,
-            IOrderService orderService,            
-            IUserRepository userRepository)
+            IOrderService orderService)
         {            
             _orderRepository = orderRepository;
-            _orderService = orderService;            
-            _userRepository = userRepository;
+            _orderService = orderService;
         }
 
         private IOrderRepository _orderRepository;
-        private IOrderService _orderService;        
-        private IUserRepository _userRepository;
-        
+        private IOrderService _orderService;
+
         public void Pay(OrderDto orderDto, string creditCardCode, bool isSpecialOrder)
         {
             if (orderDto == null) throw new Exception("orderDto is required.");
