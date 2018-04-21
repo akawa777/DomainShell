@@ -64,6 +64,7 @@ namespace DomainShell.Test.Apps
                 using (Session.Open())
                 {
                     var orderRead = _orderReadRepository.Find(orderId);
+                    
                     var certificate = orderRead.IssueCertificate();
 
                     return certificate;
