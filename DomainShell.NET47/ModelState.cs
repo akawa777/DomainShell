@@ -3,9 +3,9 @@ using Newtonsoft.Json;
 
 namespace DomainShell
 {    
-    public struct Dirty
+    public struct ModelState
     {
-        private Dirty(object domainModel, bool isClear = false)
+        private ModelState(object domainModel, bool isClear = false)
         {
             if (isClear)
             {
@@ -27,24 +27,19 @@ namespace DomainShell
             return JsonConvert.SerializeObject(domainMpdel, Formatting.Indented);            
         }
         
-        public bool Verify()
+        public bool Modified()
         {
             if (_domainModel == null) return false;
-
+            
             string serializedData = SerializeData(_domainModel);
             if (_serializedData == serializedData) return true;
 
             throw new InvalidOperationException($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_serializedData}\"{Environment.NewLine}current{Environment.NewLine}\"{serializedData}\"");
         }        
 
-        public static Dirty Seal<T>(T domainModel) where T : class
+        public static ModelState Seal<T>(T domainModel) where T : class
         {
-            return new Dirty(domainModel);
-        }
-
-        public static Dirty Clear<T>(T domainModel) where T : class
-        {
-            return new Dirty(domainModel, isClear: true);
+            return new ModelState(domainModel);
         }
     }
 }

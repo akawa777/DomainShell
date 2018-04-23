@@ -28,7 +28,7 @@ namespace DomainShell
         {
             Validate();
 
-            ISession session = _getSession();            
+            var session = _getSession();            
             return session.Open();
         }
 
@@ -36,7 +36,7 @@ namespace DomainShell
         {
             Validate();
 
-            ISession session = _getSession();
+            var session = _getSession();
             return session.Tran();
         }
 
@@ -44,7 +44,7 @@ namespace DomainShell
         {
             Validate();
 
-            ISession session = _getSession();
+            var session = _getSession();
             session.OnException(exception);
         }
     }
@@ -114,7 +114,7 @@ namespace DomainShell
                         {
                             try
                             {
-                                TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                                var domainEvents = GetDomainEvents().ToArray();
                                 _allDomainEvents.AddRange(domainEvents);
 
                                 PublishDomainEventInSession(domainEvents);
@@ -135,7 +135,7 @@ namespace DomainShell
 
                 return new OpenScope(() => 
                 {
-                    TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                    var domainEvents = GetDomainEvents().ToArray();
                     _allDomainEvents.AddRange(domainEvents);
 
                     PublishDomainEventInSession(domainEvents);
@@ -160,7 +160,7 @@ namespace DomainShell
                         {
                             try
                             {
-                                TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                                var domainEvents = GetDomainEvents().ToArray();
                                 _allDomainEvents.AddRange(domainEvents);
 
                                 if (completed)
@@ -189,7 +189,7 @@ namespace DomainShell
                 return new TranScope(
                 completed => 
                 {
-                    TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+                    var domainEvents = GetDomainEvents().ToArray();
                     _allDomainEvents.AddRange(domainEvents);
 
                     if (completed)
@@ -214,17 +214,17 @@ namespace DomainShell
 
         public virtual void OnException(Exception exception)
         {
-            TDomainEvent[] domainEvents = GetDomainEvents().ToArray();
+            var domainEvents = GetDomainEvents().ToArray();
             _allDomainEvents.AddRange(domainEvents);
 
-            OnException(exception, _allDomainEvents.ToArray());
+            PublishDomainEventOnException(exception, _allDomainEvents.ToArray());
         }
 
         protected abstract void BeginOpen();
         protected abstract void BeginTran();
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
-        protected abstract void OnException(Exception exception, TDomainEvent[] domainEvents);
+        protected abstract void PublishDomainEventOnException(Exception exception, TDomainEvent[] domainEvents);
         protected abstract void PublishDomainEventInSession(TDomainEvent[] domainEvents);
         protected abstract void PublishDomainEventOutSession(TDomainEvent[] domainEvents);        
     }   

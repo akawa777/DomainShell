@@ -9,7 +9,4 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-     <Exec Command="rem del $(SolutionDir)\$(ProjectName).NET47\*.cs copy $(ProjectDir)*.cs $(SolutionDir)\$(ProjectName).NET47\" /> 
-  </Target>
 </Project>
