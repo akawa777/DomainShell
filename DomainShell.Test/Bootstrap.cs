@@ -144,17 +144,19 @@ namespace DomainShell.Test
                     CreditCardCode text,
                     PaymentId text,     
                     CertificateIssueCount integer,
-                    SpecialOrderFlg integer
+                    SpecialOrderFlg integer,
+                    LastUpdate text
                 );
 
                 create table LoginUser (
                     UserId text primary key,                    
                     UserName text,
-                    PaymentPoint integer
+                    PaymentPoint integer,
+                    LastUpdate text
                 );
 
-                insert into LoginUser values('user1', 'user1', 0);
-                insert into LoginUser values('user2', 'user2', 0);
+                insert into LoginUser values('user1', 'user1', 0, '201801010000');
+                insert into LoginUser values('user2', 'user2', 0, '201801010000');
             ";
 
             command.ExecuteNonQuery();

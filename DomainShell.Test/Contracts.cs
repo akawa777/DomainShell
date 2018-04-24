@@ -16,5 +16,7 @@ namespace DomainShell.Test
         ModelState State { get; }
 
         bool Deleted { get; }
+
+        string LastUpdate { get; }
     }
 }

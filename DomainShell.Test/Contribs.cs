@@ -221,6 +221,8 @@ namespace DomainShell.Test
         public bool Deleted { get; protected set; }
 
         public ModelState State { get; protected set; }
+
+        public string LastUpdate { get; private set; }
     }
 
     public abstract class ReadAggregateRoot : IDomainEventAuthor<IDomainEvent>

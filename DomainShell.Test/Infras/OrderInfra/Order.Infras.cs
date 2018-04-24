@@ -60,15 +60,15 @@ namespace DomainShell.Test.Infras.OrderInfra
 
             if (order.Deleted)
             {
-                // delete
+                Delete(order);
             }
-            else if (order.OrderId == 0)
+            else if (string.IsNullOrEmpty(order.LastUpdate))
             {
                 Insert(order);
             }
             else
             {
-                // update
+                Update(order);
             }
         }
 
@@ -157,7 +157,8 @@ namespace DomainShell.Test.Infras.OrderInfra
                         .Set(m => m.ProductName, (m, p) => reader[p.Name])
                         .Set(m => m.Price, (m, p) => reader[p.Name])
                         .Set(m => m.CreditCardCode, (m, p) => reader[p.Name])
-                        .Set(m => m.PaymentId, (m, p) => reader[p.Name]);
+                        .Set(m => m.PaymentId, (m, p) => reader[p.Name])
+                        .Set(m => m.LastUpdate, (m, p) => reader[p.Name]);;
 
                     yield return orderProxyObject.Material;
                 }
@@ -213,6 +214,8 @@ namespace DomainShell.Test.Infras.OrderInfra
 
             if (order is Order) yield return ("SpecialOrderFlg", 0);
             else yield return ("SpecialOrderFlg", 1);
+
+            yield return (nameof(x.LastUpdate), DateTime.Now.ToString("yyyyMMddmmss"));
         }
         
         private void AddParams(IDbCommand command, IEnumerable<(string Name, object Value)> parameters)
@@ -255,5 +258,42 @@ namespace DomainShell.Test.Infras.OrderInfra
                 command.ExecuteNonQuery();
             }
         }
+
+        private void Update(Order Order)
+        {
+           var parameters = GetParameters(Order);
+
+           var sql = $@"
+               update OrderForm 
+               set
+                   {string.Join(", ", parameters.Select(x => $"{x.Name} = @{x.Name}"))}
+               where
+                   OrderId = @{nameof(Order.OrderId)}
+           ";
+
+           using(var command = _connection.CreateCommand())
+           {
+               command.CommandText = sql;
+               AddParams(command, parameters);
+               AddOrderIdParam(command, Order);
+               command.ExecuteNonQuery();
+           }
+        }
+
+       private void Delete(Order Order)
+       {
+           var sql = $@"
+               delete from OrderForm                 
+               where
+                   OrderId = @{nameof(Order.OrderId)}
+           ";
+
+           using(var command = _connection.CreateCommand())
+           {
+               command.CommandText = sql;
+               AddOrderIdParam(command, Order);
+               command.ExecuteNonQuery();
+           }
+       }        
     }  
 }

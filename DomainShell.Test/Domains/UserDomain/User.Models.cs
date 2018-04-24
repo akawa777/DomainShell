@@ -14,10 +14,11 @@ namespace DomainShell.Test.Domains.UserDomain
 
         public User Create(string userId)
         {
-            return new User
-            {
-                UserId = userId
-            };
+            var user = DomainModelFactory.Create<User>();
+
+            user.UserId = userId;
+
+            return user;
         }
 
         public string UserId { get; private set; }
