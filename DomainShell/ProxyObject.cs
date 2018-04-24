@@ -62,13 +62,16 @@ namespace DomainShell
 
         private PropertyInfo GetProperty<TProperty>(Type type, Expression<Func<TMaterial, TProperty>> expression)
         {
-            var property = type.GetProperty((expression.Body as MemberExpression).Member.Name);
+            var property = type.GetProperty((expression.Body as MemberExpression).Member.Name);            
             
             if (property == null && type.BaseType == typeof(object))
             {
                 throw new ArgumentException($"{expression.ToString()} is not propery of {typeof(TMaterial).GetType().Name}.");
             }
-            else if (property == null || property.DeclaringType != type)
+
+            property = property.DeclaringType.GetProperty(property.Name);
+
+            if (property == null)
             {
                 return GetProperty(type.BaseType, expression);
             }
