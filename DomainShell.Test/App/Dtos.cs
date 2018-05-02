@@ -1,12 +1,8 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DomainShell;
-using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.UserDomain;
-using DomainShell.Test.Domains.OrderDomain;
 
-namespace DomainShell.Test.Apps
+namespace DomainShell.Test.App
 {
     public class OrderDto
     {

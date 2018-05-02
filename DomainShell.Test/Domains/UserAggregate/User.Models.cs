@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DomainShell;
 
-namespace DomainShell.Test.Domains.UserDomain
+namespace DomainShell.Test.Domain.UserAggregate
 {
     public class User : AggregateRoot
     {   

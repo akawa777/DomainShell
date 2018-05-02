@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Threading;
 using System.Threading.Tasks;
-using DomainShell.Test.Domains.UserDomain;
+using DomainShell.Test.Domain.UserAggregate;
 
-namespace DomainShell.Test.Domains.OrderDomain
+namespace DomainShell.Test.Domain.OrderAggregate
 {
     public class OrderEventHandler : 
         IDomainEventHandler<OrderPaidEvent>,      

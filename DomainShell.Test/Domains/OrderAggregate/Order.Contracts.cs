@@ -1,10 +1,8 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DomainShell;
-using System.Data;
 
-namespace DomainShell.Test.Domains.OrderDomain
+namespace DomainShell.Test.Domain.OrderAggregate
 {    
     public interface IOrderRepository
     {

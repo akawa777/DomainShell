@@ -1,12 +1,10 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DomainShell;
 using System.Data;
-using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.UserDomain;
+using DomainShell.Test.Domain.UserAggregate;
 
-namespace DomainShell.Test.Infras.UserInfra
+namespace DomainShell.Test.Infras.UserAggregate
 {    
     public class UserRepository : IUserRepository
     {

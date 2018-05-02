@@ -8,12 +8,11 @@ using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using DomainShell.Test.Apps;
-using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.UserDomain;
-using DomainShell.Test.Domains.OrderDomain;
-using DomainShell.Test.Infras.UserInfra;
-using DomainShell.Test.Infras.OrderInfra;
+using DomainShell.Test.App;
+using DomainShell.Test.Domain.OrderAggregate;
+using DomainShell.Test.Domain.UserAggregate;
+using DomainShell.Test.Infras.UserAggregate;
+using DomainShell.Test.Infras.OrderAggregate;
 using System.Reflection;
 
 namespace DomainShell.Test

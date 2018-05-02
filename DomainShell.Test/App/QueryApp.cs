@@ -3,10 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using DomainShell;
-using DomainShell.Test.Domains;
-using DomainShell.Test.Domains.OrderDomain;
+using DomainShell.Test.Domain.OrderAggregate;
 
-namespace DomainShell.Test.Apps
+namespace DomainShell.Test.App
 {   
     public class OrderQueryApp
     {

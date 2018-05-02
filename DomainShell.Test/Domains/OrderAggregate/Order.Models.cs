@@ -3,9 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using DomainShell;
-using DomainShell.Test.Domains.UserDomain;
 
-namespace DomainShell.Test.Domains.OrderDomain
+namespace DomainShell.Test.Domain.OrderAggregate
 {
     public class Order : AggregateRoot
     {

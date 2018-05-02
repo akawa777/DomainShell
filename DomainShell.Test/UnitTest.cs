@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using DomainShell;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
-using DomainShell.Test.Apps;
+using DomainShell.Test.App;
 
 namespace DomainShell.Test
 {
