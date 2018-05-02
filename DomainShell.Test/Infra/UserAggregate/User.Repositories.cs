@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using DomainShell.Test.Domain.UserAggregate;
 
-namespace DomainShell.Test.Infras.UserAggregate
+namespace DomainShell.Test.Infra.UserAggregate
 {    
     public class UserRepository : IUserRepository
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using DomainShell.Test.Domain.OrderAggregate;
 
-namespace DomainShell.Test.Infras.OrderAggregate
+namespace DomainShell.Test.Infra.OrderAggregate
 {    
     public class OrderRepository : IOrderRepository, IOrderReadRepository
     {

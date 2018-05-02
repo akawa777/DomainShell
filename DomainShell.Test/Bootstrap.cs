@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using DomainShell.Test.App;
 using DomainShell.Test.Domain.OrderAggregate;
 using DomainShell.Test.Domain.UserAggregate;
-using DomainShell.Test.Infras.UserAggregate;
-using DomainShell.Test.Infras.OrderAggregate;
+using DomainShell.Test.Infra.UserAggregate;
+using DomainShell.Test.Infra.OrderAggregate;
 using System.Reflection;
 
 namespace DomainShell.Test
