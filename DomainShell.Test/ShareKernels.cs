@@ -7,43 +7,44 @@ using SimpleInjector.Lifestyles;
 using System.Data;
 using System.Reflection;
 using System.Threading.Tasks;
+using DomainShell.Kernels;
 
 namespace DomainShell.Test
 {
-    public class DomainModelFactoryFoundation : DomainModelFactoryFoundationBase
+    public class DomainModelFactoryKernel : DomainModelFactoryKernelBase
     {
-        public DomainModelFactoryFoundation(Container container)
+        public DomainModelFactoryKernel(Container container)
         {
             _container = container;
         }
 
         private Container _container;
 
-        protected override bool TryCreate<T>(out T model)
+        public override bool TryCreate(Type type, out object domainModel)
         {
-            model = default(T);
+            domainModel = null;
 
-            var producer = _container.GetRegistration(typeof(T));
+            var producer = _container.GetRegistration(type);
 
             if (producer == null) return false;
 
-            model = _container.GetInstance<T>();
+            domainModel = _container.GetInstance(type);
 
             return true;
         }
     }
 
-    public class DomainModelTrackerFoundation : DomainModelTrackerFoundationBase
+    public class DomainModelTrackerKernel : DomainModelTrackerKernelBase
     {
-        protected override object CreateTag<T>(T domainModel)
+        protected override object CreateTag(object domainModel)
         {
             return null;
         }
     }
 
-    public class SessionFoundation : SessionFoundationBase<IDomainEvent>, IConnection
+    public class SessionKernel : SessionKernelBase<IDomainEvent>, IConnection
     {
-        public SessionFoundation(Container container, IDbConnection connection)
+        public SessionKernel(Container container, IDbConnection connection)
         {
             _container = container;
             _connection = connection;
@@ -143,6 +144,24 @@ namespace DomainShell.Test
 
             return command;
         }
+
+        protected override IDomainEvent[] GetDomainEvents(object model)
+        {
+            if (model is IAggregateRoot aggregateRoot)
+            {
+                return aggregateRoot.GetDomainEvents();
+            }
+
+            return new IDomainEvent[0];
+        }
+
+        protected override void ClearDomainEvents(object model)
+        {
+            if (model is IAggregateRoot aggregateRoot)
+            {
+                aggregateRoot.ClearDomainEvents();
+            }
+        }
     }
     
     public class DomainEventMode
@@ -199,7 +218,7 @@ namespace DomainShell.Test
         void Handle(TDomainEvent domainEvent);
     }
 
-    public abstract class AggregateRoot : IAggregateRoot, IDomainEventAuthor<IDomainEvent>
+    public abstract class AggregateRoot : IAggregateRoot
     {
         protected AggregateRoot()
         {
@@ -208,9 +227,9 @@ namespace DomainShell.Test
 
         protected List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
 
-        public IEnumerable<IDomainEvent> GetDomainEvents()
+        public IDomainEvent[] GetDomainEvents()
         {
-            return DomainEvents.AsReadOnly();
+            return DomainEvents.ToArray();
         }
 
         public void ClearDomainEvents()
@@ -225,7 +244,7 @@ namespace DomainShell.Test
         public string LastUpdate { get; private set; }
     }
 
-    public abstract class ReadAggregateRoot : IDomainEventAuthor<IDomainEvent>
+    public abstract class ReadAggregateRoot : IAggregateRootRead
     {
         protected ReadAggregateRoot()
         {
@@ -234,9 +253,9 @@ namespace DomainShell.Test
 
         protected List<IDomainEvent> DomainEvents { get; } = new List<IDomainEvent>();
 
-        public IEnumerable<IDomainEvent> GetDomainEvents()
+        public IDomainEvent[] GetDomainEvents()
         {
-            return DomainEvents.AsReadOnly();
+            return DomainEvents.ToArray();
         }
 
         public void ClearDomainEvents()

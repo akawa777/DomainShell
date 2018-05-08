@@ -5,48 +5,13 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DomainShell
+namespace DomainShell.Kernels
 {
-    public static class Session
+    public interface ISessionKernel
     {
-        private static Func<ISession> _getSession;
-
-        public static void Startup(Func<ISession> getSession)
-        {
-            _getSession = getSession;            
-        }
-
-        private static void Validate()
-        {
-            if (_getSession == null)
-            {
-                throw new InvalidOperationException("StratUp not runninng.");
-            }
-        }
-
-        public static IOpenScope Open()
-        {
-            Validate();
-
-            var session = _getSession();            
-            return session.Open();
-        }
-
-        public static ITranScope Tran()
-        {
-            Validate();
-
-            var session = _getSession();
-            return session.Tran();
-        }
-
-        public static void OnException(Exception exception)
-        {
-            Validate();
-
-            var session = _getSession();
-            session.OnException(exception);
-        }
+        IOpenScope Open();
+        ITranScope Tran();
+        void OnException(Exception exception);
     }
 
     internal class OpenScope : IOpenScope
@@ -56,10 +21,10 @@ namespace DomainShell
             _dispose = dispose;
         }
 
-        private Action _dispose = () => {};
+        private Action _dispose = () => { };
 
         public void Dispose()
-        {   
+        {
             _dispose();
         }
     }
@@ -67,15 +32,15 @@ namespace DomainShell
     internal class TranScope : ITranScope
     {
         public TranScope(Action<bool> dispose)
-        {   
+        {
             _dispose = dispose;
         }
 
-        private Action<bool> _dispose = x => {};
+        private Action<bool> _dispose = x => { };
         private bool _completed = false;
 
         public void Complete()
-        {   
+        {
             _completed = true;
         }
 
@@ -92,7 +57,7 @@ namespace DomainShell
         }
     }
 
-    public abstract class SessionFoundationBase<TDomainEvent> : ISession where TDomainEvent : class
+    public abstract class SessionKernelBase<TDomainEvent> : ISessionKernel where TDomainEvent : class
     {
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
@@ -133,7 +98,7 @@ namespace DomainShell
                     return _openScope;
                 }
 
-                return new OpenScope(() => 
+                return new OpenScope(() =>
                 {
                     var domainEvents = GetDomainEvents().ToArray();
                     _allDomainEvents.AddRange(domainEvents);
@@ -147,7 +112,7 @@ namespace DomainShell
         {
             lock (_lockTran)
             {
-                IOpenScope openScope = Open();
+                var openScope = Open();
 
                 if (_tranScope == null)
                 {
@@ -165,9 +130,9 @@ namespace DomainShell
 
                                 if (completed)
                                 {
-                                    PublishDomainEventInSession(domainEvents);                               
+                                    PublishDomainEventInSession(domainEvents);
                                 }
-                                
+
                                 EndTran(completed);
 
                                 if (completed)
@@ -177,7 +142,7 @@ namespace DomainShell
                             }
                             finally
                             {
-                                _tranScope = null;                                
+                                _tranScope = null;
                                 openScope.Dispose();
                             }
                         }
@@ -187,7 +152,7 @@ namespace DomainShell
                 }
 
                 return new TranScope(
-                completed => 
+                completed =>
                 {
                     var domainEvents = GetDomainEvents().ToArray();
                     _allDomainEvents.AddRange(domainEvents);
@@ -198,16 +163,18 @@ namespace DomainShell
                     }
                 });
             }
-        }        
+        }
 
         protected virtual IEnumerable<TDomainEvent> GetDomainEvents()
         {
             foreach (var trackPack in DomainModelTracker.GetAll())
             {
-                if (trackPack.Model is IDomainEventAuthor<TDomainEvent> domainEvenAuthor)
+                var domainEvents = GetDomainEvents(trackPack.DomainModel);
+
+                if (domainEvents != null)
                 {
-                    foreach (var domainEvent in domainEvenAuthor.GetDomainEvents()) yield return domainEvent;
-                    domainEvenAuthor.ClearDomainEvents();
+                    foreach (var domainEvent in domainEvents) yield return domainEvent;
+                    ClearDomainEvents(trackPack.DomainModel);
                 }
             }
         }
@@ -224,8 +191,10 @@ namespace DomainShell
         protected abstract void BeginTran();
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
+        protected abstract TDomainEvent[] GetDomainEvents(object model);
+        protected abstract void ClearDomainEvents(object model);
         protected abstract void PublishDomainEventOnException(Exception exception, TDomainEvent[] domainEvents);
         protected abstract void PublishDomainEventInSession(TDomainEvent[] domainEvents);
-        protected abstract void PublishDomainEventOutSession(TDomainEvent[] domainEvents);        
-    }   
+        protected abstract void PublishDomainEventOutSession(TDomainEvent[] domainEvents);
+    }
 }

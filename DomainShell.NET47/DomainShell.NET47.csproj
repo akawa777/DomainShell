@@ -44,20 +44,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DomainEventAuthor.cs" />
     <Compile Include="DomainModelFactory.cs" />
-    <Compile Include="DomainModelFactoryFoundation.cs" />
     <Compile Include="DomainModelTracker.cs" />
-    <Compile Include="DomainModelTrackerFoundation.cs" />
+    <Compile Include="Kernels\DomainModelFactoryKernel.cs" />
+    <Compile Include="Kernels\DomainModelTrackerKernel.cs" />
+    <Compile Include="Kernels\SessionKernel.cs" />
     <Compile Include="ModelState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyObject.cs" />
     <Compile Include="Session.cs" />
-    <Compile Include="SessionFoundation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>$(ProjectDir)prebuild.bat</PreBuildEvent>

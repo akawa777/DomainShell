@@ -14,6 +14,7 @@ using DomainShell.Test.Domain.UserAggregate;
 using DomainShell.Test.Infra.UserAggregate;
 using DomainShell.Test.Infra.OrderAggregate;
 using System.Reflection;
+using DomainShell.Kernels;
 
 namespace DomainShell.Test
 {
@@ -48,17 +49,17 @@ namespace DomainShell.Test
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
 
             // start up for DomainShell >>
-            container.Register<IDomainModelFactory, DomainModelFactoryFoundation>(Lifestyle.Scoped);
-            container.Register<IDomainModelTracker, DomainModelTrackerFoundation>(Lifestyle.Scoped);       
-            container.Register<ISession, SessionFoundation>(Lifestyle.Scoped);
+            container.Register<IDomainModelFactoryKernel, DomainModelFactoryKernel>(Lifestyle.Scoped);
+            container.Register<IDomainModelTrackerKernel, DomainModelTrackerKernel>(Lifestyle.Scoped);       
+            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);
 
-            DomainModelFactory.Startup(container.GetInstance<IDomainModelFactory>);            
-            DomainModelTracker.Startup(container.GetInstance<IDomainModelTracker>);                        
-            Session.Startup(container.GetInstance<ISession>);
+            DomainModelFactory.Startup(container.GetInstance<IDomainModelFactoryKernel>);            
+            DomainModelTracker.Startup(container.GetInstance<IDomainModelTrackerKernel>);                        
+            Session.Startup(container.GetInstance<ISessionKernel>);
             // <<    
 
             container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
-            container.Register<IConnection, SessionFoundation>(Lifestyle.Scoped);                        
+            container.Register<IConnection, SessionKernel>(Lifestyle.Scoped);                        
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);                         

@@ -180,9 +180,7 @@ namespace DomainShell
 
         public static object Get(this PropertyInfo property, object obj)
         {
-            PropertyAccessor accessor;
-
-            if (!_propertyAccessorMap.TryGetValue(property, out accessor))
+            if (!_propertyAccessorMap.TryGetValue(property, out PropertyAccessor accessor))
             {
                 accessor = new PropertyAccessor(property);
                 _propertyAccessorMap[property] = accessor;
@@ -193,9 +191,7 @@ namespace DomainShell
 
         public static void Set(this PropertyInfo property, object obj, object value)
         {
-            PropertyAccessor accessor;
-
-            if (!_propertyAccessorMap.TryGetValue(property, out accessor))
+            if (!_propertyAccessorMap.TryGetValue(property, out PropertyAccessor accessor))
             {
                 accessor = new PropertyAccessor(property);
                 _propertyAccessorMap[property] = accessor;

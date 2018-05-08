@@ -11,12 +11,23 @@ namespace DomainShell.Test
         IDbCommand CreateCommand();
     }
 
-    public interface IAggregateRoot : IDomainEventAuthor<IDomainEvent>
+    public interface IAggregateRoot
     {
         ModelState State { get; }
 
         bool Deleted { get; }
 
         string LastUpdate { get; }
+
+        IDomainEvent[] GetDomainEvents();
+
+        void ClearDomainEvents();
+    }
+
+    public interface IAggregateRootRead
+    {
+        IDomainEvent[] GetDomainEvents();
+
+        void ClearDomainEvents();
     }
 }
