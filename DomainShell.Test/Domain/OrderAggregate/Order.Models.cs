@@ -69,8 +69,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
             PaymentId = paymentResult.PaymentId; 
 
-            DomainEvents.Add(new OrderPaidEvent{ UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });
-            DomainEvents.Add(new OrderPaidExceptionEvent { OrderId = OrderId });
+            DomainEvents.Add(new OrderPaidEvent{ OrderId = OrderId, UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });            
 
             State = ModelState.Seal(this);
         }
@@ -114,17 +113,9 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
     public class OrderPaidEvent : IDomainEvent
     {
-        public DomainEventMode Mode { get; } = DomainEventMode.InSession();
-
         public string UserId { get; set; }
-        public int PaymentPoint { get; set; }
-    }
-
-    public class OrderPaidExceptionEvent : IDomainEvent
-    {
-        public DomainEventMode Mode { get; } = DomainEventMode.OnException();
-
         public int OrderId { get; set; }
+        public int PaymentPoint { get; set; }
     }
 
     public class OrderRead : ReadAggregateRoot
@@ -179,8 +170,6 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
     public class OrderReadIssuedCertificateEvent : IDomainEvent
     {
-        public DomainEventMode Mode { get; } = DomainEventMode.OutSession();
-
         public int OrderId { get; set; }
     }
 }

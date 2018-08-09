@@ -126,7 +126,12 @@ namespace DomainShell.Kernels
                             try
                             {
                                 var domainEvents = GetDomainEvents().ToArray();
-                                _allDomainEvents.AddRange(domainEvents);
+
+                                foreach (var domainEvent in domainEvents)
+                                {
+                                    if (_allDomainEvents.Any(x => x == domainEvent)) continue;
+                                    _allDomainEvents.Add(domainEvent);
+                                }                                
 
                                 if (completed)
                                 {
@@ -155,7 +160,12 @@ namespace DomainShell.Kernels
                 completed =>
                 {
                     var domainEvents = GetDomainEvents().ToArray();
-                    _allDomainEvents.AddRange(domainEvents);
+
+                    foreach (var domainEvent in domainEvents)
+                    {
+                        if (_allDomainEvents.Any(x => x == domainEvent)) continue;
+                        _allDomainEvents.Add(domainEvent);
+                    }
 
                     if (completed)
                     {
@@ -182,7 +192,12 @@ namespace DomainShell.Kernels
         public virtual void OnException(Exception exception)
         {
             var domainEvents = GetDomainEvents().ToArray();
-            _allDomainEvents.AddRange(domainEvents);
+
+            foreach (var domainEvent in domainEvents)
+            {
+                if (_allDomainEvents.Any(x => x == domainEvent)) continue;
+                _allDomainEvents.Add(domainEvent);
+            }
 
             PublishDomainEventOnException(exception, _allDomainEvents.ToArray());
         }

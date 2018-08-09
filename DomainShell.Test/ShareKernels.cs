@@ -86,16 +86,14 @@ namespace DomainShell.Test
         {
             foreach (var domainEvent in domainEvents)
             {
-                if (domainEvent.Mode.Format == DomainEventFormat.OnException)
+                if (_container.GetRegistration(typeof(IDomainEventExceptionHandler<>).MakeGenericType(domainEvent.GetType())) == null)
                 {
-                    var field = domainEvent.Mode.GetType().GetField("_exception", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                    field.SetValue(domainEvent.Mode, exception);
-
-                    var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
-
-                    handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
+                    continue;
                 }
+
+                var handler = _container.GetInstance(typeof(IDomainEventExceptionHandler<>).MakeGenericType(domainEvent.GetType()));
+
+                handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType(), typeof(Exception) }).Invoke(handler, new object[] { domainEvent, exception });
             }
         }
 
@@ -103,12 +101,14 @@ namespace DomainShell.Test
         {
             foreach (var domainEvent in domainEvents)
             {
-                if (domainEvent.Mode.Format == DomainEventFormat.InSession)
+                if (_container.GetRegistration(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType())) == null)
                 {
-                    var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
-
-                    handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
+                    continue;
                 }
+
+                var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));                
+
+                handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
             }
         }
 
@@ -120,13 +120,15 @@ namespace DomainShell.Test
                 {
                      foreach (var domainEvent in domainEvents)
                      {
-                         if (domainEvent.Mode.Format == DomainEventFormat.OutSession)
-                         {
-                            var handler = _container.GetInstance(typeof(IDomainEventHandler<>).MakeGenericType(domainEvent.GetType()));
-
-                            handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
+                        if (_container.GetRegistration(typeof(IDomainEventAsyncHandler<>).MakeGenericType(domainEvent.GetType())) == null)
+                        {
+                            continue;
                         }
-                     }
+
+                        var handler = _container.GetInstance(typeof(IDomainEventAsyncHandler<>).MakeGenericType(domainEvent.GetType()));
+
+                        handler.GetType().GetMethod("Handle", new Type[] { domainEvent.GetType() }).Invoke(handler, new object[] { domainEvent });
+                    }
                 }
             });
         }
@@ -147,9 +149,9 @@ namespace DomainShell.Test
 
         protected override IDomainEvent[] GetDomainEvents(object model)
         {
-            if (model is IAggregateRoot aggregateRoot)
+            if (model is IDomainEventAuthor domainEventAuthor)
             {
-                return aggregateRoot.GetDomainEvents();
+                return domainEventAuthor.GetDomainEvents();
             }
 
             return new IDomainEvent[0];
@@ -157,68 +159,90 @@ namespace DomainShell.Test
 
         protected override void ClearDomainEvents(object model)
         {
-            if (model is IAggregateRoot aggregateRoot)
+            if (model is IDomainEventAuthor domainEventAuthor)
             {
-                aggregateRoot.ClearDomainEvents();
+                domainEventAuthor.ClearDomainEvents();
             }
         }
     }
     
-    public class DomainEventMode
-    {
-        private DomainEventMode(DomainEventFormat format)
-        {
-            _format = format;
-            _exception = null;
-        }
+    //public class DomainEventMode
+    //{
+    //    private DomainEventMode(DomainEventFormat format)
+    //    {
+    //        _format = format;
+    //        _exception = null;
+    //    }
 
-        private DomainEventFormat _format;
-        public DomainEventFormat Format
-        {
-            get { return _format; }
-            set { _format = value;  }
-        }
+    //    private DomainEventFormat _format;
+    //    public DomainEventFormat Format
+    //    {
+    //        get { return _format; }
+    //        set { _format = value;  }
+    //    }
 
-        private Exception _exception;
-        public Exception GetException()
-        {
-            return _exception;
-        }
+    //    private Exception _exception;
+    //    public Exception GetException()
+    //    {
+    //        return _exception;
+    //    }
 
-        public static DomainEventMode InSession()
-        {
-            return new DomainEventMode(DomainEventFormat.InSession);
-        }
+    //    public static DomainEventMode InSession()
+    //    {
+    //        return new DomainEventMode(DomainEventFormat.InSession);
+    //    }
 
-        public static DomainEventMode OutSession()
-        {
-            return new DomainEventMode(DomainEventFormat.OutSession);
-        }
+    //    public static DomainEventMode OutSession()
+    //    {
+    //        return new DomainEventMode(DomainEventFormat.OutSession);
+    //    }
 
-        public static DomainEventMode OnException()
-        {
-            return new DomainEventMode(DomainEventFormat.OnException);
-        }
-    }
+    //    public static DomainEventMode OnException()
+    //    {
+    //        return new DomainEventMode(DomainEventFormat.OnException);
+    //    }
+    //}
 
-    public enum DomainEventFormat
-    {
-        InSession,
-        OutSession,
-        OnException         
-    }
+    //public enum DomainEventFormat
+    //{
+    //    InSession,
+    //    OutSession,
+    //    OnException         
+    //}
+
+    //public interface IDomainEvent
+    //{
+    //    DomainEventMode Mode { get; }
+    //}
 
     public interface IDomainEvent
     {
-        DomainEventMode Mode { get; }
-    }    
+        
+    }
 
     public interface IDomainEventHandler<TDomainEvent>
     {
         void Handle(TDomainEvent domainEvent);
     }
 
-    public abstract class AggregateRoot : IAggregateRoot
+    public interface IDomainEventAsyncHandler<TDomainEvent>
+    {
+        void Handle(TDomainEvent domainEvent);
+    }
+
+    public interface IDomainEventExceptionHandler<TDomainEvent>
+    {
+        void Handle(TDomainEvent domainEvent, Exception exception);
+    }
+
+    public interface IDomainEventAuthor
+    {
+        IDomainEvent[] GetDomainEvents();
+
+        void ClearDomainEvents();
+    }
+
+    public abstract class AggregateRoot : IAggregateRoot, IDomainEventAuthor
     {
         protected AggregateRoot()
         {
@@ -244,7 +268,7 @@ namespace DomainShell.Test
         public string LastUpdate { get; private set; }
     }
 
-    public abstract class ReadAggregateRoot : IAggregateRootRead
+    public abstract class ReadAggregateRoot : IAggregateRootRead, IDomainEventAuthor
     {
         protected ReadAggregateRoot()
         {

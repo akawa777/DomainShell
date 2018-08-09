@@ -10,7 +10,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 {
     public class OrderEventHandler : 
         IDomainEventHandler<OrderPaidEvent>,      
-        IDomainEventHandler<OrderPaidExceptionEvent>
+        IDomainEventExceptionHandler<OrderPaidEvent>
     {
         public OrderEventHandler(            
             IOrderRepository orderRepository,
@@ -33,7 +33,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
             try
             {
                 using(var tran = Session.Tran())
-                {                    
+                { 
                     var user = _userRepository.Find(domainEvent.UserId);
 
                     if (user == null) throw new Exception("user not found.");
@@ -54,15 +54,24 @@ namespace DomainShell.Test.Domain.OrderAggregate
             }
         }
 
-        public void Handle(OrderPaidExceptionEvent domainEvent)
+        public void Handle(OrderPaidEvent domainEvent, Exception exception)
         {            
-            Log.MessageList.Add($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidExceptionEvent)}");
+            Log.MessageList.Add($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
 
             try
             {
                 using(var tran = Session.Tran())
-                {                    
-                    var order = _orderRepository.Find(domainEvent.OrderId);
+                {
+                    Order order;
+
+                    if (domainEvent.OrderId == 0)
+                    {
+                        order = _orderRepository.GetLastByUser(domainEvent.UserId);
+                    }
+                    else
+                    {
+                        order = _orderRepository.Find(domainEvent.OrderId);
+                    }
 
                     if (order == null) throw new Exception("order not found.");
 
@@ -82,7 +91,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
     }
 
     public class OrderReadEventHandler :         
-        IDomainEventHandler<OrderReadIssuedCertificateEvent>
+        IDomainEventAsyncHandler<OrderReadIssuedCertificateEvent>
     {
         public OrderReadEventHandler(
             IOrderRepository orderRepository,
