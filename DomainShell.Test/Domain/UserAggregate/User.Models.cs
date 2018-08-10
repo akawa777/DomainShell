@@ -32,7 +32,13 @@ namespace DomainShell.Test.Domain.UserAggregate
             if (string.IsNullOrEmpty(UserName)) throw new Exception("UserName is required.");
             if (PaymentPoint < 0) throw new Exception("PaymentPoint is invalid.");
 
+            DomainEvents.Add(new UserRegisterdEvent { UserId = UserId });
             State = ModelState.Seal(this);
         }
+    }
+
+    public class UserRegisterdEvent: IDomainEvent
+    {
+        public string UserId { get; set; }
     }
 }

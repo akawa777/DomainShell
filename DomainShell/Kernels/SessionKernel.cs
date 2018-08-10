@@ -62,8 +62,19 @@ namespace DomainShell.Kernels
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
-        private object _lockTran = new object();
-        private List<TDomainEvent> _allDomainEvents = new List<TDomainEvent>();
+        private object _lockTran = new object();        
+        private List<TDomainEvent> _allDomainEventsForException = new List<TDomainEvent>();
+
+        private void CacheDomainEvents(TDomainEvent[] domainEvents)
+        {
+            foreach (var domainEvent in domainEvents)
+            {
+                if (!_allDomainEventsForException.Any(x => x == domainEvent))
+                {
+                    _allDomainEventsForException.Add(domainEvent);
+                }
+            }
+        }
 
         public virtual IOpenScope Open()
         {
@@ -80,13 +91,13 @@ namespace DomainShell.Kernels
                             try
                             {
                                 var domainEvents = GetDomainEvents().ToArray();
-                                _allDomainEvents.AddRange(domainEvents);
+
+                                CacheDomainEvents(domainEvents);
 
                                 PublishDomainEventInSession(domainEvents);
+                                PublishDomainEventOutSession(domainEvents);
 
-                                EndOpen();
-
-                                PublishDomainEventOutSession(_allDomainEvents.ToArray());
+                                EndOpen();                                
                             }
                             finally
                             {
@@ -101,9 +112,10 @@ namespace DomainShell.Kernels
                 return new OpenScope(() =>
                 {
                     var domainEvents = GetDomainEvents().ToArray();
-                    _allDomainEvents.AddRange(domainEvents);
+                    CacheDomainEvents(domainEvents);
 
                     PublishDomainEventInSession(domainEvents);
+                    PublishDomainEventOutSession(domainEvents);
                 });
             }
         }
@@ -127,23 +139,15 @@ namespace DomainShell.Kernels
                             {
                                 var domainEvents = GetDomainEvents().ToArray();
 
-                                foreach (var domainEvent in domainEvents)
-                                {
-                                    if (_allDomainEvents.Any(x => x == domainEvent)) continue;
-                                    _allDomainEvents.Add(domainEvent);
-                                }                                
+                                CacheDomainEvents(domainEvents);
 
                                 if (completed)
                                 {
                                     PublishDomainEventInSession(domainEvents);
+                                    PublishDomainEventOutSession(domainEvents);
                                 }
 
                                 EndTran(completed);
-
-                                if (completed)
-                                {
-                                    PublishDomainEventOutSession(_allDomainEvents.ToArray());
-                                }
                             }
                             finally
                             {
@@ -161,15 +165,12 @@ namespace DomainShell.Kernels
                 {
                     var domainEvents = GetDomainEvents().ToArray();
 
-                    foreach (var domainEvent in domainEvents)
-                    {
-                        if (_allDomainEvents.Any(x => x == domainEvent)) continue;
-                        _allDomainEvents.Add(domainEvent);
-                    }
+                    CacheDomainEvents(domainEvents);
 
                     if (completed)
                     {
                         PublishDomainEventInSession(domainEvents);
+                        PublishDomainEventOutSession(domainEvents);
                     }
                 });
             }
@@ -193,13 +194,9 @@ namespace DomainShell.Kernels
         {
             var domainEvents = GetDomainEvents().ToArray();
 
-            foreach (var domainEvent in domainEvents)
-            {
-                if (_allDomainEvents.Any(x => x == domainEvent)) continue;
-                _allDomainEvents.Add(domainEvent);
-            }
+            CacheDomainEvents(domainEvents);
 
-            PublishDomainEventOnException(exception, _allDomainEvents.ToArray());
+            PublishDomainEventOnException(exception, _allDomainEventsForException.ToArray());            
         }
 
         protected abstract void BeginOpen();

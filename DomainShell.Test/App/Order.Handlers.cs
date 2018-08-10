@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainShell.Test.Domain.OrderAggregate;
 using DomainShell.Test.Domain.UserAggregate;
 
-namespace DomainShell.Test.Domain.OrderAggregate
+namespace DomainShell.Test.App
 {
     public class OrderEventHandler : 
         IDomainEventHandler<OrderPaidEvent>,      
@@ -28,7 +29,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
         public void Handle(OrderPaidEvent domainEvent)
         {
-            Log.MessageList.Add($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
+            Log.SetMessage($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
 
             try
             {
@@ -56,7 +57,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
         public void Handle(OrderPaidEvent domainEvent, Exception exception)
         {            
-            Log.MessageList.Add($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
+            Log.SetMessage($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
 
             try
             {
@@ -106,7 +107,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
         public void Handle(OrderReadIssuedCertificateEvent domainEvent)
         {
-            Log.MessageList.Add($"{nameof(OrderReadEventHandler)} {nameof(Handle)} {nameof(OrderReadIssuedCertificateEvent)}");
+            Log.SetMessage($"{nameof(OrderReadEventHandler)} {nameof(Handle)} {nameof(OrderReadIssuedCertificateEvent)}");
 
             try
             {

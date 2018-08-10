@@ -17,6 +17,11 @@ namespace DomainShell.Test
         {
             Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
 
+            Log.HandleMessage(x =>
+            {
+                string msg = x;
+            });
+
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
                 OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
@@ -44,6 +49,11 @@ namespace DomainShell.Test
         public void TestMethod2()
         {
             Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
+
+            Log.HandleMessage(x =>
+            {
+                string msg = x;
+            });
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {

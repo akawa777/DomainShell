@@ -22,7 +22,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
         public void CancelPayment(Order order)
         {            
-            Log.MessageList.Add($"{nameof(OrderService)} {nameof(CancelPayment)} {nameof(Order)}");
+            Log.SetMessage($"{nameof(OrderService)} {nameof(CancelPayment)} {nameof(Order)}");
         }
 
         private PaymentResult PayBy(Order order)

@@ -290,6 +290,20 @@ namespace DomainShell.Test
 
     public static class Log
     {
-        public static List<string> MessageList { get; private set; } = new List<string>();
+        private static Action<string> _handle = x => { };
+
+        public static void SetMessage(string message)
+        {
+            _messageList.Add(message);
+            _handle(message);
+        }
+
+        public static void HandleMessage(Action<string> handle)
+        {
+            _handle = handle;
+        }
+
+        private static List<string> _messageList { get; } = new List<string>();
+        public static string[] MessageList => _messageList.ToArray();
     }
 }
