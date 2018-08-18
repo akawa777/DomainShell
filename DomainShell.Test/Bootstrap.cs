@@ -48,13 +48,13 @@ namespace DomainShell.Test
             Container container = new Container();
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
             
-            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);                        
+            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);
+            container.Register<ISessionExceptionCatcherKernel, SessionExceptionCatcherKernel>(Lifestyle.Scoped);
+            container.Register<IDomainEventCacheKernel<IDomainEvent>, DomainEventCache>(Lifestyle.Scoped);
+            container.Register<IDomainEventPublisherKernel<IAggregateRoot>, DomainEventPublisherKernel>(Lifestyle.Scoped);            
 
             container.Register(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
-            container.Register<IConnection, SessionKernel>(Lifestyle.Scoped);
-            container.Register<IDomainEventCacheKernel<IDomainEvent>, DomainEventCache>(Lifestyle.Scoped);
-            container.Register<IDomainEventPublisherKernel<IAggregateRoot>, DomainEventPublisherKernel>(Lifestyle.Scoped);
-            container.Register<ISessionExceptionCatcherKernel, SessionExceptionCatcherKernel>(Lifestyle.Scoped);
+            container.Register<IConnection, SessionKernel>(Lifestyle.Scoped);            
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);                         
@@ -75,8 +75,8 @@ namespace DomainShell.Test
             Container = container;
 
             Session.Startup(container.GetInstance<ISessionKernel>);
-            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel<IAggregateRoot>>);
             SessionExceptionCatcher.Startup(container.GetInstance<ISessionExceptionCatcherKernel>);
+            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel<IAggregateRoot>>);            
             Log.Startup(container.GetInstance<ILogKernel>);
         }
     }

@@ -17,17 +17,17 @@ namespace DomainShell.Test
 
     }
 
-    public interface IDomainEventHandler<TDomainEvent>
+    public interface IDomainEventHandler<TDomainEvent> where TDomainEvent : IDomainEvent
     {
         void Handle(TDomainEvent domainEvent);
     }
 
-    public interface IDomainEventAsyncHandler<TDomainEvent>
+    public interface IDomainEventAsyncHandler<TDomainEvent> where TDomainEvent : IDomainEvent
     {
         void Handle(TDomainEvent domainEvent);
     }
 
-    public interface IDomainEventExceptionHandler<TDomainEvent>
+    public interface IDomainEventExceptionHandler<TDomainEvent> where TDomainEvent : IDomainEvent
     {
         void Handle(TDomainEvent domainEvent, Exception exception);
     }
