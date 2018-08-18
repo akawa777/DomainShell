@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Kernels
 {
+    public interface ISessionKernel
+    {
+        IOpenScope Open();
+        ITranScope Tran();
+    }
+
     internal class OpenScope : IOpenScope
     {
         public OpenScope(Action dispose)
@@ -55,7 +61,17 @@ namespace DomainShell.Kernels
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
-        private object _lockTran = new object();                
+        private object _lockTran = new object();  
+        private void ValidateComiited()
+        {
+            foreach (IModelStateTrack modelStateTrack in ModelStateTracker.GetAll())
+            {
+                if (!modelStateTrack.Comiited)
+                {
+                    throw new InvalidOperationException($"{modelStateTrack.DomainModel.GetType()} is sealed. but not commited.");
+                }
+            }
+        }
 
         public virtual IOpenScope Open()
         {
@@ -71,7 +87,14 @@ namespace DomainShell.Kernels
                         {
                             try
                             {
+                                ValidateComiited();
+
                                 EndOpen();                                
+                            }
+                            catch (Exception e)
+                            {
+                                EndOpen();
+                                throw e;
                             }
                             finally
                             {
@@ -103,8 +126,15 @@ namespace DomainShell.Kernels
                         lock (_lockTran)
                         {
                             try
-                            {
+                            {   
+                                ValidateComiited();
+
                                 EndTran(completed);
+                            }
+                            catch(Exception e)
+                            {
+                                EndTran(false);
+                                throw e;
                             }
                             finally
                             {

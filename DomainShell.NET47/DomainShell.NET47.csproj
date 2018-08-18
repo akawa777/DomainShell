@@ -47,9 +47,11 @@
     <Compile Include="DomainEventCacheKernel.cs" />
     <Compile Include="DomainEventPublisher.cs" />
     <Compile Include="Kernels\DomainEventPublisherKernel.cs" />
+    <Compile Include="Kernels\ModelStateTrackerKernel.cs" />
     <Compile Include="Kernels\SessionExceptionCatcherKernel.cs" />
     <Compile Include="Kernels\SessionKernel.cs" />
     <Compile Include="ModelState.cs" />
+    <Compile Include="ModelStateTracker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyObject.cs" />
     <Compile Include="Session.cs" />
