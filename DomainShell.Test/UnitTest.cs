@@ -16,12 +16,7 @@ namespace DomainShell.Test
         [TestMethod]
         public void TestMethod()
         {
-            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
-
-            Log.HandleMessage(x =>
-            {
-                string msg = x;
-            });
+            Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);            
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
@@ -43,14 +38,10 @@ namespace DomainShell.Test
                     var lastOrderDto = queryApp.GetLastByUser("user1");
 
                     Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
-
-                    System.Threading.Thread.Sleep(1000);
-                    var messageList = Log.MessageList;
-                    Assert.AreEqual(2, messageList.Length);
                 }
                 catch(Exception e)
                 {
-                    SessionExceptionCatcher.OnException(e);
+                    SessionExceptionCatcher.Catch(e);
                     throw e;
                 }
             }
@@ -60,11 +51,6 @@ namespace DomainShell.Test
         public void TestMethod2()
         {
             Bootstrap.StartUp(Bootstrap.DatabaseType.Sqlite);
-
-            Log.HandleMessage(x =>
-            {
-                string msg = x;
-            });
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
@@ -87,14 +73,10 @@ namespace DomainShell.Test
                     var lastOrderDto = queryApp.GetLastByUser("user1");
 
                     Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
-
-                    System.Threading.Thread.Sleep(1000);
-                    var messageList = Log.MessageList;
-                    Assert.AreEqual(2, messageList.Length);
                 }
                 catch(Exception e)
                 {
-                    SessionExceptionCatcher.OnException(e);
+                    SessionExceptionCatcher.Catch(e);
                 }
             }
         }

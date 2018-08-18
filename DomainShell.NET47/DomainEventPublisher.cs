@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DomainShell
 {
-    public interface ISessionExceptionCatcherKernel
+    public interface IDomainEventPublisherKernel<TAggregateRoot>
     {
-        void Catch(Exception exception);
-    }
+        void Publish(TAggregateRoot aggregateRoot);
+    }    
 }

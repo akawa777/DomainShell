@@ -13,22 +13,21 @@ using DomainShell.Kernels;
 
 namespace DomainShell.Test
 {
-    public static class Log
+    public interface ILogKernel : IList
     {
-        private static Action<string> _handle = x => { };
+        string[] Messages { get; }
+        void SetMessage(string message);
+    }
 
-        public static void SetMessage(string message)
+    public class LogKernel : List<string>, ILogKernel
+    {
+        private List<string> _messages = new List<string>();
+
+        public string[] Messages => _messages.ToArray();
+
+        public void SetMessage(string message)
         {
-            _messageList.Add(message);
-            _handle(message);
+            _messages.Add(message);
         }
-
-        public static void HandleMessage(Action<string> handle)
-        {
-            _handle = handle;
-        }
-
-        private static List<string> _messageList { get; } = new List<string>();
-        public static string[] MessageList => _messageList.ToArray();
     }
 }

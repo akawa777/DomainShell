@@ -14,16 +14,16 @@ namespace DomainShell.Test
 {
     public static class Session
     {
-        private static Func<ISessionKernel> _getSession;
+        private static Func<ISessionKernel> _getKernel;
 
-        public static void Startup(Func<ISessionKernel> getSession)
+        public static void Startup(Func<ISessionKernel> getKernel)
         {
-            _getSession = getSession;
+            _getKernel = getKernel;
         }
 
         private static void Validate()
         {
-            if (_getSession == null)
+            if (_getKernel == null)
             {
                 throw new InvalidOperationException("StratUp not runninng.");
             }
@@ -33,7 +33,7 @@ namespace DomainShell.Test
         {
             Validate();
 
-            var session = _getSession();
+            var session = _getKernel();
             return session.Open();
         }
 
@@ -41,7 +41,7 @@ namespace DomainShell.Test
         {
             Validate();
 
-            var session = _getSession();
+            var session = _getKernel();
             return session.Tran();
         }
     }
@@ -70,6 +70,72 @@ namespace DomainShell.Test
             var kernel = _getKernel();
 
             kernel.Publish(aggregateRoot);
+        }
+    }
+
+    public static class SessionExceptionCatcher
+    {
+        private static Func<ISessionExceptionCatcherKernel> _getKernel;
+
+        public static void Startup(Func<ISessionExceptionCatcherKernel> getKernel)
+        {
+            _getKernel = getKernel;
+        }
+
+        private static void Validate()
+        {
+            if (_getKernel == null)
+            {
+                throw new InvalidOperationException("StratUp not runninng.");
+            }
+        }
+
+        public static void Catch(Exception exception)
+        {
+            Validate();
+
+            var kernel = _getKernel();
+
+            kernel.Catch(exception);
+        }
+    }
+
+    public static class Log
+    {
+        private static Func<ILogKernel> _getKernel;
+
+        public static void Startup(Func<ILogKernel> getKernel)
+        {
+            _getKernel = getKernel;
+        }
+
+        private static void Validate()
+        {
+            if (_getKernel == null)
+            {
+                throw new InvalidOperationException("StratUp not runninng.");
+            }
+        }
+
+        public static string[] Messages
+        {
+            get
+            {
+                Validate();
+
+                var kernel = _getKernel();
+
+                return kernel.Messages;
+            }
+        }
+
+        public static void SetMessage(string message)
+        {
+            Validate();
+
+            var kernel = _getKernel();
+
+            kernel.SetMessage(message);
         }
     }
 }

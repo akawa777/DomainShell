@@ -60,7 +60,6 @@ namespace DomainShell.Test
                         handler.Handle(domainEvent as dynamic);
                     }
                 }
-
             }
         }
 

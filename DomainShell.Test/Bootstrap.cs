@@ -66,6 +66,8 @@ namespace DomainShell.Test
             container.Register<IDomainEventExceptionHandler<OrderPaidEvent>, OrderEventHandler>(Lifestyle.Scoped);            
             container.Register<IDomainEventAsyncHandler<UserRegisterdEvent>, UserEventHandler>(Lifestyle.Scoped);
 
+            container.Register<ILogKernel, LogKernel>(Lifestyle.Scoped);
+
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
             container.Register<OrderQueryApp>(Lifestyle.Scoped);
 
@@ -75,6 +77,7 @@ namespace DomainShell.Test
             Session.Startup(container.GetInstance<ISessionKernel>);
             DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel<IAggregateRoot>>);
             SessionExceptionCatcher.Startup(container.GetInstance<ISessionExceptionCatcherKernel>);
+            Log.Startup(container.GetInstance<ILogKernel>);
         }
     }
 

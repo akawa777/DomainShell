@@ -7,13 +7,6 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Kernels
 {
-    public interface ISessionKernel
-    {
-        IOpenScope Open();
-        ITranScope Tran();
-        Exception ThrowException(Exception exception);
-    }
-
     internal class OpenScope : IOpenScope
     {
         public OpenScope(Action dispose)
@@ -129,18 +122,10 @@ namespace DomainShell.Kernels
             }
         }
 
-        public Exception ThrowException(Exception exception)
-        {
-            OnException(exception);
-
-            return exception;
-        }
-
         protected abstract void BeginOpen();
         protected abstract void BeginTran();
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
-        protected abstract void OnException(Exception exception);
 
     }
 }

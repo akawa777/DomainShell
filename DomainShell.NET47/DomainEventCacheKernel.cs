@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DomainShell
 {
-    public interface ISessionExceptionCatcherKernel
+    public interface IDomainEventCacheKernel<TDomainEvent> : IList<TDomainEvent>
     {
-        void Catch(Exception exception);
+
     }
 }
