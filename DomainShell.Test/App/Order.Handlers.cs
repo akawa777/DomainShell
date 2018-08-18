@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DomainShell;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainShell.App;
 using DomainShell.Test.Domain.OrderAggregate;
 using DomainShell.Test.Domain.UserAggregate;
 

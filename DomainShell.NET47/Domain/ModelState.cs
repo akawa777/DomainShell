@@ -1,7 +1,8 @@
 using System;
 using Newtonsoft.Json;
+using DomainShell.Infra;
 
-namespace DomainShell
+namespace DomainShell.Domain
 {    
     public struct ModelState
     {

@@ -15,6 +15,8 @@ using DomainShell.Test.Infra.UserAggregate;
 using DomainShell.Test.Infra.OrderAggregate;
 using System.Reflection;
 using DomainShell.Kernels;
+using DomainShell.App;
+using DomainShell.Infra;
 
 namespace DomainShell.Test
 {

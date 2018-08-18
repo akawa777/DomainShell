@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DomainShell.Kernels;
 
-namespace DomainShell
+namespace DomainShell.App
 {
     public interface IOpenScope : IDisposable
     {

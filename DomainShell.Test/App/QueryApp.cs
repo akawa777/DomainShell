@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using DomainShell;
+using DomainShell.App;
 using DomainShell.Test.Domain.OrderAggregate;
 
 namespace DomainShell.Test.App

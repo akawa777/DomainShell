@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DomainShell
+namespace DomainShell.Kernels
 {
     public interface IDomainEventCacheKernel<TDomainEvent> : IList<TDomainEvent>
     {

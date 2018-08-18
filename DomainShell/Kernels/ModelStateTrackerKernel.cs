@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Specialized;
+using DomainShell.Infra;
 
 namespace DomainShell.Kernels
 {

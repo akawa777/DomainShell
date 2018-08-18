@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq.Expressions;
 
-namespace DomainShell
+namespace DomainShell.Domain
 {
     public interface IProxyObject<TMaterial>
     {   

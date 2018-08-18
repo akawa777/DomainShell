@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainShell.Domain;
+using DomainShell.Infra;
+using DomainShell.App;
 
 namespace DomainShell.Kernels
 {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DomainShell;
 using System.Data;
 using System.Collections.Specialized;
+using DomainShell.Domain;
 
 namespace DomainShell.Test
 {

@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Data;
+using DomainShell.Domain;
+using DomainShell.Infra;
 using DomainShell.Test.Domain.UserAggregate;
 
 namespace DomainShell.Test.Infra.UserAggregate

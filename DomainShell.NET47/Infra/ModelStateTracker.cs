@@ -9,7 +9,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using DomainShell.Kernels;
 
-namespace DomainShell
+namespace DomainShell.Infra
 {
     public interface IModelStateTrack
     {
