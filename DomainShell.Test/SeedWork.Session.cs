@@ -78,12 +78,12 @@ namespace DomainShell.Test
 
         private readonly Container _container;
 
-        protected override void OnException(Exception e)
+        protected override void OnException(Exception exception)
         {
 
         }
 
-        protected override void HandleDomainEventsOnException(IDomainEvent[] domainEvents)
+        protected override void HandleDomainEventsOnException(Exception exception, IDomainEvent[] domainEvents)
         {
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
             {

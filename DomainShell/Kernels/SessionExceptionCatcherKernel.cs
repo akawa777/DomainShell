@@ -19,7 +19,7 @@ namespace DomainShell.Kernels
         {
             try
             {
-                HandleDomainEventsOnException(_domainEventCache.ToArray());
+                HandleDomainEventsOnException(exception, _domainEventCache.ToArray());
                 OnException(exception);
             }
             catch(Exception e)
@@ -35,6 +35,6 @@ namespace DomainShell.Kernels
 
         protected abstract void OnException(Exception exception);
 
-        protected abstract void HandleDomainEventsOnException(TDomainEvent[] domainEvents);
+        protected abstract void HandleDomainEventsOnException(Exception exception, TDomainEvent[] domainEvents);
     }
 }
