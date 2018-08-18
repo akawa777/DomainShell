@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,24 +25,34 @@ namespace DomainShell.Test
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
-                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
-                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
-
-                OrderDto order = new OrderDto
+                try
                 {
-                    OrderDate = "20180101",
-                    ProductName = "product1",
-                    Price = 999,
-                    UserId = "user1"
-                };
+                    OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
+                    OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
 
-                commandApp.Pay(order, "xxxx-xxxx-xxxx-xxxx", false);  
+                    OrderDto orderDto = new OrderDto
+                    {
+                        OrderDate = "20180101",
+                        ProductName = "product1",
+                        Price = 999,
+                        UserId = "user1"
+                    };
 
-                var lastOrder = queryApp.GetLastByUser("user1");          
+                    commandApp.Pay(orderDto, "xxxx-xxxx-xxxx-xxxx");
 
-                var certificate = queryApp.IssueCertificate(lastOrder.OrderId);
+                    var lastOrderDto = queryApp.GetLastByUser("user1");
 
-                var messageList = Log.MessageList;
+                    Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
+
+                    System.Threading.Thread.Sleep(1000);
+                    var messageList = Log.MessageList;
+                    Assert.AreEqual(2, messageList.Length);
+                }
+                catch(Exception e)
+                {
+                    SessionExceptionCatcher.OnException(e);
+                    throw e;
+                }
             }
         }
 
@@ -57,20 +68,34 @@ namespace DomainShell.Test
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
-                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
-                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
-
-                OrderDto order = new OrderDto
+                try
                 {
-                    OrderDate = "20180101",
-                    ProductName = "product1",
-                    Price = 999,
-                    UserId = "user1"
-                };
+                    OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
+                    OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
 
-                commandApp.Pay(order, "xxxx-xxxx-xxxx-xxxx", true);  
+                    OrderDto orderDto = new OrderDto
+                    {
+                        OrderDate = "20180101",
+                        ProductName = "product1",
+                        Price = 999,
+                        UserId = "user1",
+                        SpecialOrderFlg = true
+                    };
 
-                var messageList = Log.MessageList;
+                    commandApp.Pay(orderDto, "xxxx-xxxx-xxxx-xxxx");
+
+                    var lastOrderDto = queryApp.GetLastByUser("user1");
+
+                    Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
+
+                    System.Threading.Thread.Sleep(1000);
+                    var messageList = Log.MessageList;
+                    Assert.AreEqual(2, messageList.Length);
+                }
+                catch(Exception e)
+                {
+                    SessionExceptionCatcher.OnException(e);
+                }
             }
         }
 

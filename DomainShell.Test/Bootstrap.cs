@@ -47,19 +47,14 @@ namespace DomainShell.Test
         {
             Container container = new Container();
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
+            
+            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);                        
 
-            // start up for DomainShell >>
-            container.Register<IDomainModelFactoryKernel, DomainModelFactoryKernel>(Lifestyle.Scoped);
-            container.Register<IDomainModelTrackerKernel, DomainModelTrackerKernel>(Lifestyle.Scoped);       
-            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);
-
-            DomainModelFactory.Startup(container.GetInstance<IDomainModelFactoryKernel>);            
-            DomainModelTracker.Startup(container.GetInstance<IDomainModelTrackerKernel>);                        
-            Session.Startup(container.GetInstance<ISessionKernel>);
-            // <<    
-
-            container.Register<IDbConnection>(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
-            container.Register<IConnection, SessionKernel>(Lifestyle.Scoped);                        
+            container.Register(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
+            container.Register<IConnection, SessionKernel>(Lifestyle.Scoped);
+            container.Register<IDomainEventCacheKernel<IDomainEvent>, DomainEventCache>(Lifestyle.Scoped);
+            container.Register<IDomainEventPublisherKernel<IAggregateRoot>, DomainEventPublisherKernel>(Lifestyle.Scoped);
+            container.Register<ISessionExceptionCatcherKernel, SessionExceptionCatcherKernel>(Lifestyle.Scoped);
 
             container.Register<IUserRepository, UserRepository>(Lifestyle.Scoped);
             container.Register<IOrderRepository, OrderRepository>(Lifestyle.Scoped);                         
@@ -68,15 +63,18 @@ namespace DomainShell.Test
             container.Register<IOrderService, OrderService>(Lifestyle.Scoped);            
 
             container.Register<IDomainEventHandler<OrderPaidEvent>, OrderEventHandler>(Lifestyle.Scoped);            
-            container.Register<IDomainEventExceptionHandler<OrderPaidEvent>, OrderEventHandler>(Lifestyle.Scoped);
-            container.Register<IDomainEventAsyncHandler<OrderReadIssuedCertificateEvent>, OrderReadEventHandler>(Lifestyle.Scoped);
+            container.Register<IDomainEventExceptionHandler<OrderPaidEvent>, OrderEventHandler>(Lifestyle.Scoped);            
             container.Register<IDomainEventAsyncHandler<UserRegisterdEvent>, UserEventHandler>(Lifestyle.Scoped);
 
             container.Register<OrderCommandApp>(Lifestyle.Scoped);
-            container.Register<OrderQueryApp>(Lifestyle.Scoped);                      
-            
+            container.Register<OrderQueryApp>(Lifestyle.Scoped);
+
             container.Verify();
             Container = container;
+
+            Session.Startup(container.GetInstance<ISessionKernel>);
+            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel<IAggregateRoot>>);
+            SessionExceptionCatcher.Startup(container.GetInstance<ISessionExceptionCatcherKernel>);
         }
     }
 

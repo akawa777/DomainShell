@@ -22,59 +22,21 @@ namespace DomainShell.Test.App
         
         public OrderDto Find(int orderId)
         {
-            try
+            using (Session.Open())
             {
-                using(Session.Open())
-                {
-                    var order = _orderRepository.Find(orderId);
+                var order = _orderRepository.Find(orderId);
 
-                    return Map(order);
-                }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
+                return Map(order);
             }
         }
 
         public OrderDto GetLastByUser(string userId)
         {
-            try
+            using (Session.Open())
             {
-                using (Session.Open())
-                {
-                    var order = _orderRepository.GetLastByUser(userId);
+                var order = _orderRepository.GetLastByUser(userId);
 
-                    return Map(order);
-                }
-            }
-            catch (Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-
-        public Stream IssueCertificate(int orderId)
-        {
-            try
-            {
-                using (Session.Open())
-                {
-                    var orderRead = _orderReadRepository.Find(orderId);
-
-                    if (orderRead == null) throw new Exception("order not found.");
-
-                    var certificate = orderRead.IssueCertificate();
-
-                    return certificate;
-                }
-            }
-            catch (Exception e)
-            {
-                Session.OnException(e);
-                throw e;
+                return Map(order);
             }
         }
 
@@ -90,7 +52,9 @@ namespace DomainShell.Test.App
                 ProductName = model.ProductName,
                 Price = model.Price,
                 CreditCardCode = model.CreditCardCode,
-                PaymentId = model.PaymentId
+                PaymentId = model.PaymentId,
+                SpecialOrderFlg = model is SpecialOrder
+
             };
 
             return dto;

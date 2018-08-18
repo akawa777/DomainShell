@@ -14,7 +14,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
             if (!isSpecialOrder)
             {
-                order = DomainModelFactory.Create<Order>();
+                order = new Order();
             }
             else
             {
@@ -53,7 +53,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
             CertificateIssueCount++;
 
-            State = ModelState.Seal(this);
+            Seal();
         }
 
         public void Pay(IOrderService orderService, string creditCardCode)
@@ -69,9 +69,9 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
             PaymentId = paymentResult.PaymentId; 
 
-            DomainEvents.Add(new OrderPaidEvent{ OrderId = OrderId, UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });            
+            DomainEvents.Add(new OrderPaidEvent{ OrderId = OrderId, UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });
 
-            State = ModelState.Seal(this);
+            Seal();
         }
 
         public void CancelPayment(IOrderService orderService)
@@ -86,7 +86,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
             this.CreditCardCode = null;
             this.PaymentId = null;
 
-            State = ModelState.Seal(this);
+            Seal();
         }
         
         private void ValidatePrecondition(IOrderService orderService)
@@ -102,7 +102,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
     {
         public static SpecialOrder Create()
         {
-            return DomainModelFactory.Create<SpecialOrder>();
+            return new SpecialOrder();
         }
 
         protected SpecialOrder()
@@ -118,13 +118,11 @@ namespace DomainShell.Test.Domain.OrderAggregate
         public int PaymentPoint { get; set; }
     }
 
-    public class OrderRead : ReadAggregateRoot
+    public class OrderRead
     {
         public static OrderRead Create()
         {
-            OrderRead orderRead = DomainModelFactory.Create<OrderRead>();
-            
-            return orderRead;
+            return new OrderRead();
         }
 
         protected OrderRead()
@@ -143,33 +141,5 @@ namespace DomainShell.Test.Domain.OrderAggregate
         public decimal Price { get; private set; }
 
         public string PaymentId { get; private set; } 
-
-        public Stream IssueCertificate()
-        {
-            if (string.IsNullOrEmpty(PaymentId)) throw new Exception("order has not been paid.");
-
-            DomainEvents.Add(new OrderReadIssuedCertificateEvent{ OrderId = OrderId });
-
-            using (var memory = new MemoryStream())            
-            using (var writer = new StreamWriter(memory))
-            {
-                writer.Write($@"
-                    {nameof(OrderId)}: {OrderId},
-                    {nameof(UserId)}: {UserId},
-                    {nameof(OrderDate)}: {OrderDate},
-                    {nameof(ProductName)}: {ProductName},
-                    {nameof(Price)}: {Price}
-                ");
-
-                memory.Position = 0;
-
-                return memory;
-            }
-        }        
-    }
-
-    public class OrderReadIssuedCertificateEvent : IDomainEvent
-    {
-        public int OrderId { get; set; }
     }
 }

@@ -7,13 +7,6 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Kernels
 {
-    public interface ISessionKernel
-    {
-        IOpenScope Open();
-        ITranScope Tran();
-        void OnException(Exception exception);
-    }
-
     internal class OpenScope : IOpenScope
     {
         public OpenScope(Action dispose)
@@ -57,24 +50,12 @@ namespace DomainShell.Kernels
         }
     }
 
-    public abstract class SessionKernelBase<TDomainEvent> : ISessionKernel where TDomainEvent : class
+    public abstract class SessionKernelBase : ISessionKernel
     {
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
-        private object _lockTran = new object();        
-        private List<TDomainEvent> _allDomainEventsForException = new List<TDomainEvent>();
-
-        private void CacheDomainEvents(TDomainEvent[] domainEvents)
-        {
-            foreach (var domainEvent in domainEvents)
-            {
-                if (!_allDomainEventsForException.Any(x => x == domainEvent))
-                {
-                    _allDomainEventsForException.Add(domainEvent);
-                }
-            }
-        }
+        private object _lockTran = new object();                
 
         public virtual IOpenScope Open()
         {
@@ -90,13 +71,6 @@ namespace DomainShell.Kernels
                         {
                             try
                             {
-                                var domainEvents = GetDomainEvents().ToArray();
-
-                                CacheDomainEvents(domainEvents);
-
-                                PublishDomainEventInSession(domainEvents);
-                                PublishDomainEventOutSession(domainEvents);
-
                                 EndOpen();                                
                             }
                             finally
@@ -109,14 +83,7 @@ namespace DomainShell.Kernels
                     return _openScope;
                 }
 
-                return new OpenScope(() =>
-                {
-                    var domainEvents = GetDomainEvents().ToArray();
-                    CacheDomainEvents(domainEvents);
-
-                    PublishDomainEventInSession(domainEvents);
-                    PublishDomainEventOutSession(domainEvents);
-                });
+                return new OpenScope(() => { });
             }
         }
 
@@ -137,16 +104,6 @@ namespace DomainShell.Kernels
                         {
                             try
                             {
-                                var domainEvents = GetDomainEvents().ToArray();
-
-                                CacheDomainEvents(domainEvents);
-
-                                if (completed)
-                                {
-                                    PublishDomainEventInSession(domainEvents);
-                                    PublishDomainEventOutSession(domainEvents);
-                                }
-
                                 EndTran(completed);
                             }
                             finally
@@ -161,52 +118,14 @@ namespace DomainShell.Kernels
                 }
 
                 return new TranScope(
-                completed =>
-                {
-                    var domainEvents = GetDomainEvents().ToArray();
-
-                    CacheDomainEvents(domainEvents);
-
-                    if (completed)
-                    {
-                        PublishDomainEventInSession(domainEvents);
-                        PublishDomainEventOutSession(domainEvents);
-                    }
-                });
+                completed => { });
             }
-        }
-
-        protected virtual IEnumerable<TDomainEvent> GetDomainEvents()
-        {
-            foreach (var trackPack in DomainModelTracker.GetAll())
-            {
-                var domainEvents = GetDomainEvents(trackPack.DomainModel);
-
-                if (domainEvents != null)
-                {
-                    foreach (var domainEvent in domainEvents) yield return domainEvent;
-                    ClearDomainEvents(trackPack.DomainModel);
-                }
-            }
-        }
-
-        public virtual void OnException(Exception exception)
-        {
-            var domainEvents = GetDomainEvents().ToArray();
-
-            CacheDomainEvents(domainEvents);
-
-            PublishDomainEventOnException(exception, _allDomainEventsForException.ToArray());            
         }
 
         protected abstract void BeginOpen();
         protected abstract void BeginTran();
         protected abstract void EndTran(bool completed);
         protected abstract void EndOpen();
-        protected abstract TDomainEvent[] GetDomainEvents(object model);
-        protected abstract void ClearDomainEvents(object model);
-        protected abstract void PublishDomainEventOnException(Exception exception, TDomainEvent[] domainEvents);
-        protected abstract void PublishDomainEventInSession(TDomainEvent[] domainEvents);
-        protected abstract void PublishDomainEventOutSession(TDomainEvent[] domainEvents);
+
     }
 }

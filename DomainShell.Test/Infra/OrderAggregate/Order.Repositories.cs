@@ -13,7 +13,7 @@ namespace DomainShell.Test.Infra.OrderAggregate
             _connection = connection;
         }
 
-        private IConnection _connection;         
+        private readonly IConnection _connection;        
 
         Order IOrderRepository.Find(int orderId)
         {  
@@ -67,6 +67,8 @@ namespace DomainShell.Test.Infra.OrderAggregate
             {
                 Update(order);
             }
+
+            DomainEventPublisher.Publish(order);
         }
 
         OrderRead IOrderReadRepository.Find(int orderId)
@@ -209,8 +211,8 @@ namespace DomainShell.Test.Infra.OrderAggregate
             yield return (nameof(x.CreditCardCode), x.CreditCardCode == null ? DBNull.Value : x.CreditCardCode as object);
             yield return (nameof(x.PaymentId), x.PaymentId == null ? DBNull.Value : x.PaymentId as object);
 
-            if (order is Order) yield return ("SpecialOrderFlg", 0);
-            else yield return ("SpecialOrderFlg", 1);
+            if (order is SpecialOrder) yield return ("SpecialOrderFlg", 1);
+            else yield return ("SpecialOrderFlg", 0);
 
             yield return (nameof(x.LastUpdate), DateTime.Now.ToString("yyyyMMddmmss"));
         }

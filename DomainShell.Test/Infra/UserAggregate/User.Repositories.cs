@@ -13,7 +13,7 @@ namespace DomainShell.Test.Infra.UserAggregate
             _connection = connection;
         }
 
-        private IConnection _connection;
+        private readonly IConnection _connection;
 
         public User Find(string userId)
         {
@@ -40,6 +40,8 @@ namespace DomainShell.Test.Infra.UserAggregate
             {
                 Update(user);
             }
+
+            DomainEventPublisher.Publish(user);
         }
 
         private (IDataReader reader, IDbCommand command) Read(string userId)

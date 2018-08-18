@@ -14,7 +14,7 @@ namespace DomainShell.Test.Domain.UserAggregate
 
         public User Create(string userId)
         {
-            var user = DomainModelFactory.Create<User>();
+            var user = new User();
 
             user.UserId = userId;
 
@@ -33,7 +33,8 @@ namespace DomainShell.Test.Domain.UserAggregate
             if (PaymentPoint < 0) throw new Exception("PaymentPoint is invalid.");
 
             DomainEvents.Add(new UserRegisterdEvent { UserId = UserId });
-            State = ModelState.Seal(this);
+
+            Seal();
         }
     }
 

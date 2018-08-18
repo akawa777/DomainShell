@@ -31,27 +31,19 @@ namespace DomainShell.Test.App
         {
             Log.SetMessage($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
 
-            try
+            using (var tran = Session.Tran())
             {
-                using(var tran = Session.Tran())
-                { 
-                    var user = _userRepository.Find(domainEvent.UserId);
+                var user = _userRepository.Find(domainEvent.UserId);
 
-                    if (user == null) throw new Exception("user not found.");
+                if (user == null) throw new Exception("user not found.");
 
-                    user.PaymentPoint += domainEvent.PaymentPoint;
+                user.PaymentPoint += domainEvent.PaymentPoint;
 
-                    user.Register();
+                user.Register();
 
-                    _userRepository.Save(user);
+                _userRepository.Save(user);
 
-                    tran.Complete();
-                }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
+                tran.Complete();
             }
         }
 
@@ -59,75 +51,26 @@ namespace DomainShell.Test.App
         {            
             Log.SetMessage($"{nameof(OrderEventHandler)} {nameof(Handle)} {nameof(OrderPaidEvent)}");
 
-            try
+            using (var tran = Session.Tran())
             {
-                using(var tran = Session.Tran())
+                Order order;
+
+                if (domainEvent.OrderId == 0)
                 {
-                    Order order;
-
-                    if (domainEvent.OrderId == 0)
-                    {
-                        order = _orderRepository.GetLastByUser(domainEvent.UserId);
-                    }
-                    else
-                    {
-                        order = _orderRepository.Find(domainEvent.OrderId);
-                    }
-
-                    if (order == null) throw new Exception("order not found.");
-
-                    order.CancelPayment(_orderService);
-
-                    _orderRepository.Save(order);
-
-                    tran.Complete();
+                    order = _orderRepository.GetLastByUser(domainEvent.UserId);
                 }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
-            }
-        }
-    }
-
-    public class OrderReadEventHandler :         
-        IDomainEventAsyncHandler<OrderReadIssuedCertificateEvent>
-    {
-        public OrderReadEventHandler(
-            IOrderRepository orderRepository,
-            IOrderService orderService)
-        {
-            _orderRepository = orderRepository;
-            _orderService = orderService;
-        }
-
-        private IOrderRepository _orderRepository;
-        private IOrderService _orderService;
-
-        public void Handle(OrderReadIssuedCertificateEvent domainEvent)
-        {
-            Log.SetMessage($"{nameof(OrderReadEventHandler)} {nameof(Handle)} {nameof(OrderReadIssuedCertificateEvent)}");
-
-            try
-            {
-                using(var tran = Session.Tran())
-                {                    
-                    var order = _orderRepository.Find(domainEvent.OrderId);
-
-                    if (order == null) throw new Exception("order not found.");                    
-
-                    order.IncrementCertificateIssueCount(_orderService);
-
-                    _orderRepository.Save(order);
-
-                    tran.Complete();
+                else
+                {
+                    order = _orderRepository.Find(domainEvent.OrderId);
                 }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
+
+                if (order == null) throw new Exception("order not found.");
+
+                order.CancelPayment(_orderService);
+
+                _orderRepository.Save(order);
+
+                tran.Complete();
             }
         }
     }

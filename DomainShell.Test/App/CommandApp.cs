@@ -19,29 +19,21 @@ namespace DomainShell.Test.App
         private IOrderRepository _orderRepository;
         private IOrderService _orderService;
 
-        public void Pay(OrderDto orderDto, string creditCardCode, bool isSpecialOrder)
+        public void Pay(OrderDto orderDto, string creditCardCode)
         {            
             if (orderDto == null) throw new Exception("orderDto is required.");
 
-            try
+            using (var tran = Session.Tran())
             {
-                using(var tran = Session.Tran())
-                {
-                    Order order = Order.Create(isSpecialOrder);
+                Order order = Order.Create(orderDto.SpecialOrderFlg);
 
-                    Map(orderDto, order);
+                Map(orderDto, order);
 
-                    order.Pay(_orderService, creditCardCode);
+                order.Pay(_orderService, creditCardCode);
 
-                    _orderRepository.Save(order);
+                _orderRepository.Save(order);
 
-                    tran.Complete();
-                }
-            }
-            catch(Exception e)
-            {
-                Session.OnException(e);
-                throw e;
+                tran.Complete();
             }
         }
 
@@ -50,7 +42,7 @@ namespace DomainShell.Test.App
             model.UserId = dto.UserId;
             model.OrderDate = DateTime.ParseExact(dto.OrderDate, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
             model.ProductName = dto.ProductName;         
-            model.Price = dto.Price;            
+            model.Price = dto.Price;                
         }
     }   
 }
