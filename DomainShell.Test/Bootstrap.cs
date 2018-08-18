@@ -50,6 +50,7 @@ namespace DomainShell.Test
             
             container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);
             container.Register<ISessionExceptionCatcherKernel, SessionExceptionCatcherKernel>(Lifestyle.Scoped);
+            container.Register<IModelStateTrackerKernel, ModelStateTrackerKernel>(Lifestyle.Scoped);
             container.Register<IDomainEventCacheKernel<IDomainEvent>, DomainEventCache>(Lifestyle.Scoped);
             container.Register<IDomainEventPublisherKernel<IAggregateRoot>, DomainEventPublisherKernel>(Lifestyle.Scoped);            
 
@@ -76,6 +77,7 @@ namespace DomainShell.Test
 
             Session.Startup(container.GetInstance<ISessionKernel>);
             SessionExceptionCatcher.Startup(container.GetInstance<ISessionExceptionCatcherKernel>);
+            ModelStateTracker.Startup(container.GetInstance<IModelStateTrackerKernel>);
             DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel<IAggregateRoot>>);            
             Log.Startup(container.GetInstance<ILogKernel>);
         }

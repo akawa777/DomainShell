@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using DomainShell.Kernels;
 
 namespace DomainShell
 {
@@ -17,9 +18,37 @@ namespace DomainShell
         void Complete();
     }
 
-    public interface ISessionKernel
+    public static class Session
     {
-        IOpenScope Open();
-        ITranScope Tran();
+        private static Func<ISessionKernel> _getKernel;
+
+        public static void Startup(Func<ISessionKernel> getKernel)
+        {
+            _getKernel = getKernel;
+        }
+
+        private static void Validate()
+        {
+            if (_getKernel == null)
+            {
+                throw new InvalidOperationException("StratUp not runninng.");
+            }
+        }
+
+        public static IOpenScope Open()
+        {
+            Validate();
+
+            var session = _getKernel();
+            return session.Open();
+        }
+
+        public static ITranScope Tran()
+        {
+            Validate();
+
+            var session = _getKernel();
+            return session.Tran();
+        }
     }
 }

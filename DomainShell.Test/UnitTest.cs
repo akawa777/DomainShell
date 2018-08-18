@@ -77,6 +77,7 @@ namespace DomainShell.Test
                 catch(Exception e)
                 {
                     SessionExceptionCatcher.Catch(e);
+                    throw e;
                 }
             }
         }

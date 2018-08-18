@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Kernels
 {
+    public interface ISessionExceptionCatcherKernel
+    {
+        void Catch(Exception exception);
+    }
+
     public abstract class SessionExceptionCatcherKernelBase<TDomainEvent> : ISessionExceptionCatcherKernel
     {
         public SessionExceptionCatcherKernelBase(IDomainEventCacheKernel<TDomainEvent> domainEventCache)
@@ -24,8 +29,8 @@ namespace DomainShell.Kernels
             }
             catch(Exception e)
             {
-                var aggregateException = new AggregateException(exception, e);
-                OnException(aggregateException);
+                var aggregateException = new AggregateException(e, exception);
+                throw aggregateException;
             }
             finally
             {

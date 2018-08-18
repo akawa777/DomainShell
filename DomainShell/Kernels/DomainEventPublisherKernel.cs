@@ -6,6 +6,17 @@ using System.Threading.Tasks;
 
 namespace DomainShell.Kernels
 {
+    public interface IDomainEventPublisherKernel
+    {
+        void Publish(object aggregateRoot);
+        Type AggregateRootDefineType { get; }
+    }    
+
+    public interface IDomainEventPublisherKernel<TAggregateRoot> : IDomainEventPublisherKernel
+    {
+        void Publish(TAggregateRoot aggregateRoot);
+    }
+
     public abstract class DomainEventCacheKernelBase<TDomainEvent> : List<TDomainEvent>, IDomainEventCacheKernel<TDomainEvent>
     {
 
@@ -18,7 +29,9 @@ namespace DomainShell.Kernels
             _domainEventCache = domainEventCache;
         }
 
-        private readonly IDomainEventCacheKernel<TDomainEvent> _domainEventCache;        
+        private readonly IDomainEventCacheKernel<TDomainEvent> _domainEventCache;
+
+        public Type AggregateRootDefineType => typeof(TAggregateRoot);
 
         public void Publish(TAggregateRoot aggregateRoot)
         {
@@ -52,5 +65,10 @@ namespace DomainShell.Kernels
         protected abstract void HandleDomainEvents(TDomainEvent[] domainEvents);
         protected abstract void HandleDomainEventsAsync(TDomainEvent[] domainEvents);
         protected abstract void ClearDomainEvents(TAggregateRoot aggregateRoot);
+
+        void IDomainEventPublisherKernel.Publish(object aggregateRoot)
+        {
+            Publish((TAggregateRoot)aggregateRoot);
+        }
     }
 }

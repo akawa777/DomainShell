@@ -68,6 +68,7 @@ namespace DomainShell.Test.Infra.OrderAggregate
                 Update(order);
             }
 
+            ModelStateTracker.Commit(order);
             DomainEventPublisher.Publish(order);
         }
 

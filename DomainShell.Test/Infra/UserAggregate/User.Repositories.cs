@@ -41,6 +41,7 @@ namespace DomainShell.Test.Infra.UserAggregate
                 Update(user);
             }
 
+            ModelStateTracker.Commit(user);
             DomainEventPublisher.Publish(user);
         }
 
