@@ -11,19 +11,14 @@ using DomainShell.Infra;
 
 namespace DomainShell.Kernels
 {
-    public interface IModelStateTrack
-    {
-        object DomainModel { get; }
-        object Tag { get; }        
-        bool Comiited { get; }
-    }
-
     public interface IModelStateTrackerKernel
     {
         void Mark(object domainModel);
-        void Commit(object domainModel);        
-        IEnumerable<IModelStateTrack> All();        
-        void Clear();
+        void Commit(object domainModel);
+        IModelStateTrack Get(object domainModel);
+        IEnumerable<IModelStateTrack> GetAll();
+        void Revoke(object domainModel);
+        void RevokeAll();
     }
 
     internal class ModelStateTrack : IModelStateTrack
@@ -63,7 +58,7 @@ namespace DomainShell.Kernels
             }
         }
 
-        public virtual IEnumerable<IModelStateTrack> All()
+        public virtual IEnumerable<IModelStateTrack> GetAll()
         {
             lock (_lock)
             {
@@ -96,13 +91,26 @@ namespace DomainShell.Kernels
                     throw new ArgumentException("domainModel is not marked.");
                 }
 
-                var modelStateTrack = _list[domainModel] as ModelStateTrack;
+                var modelStateTrack = _list[domainModel] as IModelStateTrack;
 
                 modelStateTrack.Commit();
             }
         }
 
-        public virtual void Clear()
+        public virtual void Revoke(object domainModel)
+        {
+            lock (_lock)
+            {
+                if (!_list.Contains(domainModel))
+                {
+                    throw new ArgumentException("domainModel is not marked.");
+                }
+
+                _list.Remove(domainModel);
+            }
+        }
+
+        public virtual void RevokeAll()
         {
             lock (_lock)
             {

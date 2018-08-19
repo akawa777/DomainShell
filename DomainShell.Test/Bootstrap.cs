@@ -50,11 +50,9 @@ namespace DomainShell.Test
             Container container = new Container();
             container.Options.DefaultScopedLifestyle = new ThreadScopedLifestyle();
             
-            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);
-            container.Register<ISessionExceptionCatcherKernel, SessionExceptionCatcherKernel>(Lifestyle.Scoped);
-            container.Register<IModelStateTrackerKernel, ModelStateTrackerKernel>(Lifestyle.Scoped);
-            container.Register<IDomainEventCacheKernel<IDomainEvent>, DomainEventCache>(Lifestyle.Scoped);
-            container.Register<IDomainEventPublisherKernel<IAggregateRoot>, DomainEventPublisherKernel>(Lifestyle.Scoped);            
+            container.Register<ISessionKernel, SessionKernel>(Lifestyle.Scoped);            
+            container.Register<IModelStateTrackerKernel, ModelStateTrackerKernel>(Lifestyle.Scoped);            
+            container.Register<IDomainEventPublisherKernel, DomainEventPublisherKernel>(Lifestyle.Scoped);            
 
             container.Register(() => _databaseProvider.CreateConnection(), Lifestyle.Scoped);            
             container.Register<IConnection, SessionKernel>(Lifestyle.Scoped);            
@@ -77,10 +75,9 @@ namespace DomainShell.Test
             container.Verify();
             Container = container;
 
-            Session.Startup(container.GetInstance<ISessionKernel>);
-            SessionExceptionCatcher.Startup(container.GetInstance<ISessionExceptionCatcherKernel>);
+            Session.Startup(container.GetInstance<ISessionKernel>);            
             ModelStateTracker.Startup(container.GetInstance<IModelStateTrackerKernel>);
-            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel<IAggregateRoot>>);            
+            DomainEventPublisher.Startup(container.GetInstance<IDomainEventPublisherKernel>);            
             Log.Startup(container.GetInstance<ILogKernel>);
         }
     }

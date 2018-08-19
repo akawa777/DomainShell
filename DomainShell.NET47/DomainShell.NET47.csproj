@@ -45,15 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Session.cs" />
-    <Compile Include="App\SessionExceptionCatcher.cs" />
     <Compile Include="Domain\ModelState.cs" />
     <Compile Include="Domain\ProxyObject.cs" />
     <Compile Include="Infra\DomainEventPublisher.cs" />
     <Compile Include="Infra\ModelStateTracker.cs" />
-    <Compile Include="Kernels\DomainEventCacheKernel.cs" />
     <Compile Include="Kernels\DomainEventPublisherKernel.cs" />
     <Compile Include="Kernels\ModelStateTrackerKernel.cs" />
-    <Compile Include="Kernels\SessionExceptionCatcherKernel.cs" />
     <Compile Include="Kernels\SessionKernel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

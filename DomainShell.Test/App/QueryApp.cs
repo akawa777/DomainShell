@@ -22,21 +22,37 @@ namespace DomainShell.Test.App
         
         public OrderDto Find(int orderId)
         {
-            using (Session.Open())
+            try
             {
-                var order = _orderRepository.Find(orderId);
+                using (Session.Open())
+                {
+                    var order = _orderRepository.Find(orderId);
 
-                return Map(order);
+                    return Map(order);
+                }
             }
+            catch(Exception e)
+            {
+                Session.OnException(e);
+                throw e;
+            }            
         }
 
         public OrderDto GetLastByUser(string userId)
         {
-            using (Session.Open())
+            try
             {
-                var order = _orderRepository.GetLastByUser(userId);
+                using (Session.Open())
+                {
+                    var order = _orderRepository.GetLastByUser(userId);
 
-                return Map(order);
+                    return Map(order);
+                }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
             }
         }
 

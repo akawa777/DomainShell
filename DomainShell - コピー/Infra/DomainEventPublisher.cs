@@ -38,7 +38,5 @@ namespace DomainShell.Infra
 
             kernel.Publish(aggregateRoot);
         }
-
-        internal static IDomainEventPublisherKernel Current => _getKernel();
     }
 }

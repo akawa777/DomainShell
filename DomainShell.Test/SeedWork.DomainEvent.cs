@@ -13,14 +13,10 @@ using DomainShell.Kernels;
 
 namespace DomainShell.Test
 {
-    public class DomainEventCache : DomainEventCacheKernelBase<IDomainEvent>
-    {
-
-    }
 
     public class DomainEventPublisherKernel : DomainEventPublisherKernelBase<IAggregateRoot, IDomainEvent>
     {
-        public DomainEventPublisherKernel(Container container, IDomainEventCacheKernel<IDomainEvent> domainEventCache) : base(domainEventCache)
+        public DomainEventPublisherKernel(Container container)
         {
             _container = container;
         }
@@ -66,6 +62,23 @@ namespace DomainShell.Test
         protected override void ClearDomainEvents(IAggregateRoot domainEventAuthor)
         {
             domainEventAuthor.ClearDomainEvents();
+        }
+
+        protected override void HandleDomainEventsOnException(IDomainEvent[] domainEvents, Exception exception)
+        {
+            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
+            {
+                foreach (var domainEvent in domainEvents)
+                {
+                    var handlerType = typeof(IDomainEventExceptionHandler<>).MakeGenericType(domainEvent.GetType());
+
+                    if (_container.GetRegistration(handlerType) != null)
+                    {
+                        var handler = _container.GetInstance(handlerType) as dynamic;
+                        handler.Handle(domainEvent as dynamic, exception as dynamic);
+                    }
+                }
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ namespace DomainShell.Kernels
     {
         IOpenScope Open();
         ITranScope Tran();
+        void OnException(Exception exception);
     }
 
     internal class OpenScope : IOpenScope
@@ -60,14 +61,15 @@ namespace DomainShell.Kernels
     }
 
     public abstract class SessionKernelBase : ISessionKernel
-    {
+    {   
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
         private object _lockTran = new object();  
+
         private void ValidateComiited()
         {
-            foreach (IModelStateTrack modelStateTrack in ModelStateTracker.GetAll())
+            foreach (IModelStateTrack modelStateTrack in ModelStateTracker.Current.All())
             {
                 if (!modelStateTrack.Comiited)
                 {
@@ -155,10 +157,23 @@ namespace DomainShell.Kernels
             }
         }
 
+        public void OnException(Exception exception)
+        {
+            try
+            {
+                DomainEventPublisher.Current.PublishOnException(exception);
+                OnException(exception);
+            }
+            catch (Exception e)
+            {
+                var aggregateException = new AggregateException(e, exception);
+                throw aggregateException;
+            }
+        }
+
         protected abstract void BeginOpen();
         protected abstract void BeginTran();
         protected abstract void EndTran(bool completed);
-        protected abstract void EndOpen();
-
+        protected abstract void EndOpen();        
     }
 }

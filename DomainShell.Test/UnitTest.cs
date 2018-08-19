@@ -21,30 +21,22 @@ namespace DomainShell.Test
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
-                try
+                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
+                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+
+                OrderDto orderDto = new OrderDto
                 {
-                    OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
-                    OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+                    OrderDate = "20180101",
+                    ProductName = "product1",
+                    Price = 999,
+                    UserId = "user1"
+                };
 
-                    OrderDto orderDto = new OrderDto
-                    {
-                        OrderDate = "20180101",
-                        ProductName = "product1",
-                        Price = 999,
-                        UserId = "user1"
-                    };
+                commandApp.Pay(orderDto, "xxxx-xxxx-xxxx-xxxx");
 
-                    commandApp.Pay(orderDto, "xxxx-xxxx-xxxx-xxxx");
+                var lastOrderDto = queryApp.GetLastByUser("user1");
 
-                    var lastOrderDto = queryApp.GetLastByUser("user1");
-
-                    Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
-                }
-                catch(Exception e)
-                {
-                    SessionExceptionCatcher.Catch(e);
-                    throw e;
-                }
+                Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
             }
         }
 
@@ -55,31 +47,23 @@ namespace DomainShell.Test
 
             using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container)) 
             {
-                try
+                OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
+                OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+
+                OrderDto orderDto = new OrderDto
                 {
-                    OrderCommandApp commandApp = Bootstrap.Container.GetInstance<OrderCommandApp>();
-                    OrderQueryApp queryApp = Bootstrap.Container.GetInstance<OrderQueryApp>();
+                    OrderDate = "20180101",
+                    ProductName = "product1",
+                    Price = 999,
+                    UserId = "user1",
+                    SpecialOrderFlg = true
+                };
 
-                    OrderDto orderDto = new OrderDto
-                    {
-                        OrderDate = "20180101",
-                        ProductName = "product1",
-                        Price = 999,
-                        UserId = "user1",
-                        SpecialOrderFlg = true
-                    };
+                commandApp.Pay(orderDto, "xxxx-xxxx-xxxx-xxxx");
 
-                    commandApp.Pay(orderDto, "xxxx-xxxx-xxxx-xxxx");
+                var lastOrderDto = queryApp.GetLastByUser("user1");
 
-                    var lastOrderDto = queryApp.GetLastByUser("user1");
-
-                    Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
-                }
-                catch(Exception e)
-                {
-                    SessionExceptionCatcher.Catch(e);
-                    throw e;
-                }
+                Assert.AreEqual(orderDto.SpecialOrderFlg, lastOrderDto.SpecialOrderFlg);
             }
         }
 

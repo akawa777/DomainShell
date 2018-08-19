@@ -23,17 +23,25 @@ namespace DomainShell.Test.App
         {            
             if (orderDto == null) throw new Exception("orderDto is required.");
 
-            using (var tran = Session.Tran())
+            try
             {
-                Order order = Order.Create(orderDto.SpecialOrderFlg);
+                using (var tran = Session.Tran())
+                {
+                    Order order = Order.Create(orderDto.SpecialOrderFlg);
 
-                Map(orderDto, order);
+                    Map(orderDto, order);
 
-                order.Pay(_orderService, creditCardCode);
+                    order.Pay(_orderService, creditCardCode);
 
-                _orderRepository.Save(order);
+                    _orderRepository.Save(order);
 
-                tran.Complete();
+                    tran.Complete();
+                }
+            }
+            catch (Exception e)
+            {
+                Session.OnException(e);
+                throw e;
             }
         }
 

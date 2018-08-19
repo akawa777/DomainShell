@@ -10,14 +10,28 @@ namespace DomainShell.Kernels
     {
         void Publish(object aggregateRoot);
         Type AggregateRootDefineType { get; }
-        ICollection<object> DomainEventCache { get; }
     }    
 
-    public abstract class DomainEventPublisherKernelBase<TAggregateRoot, TDomainEvent> : IDomainEventPublisherKernel
-    {   
-        public Type AggregateRootDefineType => typeof(TAggregateRoot);
+    public interface IDomainEventPublisherKernel<TAggregateRoot> : IDomainEventPublisherKernel
+    {
+        void Publish(TAggregateRoot aggregateRoot);
+    }
 
-        public ICollection<object> DomainEventCache { get; } = new List<object>();
+    public abstract class DomainEventCacheKernelBase<TDomainEvent> : List<TDomainEvent>, IDomainEventCacheKernel<TDomainEvent>
+    {
+
+    }    
+
+    public abstract class DomainEventPublisherKernelBase<TAggregateRoot, TDomainEvent> : IDomainEventPublisherKernel<TAggregateRoot>
+    {   
+        public DomainEventPublisherKernelBase(IDomainEventCacheKernel<TDomainEvent> domainEventCache)
+        {
+            _domainEventCache = domainEventCache;
+        }
+
+        private readonly IDomainEventCacheKernel<TDomainEvent> _domainEventCache;
+
+        public Type AggregateRootDefineType => typeof(TAggregateRoot);
 
         public void Publish(TAggregateRoot aggregateRoot)
         {
@@ -27,7 +41,7 @@ namespace DomainShell.Kernels
 
                 foreach (var domainEvent in domainEvents)
                 {
-                    DomainEventCache.Add(domainEvent);
+                    _domainEventCache.Add(domainEvent);
                 }
 
                 HandleDomainEvents(domainEvents);

@@ -62,14 +62,14 @@ namespace DomainShell.Kernels
 
     public abstract class SessionKernelBase<TDomainEvent> : ISessionKernel
     {
-        public SessionKernelBase()
+        public SessionKernelBase(IDomainEventCacheKernel<TDomainEvent> domainEventCacheKernel)
         {
             _modelStateTrackerKernel = ModelStateTracker.Current;
-            _domainEventCacheKernel = DomainEventPublisher.Current;
+            _domainEventCacheKernel = domainEventCacheKernel;
         }
 
         private readonly IModelStateTrackerKernel _modelStateTrackerKernel;
-        private readonly IDomainEventPublisherKernel _domainEventCacheKernel;
+        private readonly IDomainEventCacheKernel<TDomainEvent> _domainEventCacheKernel;
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
@@ -77,7 +77,7 @@ namespace DomainShell.Kernels
 
         private void ValidateComiited()
         {
-            foreach (IModelStateTrack modelStateTrack in _modelStateTrackerKernel.All())
+            foreach (IModelStateTrack modelStateTrack in _modelStateTrackerKernel.GetAll())
             {
                 if (!modelStateTrack.Comiited)
                 {
@@ -169,7 +169,7 @@ namespace DomainShell.Kernels
         {
             try
             {
-                HandleDomainEventsOnException(exception, _domainEventCacheKernel.DomainEventCache.Select(x => (TDomainEvent)x).ToArray());
+                HandleDomainEventsOnException(exception, _domainEventCacheKernel.ToArray());
                 OnException(exception);
             }
             catch (Exception e)
@@ -179,7 +179,7 @@ namespace DomainShell.Kernels
             }
             finally
             {
-                _domainEventCacheKernel.DomainEventCache.Clear();
+                _domainEventCacheKernel.Clear();
             }
         }
 

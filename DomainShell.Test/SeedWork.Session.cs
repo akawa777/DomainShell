@@ -15,14 +15,12 @@ namespace DomainShell.Test
 {
     public class SessionKernel : SessionKernelBase, IConnection
     {
-        public SessionKernel(IDbConnection connection, IDomainEventCacheKernel<IDomainEvent> domainEventCache)
+        public SessionKernel(IDbConnection connection)
         {
             _connection = connection;
-            _domainEventCache = domainEventCache;
         }
         
-        private readonly IDbConnection _connection;        
-        private readonly IDomainEventCacheKernel<IDomainEvent> _domainEventCache;        
+        private readonly IDbConnection _connection;                
         private IDbTransaction _transaction;
 
         protected override void BeginOpen()
@@ -66,38 +64,6 @@ namespace DomainShell.Test
             if (_transaction != null) command.Transaction = _transaction;
 
             return command;
-        }
-    }
-
-    public class SessionExceptionCatcherKernel : SessionExceptionCatcherKernelBase<IDomainEvent>
-    {
-        public SessionExceptionCatcherKernel(Container container, IDomainEventCacheKernel<IDomainEvent> domainEventCache) : base(domainEventCache)
-        {
-            _container = container;
-        }
-
-        private readonly Container _container;
-
-        protected override void OnException(Exception exception)
-        {
-
-        }
-
-        protected override void HandleDomainEventsOnException(Exception exception, IDomainEvent[] domainEvents)
-        {
-            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
-            {
-                foreach (var domainEvent in domainEvents)
-                {
-                    var handlerType = typeof(IDomainEventExceptionHandler<>).MakeGenericType(domainEvent.GetType());
-
-                    if (_container.GetRegistration(handlerType) != null)
-                    {
-                        var handler = _container.GetInstance(handlerType) as dynamic;
-                        handler.Handle(domainEvent as dynamic);
-                    }
-                }
-            }
         }
     }
 }

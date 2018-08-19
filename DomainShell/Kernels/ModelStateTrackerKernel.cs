@@ -11,26 +11,28 @@ using DomainShell.Infra;
 
 namespace DomainShell.Kernels
 {
+    public interface IModelStateTrack
+    {
+        object DomainModel { get; }
+        bool Comiited { get; }
+    }
+
     public interface IModelStateTrackerKernel
     {
         void Mark(object domainModel);
-        void Commit(object domainModel);
-        IModelStateTrack Get(object domainModel);
-        IEnumerable<IModelStateTrack> GetAll();
-        void Revoke(object domainModel);
-        void RevokeAll();
+        void Commit(object domainModel);        
+        IEnumerable<IModelStateTrack> All();        
+        void Clear();
     }
 
     internal class ModelStateTrack : IModelStateTrack
     {
-        public ModelStateTrack(object domainModel, object tag)
+        public ModelStateTrack(object domainModel)
         {
             DomainModel = domainModel;
-            Tag = tag;
         }
 
         public object DomainModel { get; private set; }
-        public object Tag { get; private set; }
 
         public bool Comiited { get; private set; }
 
@@ -40,7 +42,7 @@ namespace DomainShell.Kernels
         }
     }
 
-    public abstract class ModelStateTrackerKernelBase : IModelStateTrackerKernel
+    public class ModelStateTrackerKernel : IModelStateTrackerKernel
     {
         private OrderedDictionary _list = new OrderedDictionary();
         private object _lock = new object();
@@ -58,7 +60,7 @@ namespace DomainShell.Kernels
             }
         }
 
-        public virtual IEnumerable<IModelStateTrack> GetAll()
+        public virtual IEnumerable<IModelStateTrack> All()
         {
             lock (_lock)
             {
@@ -78,7 +80,7 @@ namespace DomainShell.Kernels
                     return;
                 }
 
-                _list[domainModel] = new ModelStateTrack(domainModel, CreateTag(domainModel));
+                _list[domainModel] = new ModelStateTrack(domainModel);
             }
         }
 
@@ -91,33 +93,18 @@ namespace DomainShell.Kernels
                     throw new ArgumentException("domainModel is not marked.");
                 }
 
-                var modelStateTrack = _list[domainModel] as IModelStateTrack;
+                var modelStateTrack = _list[domainModel] as ModelStateTrack;
 
                 modelStateTrack.Commit();
             }
         }
 
-        public virtual void Revoke(object domainModel)
-        {
-            lock (_lock)
-            {
-                if (!_list.Contains(domainModel))
-                {
-                    throw new ArgumentException("domainModel is not marked.");
-                }
-
-                _list.Remove(domainModel);
-            }
-        }
-
-        public virtual void RevokeAll()
+        public virtual void Clear()
         {
             lock (_lock)
             {
                 _list.Clear();
             }
         }
-
-        protected abstract object CreateTag(object domainModel);
     }
 }
