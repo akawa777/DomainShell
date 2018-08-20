@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using DomainShell;
+using DomainShell.Domain;
 
 namespace DomainShell.Test.Domain.OrderAggregate
 {
@@ -53,7 +53,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
             CertificateIssueCount++;
 
-            Seal();
+            ModelState = ModelState.Seal(this);
         }
 
         public void Pay(IOrderService orderService, string creditCardCode)
@@ -71,7 +71,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
 
             DomainEvents.Add(new OrderPaidEvent{ OrderId = OrderId, UserId = UserId, PaymentPoint = paymentResult.PaymentPoint });
 
-            Seal();
+            ModelState = ModelState.Seal(this);
         }
 
         public void CancelPayment(IOrderService orderService)
@@ -86,7 +86,7 @@ namespace DomainShell.Test.Domain.OrderAggregate
             this.CreditCardCode = null;
             this.PaymentId = null;
 
-            Seal();
+            ModelState = ModelState.Seal(this);
         }
         
         private void ValidatePrecondition(IOrderService orderService)

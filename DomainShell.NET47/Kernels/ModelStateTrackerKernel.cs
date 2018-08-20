@@ -14,7 +14,6 @@ namespace DomainShell.Kernels
     public interface IModelStateTrack
     {
         object DomainModel { get; }
-        object Tag { get; }        
         bool Comiited { get; }
     }
 
@@ -28,14 +27,12 @@ namespace DomainShell.Kernels
 
     internal class ModelStateTrack : IModelStateTrack
     {
-        public ModelStateTrack(object domainModel, object tag)
+        public ModelStateTrack(object domainModel)
         {
             DomainModel = domainModel;
-            Tag = tag;
         }
 
         public object DomainModel { get; private set; }
-        public object Tag { get; private set; }
 
         public bool Comiited { get; private set; }
 
@@ -45,7 +42,7 @@ namespace DomainShell.Kernels
         }
     }
 
-    public abstract class ModelStateTrackerKernelBase : IModelStateTrackerKernel
+    public class ModelStateTrackerKernel : IModelStateTrackerKernel
     {
         private OrderedDictionary _list = new OrderedDictionary();
         private object _lock = new object();
@@ -83,7 +80,7 @@ namespace DomainShell.Kernels
                     return;
                 }
 
-                _list[domainModel] = new ModelStateTrack(domainModel, CreateTag(domainModel));
+                _list[domainModel] = new ModelStateTrack(domainModel);
             }
         }
 
@@ -109,7 +106,5 @@ namespace DomainShell.Kernels
                 _list.Clear();
             }
         }
-
-        protected abstract object CreateTag(object domainModel);
     }
 }

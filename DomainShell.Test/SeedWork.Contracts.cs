@@ -39,7 +39,7 @@ namespace DomainShell.Test
 
         void ClearDomainEvents();
 
-        ModelState State { get; }
+        ModelState ModelState { get; }
 
         bool Deleted { get; }
 
@@ -62,13 +62,8 @@ namespace DomainShell.Test
 
         public bool Deleted { get; protected set; }
 
-        public ModelState State { get; private set; }
+        public ModelState ModelState { get; protected set; }
 
         public string LastUpdate { get; private set; }
-
-        public void Seal()
-        {
-            State = ModelState.Seal(this);
-        }
     }
 }

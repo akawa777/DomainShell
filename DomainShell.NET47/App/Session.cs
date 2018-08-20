@@ -50,5 +50,13 @@ namespace DomainShell.App
             var session = _getKernel();
             return session.Tran();
         }
+
+        public static void OnException(Exception exception)
+        {
+            Validate();
+
+            var session = _getKernel();
+            session.OnException(exception);
+        }
     }
 }

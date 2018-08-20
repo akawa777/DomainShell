@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using DomainShell;
+using DomainShell.Domain;
 
 namespace DomainShell.Test.Domain.UserAggregate
 {
@@ -34,7 +34,7 @@ namespace DomainShell.Test.Domain.UserAggregate
 
             DomainEvents.Add(new UserRegisterdEvent { UserId = UserId });
 
-            Seal();
+            ModelState = ModelState.Seal(this);
         }
     }
 

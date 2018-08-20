@@ -29,14 +29,17 @@ namespace DomainShell.Domain
             return JsonConvert.SerializeObject(domainMpdel, Formatting.Indented);            
         }
         
-        public bool Modified()
+        public bool HasModified
         {
-            if (_domainModel == null) return false;
-            
-            string serializedData = SerializeData(_domainModel);
-            if (_serializedData == serializedData) return true;
+            get
+            {
+                if (_domainModel == null) return false;
 
-            throw new InvalidOperationException($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_serializedData}\"{Environment.NewLine}current{Environment.NewLine}\"{serializedData}\"");
+                string serializedData = SerializeData(_domainModel);
+                if (_serializedData == serializedData) return true;
+
+                throw new InvalidOperationException($"there was invalid modified. {Environment.NewLine}seal{Environment.NewLine}\"{_serializedData}\"{Environment.NewLine}current{Environment.NewLine}\"{serializedData}\"");
+            }
         }        
 
         public static ModelState Seal<T>(T domainModel) where T : class

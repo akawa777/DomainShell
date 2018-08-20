@@ -28,7 +28,7 @@ namespace DomainShell.Test.Infra.UserAggregate
 
         public void Save(User user)
         {
-            if (!user.State.Modified()) return;
+            if (!user.ModelState.HasModified) return;
 
             if (user.Deleted)
             {

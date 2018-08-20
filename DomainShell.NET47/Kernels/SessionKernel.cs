@@ -60,16 +60,8 @@ namespace DomainShell.Kernels
         }
     }
 
-    public abstract class SessionKernelBase<TDomainEvent> : ISessionKernel
-    {
-        public SessionKernelBase()
-        {
-            _modelStateTrackerKernel = ModelStateTracker.Current;
-            _domainEventCacheKernel = DomainEventPublisher.Current;
-        }
-
-        private readonly IModelStateTrackerKernel _modelStateTrackerKernel;
-        private readonly IDomainEventPublisherKernel _domainEventCacheKernel;
+    public abstract class SessionKernelBase : ISessionKernel
+    {   
         private IOpenScope _openScope = null;
         private ITranScope _tranScope = null;
         private object _lockOpen = new object();
@@ -77,7 +69,7 @@ namespace DomainShell.Kernels
 
         private void ValidateComiited()
         {
-            foreach (IModelStateTrack modelStateTrack in _modelStateTrackerKernel.All())
+            foreach (IModelStateTrack modelStateTrack in ModelStateTracker.Current.All())
             {
                 if (!modelStateTrack.Comiited)
                 {
@@ -169,7 +161,7 @@ namespace DomainShell.Kernels
         {
             try
             {
-                HandleDomainEventsOnException(exception, _domainEventCacheKernel.DomainEventCache.Select(x => (TDomainEvent)x).ToArray());
+                DomainEventPublisher.Current.PublishOnException(exception);
                 OnException(exception);
             }
             catch (Exception e)
@@ -177,16 +169,11 @@ namespace DomainShell.Kernels
                 var aggregateException = new AggregateException(e, exception);
                 throw aggregateException;
             }
-            finally
-            {
-                _domainEventCacheKernel.DomainEventCache.Clear();
-            }
         }
 
         protected abstract void BeginOpen();
         protected abstract void BeginTran();
         protected abstract void EndTran(bool completed);
-        protected abstract void EndOpen();
-        protected abstract void HandleDomainEventsOnException(Exception exception, TDomainEvent[] domainEvents);
+        protected abstract void EndOpen();        
     }
 }
