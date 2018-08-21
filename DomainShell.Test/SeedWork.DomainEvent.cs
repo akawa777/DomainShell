@@ -44,19 +44,22 @@ namespace DomainShell.Test
 
         protected override void HandleDomainEventsAsync(IDomainEvent[] domainEvents)
         {
-            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
+            Task.Run(() =>
             {
-                foreach (var domainEvent in domainEvents)
+                using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
                 {
-                    var handlerType = typeof(IDomainEventAsyncHandler<>).MakeGenericType(domainEvent.GetType());
-
-                    if (_container.GetRegistration(handlerType) != null)
+                    foreach (var domainEvent in domainEvents)
                     {
-                        var handler = _container.GetInstance(handlerType) as dynamic;
-                        handler.Handle(domainEvent as dynamic);
+                        var handlerType = typeof(IDomainEventAsyncHandler<>).MakeGenericType(domainEvent.GetType());
+
+                        if (_container.GetRegistration(handlerType) != null)
+                        {
+                            var handler = _container.GetInstance(handlerType) as dynamic;
+                            handler.Handle(domainEvent as dynamic);
+                        }
                     }
                 }
-            }
+            });
         }
 
         protected override void ClearDomainEvents(IAggregateRoot domainEventAuthor)
@@ -66,17 +69,14 @@ namespace DomainShell.Test
 
         protected override void HandleDomainEventsOnException(IDomainEvent[] domainEvents, Exception exception)
         {
-            using (ThreadScopedLifestyle.BeginScope(Bootstrap.Container))
+            foreach (var domainEvent in domainEvents)
             {
-                foreach (var domainEvent in domainEvents)
-                {
-                    var handlerType = typeof(IDomainEventExceptionHandler<>).MakeGenericType(domainEvent.GetType());
+                var handlerType = typeof(IDomainEventExceptionHandler<>).MakeGenericType(domainEvent.GetType());
 
-                    if (_container.GetRegistration(handlerType) != null)
-                    {
-                        var handler = _container.GetInstance(handlerType) as dynamic;
-                        handler.Handle(domainEvent as dynamic, exception as dynamic);
-                    }
+                if (_container.GetRegistration(handlerType) != null)
+                {
+                    var handler = _container.GetInstance(handlerType) as dynamic;
+                    handler.Handle(domainEvent as dynamic, exception as dynamic);
                 }
             }
         }

@@ -35,10 +35,7 @@ namespace DomainShell.Kernels
 
                 HandleDomainEvents(domainEvents);
 
-                Task.Run(() =>
-                {
-                    HandleDomainEventsAsync(domainEvents);
-                });
+                HandleDomainEventsAsync(domainEvents);
             }
             catch (Exception e)
             {
