@@ -55,7 +55,7 @@ namespace DomainShell.Test.Infra.OrderAggregate
 
         void IOrderRepository.Save(Order order)
         {
-            if (!order.ModelState.HasModified) return;
+            if (!order.ModelState.HasModified()) return;
 
             if (order.Deleted)
             {
