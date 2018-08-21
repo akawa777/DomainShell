@@ -71,10 +71,10 @@ namespace DomainShell.Kernels
         {
             foreach (IModelStateTrack modelStateTrack in ModelStateTracker.Current.All())
             {
-                //if (!modelStateTrack.Comiited)
-                //{
-                //    throw new InvalidOperationException($"{modelStateTrack.DomainModel.GetType()} is sealed. but not commited.");
-                //}
+                if (!modelStateTrack.Comiited)
+                {
+                    throw new InvalidOperationException($"{modelStateTrack.DomainModel.GetType()} is sealed. but not commited.");
+                }
             }
         }
 
