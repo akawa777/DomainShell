@@ -161,8 +161,7 @@ namespace DomainShell.Kernels
         {
             try
             {
-                DomainEventPublisher.Current.PublishOnException(exception);
-                OnException(exception);
+                DomainEventPublisher.Current.PublishOnException(exception);                
             }
             catch (Exception e)
             {
