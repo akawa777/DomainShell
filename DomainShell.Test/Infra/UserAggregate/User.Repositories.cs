@@ -28,23 +28,31 @@ namespace DomainShell.Test.Infra.UserAggregate
 
         public void Save(User user)
         {
-            if (!user.ModelState.IsModified()) return;
+            try
+            {
+                if (!user.ModelState.IsModified()) return;
 
-            if (user.Deleted)
-            {
-                Delete(user);
-            }
-            else if (string.IsNullOrEmpty(user.LastUpdate))
-            {
-                Insert(user);
-            }
-            else
-            {
-                Update(user);
-            }
+                if (user.Deleted)
+                {
+                    Delete(user);
+                }
+                else if (string.IsNullOrEmpty(user.LastUpdate))
+                {
+                    Insert(user);
+                }
+                else
+                {
+                    Update(user);
+                }
 
-            ModelStateTracker.Commit(user);
-            DomainEventPublisher.Publish(user);
+                ModelStateTracker.Commit(user);
+                DomainEventPublisher.Publish(user);
+            }
+            catch (Exception e)
+            {
+                ModelStateTracker.Rollback(user);
+                throw e;
+            }
         }
 
         private (IDataReader reader, IDbCommand command) Read(string userId)

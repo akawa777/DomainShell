@@ -46,6 +46,15 @@ namespace DomainShell.Infra
             kernel.Commit(domainModel);
         }
 
+        public static void Rollback(object domainModel)
+        {
+            Validate();
+
+            var kernel = _getKernel();
+
+            kernel.Rollback(domainModel);
+        }
+
         internal static IModelStateTrackerKernel Current => _getKernel();
     }
 }

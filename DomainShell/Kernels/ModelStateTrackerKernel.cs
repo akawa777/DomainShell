@@ -14,13 +14,15 @@ namespace DomainShell.Kernels
     public interface IModelStateTrack
     {
         object DomainModel { get; }
-        bool Comiited { get; }
+        bool IsComiited { get; }
+        bool IsRollbacked { get;  }
     }
 
     public interface IModelStateTrackerKernel
     {
         void Mark(object domainModel);
-        void Commit(object domainModel);        
+        void Commit(object domainModel);
+        void Rollback(object domainModel);
         IEnumerable<IModelStateTrack> All();        
         void Clear();
     }
@@ -34,11 +36,18 @@ namespace DomainShell.Kernels
 
         public object DomainModel { get; private set; }
 
-        public bool Comiited { get; private set; }
+        public bool IsComiited { get; private set; }
 
         public void Commit()
         {
-            Comiited = true;
+            IsComiited = true;
+        }
+
+        public bool IsRollbacked { get; private set; }
+
+        public void Rollback()
+        {
+            IsRollbacked = true;
         }
     }
 
@@ -104,6 +113,21 @@ namespace DomainShell.Kernels
             lock (_lock)
             {
                 _list.Clear();
+            }
+        }
+
+        public void Rollback(object domainModel)
+        {
+            lock (_lock)
+            {
+                if (!_list.Contains(domainModel))
+                {
+                    throw new ArgumentException("domainModel is not marked.");
+                }
+
+                var modelStateTrack = _list[domainModel] as ModelStateTrack;
+
+                modelStateTrack.Rollback();
             }
         }
     }

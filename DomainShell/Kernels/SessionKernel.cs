@@ -69,12 +69,20 @@ namespace DomainShell.Kernels
 
         private void ValidateComiited()
         {
-            foreach (IModelStateTrack modelStateTrack in ModelStateTracker.Current.All())
+            try
             {
-                if (!modelStateTrack.Comiited)
+                foreach (IModelStateTrack modelStateTrack in ModelStateTracker.Current.All())
                 {
-                    throw new InvalidOperationException($"{modelStateTrack.DomainModel.GetType()} is sealed. but not commited.");
+                    if (!modelStateTrack.IsComiited && !modelStateTrack.IsRollbacked)
+                    {
+                        throw new InvalidOperationException($"{modelStateTrack.DomainModel.GetType()} is sealed. but not commited.");
+                    }
                 }
+            }
+            catch(Exception e)
+            {
+                ModelStateTracker.Current.Clear();
+                throw e;
             }
         }
 

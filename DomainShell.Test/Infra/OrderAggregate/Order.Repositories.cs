@@ -55,23 +55,31 @@ namespace DomainShell.Test.Infra.OrderAggregate
 
         void IOrderRepository.Save(Order order)
         {
-            if (!order.ModelState.IsModified()) return;
+            try
+            {
+                if (!order.ModelState.IsModified()) return;
 
-            if (order.Deleted)
-            {
-                Delete(order);
-            }
-            else if (string.IsNullOrEmpty(order.LastUpdate))
-            {
-                Insert(order);
-            }
-            else
-            {
-                Update(order);
-            }
+                if (order.Deleted)
+                {
+                    Delete(order);
+                }
+                else if (string.IsNullOrEmpty(order.LastUpdate))
+                {
+                    Insert(order);
+                }
+                else
+                {
+                    Update(order);
+                }
 
-            ModelStateTracker.Commit(order);
-            DomainEventPublisher.Publish(order);
+                ModelStateTracker.Commit(order);
+                DomainEventPublisher.Publish(order);
+            }
+            catch(Exception e)
+            {
+                ModelStateTracker.Rollback(order);
+                throw e;
+            }
         }
 
         OrderRead IOrderReadRepository.Find(int orderId)
