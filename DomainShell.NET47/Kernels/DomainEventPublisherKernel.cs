@@ -76,7 +76,7 @@ namespace DomainShell.Kernels
 
         void IDomainEventPublisherKernel.PublishOnException(Exception exception)
         {
-
+            PublishOnException(exception);
         }
     }
 }
