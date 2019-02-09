@@ -37,10 +37,6 @@ namespace DomainShell.Kernels
 
                 HandleDomainEventsAsync(domainEvents);
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
             finally
             {
                 ClearDomainEvents(aggregateRoot);
@@ -52,10 +48,6 @@ namespace DomainShell.Kernels
             try
             {
                 HandleDomainEventsOnException(DomainEventCache.ToArray(), exception);
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
             finally
             {

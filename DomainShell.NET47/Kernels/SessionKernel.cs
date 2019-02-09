@@ -79,10 +79,10 @@ namespace DomainShell.Kernels
                     }
                 }
             }
-            catch(Exception e)
+            catch
             {
                 ModelStateTracker.Current.Clear();
-                throw e;
+                throw;
             }
         }
 
@@ -104,10 +104,10 @@ namespace DomainShell.Kernels
 
                                 EndOpen();                                
                             }
-                            catch (Exception e)
+                            catch
                             {
                                 EndOpen();
-                                throw e;
+                                throw;
                             }
                             finally
                             {
@@ -144,10 +144,10 @@ namespace DomainShell.Kernels
 
                                 EndTran(completed);
                             }
-                            catch(Exception e)
+                            catch
                             {
                                 EndTran(false);
-                                throw e;
+                                throw;
                             }
                             finally
                             {
@@ -167,15 +167,7 @@ namespace DomainShell.Kernels
 
         public void OnException(Exception exception)
         {
-            try
-            {
-                DomainEventPublisher.Current.PublishOnException(exception);                
-            }
-            catch (Exception e)
-            {
-                var aggregateException = new AggregateException(e, exception);
-                throw aggregateException;
-            }
+            DomainEventPublisher.Current.PublishOnException(exception);
         }
 
         protected abstract void BeginOpen();
